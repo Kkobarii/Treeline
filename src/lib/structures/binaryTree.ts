@@ -70,7 +70,7 @@ export class BinaryTree<T> extends Tree<T> {
         return null;
     }
 
-    delete_node(value: T, data: AnimationData): boolean {
+    remove_node(value: T, data: AnimationData): boolean {
 
         const swap = (nodeA: BinaryTreeNode<T>, nodeB: BinaryTreeNode<T>) => {
             const temp = nodeA.value;

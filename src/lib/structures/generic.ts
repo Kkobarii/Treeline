@@ -43,14 +43,14 @@ export class Tree<T> {
         throw new Error("Method not implemented.");
     }
 
-    delete(value: T): AnimationData {
+    remove(value: T): AnimationData {
         const data: AnimationData = new AnimationData("Delete " + value, this.snapshot());
-        const success = this.delete_node(value, data);
+        const success = this.remove_node(value, data);
         data.endSnapshot = this.snapshot();
         return data;
     }
 
-    delete_node(value: T, data: AnimationData): boolean {
+    remove_node(value: T, data: AnimationData): boolean {
         throw new Error("Method not implemented.");
     }
 }
