@@ -1,1 +1,25 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+button {
+	color: #fff;
+	background-color: #6b7280; /* gray-500 */
+	border-radius: 0.5rem;
+	font-size: 0.875rem;
+	padding: 0.625rem 1.25rem;
+	font-weight: 500;
+	outline: none;
+}
+
+button:hover {
+	background-color: #4b5563; /* gray-600 */
+	cursor: pointer;
+}
+
+button:focus {
+	box-shadow: 0 0 0 2px #93c5fd; /* blue-300 ring */
+}
+
+button:disabled {
+	opacity: 0.5;
+	cursor: auto;
+}

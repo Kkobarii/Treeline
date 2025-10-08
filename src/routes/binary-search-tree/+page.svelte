@@ -1,143 +1,185 @@
 <script lang="ts">
-// @ts-nocheck
+	import { onMount } from 'svelte';
+	import { Network } from 'vis-network/standalone';
+	import { BinaryTreeNode } from '$lib/structures/binaryTree';
+	import { treeToGraph } from '$lib/utils/trees';
+	import { enforceMinMax } from '$lib/utils/utils';
+	import { OperationManager } from '$lib/operation/operationManager';
+	import { OperationType, TreeType } from '$lib/structures/generic';
+	import type { OperationData } from '$lib/operation/operationData';
 
-  import { onMount } from "svelte";
-  import { Network } from "vis-network/standalone";
-  import { BinaryTree } from "$lib/structures/binaryTree";
-  import { treeToGraph } from "$lib/utils/trees";
-  import { clampInput, enforceMinMax } from "$lib/utils/utils";
-  import { OperationManager } from "$lib/animation/operationManager";
+	let container: HTMLElement;
+	let network: Network | null = null;
+	let { nodes, edges } = treeToGraph(null);
 
-  let container;
-  let tree = new BinaryTree<number>();
-  let network = null;
-  let manualValue: number = 0;
-  let {nodes, edges} = treeToGraph(tree.root);
-  let operationManager = new OperationManager(network);
+	let operationManager: OperationManager | undefined;
+	let operations: OperationData[] = [];
+	let currentOperation: number = 0;
+	let currentStep: number = 0;
 
-  onMount(() => {
-    network = new Network(container, { nodes, edges }, {
-      layout: {
-        hierarchical: {
-          direction: "UD",  // top to bottom
-          sortMethod: "directed",
-          shakeTowards: "roots",
-          levelSeparation: 100
-        }
-      },
-      physics: true,
-      nodes: {
-        shape: "box",
-        color: "#9fd4ff",
-        font: { color: "black", size: 30 },
-      },
-    });
+	let manualValue: number = 0;
+	let autoPlay: boolean = false;
+	let canDoNext: boolean = false;
+	let canDoPrevious: boolean = false;
 
-    network.on("selectNode", function (params) {
-      if (params.nodes.length > 0) {
-        const nodeId = params.nodes[0];
-        let node = undefined;
-        for (let n of nodes) {
-          if (n.id === nodeId) {
-            node = n;
-            break;
-          }
-        }
-        console.log("Selected node:", node);
-        manualValue = node ? node.label : 0;
-      }
-    });
+	onMount(() => {
+		network = new Network(
+			container,
+			{ nodes, edges },
+			{
+				layout: {
+					hierarchical: {
+						direction: 'UD', // top to bottom
+						sortMethod: 'directed',
+						shakeTowards: 'roots',
+						levelSeparation: 100,
+					},
+				},
+				physics: true,
+				nodes: {
+					shape: 'box',
+					color: '#9fd4ff',
+					font: { color: 'black', size: 30 },
+				},
+			},
+		);
+		network.on('selectNode', function (params) {
+			if (params.nodes.length > 0) {
+				const nodeId = params.nodes[0];
+				let node = undefined;
+				for (let n of nodes) {
+					if (n.id === nodeId) {
+						node = n;
+						break;
+					}
+				}
+				console.log('Selected node:', node);
+				manualValue = node ? Number(node.label) || 0 : 0;
+			}
+		});
 
-    operationManager = new OperationManager(network);
-  });
-  
-  function resetTree() {
-    tree = new BinaryTree<number>();
-    let graph = treeToGraph(tree.root);
-    nodes = graph.nodes;
-    edges = graph.edges;
-    network.setData({ nodes, edges });
-    operationManager = new OperationManager(network);
-  }
+		operationManager = new OperationManager(TreeType.Binary);
+		operationManager.addEventListener('change', e => {
+			updateOperationState();
+		});
+		updateOperationState();
+	});
 
-  function doOperation(op, value: number) {
-    let data;
-    switch (op) {
-      case "insert":
-        data = tree.insert(value);
-        break;
-      case "remove":
-        data = tree.remove(value);
-        break;
-      case "find":
-        data = tree.find(value);
-        break;
-      default:
-        console.error("Unknown operation:", op);
-    }
-    console.log(data);
-    operationManager.newOperation(data);
-  }
+	function updateOperationState() {
+		const opsState = operationManager?.getState();
+		if (opsState) {
+			operations = opsState.operations;
+			currentOperation = opsState.currentOperation;
+			currentStep = opsState.currentStep;
+			({ nodes, edges } = treeToGraph(operations[currentOperation].endSnapshot?.root as BinaryTreeNode));
+			network?.setData({ nodes, edges });
+			canDoNext = opsState.canDoNext;
+			canDoPrevious = opsState.canDoPrevious;
+		}
+	}
 </script>
 
-<h1 class="text-2xl font-bold mb-4">Binary Tree Prototype</h1>
-<div class ="mb-4 display: flex">
+<h1 class="mb-4 text-2xl font-bold">Binary Tree Prototype</h1>
+<div class="display: mb-4 flex">
+	<div
+		bind:this={container}
+		style="width: 1200px; height: 700px; border: 1px solid lightgray;">
+	</div>
 
-  <div bind:this={container} style="width: 1200px; height: 600px; border: 1px solid lightgray;" on:selectNode={(obj) => {console.log(obj)}} ></div>
+	<div class="mr-4 ml-4 w-100 rounded bg-gray-100 p-4">
+		<div>
+			<h2 class="mb-2 text-xl font-semibold">Tree Controls</h2>
+			<div>
+				<button
+					type="button"
+					on:click={() => operationManager?.doOperation(OperationType.Insert, Math.floor(Math.random() * 1000))}>
+					Insert Random Node
+				</button>
+				<button
+					type="button"
+					on:click={() => operationManager?.reset()}>
+					Reset
+				</button>
+			</div>
 
-  <div class="ml-4 mr-4 p-4 bg-gray-100 rounded w-100">
-    <div>
-      <h2 class="text-xl font-semibold mb-2">Tree Controls</h2>
-      <div>
-        <button class="px-4 py-2 rounded bg-gray-500 text-white" on:click={() => doOperation("insert", Math.floor(Math.random() * 1000))}>
-          Insert Random Node
-        </button>
-        <button class="px-4 py-2 rounded bg-gray-500 text-white ml-2" on:click={resetTree}>
-          Reset Tree
-        </button>
-      </div>
+			<div class="mt-4">
+				<input
+					type="number"
+					class="w-15 rounded border p-2"
+					bind:value={manualValue}
+					max="999"
+					min="0"
+					on:keyup={e => enforceMinMax(e.target as HTMLInputElement)} />
+				<button
+					type="button"
+					on:click={() => operationManager?.doOperation(OperationType.Insert, manualValue)}>
+					Insert
+				</button>
+				<button
+					type="button"
+					on:click={() => operationManager?.doOperation(OperationType.Remove, manualValue)}>
+					Remove
+				</button>
+				<button
+					type="button"
+					on:click={() => operationManager?.doOperation(OperationType.Find, manualValue)}>
+					Find
+				</button>
+			</div>
+		</div>
 
-      <div class="mt-4">
-        <input type="number" class="border p-2 rounded w-15"
-          bind:value={manualValue} max="999" min="0" on:keyup={(e) => enforceMinMax(e.target)} />
-        <button class="px-4 py-2 rounded bg-gray-500 text-white ml-2" on:click={() => doOperation("insert", manualValue)}>
-          Insert
-        </button>
-        <button class="px-4 py-2 rounded bg-gray-500 text-white ml-2" on:click={() => doOperation("remove", manualValue)}>
-          Remove
-        </button>
-        <button class="px-4 py-2 rounded bg-gray-500 text-white ml-2" on:click={() => doOperation("find", manualValue)}>
-          Find
-        </button>
-      </div>
-    </div>
+		<div class="mt-6">
+			<h2 class="mb-2 text-xl font-semibold">Operation Controls</h2>
+			<button
+				type="button"
+				on:click={() => operationManager?.previous()}
+				disabled={!canDoPrevious}>
+				Previous
+			</button>
+			<button
+				type="button"
+				on:click={() => operationManager?.next()}
+				disabled={!canDoNext}>
+				Next
+			</button>
+			<input
+				id="steps-checkbox"
+				type="checkbox"
+				bind:checked={autoPlay}
+				class="h-4 w-4"
+				on:change={() => operationManager?.toggleShowSteps()} />
+			<label
+				for="steps-checkbox"
+				class="mr-4">
+				Steps
+			</label>
+		</div>
 
-    <div class="mt-6">
-      <h2 class="text-xl font-semibold mb-2">Operation Controls</h2>
-      <div>
-        <button class="px-4 py-2 rounded bg-gray-500 text-white" on:click={() => operationManager.undo()}>
-          Undo
-        </button>
-        <button class="px-4 py-2 rounded bg-gray-500 text-white ml-2" on:click={() => operationManager.redo()}>
-          Redo
-        </button>
-        <button class="px-4 py-2 rounded bg-gray-500 text-white ml-2" on:click={() => operationManager.undo()}>
-          Undo Operation
-        </button>
-      </div>
-    </div>
-
-    <div class="mt-6">
-      <h2 class="text-xl font-semibold mb-2">Operation Info</h2>
-      <div>
-        <p>Current Operation: {operationManager.getCurrentOperation()?.operation}</p>
-        <p>Operation History:</p>
-        <ul>
-          {#each operationManager.getOperationHistory() as op}
-            <li>{op.operation}</li>
-          {/each}
-        </ul>
-      </div>
-    </div>
-  </div>
+		<div class="mt-6">
+			<h2 class="mb-2 text-xl font-semibold">Operation Info</h2>
+			<!-- scroll element -->
+			<div class="max-h-80 overflow-y-auto">
+				<ul>
+					{#each operations as op}
+						<li class="{operations[currentOperation] === op ? 'bg-gray-300' : 'bg-gray-200'} mb-2 rounded p-2 text-sm">
+							{op.operation}
+							{#if operations[currentOperation] === op}
+								<ul>
+									{#each op.steps as step}
+										<li
+											class="{operations[currentOperation].steps[currentStep] === step &&
+											operations[currentOperation] === op
+												? 'bg-gray-400'
+												: 'text-gray-700'} rounded p-1 text-sm">
+											{step.id + 1}: {step.tmp}
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			</div>
+		</div>
+	</div>
 </div>
