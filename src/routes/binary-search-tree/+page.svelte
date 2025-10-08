@@ -75,6 +75,15 @@
 			network?.setData({ nodes, edges });
 			canDoNext = opsState.canDoNext;
 			canDoPrevious = opsState.canDoPrevious;
+
+			setTimeout(() => {
+				const stepElements = document.querySelectorAll('.operation-step');
+				stepElements.forEach(el => {
+					if (el.classList.contains('bg-gray-400')) {
+						el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					}
+				});
+			}, 100);
 		}
 	}
 </script>
@@ -157,7 +166,6 @@
 
 		<div class="mt-6">
 			<h2 class="mb-2 text-xl font-semibold">Operation Info</h2>
-			<!-- scroll element -->
 			<div class="max-h-80 overflow-y-auto">
 				<ul>
 					{#each operations as op}
@@ -170,7 +178,7 @@
 											class="{operations[currentOperation].steps[currentStep] === step &&
 											operations[currentOperation] === op
 												? 'bg-gray-400'
-												: 'text-gray-700'} rounded p-1 text-sm">
+												: 'text-gray-700'} operation-step rounded p-1 text-sm">
 											{step.id + 1}: {step.tmp}
 										</li>
 									{/each}

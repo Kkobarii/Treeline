@@ -1,19 +1,6 @@
 import type { BinaryTreeNode } from '$lib/structures/binaryTree';
 import type { Edge, Node } from 'vis-network';
 
-type NodeType = {
-	id: string | number;
-	label: string;
-	shape?: string;
-	size?: number;
-	color?: string;
-};
-type EdgeType = {
-	from: string | number | null;
-	to: string | number;
-	dashes?: boolean;
-};
-
 export function treeToGraph(root: BinaryTreeNode | null, nodes: Node[] = [], edges: Edge[] = [], parent: string | number | null = null) {
 	if (!root) return { nodes, edges };
 

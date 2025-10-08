@@ -70,7 +70,6 @@ export class OperationManager {
 	}
 
 	private newOperation(operation: OperationData) {
-		// If we are not at the end of the operations list, rewrite the future operations
 		if (this.currentOperation < this.operations.length - 1) {
 			this.operations = this.operations.slice(0, this.currentOperation + 1);
 		}

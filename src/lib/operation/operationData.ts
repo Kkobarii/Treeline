@@ -14,7 +14,6 @@ export class OperationData {
 	}
 
 	addStep(step: string) {
-		console.log('Adding step:', step);
 		this.steps.push(new StepData(this.steps.length, step));
 	}
 

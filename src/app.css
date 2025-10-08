@@ -2,7 +2,7 @@
 
 button {
 	color: #fff;
-	background-color: #6b7280; /* gray-500 */
+	background-color: #6b7280;
 	border-radius: 0.5rem;
 	font-size: 0.875rem;
 	padding: 0.625rem 1.25rem;
@@ -11,12 +11,12 @@ button {
 }
 
 button:hover {
-	background-color: #4b5563; /* gray-600 */
+	background-color: #4b5563;
 	cursor: pointer;
 }
 
 button:focus {
-	box-shadow: 0 0 0 2px #93c5fd; /* blue-300 ring */
+	box-shadow: 0 0 0 2px #93c5fd;
 }
 
 button:disabled {
