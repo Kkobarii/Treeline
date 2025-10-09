@@ -72,25 +72,7 @@ export class OperationManager {
 		};
 		this.emit(EventType.OperationListChange, data);
 	}
-
-	// getState(): {
-	// 	operations: OperationData[];
-	// 	currentOperation: number;
-	// 	currentStep: number;
-	// 	showSteps: boolean;
-	// 	canDoNext: boolean;
-	// 	canDoPrevious: boolean;
-	// } {
-	// 	return {
-	// 		operations: this.operations,
-	// 		currentOperation: this.currentOperation,
-	// 		currentStep: this.currentStep,
-	// 		showSteps: this.showSteps,
-	// 		canDoNext: this.canDoNext(),
-	// 		canDoPrevious: this.canDoPrevious(),
-	// 	};
-	// }
-
+	
 	private getBools() {
 		return {
 			canDoNext: this.canDoNext(),

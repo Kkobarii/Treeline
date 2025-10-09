@@ -77,8 +77,6 @@
 		operationManager.emitOperationListChange();
 	});
 
-	// function updateState()
-
 	function updateOperationList(data: any) {
 		operations = data.operations;
 	}
@@ -106,28 +104,6 @@
 	function updateBools(data: any) {
 		canDoNext = data.canDoNext;
 		canDoPrevious =  data.canDoPrevious;
-	}
-
-	function updateOperationState() {
-		const opsState = operationManager?.getState();
-		if (opsState) {
-			operations = opsState.operations;
-			currentOperation = opsState.currentOperation;
-			currentStep = opsState.currentStep;
-			({ nodes, edges } = treeToGraph(operations[currentOperation].endSnapshot?.root as BinaryTreeNode));
-			network?.setData({ nodes, edges });
-			canDoNext = opsState.canDoNext;
-			canDoPrevious = opsState.canDoPrevious;
-
-			setTimeout(() => {
-				const stepElements = document.querySelectorAll('.operation-step');
-				stepElements.forEach(el => {
-					if (el.classList.contains('bg-gray-400')) {
-						el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-					}
-				});
-			}, 100);
-		}
 	}
 </script>
 
