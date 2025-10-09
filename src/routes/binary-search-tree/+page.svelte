@@ -4,7 +4,7 @@
 	import { BinaryTreeNode } from '$lib/structures/binaryTree';
 	import { treeToGraph } from '$lib/utils/trees';
 	import { enforceMinMax } from '$lib/utils/utils';
-	import { OperationManager } from '$lib/operation/operationManager';
+	import { EventType, OperationManager } from '$lib/operation/operationManager';
 	import { OperationType, TreeType } from '$lib/structures/generic';
 	import type { OperationData } from '$lib/operation/operationData';
 
@@ -59,11 +59,54 @@
 		});
 
 		operationManager = new OperationManager(TreeType.Binary);
-		operationManager.addEventListener('change', e => {
-			updateOperationState();
+		operationManager.addEventListener(EventType.StepChange, e => {
+			console.log('Frontend caught step change');
+			updateSteps(e.detail);
 		});
-		updateOperationState();
+		operationManager.addEventListener(EventType.OperationChange, e => {
+			console.log('Frontend caught operation change');
+			updateOperations(e.detail);
+			updateSteps(e.detail);
+		});
+		operationManager.addEventListener(EventType.OperationListChange, e => {
+			console.log('Frontend caught operation list change');
+			updateOperationList(e.detail);
+			updateOperations(e.detail);
+			updateSteps(e.detail);
+		});
+		operationManager.emitOperationListChange();
 	});
+
+	// function updateState()
+
+	function updateOperationList(data: any) {
+		operations = data.operations;
+	}
+
+	function updateOperations(data: any) {
+		currentOperation = data.currentOperation;
+		({ nodes, edges } = treeToGraph(operations[currentOperation].endSnapshot?.root as BinaryTreeNode));
+		network?.setData({ nodes, edges });
+	}
+
+	function updateSteps(data: any) {
+		currentStep = data.currentStep;
+
+		setTimeout(() => {
+			const stepElements = document.querySelectorAll('.operation-step');
+			stepElements.forEach(el => {
+				if (el.classList.contains('bg-gray-400')) {
+					el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				}
+			});
+		}, 100);
+		updateBools(data);
+	}
+
+	function updateBools(data: any) {
+		canDoNext = data.canDoNext;
+		canDoPrevious =  data.canDoPrevious;
+	}
 
 	function updateOperationState() {
 		const opsState = operationManager?.getState();
@@ -89,13 +132,13 @@
 </script>
 
 <h1 class="mb-4 text-2xl font-bold">Binary Tree Prototype</h1>
-<div class="display: mb-4 flex">
+<div class="display: mb-4 flex" style="height: 75vh;">	
 	<div
 		bind:this={container}
-		style="width: 1200px; height: 700px; border: 1px solid lightgray;">
+		style="border: 1px solid lightgray; flex-grow: 1; height: 100%;">
 	</div>
 
-	<div class="mr-4 ml-4 w-100 rounded bg-gray-100 p-4">
+	<div class="mr-4 ml-4 rounded bg-gray-100 p-4" style="width: 25em;">
 		<div>
 			<h2 class="mb-2 text-xl font-semibold">Tree Controls</h2>
 			<div>
@@ -166,7 +209,8 @@
 
 		<div class="mt-6">
 			<h2 class="mb-2 text-xl font-semibold">Operation Info</h2>
-			<div class="max-h-80 overflow-y-auto">
+			<div class="overflow-y-auto" style="max-height: 30vh;">
+				
 				<ul>
 					{#each operations as op}
 						<li class="{operations[currentOperation] === op ? 'bg-gray-300' : 'bg-gray-200'} mb-2 rounded p-2 text-sm">
