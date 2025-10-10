@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Network } from 'vis-network/standalone';
+	import { Network, type Edge, type Node } from 'vis-network/standalone';
 	import { BinaryTreeNode } from '$lib/structures/binaryTree';
 	import { treeToGraph } from '$lib/utils/trees';
 	import { enforceMinMax } from '$lib/utils/utils';
-	import { EventType, OperationManager } from '$lib/operation/operationManager';
+	import { ChangeFlags, OperationManager } from '$lib/operation/operationManager';
 	import { OperationType, TreeType } from '$lib/structures/generic';
 	import type { OperationData } from '$lib/operation/operationData';
 
 	let container: HTMLElement;
-	let network: Network | null = null;
-	let { nodes, edges } = treeToGraph(null);
+	let { nodes, edges }: { nodes: Node[]; edges: Edge[] } = { nodes: [], edges: [] };
+	let network: Network;
 
 	let operationManager: OperationManager | undefined;
 	let operations: OperationData[] = [];
@@ -23,7 +23,21 @@
 	let canDoPrevious: boolean = false;
 
 	onMount(() => {
-		network = new Network(
+		({ nodes, edges } = treeToGraph(null));
+		network = setupNetwork();
+
+		operationManager = new OperationManager(TreeType.Binary);
+		operationManager.addEventListener((e: Event) => {
+			const event = e as CustomEvent<ChangeFlags>;
+			console.log('Frontend caught change');
+			if (event.detail.list) updateList();
+			if (event.detail.tree) updateTree();
+		});
+		operationManager.emit(new ChangeFlags(true, true));
+	});
+
+	function setupNetwork(): Network {
+		let network = new Network(
 			container,
 			{ nodes, edges },
 			{
@@ -58,63 +72,52 @@
 			}
 		});
 
-		operationManager = new OperationManager(TreeType.Binary);
-		operationManager.addEventListener(EventType.StepChange, e => {
-			console.log('Frontend caught step change');
-			updateSteps(e.detail);
-		});
-		operationManager.addEventListener(EventType.OperationChange, e => {
-			console.log('Frontend caught operation change');
-			updateOperations(e.detail);
-			updateSteps(e.detail);
-		});
-		operationManager.addEventListener(EventType.OperationListChange, e => {
-			console.log('Frontend caught operation list change');
-			updateOperationList(e.detail);
-			updateOperations(e.detail);
-			updateSteps(e.detail);
-		});
-		operationManager.emitOperationListChange();
-	});
-
-	function updateOperationList(data: any) {
-		operations = data.operations;
+		return network;
 	}
 
-	function updateOperations(data: any) {
-		currentOperation = data.currentOperation;
-		({ nodes, edges } = treeToGraph(operations[currentOperation].endSnapshot?.root as BinaryTreeNode));
-		network?.setData({ nodes, edges });
+	function updateTree() {
+		if (operationManager) {
+			({ nodes, edges } = treeToGraph(operationManager.getCurrentTree().root as BinaryTreeNode));
+			network?.setData({ nodes, edges });
+		}
 	}
 
-	function updateSteps(data: any) {
-		currentStep = data.currentStep;
+	function updateList() {
+		if (operationManager) {
+			let data = operationManager.getListData();
 
-		setTimeout(() => {
-			const stepElements = document.querySelectorAll('.operation-step');
-			stepElements.forEach(el => {
-				if (el.classList.contains('bg-gray-400')) {
-					el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-				}
-			});
-		}, 100);
-		updateBools(data);
+			operations = data.operations;
+			currentOperation = data.currentOperation;
+			currentStep = data.currentStep;
+			scrollToCurrentStep();
+
+			canDoNext = data.canDoNext;
+			canDoPrevious = data.canDoPrevious;
+		}
 	}
 
-	function updateBools(data: any) {
-		canDoNext = data.canDoNext;
-		canDoPrevious =  data.canDoPrevious;
+	function scrollToCurrentStep() {
+		const stepElements = document.querySelectorAll('.operation-step');
+		stepElements.forEach(el => {
+			if (el.classList.contains('bg-gray-400')) {
+				el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+		});
 	}
 </script>
 
 <h1 class="mb-4 text-2xl font-bold">Binary Tree Prototype</h1>
-<div class="display: mb-4 flex" style="height: 75vh;">	
+<div
+	class="display: mb-4 flex"
+	style="height: 75vh;">
 	<div
 		bind:this={container}
 		style="border: 1px solid lightgray; flex-grow: 1; height: 100%;">
 	</div>
 
-	<div class="mr-4 ml-4 rounded bg-gray-100 p-4" style="width: 25em;">
+	<div
+		class="mr-4 ml-4 rounded bg-gray-100 p-4"
+		style="width: 25em;">
 		<div>
 			<h2 class="mb-2 text-xl font-semibold">Tree Controls</h2>
 			<div>
@@ -185,8 +188,9 @@
 
 		<div class="mt-6">
 			<h2 class="mb-2 text-xl font-semibold">Operation Info</h2>
-			<div class="overflow-y-auto" style="max-height: 30vh;">
-				
+			<div
+				class="overflow-y-auto"
+				style="max-height: 30vh;">
 				<ul>
 					{#each operations as op}
 						<li class="{operations[currentOperation] === op ? 'bg-gray-300' : 'bg-gray-200'} mb-2 rounded p-2 text-sm">

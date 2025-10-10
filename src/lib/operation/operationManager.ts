@@ -7,12 +7,30 @@ export enum EventType {
 	OperationListChange = 'operation_list_change',
 }
 
+export class ChangeFlags {
+	list: boolean = false;
+	tree: boolean = false;
+
+	constructor(list: boolean = false, tree: boolean = false) {
+		this.list = list;
+		this.tree = tree;
+	}
+}
+
+export class ChangeData {
+	operations: OperationData[] = [];
+	currentOperation: number = 0;
+	currentStep: number = 0;
+	canDoNext: boolean = false;
+	canDoPrevious: boolean = false;
+}
+
 export class OperationManager {
 	private operations: OperationData[] = [];
 	private currentOperation: number = 0;
 	private currentStep: number = -1;
 
-	private listeners: { [key: string]: EventListener[] } = {};
+	private listeners: EventListener[] = [];
 
 	private showSteps: boolean = false;
 
@@ -25,72 +43,39 @@ export class OperationManager {
 		this.currentOperation = 0;
 		this.currentStep = 0;
 
-		this.emitOperationListChange();
+		this.emit(new ChangeFlags(true, true));
 	}
 
-	addEventListener(event: EventType, listener: EventListener) {
-		if (!this.listeners[event]) {
-			this.listeners[event] = [];
-		}
-		this.listeners[event].push(listener);
+	addEventListener(listener: EventListener) {
+		this.listeners.push(listener);
 	}
 
-	private emit(event: EventType, args: any) {
-		if (this.listeners[event]) {
-			this.listeners[event].forEach((listener) => listener(new CustomEvent(event, { detail: args })));
-		}
-		console.log(`Event emitted: ${event}`, args);
+	emit(flags: ChangeFlags = new ChangeFlags()) {
+		this.listeners.forEach(listener => listener(new CustomEvent('change', { detail: flags })));
+		console.log(`Event emitted:`, flags);
 	}
 
-	private emitOperationChange() {
-		// rewrite tree
-		// change step and operation
-		let data = {
-			'currentOperation': this.currentOperation,
-			'currentStep': this.currentStep,
-			...this.getBools(),
-		};
-		this.emit(EventType.OperationChange, data);
-	}
-
-	private emitStepChange() {
-		// change step only
-		let data = { 
-			'currentStep': this.currentStep,
-			...this.getBools(),
-		};
-		this.emit(EventType.StepChange, data);
-	}
-
-	emitOperationListChange() {
-		// change everything
-		let data = {
+	getListData(): ChangeData {
+		return {
 			operations: this.operations,
 			currentOperation: this.currentOperation,
 			currentStep: this.currentStep,
-			...this.getBools(),
-		};
-		this.emit(EventType.OperationListChange, data);
-	}
-	
-	private getBools() {
-		return {
 			canDoNext: this.canDoNext(),
 			canDoPrevious: this.canDoPrevious(),
 		};
 	}
 
-	getCurrentOperation(): OperationData {
-		return this.operations[this.currentOperation];
+	getCurrentTree() {
+		return this.operations[this.currentOperation].endSnapshot!;
 	}
 
 	doOperation(type: OperationType, value: number) {
 		console.log('Op manager performing operation:', type, value);
-		let initialState = deepCopyTree(TreeType.Binary, this.getCurrentOperation().endSnapshot!);
+		let initialState = deepCopyTree(TreeType.Binary, this.operations[this.currentOperation].endSnapshot!);
 		let data = initialState?.doOperation(type, value);
 		if (data) {
 			this.newOperation(data);
-			this.emitOperationListChange();
+			this.emit(new ChangeFlags(true, true));
 		}
 	}
 
@@ -109,12 +94,12 @@ export class OperationManager {
 		this.operations = [firstOp];
 		this.currentOperation = 0;
 		this.currentStep = 0;
-		this.emitOperationListChange();
+		this.emit(new ChangeFlags(true, true));
 	}
 
 	toggleShowSteps() {
 		this.showSteps = !this.showSteps;
-		this.emitStepChange();
+		this.emit(new ChangeFlags(true, false));
 	}
 
 	canDoNext(): boolean {
@@ -136,45 +121,53 @@ export class OperationManager {
 
 	next() {
 		if (!this.canDoNext()) return;
+		let currentFlags = new ChangeFlags();
 
 		if (this.showSteps) {
 			let currentOp = this.operations[this.currentOperation];
 			if (this.currentStep < currentOp.steps.length - 1) {
 				this.currentStep++;
-				this.emitStepChange();
+				currentFlags.list = true;
 			} else if (this.currentOperation < this.operations.length - 1) {
 				this.currentOperation++;
 				this.currentStep = 0;
-				this.emitOperationChange();
+				currentFlags.list = true;
+				currentFlags.tree = true;
 			}
 		} else {
 			if (this.currentOperation < this.operations.length - 1) {
 				this.currentOperation++;
 				this.currentStep = 0;
-				this.emitOperationChange();
+				currentFlags.list = true;
+				currentFlags.tree = true;
 			}
 		}
+		this.emit(currentFlags);
 	}
 
 	previous() {
 		if (!this.canDoPrevious()) return;
+		let currentFlags = new ChangeFlags();
 
 		if (this.showSteps) {
 			if (this.currentStep > 0) {
 				this.currentStep--;
-				this.emitStepChange();
+				currentFlags.list = true;
 			} else if (this.currentOperation > 0) {
 				this.currentOperation--;
 				let previousOp = this.operations[this.currentOperation];
 				this.currentStep = previousOp.steps.length - 1;
-				this.emitOperationChange();
+				currentFlags.list = true;
+				currentFlags.tree = true;
 			}
 		} else {
 			if (this.currentOperation > 0) {
 				this.currentOperation--;
 				this.currentStep = 0;
-				this.emitOperationChange();
+				currentFlags.list = true;
+				currentFlags.tree = true;
 			}
 		}
+		this.emit(currentFlags);
 	}
 }
