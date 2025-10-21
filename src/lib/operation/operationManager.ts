@@ -1,11 +1,5 @@
-import { createEmptyTree, deepCopyTree, OperationType, TreeType } from '$lib/structures/generic';
+import { createEmptyTree, deepCopyStructure, StructureType, type OperationTypeValue } from '$lib/structures/dataStructure';
 import { OperationData } from './operationData';
-
-export enum EventType {
-	OperationChange = 'operation_change',
-	StepChange = 'step_change',
-	OperationListChange = 'operation_list_change',
-}
 
 export class ChangeFlags {
 	list: boolean = false;
@@ -26,6 +20,8 @@ export class ChangeData {
 }
 
 export class OperationManager {
+	private structureType: StructureType;
+
 	private operations: OperationData[] = [];
 	private currentOperation: number = 0;
 	private currentStep: number = -1;
@@ -34,8 +30,9 @@ export class OperationManager {
 
 	private showSteps: boolean = false;
 
-	constructor(treeType: TreeType) {
-		let emptySnapshot = createEmptyTree(treeType);
+	constructor(structureType: StructureType) {
+		this.structureType = structureType;
+		let emptySnapshot = createEmptyTree(structureType);
 		let data = new OperationData('Empty', emptySnapshot);
 		data.end(emptySnapshot);
 
@@ -48,11 +45,11 @@ export class OperationManager {
 
 	addEventListener(listener: EventListener) {
 		this.listeners.push(listener);
+		listener(new CustomEvent('change', { detail: new ChangeFlags(true, true) })); // to make sure the listener is up to date
 	}
 
 	emit(flags: ChangeFlags = new ChangeFlags()) {
 		this.listeners.forEach(listener => listener(new CustomEvent('change', { detail: flags })));
-		console.log(`Event emitted:`, flags);
 	}
 
 	getListData(): ChangeData {
@@ -69,19 +66,19 @@ export class OperationManager {
 		return this.operations[this.currentOperation].endSnapshot!;
 	}
 
-	doOperation(type: OperationType, value: number) {
-		console.log('Op manager performing operation:', type, value);
-		let initialState = deepCopyTree(TreeType.Binary, this.operations[this.currentOperation].endSnapshot!);
-		let data = initialState?.doOperation(type, value);
-		if (data) {
-			this.newOperation(data);
-			this.emit(new ChangeFlags(true, true));
-		}
+	operation(type: OperationTypeValue, value: number) {
+		console.log('OM performing:', type, value);
+
+		let initialState = deepCopyStructure(this.structureType, this.operations[this.currentOperation].endSnapshot!);
+		let data = initialState.operation(type, value);
+
+		this.newOperation(data);
+		this.emit(new ChangeFlags(true, true));
 	}
 
 	private newOperation(operation: OperationData) {
 		if (this.currentOperation < this.operations.length - 1) {
-			this.operations = this.operations.slice(0, this.currentOperation + 1);
+			this.operations = this.operations.slice(0, this.currentOperation + 1); // remove future operations
 		}
 		this.operations.push(operation);
 		this.currentOperation++;

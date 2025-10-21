@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Network, type Edge, type Node } from 'vis-network/standalone';
-	import { BinaryTreeNode } from '$lib/structures/binaryTree';
-	import { treeToGraph } from '$lib/utils/trees';
+	import { BSTree } from '$lib/structures/bsTree';
+	import { bsTreetoGraph } from '$lib/utils/trees';
 	import { enforceMinMax } from '$lib/utils/utils';
 	import { ChangeFlags, OperationManager } from '$lib/operation/operationManager';
-	import { OperationType, TreeType } from '$lib/structures/generic';
+	import { OperationType, StructureType } from '$lib/structures/dataStructure';
 	import type { OperationData } from '$lib/operation/operationData';
 
 	let container: HTMLElement;
 	let { nodes, edges }: { nodes: Node[]; edges: Edge[] } = { nodes: [], edges: [] };
 	let network: Network;
 
-	let operationManager: OperationManager | undefined;
+	let operationManager: OperationManager;
 	let operations: OperationData[] = [];
 	let currentOperation: number = 0;
 	let currentStep: number = 0;
@@ -23,17 +23,18 @@
 	let canDoPrevious: boolean = false;
 
 	onMount(() => {
-		({ nodes, edges } = treeToGraph(null));
+		console.log('');
+		console.log('Mounting Binary Tree page');
+
+		({ nodes, edges } = bsTreetoGraph(null));
 		network = setupNetwork();
 
-		operationManager = new OperationManager(TreeType.Binary);
+		operationManager = new OperationManager(StructureType.BSTree);
 		operationManager.addEventListener((e: Event) => {
 			const event = e as CustomEvent<ChangeFlags>;
-			console.log('Frontend caught change');
 			if (event.detail.list) updateList();
 			if (event.detail.tree) updateTree();
 		});
-		operationManager.emit(new ChangeFlags(true, true));
 	});
 
 	function setupNetwork(): Network {
@@ -58,9 +59,9 @@
 			},
 		);
 		network.on('selectNode', function (params) {
-			if (params.nodes.length > 0) {
+			if (params.nodes.length == 1) {
 				const nodeId = params.nodes[0];
-				let node = undefined;
+				let node: Node | null = null;
 				for (let n of nodes) {
 					if (n.id === nodeId) {
 						node = n;
@@ -76,24 +77,20 @@
 	}
 
 	function updateTree() {
-		if (operationManager) {
-			({ nodes, edges } = treeToGraph(operationManager.getCurrentTree().root as BinaryTreeNode));
-			network?.setData({ nodes, edges });
-		}
+		({ nodes, edges } = bsTreetoGraph((operationManager.getCurrentTree() as BSTree).root));
+		network.setData({ nodes, edges });
 	}
 
 	function updateList() {
-		if (operationManager) {
-			let data = operationManager.getListData();
+		let data = operationManager.getListData();
 
-			operations = data.operations;
-			currentOperation = data.currentOperation;
-			currentStep = data.currentStep;
-			scrollToCurrentStep();
+		operations = data.operations;
+		currentOperation = data.currentOperation;
+		currentStep = data.currentStep;
+		scrollToCurrentStep();
 
-			canDoNext = data.canDoNext;
-			canDoPrevious = data.canDoPrevious;
-		}
+		canDoNext = data.canDoNext;
+		canDoPrevious = data.canDoPrevious;
 	}
 
 	function scrollToCurrentStep() {
@@ -106,7 +103,7 @@
 	}
 </script>
 
-<h1 class="mb-4 text-2xl font-bold">Binary Tree Prototype</h1>
+<h1 class="mb-4 text-2xl font-bold">Binary Search Tree Simulation</h1>
 <div
 	class="display: mb-4 flex"
 	style="height: 75vh;">
@@ -123,12 +120,12 @@
 			<div>
 				<button
 					type="button"
-					on:click={() => operationManager?.doOperation(OperationType.Insert, Math.floor(Math.random() * 1000))}>
+					on:click={() => operationManager.operation(OperationType.BSTree.Insert, Math.floor(Math.random() * 1000))}>
 					Insert Random Node
 				</button>
 				<button
 					type="button"
-					on:click={() => operationManager?.reset()}>
+					on:click={() => operationManager.reset()}>
 					Reset
 				</button>
 			</div>
@@ -143,17 +140,17 @@
 					on:keyup={e => enforceMinMax(e.target as HTMLInputElement)} />
 				<button
 					type="button"
-					on:click={() => operationManager?.doOperation(OperationType.Insert, manualValue)}>
+					on:click={() => operationManager.operation(OperationType.BSTree.Insert, manualValue)}>
 					Insert
 				</button>
 				<button
 					type="button"
-					on:click={() => operationManager?.doOperation(OperationType.Remove, manualValue)}>
+					on:click={() => operationManager.operation(OperationType.BSTree.Remove, manualValue)}>
 					Remove
 				</button>
 				<button
 					type="button"
-					on:click={() => operationManager?.doOperation(OperationType.Find, manualValue)}>
+					on:click={() => operationManager.operation(OperationType.BSTree.Find, manualValue)}>
 					Find
 				</button>
 			</div>
@@ -163,13 +160,13 @@
 			<h2 class="mb-2 text-xl font-semibold">Operation Controls</h2>
 			<button
 				type="button"
-				on:click={() => operationManager?.previous()}
+				on:click={() => operationManager.previous()}
 				disabled={!canDoPrevious}>
 				Previous
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager?.next()}
+				on:click={() => operationManager.next()}
 				disabled={!canDoNext}>
 				Next
 			</button>
@@ -178,7 +175,7 @@
 				type="checkbox"
 				bind:checked={autoPlay}
 				class="h-4 w-4"
-				on:change={() => operationManager?.toggleShowSteps()} />
+				on:change={() => operationManager.toggleShowSteps()} />
 			<label
 				for="steps-checkbox"
 				class="mr-4">
@@ -203,7 +200,7 @@
 											operations[currentOperation] === op
 												? 'bg-gray-400'
 												: 'text-gray-700'} operation-step rounded p-1 text-sm">
-											{step.id + 1}: {step.tmp}
+											{step.id + 1}: {step.data}
 										</li>
 									{/each}
 								</ul>

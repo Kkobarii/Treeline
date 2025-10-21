@@ -1,11 +1,11 @@
 import { OperationData } from '$lib/operation/operationData';
 import { deepCopy } from '$lib/utils/utils';
-import { Tree, TreeNode } from './generic';
+import { DataNode, DataStructure, OperationType, type OperationTypeValue } from './dataStructure';
 
-export class BinaryTreeNode extends TreeNode {
+export class BSTreeNode extends DataNode {
 	value: number;
-	left: BinaryTreeNode | null = null;
-	right: BinaryTreeNode | null = null;
+	left: BSTreeNode | null = null;
+	right: BSTreeNode | null = null;
 
 	constructor(id: number, value: number) {
 		super(id);
@@ -13,15 +13,29 @@ export class BinaryTreeNode extends TreeNode {
 	}
 }
 
-export class BinaryTree extends Tree {
-	root: BinaryTreeNode | null = null;
+export class BSTree extends DataStructure {
+	root: BSTreeNode | null = null;
 
-	snapshot(): BinaryTree {
-		return Object.assign(new BinaryTree(), deepCopy(this));
+	snapshot(): BSTree {
+		return Object.assign(new BSTree(), deepCopy(this));
 	}
 
-	insert_node(value: number, data: OperationData): BinaryTreeNode | null {
-		const newNode = new BinaryTreeNode(this.generateId(), value);
+	protected doOperation(type: OperationTypeValue, value: number | null, data: OperationData): void {
+		switch (type) {
+			case OperationType.BSTree.Insert:
+				this.insert(value as number, data);
+				break;
+			case OperationType.BSTree.Remove:
+				this.remove(value as number, data);
+				break;
+			case OperationType.BSTree.Find:
+				this.find(value as number, data);
+				break;
+		}
+	}
+
+	insert(value: number, data: OperationData): BSTreeNode | null {
+		const newNode = new BSTreeNode(this.generateId(), value);
 
 		if (!this.root) {
 			data.addStep(`Inserting ${value} as root node.`);
@@ -53,7 +67,7 @@ export class BinaryTree extends Tree {
 		return newNode;
 	}
 
-	find_node(value: number, data: OperationData): BinaryTreeNode | null {
+	find(value: number, data: OperationData): BSTreeNode | null {
 		let current = this.root;
 
 		while (current) {
@@ -74,8 +88,8 @@ export class BinaryTree extends Tree {
 		return null;
 	}
 
-	remove_node(value: number, data: OperationData): boolean {
-		const deleteRecursively = (node: BinaryTreeNode | null, value: number): BinaryTreeNode | null => {
+	remove(value: number, data: OperationData): boolean {
+		const deleteRecursively = (node: BSTreeNode | null, value: number): BSTreeNode | null => {
 			if (!node) {
 				data.addStep(`${value} not found in the tree.`);
 				return null;

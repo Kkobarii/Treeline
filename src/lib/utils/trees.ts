@@ -1,7 +1,7 @@
-import type { BinaryTreeNode } from '$lib/structures/binaryTree';
+import type { BSTreeNode } from '$lib/structures/bsTree';
 import type { Edge, Node } from 'vis-network';
 
-export function treeToGraph(root: BinaryTreeNode | null, nodes: Node[] = [], edges: Edge[] = [], parent: string | number | null = null) {
+export function bsTreetoGraph(root: BSTreeNode | null, nodes: Node[] = [], edges: Edge[] = [], parent: string | number | null = null) {
 	if (!root) return { nodes, edges };
 
 	const nodeId = root.id;
@@ -12,7 +12,7 @@ export function treeToGraph(root: BinaryTreeNode | null, nodes: Node[] = [], edg
 	}
 
 	if (root.left) {
-		const result = treeToGraph(root.left, nodes, edges, nodeId);
+		const result = bsTreetoGraph(root.left, nodes, edges, nodeId);
 		nodes = result.nodes;
 		edges = result.edges;
 	} else {
@@ -28,7 +28,7 @@ export function treeToGraph(root: BinaryTreeNode | null, nodes: Node[] = [], edg
 	}
 
 	if (root.right) {
-		const result = treeToGraph(root.right, nodes, edges, nodeId);
+		const result = bsTreetoGraph(root.right, nodes, edges, nodeId);
 		nodes = result.nodes;
 		edges = result.edges;
 	} else {
