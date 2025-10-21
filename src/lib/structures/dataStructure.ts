@@ -1,6 +1,5 @@
 import { OperationData } from '$lib/operation/operationData';
 import { deepCopy } from '$lib/utils/utils';
-import { BSTree } from './bsTree';
 
 export enum StructureType {
 	BSTree = 'BSTree',
@@ -20,21 +19,6 @@ export const OperationType = {
 
 export type OperationTypeValue = (typeof OperationType.BSTree)[keyof typeof OperationType.BSTree];
 // | (typeof OperationType.Stack)[keyof typeof OperationType.Stack];
-
-export function createEmptyTree(type: StructureType): DataStructure {
-	const x: Record<StructureType, DataStructure> = {
-		[StructureType.BSTree]: new BSTree(),
-	};
-
-	return x[type];
-}
-
-export function deepCopyStructure(type: StructureType, struct: DataStructure): DataStructure {
-	const x: Record<StructureType, (tree: DataStructure) => DataStructure> = {
-		[StructureType.BSTree]: (tree: DataStructure) => Object.assign(new BSTree(), deepCopy(tree)),
-	};
-	return x[type](struct);
-}
 
 export class DataNode {
 	id: number;

@@ -1,4 +1,5 @@
-import { createEmptyTree, deepCopyStructure, StructureType, type OperationTypeValue } from '$lib/structures/dataStructure';
+import { StructureType, type OperationTypeValue } from '$lib/structures/dataStructure';
+import { createEmptyStructure, deepCopyStructure } from '$lib/utils/structures';
 import { OperationData } from './operationData';
 
 export class ChangeFlags {
@@ -15,6 +16,7 @@ export class ChangeData {
 	operations: OperationData[] = [];
 	currentOperation: number = 0;
 	currentStep: number = 0;
+	currentValue: number = 0;
 	canDoNext: boolean = false;
 	canDoPrevious: boolean = false;
 }
@@ -29,10 +31,11 @@ export class OperationManager {
 	private listeners: EventListener[] = [];
 
 	private showSteps: boolean = false;
+	private currentValue: number = 0;
 
 	constructor(structureType: StructureType) {
 		this.structureType = structureType;
-		let emptySnapshot = createEmptyTree(structureType);
+		let emptySnapshot = createEmptyStructure(structureType);
 		let data = new OperationData('Empty', emptySnapshot);
 		data.end(emptySnapshot);
 
@@ -59,6 +62,7 @@ export class OperationManager {
 			currentStep: this.currentStep,
 			canDoNext: this.canDoNext(),
 			canDoPrevious: this.canDoPrevious(),
+			currentValue: this.currentValue,
 		};
 	}
 
@@ -66,7 +70,7 @@ export class OperationManager {
 		return this.operations[this.currentOperation].endSnapshot!;
 	}
 
-	operation(type: OperationTypeValue, value: number) {
+	operation(type: OperationTypeValue, value: number = this.currentValue) {
 		console.log('OM performing:', type, value);
 
 		let initialState = deepCopyStructure(this.structureType, this.operations[this.currentOperation].endSnapshot!);
@@ -97,6 +101,12 @@ export class OperationManager {
 	toggleShowSteps() {
 		this.showSteps = !this.showSteps;
 		this.emit(new ChangeFlags(true, false));
+	}
+
+	updateCurrentValue(value: number) {
+		this.currentValue = value;
+		this.emit(new ChangeFlags(true, false));
+		console.log('Updated current value to', this.currentValue);
 	}
 
 	canDoNext(): boolean {
