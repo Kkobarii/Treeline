@@ -85,7 +85,7 @@
 									class="{operations[currentOperation].steps[currentStep] === step && operations[currentOperation] === op
 										? 'bg-gray-400'
 										: 'text-gray-700'} operation-step rounded p-1 text-sm">
-									{step.id + 1}: {step.data}
+									{step.id + 1}: {step.data.action}
 								</li>
 							{/each}
 						</ul>

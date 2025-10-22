@@ -1,4 +1,4 @@
-import { OperationData } from '$lib/operation/operationData';
+import { BSTreeSteps, OperationData } from '$lib/operation/operationData';
 import { deepCopy } from '$lib/utils/utils';
 import { DataNode, DataStructure, OperationType, type OperationTypeValue } from './dataStructure';
 
@@ -31,6 +31,8 @@ export class BSTree extends DataStructure {
 			case OperationType.BSTree.Find:
 				this.find(value as number, data);
 				break;
+			default:
+				throw new Error(`Operation type ${type} not supported for BSTree.`);
 		}
 	}
 
@@ -38,30 +40,35 @@ export class BSTree extends DataStructure {
 		const newNode = new BSTreeNode(this.generateId(), value);
 
 		if (!this.root) {
-			data.addStep(`Inserting ${value} as root node.`);
+			data.step(BSTreeSteps.CreateRoot(newNode.id, value));
 			this.root = newNode;
 			return newNode;
 		}
 
 		let current = this.root;
 		while (true) {
-			data.addStep(`Comparing ${value} with ${current.value}.`);
+			data.step(BSTreeSteps.Compare(value, current.id, current.value));
 			if (value < current.value) {
-				data.addStep(`Going left from ${current.value}.`);
 				if (!current.left) {
-					data.addStep(`Inserting ${value} to the left of ${current.value}.`);
+					data.step(BSTreeSteps.CreateLeaf(newNode.id, value, current.id, 'left'));
 					current.left = newNode;
 					break;
 				}
+
+				data.step(BSTreeSteps.Traverse(current.id, current.left.id, 'left'));
 				current = current.left;
-			} else {
-				data.addStep(`Going right from ${current.value}.`);
+			} else if (value > current.value) {
 				if (!current.right) {
-					data.addStep(`Inserting ${value} to the right of ${current.value}.`);
+					data.step(BSTreeSteps.CreateLeaf(newNode.id, value, current.id, 'right'));
 					current.right = newNode;
 					break;
 				}
+
+				data.step(BSTreeSteps.Traverse(current.id, current.right.id, 'right'));
 				current = current.right;
+			} else {
+				data.step(BSTreeSteps.Drop(value, 'duplicate value'));
+				break;
 			}
 		}
 		return newNode;
@@ -71,55 +78,70 @@ export class BSTree extends DataStructure {
 		let current = this.root;
 
 		while (current) {
-			data.addStep(`Comparing ${value} with ${current.value}.`);
+			data.step(BSTreeSteps.Compare(value, current.id, current.value));
 			if (value === current.value) {
-				data.addStep(`Found ${value} in the tree.`);
+				data.step(BSTreeSteps.Found(current.id, value));
 				return current;
 			} else if (value < current.value) {
-				data.addStep(`Going left from ${current.value}.`);
+				data.step(BSTreeSteps.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
 				current = current.left;
 			} else {
-				data.addStep(`Going right from ${current.value}.`);
+				data.step(BSTreeSteps.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
 				current = current.right;
 			}
 		}
 
-		data.addStep(`${value} not found in the tree.`);
+		data.step(BSTreeSteps.Drop(value, 'not found'));
 		return null;
 	}
 
 	remove(value: number, data: OperationData): boolean {
 		const deleteRecursively = (node: BSTreeNode | null, value: number): BSTreeNode | null => {
 			if (!node) {
-				data.addStep(`${value} not found in the tree.`);
+				data.step(BSTreeSteps.Drop(value, 'not found'));
 				return null;
 			}
-			data.addStep(`Comparing ${value} with ${node.value}.`);
+
+			data.step(BSTreeSteps.Compare(value, node.id, node.value));
 			if (value < node.value) {
-				data.addStep(`Going left from ${node.value}.`);
+				data.step(BSTreeSteps.Traverse(node.id, node.left ? node.left.id : -1, 'left'));
 				node.left = deleteRecursively(node.left, value);
 			} else if (value > node.value) {
-				data.addStep(`Going right from ${node.value}.`);
+				data.step(BSTreeSteps.Traverse(node.id, node.right ? node.right.id : -1, 'right'));
 				node.right = deleteRecursively(node.right, value);
 			} else {
-				data.addStep(`Found ${value}, deleting...`);
+				data.step(BSTreeSteps.Found(node.id, value));
 				if (!node.left && !node.right) {
-					data.addStep(`Deleting leaf node ${value}.`);
+					data.step(BSTreeSteps.Delete(node.id, value));
 					return null;
 				}
 				if (!node.left) {
-					data.addStep(`Replacing ${value} with right child.`);
+					data.step(BSTreeSteps.Replace(node.id, node.right!.id, node.right!.value));
 					return node.right;
 				}
 				if (!node.right) {
-					data.addStep(`Replacing ${value} with left child.`);
+					data.step(BSTreeSteps.Replace(node.id, node.left!.id, node.left!.value));
 					return node.left;
 				}
-				let temp = node.right;
-				while (temp.left) temp = temp.left;
-				data.addStep(`Replacing ${value} with inorder successor ${temp.value}.`);
-				node.value = temp.value;
-				node.right = deleteRecursively(node.right, temp.value);
+
+				let parent = node;
+				let inorderSuccessor = node.right;
+				while (inorderSuccessor.left) {
+					parent = inorderSuccessor;
+					inorderSuccessor = inorderSuccessor.left;
+				}
+
+				data.step(BSTreeSteps.Replace(node.id, inorderSuccessor.id, inorderSuccessor.value));
+				node.value = inorderSuccessor.value;
+				node.id = inorderSuccessor.id;
+
+				if (parent !== node) {
+					parent.left = inorderSuccessor.right;
+				}
+
+				if (node.right === inorderSuccessor) {
+					node.right = inorderSuccessor.right;
+				}
 			}
 			return node;
 		};

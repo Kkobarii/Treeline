@@ -5,7 +5,7 @@ export function bsTreetoGraph(root: BSTreeNode | null, nodes: Node[] = [], edges
 	if (!root) return { nodes, edges };
 
 	const nodeId = root.id;
-	nodes.push({ id: nodeId, label: root.value.toString() });
+	nodes.push({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
 
 	if (parent !== null) {
 		edges.push({ from: parent, to: nodeId });
