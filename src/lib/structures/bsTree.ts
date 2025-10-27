@@ -110,17 +110,19 @@ export class BSTree extends DataStructure {
 				data.step(BSTreeSteps.Traverse(node.id, node.right ? node.right.id : -1, 'right'));
 				node.right = deleteRecursively(node.right, value);
 			} else {
-				data.step(BSTreeSteps.Found(node.id, value));
+				data.step(BSTreeSteps.MarkToDelete(node.id, value));
 				if (!node.left && !node.right) {
 					data.step(BSTreeSteps.Delete(node.id, value));
 					return null;
 				}
+
 				if (!node.left) {
-					data.step(BSTreeSteps.Replace(node.id, node.right!.id, node.right!.value));
+					data.step(BSTreeSteps.ReplaceWithChild(node.id, node.right!.id, node.right!.value, 'right'));
 					return node.right;
 				}
+
 				if (!node.right) {
-					data.step(BSTreeSteps.Replace(node.id, node.left!.id, node.left!.value));
+					data.step(BSTreeSteps.ReplaceWithChild(node.id, node.left!.id, node.left!.value, 'left'));
 					return node.left;
 				}
 
@@ -130,18 +132,20 @@ export class BSTree extends DataStructure {
 					parent = inorderSuccessor;
 					inorderSuccessor = inorderSuccessor.left;
 				}
-
-				data.step(BSTreeSteps.Replace(node.id, inorderSuccessor.id, inorderSuccessor.value));
-				node.value = inorderSuccessor.value;
-				node.id = inorderSuccessor.id;
-
+				data.step(BSTreeSteps.FoundInorderSuccessor(node.id, inorderSuccessor.id, inorderSuccessor.value));
+				
 				if (parent !== node) {
 					parent.left = inorderSuccessor.right;
+					data.step(BSTreeSteps.RelinkSuccessorChild(inorderSuccessor.right!.id, inorderSuccessor.right!.value, parent.id, parent.value));
 				}
-
+				
 				if (node.right === inorderSuccessor) {
 					node.right = inorderSuccessor.right;
 				}
+
+				data.step(BSTreeSteps.ReplaceWithInorderSuccessor(node.id, inorderSuccessor.id, inorderSuccessor.value));
+				node.value = inorderSuccessor.value;
+				node.id = inorderSuccessor.id;
 			}
 			return node;
 		};

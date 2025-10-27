@@ -34,8 +34,12 @@ export enum StepType {
 	Traverse,
 	Drop,
 	Found,
+	MarkToDelete,
 	Delete,
-	Replace,
+	ReplaceWithChild,
+	FoundInorderSuccessor,
+	RelinkSuccessorChild,
+	ReplaceWithInorderSuccessor,
 }
 
 export class StepData {
@@ -109,6 +113,15 @@ export class BSTreeSteps {
 		});
 	}
 
+	static MarkToDelete(nodeId: number, value: number): StepData {
+		return new StepData(0, {
+			type: StepType.MarkToDelete,
+			nodeId: nodeId,
+			value: value,
+			action: `Mark node ${nodeId} with value ${value} for deletion`,
+		});
+	}
+
 	static Delete(nodeId: number, value: number): StepData {
 		return new StepData(0, {
 			type: StepType.Delete,
@@ -118,13 +131,45 @@ export class BSTreeSteps {
 		});
 	}
 
-	static Replace(oldNodeId: number, newNodeId: number, newValue: number): StepData {
+	static ReplaceWithChild(oldNodeId: number, newNodeId: number, newValue: number, direction: 'left' | 'right'): StepData {
 		return new StepData(0, {
-			type: StepType.Replace,
+			type: StepType.ReplaceWithChild,
 			oldNodeId: oldNodeId,
 			newNodeId: newNodeId,
 			newValue: newValue,
-			action: `Replace node ${oldNodeId} with node ${newNodeId} and value ${newValue}`,
+			direction: direction,
+			action: `Replace node ${oldNodeId} with ${direction} child ${newNodeId} having value ${newValue}`,
+		});
+	}
+
+	static ReplaceWithInorderSuccessor(oldNodeId: number, successorNodeId: number, successorValue: number): StepData {
+		return new StepData(0, {
+			type: StepType.ReplaceWithInorderSuccessor,
+			oldNodeId: oldNodeId,
+			successorNodeId: successorNodeId,
+			successorValue: successorValue,
+			action: `Replace node ${oldNodeId} with inorder successor ${successorNodeId} having value ${successorValue}`,
+		});
+	}
+
+	static RelinkSuccessorChild(childNodeId: number, childValue: number, newParentNodeId: number, newParentValue: number): StepData {
+		return new StepData(0, {
+			type: StepType.RelinkSuccessorChild,
+			childNodeId: childNodeId,
+			childValue: childValue,
+			parentNodeId: newParentNodeId,
+			parentValue: newParentValue,
+			action: `Relink child node ${childNodeId} with value ${childValue} from successor to parent node ${newParentNodeId} with value ${newParentValue}`,
+		});
+	}
+
+	static FoundInorderSuccessor(nodeId: number, successorId: number, successorValue: number): StepData {
+		return new StepData(0, {
+			type: StepType.FoundInorderSuccessor,
+			nodeId: nodeId,
+			successorId: successorId,
+			successorValue: successorValue,
+			action: `Found inorder successor of node ${nodeId} as ${successorId} with value ${successorValue}`,
 		});
 	}
 }
