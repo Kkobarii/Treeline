@@ -10,7 +10,7 @@ export class OperationData {
 	constructor(operation: string, startSnapshot: DataStructure) {
 		this.operation = operation;
 		this.startSnapshot = startSnapshot;
-		this.steps = [new StepData(0, { type: StepType.Start, action: 'Start' })];
+		this.steps = [new StepData(0, StepType.Start, { action: 'Start' })];
 		this.endSnapshot = null;
 	}
 
@@ -20,42 +20,43 @@ export class OperationData {
 	}
 
 	end(endSnapshot: DataStructure) {
-		this.step(new StepData(this.steps.length, { type: StepType.End, action: 'End' }));
+		this.step(new StepData(this.steps.length, StepType.End, { action: 'End' }));
 		this.endSnapshot = endSnapshot;
 	}
 }
 
 export enum StepType {
-	Start,
-	End,
-	CreateRoot,
-	CreateLeaf,
-	Compare,
-	Traverse,
-	Drop,
-	Found,
-	MarkToDelete,
-	Delete,
-	ReplaceWithChild,
-	FoundInorderSuccessor,
-	RelinkSuccessorChild,
-	ReplaceWithInorderSuccessor,
+	Start = 'Start',
+	End = 'End',
+	CreateRoot = 'CreateRoot',
+	CreateLeaf = 'CreateLeaf',
+	Compare = 'Compare',
+	Traverse = 'Traverse',
+	Drop = 'Drop',
+	Found = 'Found',
+	MarkToDelete = 'MarkToDelete',
+	Delete = 'Delete',
+	ReplaceWithChild = 'ReplaceWithChild',
+	FoundInorderSuccessor = 'FoundInorderSuccessor',
+	RelinkSuccessorChild = 'RelinkSuccessorChild',
+	ReplaceWithInorderSuccessor = 'ReplaceWithInorderSuccessor',
 }
 
 export class StepData {
 	id: number = 0;
+	type: StepType;
 	data: object = {};
 
-	constructor(id: number, data: object) {
+	constructor(id: number, type: StepType, data: object) {
 		this.id = id;
+		this.type = type;
 		this.data = data;
 	}
 }
 
 export class BSTreeSteps {
 	static CreateRoot(nodeId: number, value: number): StepData {
-		return new StepData(0, {
-			type: StepType.CreateRoot,
+		return new StepData(0, StepType.CreateRoot, {
 			nodeId: nodeId,
 			value: value,
 			action: `Create root node ${nodeId} with value ${value}`,
@@ -63,8 +64,7 @@ export class BSTreeSteps {
 	}
 
 	static CreateLeaf(nodeId: number, value: number, parentId: number, direction: 'left' | 'right'): StepData {
-		return new StepData(0, {
-			type: StepType.CreateLeaf,
+		return new StepData(0, StepType.CreateLeaf, {
 			nodeId: nodeId,
 			value: value,
 			parentId: parentId,
@@ -75,8 +75,7 @@ export class BSTreeSteps {
 
 	static Compare(value: number, comparisonId: number, comparisonValue: number): StepData {
 		let result = value < comparisonValue ? 'less' : value > comparisonValue ? 'greater' : 'equal';
-		return new StepData(0, {
-			type: StepType.Compare,
+		return new StepData(0, StepType.Compare, {
 			value: value,
 			comparisonId: comparisonId,
 			comparisonValue: comparisonValue,
@@ -86,8 +85,7 @@ export class BSTreeSteps {
 	}
 
 	static Traverse(fromId: number, toId: number, direction: 'left' | 'right'): StepData {
-		return new StepData(0, {
-			type: StepType.Traverse,
+		return new StepData(0, StepType.Traverse, {
 			fromId: fromId,
 			toId: toId,
 			direction: direction,
@@ -95,18 +93,17 @@ export class BSTreeSteps {
 		});
 	}
 
-	static Drop(value: number, reason: string): StepData {
-		return new StepData(0, {
-			type: StepType.Drop,
+	static Drop(value: number, reason: string, fromId: string): StepData {
+		return new StepData(0, StepType.Drop, {
 			value: value,
 			reason: reason,
-			action: `Drop value ${value} due to ${reason}`,
+			fromId: fromId,
+			action: `Drop value ${value} from node ${fromId} due to ${reason}`,
 		});
 	}
 
 	static Found(nodeId: number, value: number): StepData {
-		return new StepData(0, {
-			type: StepType.Found,
+		return new StepData(0, StepType.Found, {
 			nodeId: nodeId,
 			value: value,
 			action: `Found value ${value} at node ${nodeId}`,
@@ -114,8 +111,7 @@ export class BSTreeSteps {
 	}
 
 	static MarkToDelete(nodeId: number, value: number): StepData {
-		return new StepData(0, {
-			type: StepType.MarkToDelete,
+		return new StepData(0, StepType.MarkToDelete, {
 			nodeId: nodeId,
 			value: value,
 			action: `Mark node ${nodeId} with value ${value} for deletion`,
@@ -123,8 +119,7 @@ export class BSTreeSteps {
 	}
 
 	static Delete(nodeId: number, value: number): StepData {
-		return new StepData(0, {
-			type: StepType.Delete,
+		return new StepData(0, StepType.Delete, {
 			nodeId: nodeId,
 			value: value,
 			action: `Delete node ${nodeId} with value ${value}`,
@@ -132,8 +127,7 @@ export class BSTreeSteps {
 	}
 
 	static ReplaceWithChild(oldNodeId: number, newNodeId: number, newValue: number, direction: 'left' | 'right'): StepData {
-		return new StepData(0, {
-			type: StepType.ReplaceWithChild,
+		return new StepData(0, StepType.ReplaceWithChild, {
 			oldNodeId: oldNodeId,
 			newNodeId: newNodeId,
 			newValue: newValue,
@@ -143,8 +137,7 @@ export class BSTreeSteps {
 	}
 
 	static ReplaceWithInorderSuccessor(oldNodeId: number, successorNodeId: number, successorValue: number): StepData {
-		return new StepData(0, {
-			type: StepType.ReplaceWithInorderSuccessor,
+		return new StepData(0, StepType.ReplaceWithInorderSuccessor, {
 			oldNodeId: oldNodeId,
 			successorNodeId: successorNodeId,
 			successorValue: successorValue,
@@ -153,8 +146,7 @@ export class BSTreeSteps {
 	}
 
 	static RelinkSuccessorChild(childNodeId: number, childValue: number, newParentNodeId: number, newParentValue: number): StepData {
-		return new StepData(0, {
-			type: StepType.RelinkSuccessorChild,
+		return new StepData(0, StepType.RelinkSuccessorChild, {
 			childNodeId: childNodeId,
 			childValue: childValue,
 			parentNodeId: newParentNodeId,
@@ -164,8 +156,7 @@ export class BSTreeSteps {
 	}
 
 	static FoundInorderSuccessor(nodeId: number, successorId: number, successorValue: number): StepData {
-		return new StepData(0, {
-			type: StepType.FoundInorderSuccessor,
+		return new StepData(0, StepType.FoundInorderSuccessor, {
 			nodeId: nodeId,
 			successorId: successorId,
 			successorValue: successorValue,

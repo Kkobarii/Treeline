@@ -19,6 +19,7 @@ export class ChangeData {
 	currentValue: number = 0;
 	canDoNext: boolean = false;
 	canDoPrevious: boolean = false;
+	showSteps: boolean = false;
 }
 
 export class OperationManager {
@@ -63,11 +64,16 @@ export class OperationManager {
 			canDoNext: this.canDoNext(),
 			canDoPrevious: this.canDoPrevious(),
 			currentValue: this.currentValue,
+			showSteps: this.showSteps,
 		};
 	}
 
-	getCurrentTree() {
+	getEndTree() {
 		return this.operations[this.currentOperation].endSnapshot!;
+	}
+
+	getStartTree() {
+		return this.operations[this.currentOperation].startSnapshot;
 	}
 
 	operation(type: OperationTypeValue, value: number = this.currentValue) {

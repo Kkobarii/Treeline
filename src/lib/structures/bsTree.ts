@@ -67,7 +67,7 @@ export class BSTree extends DataStructure {
 				data.step(BSTreeSteps.Traverse(current.id, current.right.id, 'right'));
 				current = current.right;
 			} else {
-				data.step(BSTreeSteps.Drop(value, 'duplicate value'));
+				data.step(BSTreeSteps.Drop(value, 'duplicate value', current.id.toString()));
 				break;
 			}
 		}
@@ -76,6 +76,7 @@ export class BSTree extends DataStructure {
 
 	find(value: number, data: OperationData): BSTreeNode | null {
 		let current = this.root;
+		let last = current?.id.toString();
 
 		while (current) {
 			data.step(BSTreeSteps.Compare(value, current.id, current.value));
@@ -84,31 +85,33 @@ export class BSTree extends DataStructure {
 				return current;
 			} else if (value < current.value) {
 				data.step(BSTreeSteps.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
+				last = current.left?.id.toString() ?? `dummy-${current.id}-L`;
 				current = current.left;
 			} else {
 				data.step(BSTreeSteps.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
+				last = current.right?.id.toString() ?? `dummy-${current.id}-R`;
 				current = current.right;
 			}
 		}
 
-		data.step(BSTreeSteps.Drop(value, 'not found'));
+		data.step(BSTreeSteps.Drop(value, 'not found', last!));
 		return null;
 	}
 
 	remove(value: number, data: OperationData): boolean {
-		const deleteRecursively = (node: BSTreeNode | null, value: number): BSTreeNode | null => {
+		const deleteRecursively = (node: BSTreeNode | null, value: number, id: string): BSTreeNode | null => {
 			if (!node) {
-				data.step(BSTreeSteps.Drop(value, 'not found'));
+				data.step(BSTreeSteps.Drop(value, 'not found', id));
 				return null;
 			}
 
 			data.step(BSTreeSteps.Compare(value, node.id, node.value));
 			if (value < node.value) {
 				data.step(BSTreeSteps.Traverse(node.id, node.left ? node.left.id : -1, 'left'));
-				node.left = deleteRecursively(node.left, value);
+				node.left = deleteRecursively(node.left, value, node.left?.id.toString() ?? `dummy-${node.id}-L`);
 			} else if (value > node.value) {
 				data.step(BSTreeSteps.Traverse(node.id, node.right ? node.right.id : -1, 'right'));
-				node.right = deleteRecursively(node.right, value);
+				node.right = deleteRecursively(node.right, value, node.right?.id.toString() ?? `dummy-${node.id}-R`);
 			} else {
 				data.step(BSTreeSteps.MarkToDelete(node.id, value));
 				if (!node.left && !node.right) {
@@ -133,12 +136,19 @@ export class BSTree extends DataStructure {
 					inorderSuccessor = inorderSuccessor.left;
 				}
 				data.step(BSTreeSteps.FoundInorderSuccessor(node.id, inorderSuccessor.id, inorderSuccessor.value));
-				
+
 				if (parent !== node) {
 					parent.left = inorderSuccessor.right;
-					data.step(BSTreeSteps.RelinkSuccessorChild(inorderSuccessor.right!.id, inorderSuccessor.right!.value, parent.id, parent.value));
+					data.step(
+						BSTreeSteps.RelinkSuccessorChild(
+							inorderSuccessor.right!.id,
+							inorderSuccessor.right!.value,
+							parent.id,
+							parent.value,
+						),
+					);
 				}
-				
+
 				if (node.right === inorderSuccessor) {
 					node.right = inorderSuccessor.right;
 				}
@@ -149,7 +159,7 @@ export class BSTree extends DataStructure {
 			}
 			return node;
 		};
-		this.root = deleteRecursively(this.root, value);
+		this.root = deleteRecursively(this.root, value, this.root ? this.root.id.toString() : 'root');
 		return true;
 	}
 }
