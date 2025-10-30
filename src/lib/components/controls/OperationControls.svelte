@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { OperationData } from '$lib/operation/operationData';
-	import { ChangeFlags, OperationManager } from '$lib/operation/operationManager';
+	import { CurrentOperationChangedEvent, CurrentStepChangedEvent, EventType, OperationManager } from '$lib/operation/operationManager';
 	import { onMount } from 'svelte';
 
 	export let operationManager: OperationManager;
@@ -13,25 +13,39 @@
 	let currentStep: number = 0;
 
 	onMount(() => {
-		console.log('Mount OperationControls component');
-		operationManager.addEventListener((e: Event) => {
-			const event = e as CustomEvent<ChangeFlags>;
-			if (!event.detail.list) return;
+		operationManager.addEventListener(EventType.CurrentOperationChanged, (e: Event) => {
+			const event = e as CustomEvent<CurrentOperationChangedEvent>;
 
-			let data = operationManager.getListData();
+			currentOperation = event.detail.currentOperationId;
+			updateCanDoFlags();
+		});
 
-			canDoNext = data.canDoNext;
-			canDoPrevious = data.canDoPrevious;
+		operationManager.addEventListener(EventType.CurrentStepChanged, (e: Event) => {
+			const event = e as CustomEvent<CurrentStepChangedEvent>;
 
-			operations = data.operations;
-			currentOperation = data.currentOperation;
-			currentStep = data.currentStep;
+			currentStep = event.detail.currentStepId;
+			updateCanDoFlags();
 
 			setTimeout(() => {
 				scrollToCurrentStep();
 			}, 50);
 		});
+
+		operationManager.addEventListener(EventType.OperationListChanged, (e: Event) => {
+			const event = e as CustomEvent<{ operations: OperationData[] }>;
+			operations = event.detail.operations;
+			updateCanDoFlags();
+		});
+
+		operationManager.addEventListener(EventType.ShowStepsToggled, () => {
+			updateCanDoFlags();
+		});
 	});
+
+	function updateCanDoFlags() {
+		canDoNext = operationManager.canDoNext();
+		canDoPrevious = operationManager.canDoPrevious();
+	}
 
 	function scrollToCurrentStep() {
 		const stepElements = document.querySelectorAll('.operation-step');

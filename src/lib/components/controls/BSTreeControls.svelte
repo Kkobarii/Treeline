@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { OperationType } from '$lib/structures/dataStructure';
-	import type { ChangeFlags, OperationManager } from '$lib/operation/operationManager';
+	import { EventType, InputValueChangedEvent, type OperationManager } from '$lib/operation/operationManager';
 	import { enforceMinMax } from '$lib/utils/utils';
 	import { onMount } from 'svelte';
 	import OperationControls from './OperationControls.svelte';
@@ -10,12 +10,10 @@
 	let manualValue: number = 0;
 
 	onMount(() => {
-		operationManager.addEventListener((e: Event) => {
-			const event = e as CustomEvent<ChangeFlags>;
-			if (!event.detail.list) return;
-
-			let data = operationManager!.getListData();
-			manualValue = data.currentValue;
+		operationManager.addEventListener(EventType.InputValueChanged, (e: Event) => {
+			const event = e as CustomEvent<InputValueChangedEvent>;
+			console.log('InputValueChanged event received:', event.detail.inputValue);
+			manualValue = event.detail.inputValue;
 		});
 	});
 </script>
@@ -45,20 +43,20 @@
 				max="999"
 				min="0"
 				on:keyup={e => enforceMinMax(e.target as HTMLInputElement)}
-				on:change={e => operationManager?.updateCurrentValue(Number((e.target as HTMLInputElement).value))} />
+				on:change={e => operationManager?.updateCurrentValue(manualValue)} />
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Insert)}>
+				on:click={() => operationManager?.operation(OperationType.BSTree.Insert, manualValue)}>
 				Insert
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Remove)}>
+				on:click={() => operationManager?.operation(OperationType.BSTree.Remove, manualValue)}>
 				Remove
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Find)}>
+				on:click={() => operationManager?.operation(OperationType.BSTree.Find, manualValue)}>
 				Find
 			</button>
 		</div>

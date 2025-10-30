@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { StepType } from '$lib/operation/operationData';
-	import type { ChangeFlags, OperationManager } from '$lib/operation/operationManager';
+	import { OperationData, StepType } from '$lib/operation/operationData';
+	import { CurrentOperationChangedEvent, EventType, type OperationManager } from '$lib/operation/operationManager';
 	import type { BSTree } from '$lib/structures/bsTree';
 	import { bsTreetoGraph } from '$lib/utils/graphs';
-	import { list } from 'postcss';
 	import { onMount } from 'svelte';
 	import { Network, type Edge, type Node } from 'vis-network/standalone';
 
@@ -41,133 +40,132 @@
 		({ nodes, edges } = bsTreetoGraph(null));
 		network = setupNetwork();
 
-		operationManager.addEventListener((e: Event) => {
-			const event = e as CustomEvent<ChangeFlags>;
+		operationManager.addEventListener(EventType.CurrentOperationChanged, (e: Event) => {
+			const event = e as CustomEvent<CurrentOperationChangedEvent>;
+			console.log('CurrentOperationChanged event received:', event.detail.currentOperation);
+			updateGraph(event.detail.currentOperation);
 
-			if (event.detail.tree) {
-				updateGraph();
-			}
+			// if (event.detail.list) {
+			// 	let listData = operationManager.getListData();
 
-			if (event.detail.list) {
-				let listData = operationManager.getListData();
+			// 	updateGraph();
 
-				updateGraph();
+			// 	if (listData.showSteps) {
+			// 		let step = listData.operations[listData.currentOperation].steps[listData.currentStep];
+			// 		console.log('Printing step:', step);
 
-				if (listData.showSteps) {
-					let step = listData.operations[listData.currentOperation].steps[listData.currentStep];
-					console.log('Printing step:', step);
+			// 		removeNodeIfExists(infoNodeId);
+			// 		const infoNode = createInfoNode();
 
-					removeNodeIfExists(infoNodeId);
-					const infoNode = createInfoNode();
+			// 		switch (step.type) {
+			// 			// case StepType.Start:
+			// 			// 	// Prepare extra node
+			// 			// 	extraNode.color = '#aaaaaa';
+			// 			// 	extraNode.font = { color: 'black', size: 15 };
+			// 			// 	if (!nodes.find(n => n.id === extraNode.id)) {
+			// 			// 		nodes.push(extraNode);
+			// 			// 		network.setData({ nodes, edges });
+			// 			// 	}
+			// 			// 	break;
+			// 			case StepType.End:
+			// 				({ nodes, edges } = bsTreetoGraph(operationManager.getEndTree().root));
+			// 				network.setData({ nodes, edges });
+			// 				break;
+			// 			case StepType.Compare:
+			// 				{
+			// 					let resultText = step.data.result == 'less' ? '<' : step.data.result == 'greater' ? '>' : '=';
+			// 					infoNode.label = `Comparing ${step.data.value} ${resultText} ${step.data.comparisonValue}`;
 
-					switch (step.type) {
-						// case StepType.Start:
-						// 	// Prepare extra node
-						// 	extraNode.color = '#aaaaaa';
-						// 	extraNode.font = { color: 'black', size: 15 };
-						// 	if (!nodes.find(n => n.id === extraNode.id)) {
-						// 		nodes.push(extraNode);
-						// 		network.setData({ nodes, edges });
-						// 	}
-						// 	break;
-						case StepType.End:
-							({ nodes, edges } = bsTreetoGraph(operationManager.getEndTree().root));
-							network.setData({ nodes, edges });
-							break;
-						case StepType.Compare:
-							{
-								let resultText = step.data.result == 'less' ? '<' : step.data.result == 'greater' ? '>' : '=';
-								infoNode.label = `Comparing ${step.data.value} ${resultText} ${step.data.comparisonValue}`;
+			// 					addNodeIfNotExists(infoNode);
 
-								addNodeIfNotExists(infoNode);
+			// 					let position = network.getPosition(step.data.comparisonId);
+			// 					position.y -= 40;
 
-								let position = network.getPosition(step.data.comparisonId);
-								position.y -= 40;
+			// 					network.moveNode(infoNodeId, position.x, position.y);
+			// 				}
+			// 				break;
+			// 			case StepType.Traverse:
+			// 				{
+			// 					infoNode.label = `Traversing to ${step.data.direction} child`;
+			// 					addNodeIfNotExists(infoNode);
 
-								network.moveNode(infoNodeId, position.x, position.y);
-							}
-							break;
-						case StepType.Traverse:
-							{
-								infoNode.label = `Traversing to ${step.data.direction} child`;
-								addNodeIfNotExists(infoNode);
+			// 					let positionFrom = network.getPosition(step.data.fromId);
+			// 					let positionTo;
 
-								let positionFrom = network.getPosition(step.data.fromId);
-								let positionTo;
+			// 					if (step.data.toId == -1) {
+			// 						positionTo = network.getPosition(
+			// 							`dummy-${step.data.fromId}-${step.data.direction == 'left' ? 'L' : 'R'}`,
+			// 						);
+			// 					} else {
+			// 						positionTo = network.getPosition(step.data.toId);
+			// 					}
 
-								if (step.data.toId == -1) {
-									positionTo = network.getPosition(
-										`dummy-${step.data.fromId}-${step.data.direction == 'left' ? 'L' : 'R'}`,
-									);
-								} else {
-									positionTo = network.getPosition(step.data.toId);
-								}
+			// 					let position = {
+			// 						x: (positionFrom.x + positionTo.x) / 2,
+			// 						y: (positionFrom.y + positionTo.y) / 2,
+			// 					};
 
-								let position = {
-									x: (positionFrom.x + positionTo.x) / 2,
-									y: (positionFrom.y + positionTo.y) / 2,
-								};
+			// 					network.moveNode(infoNodeId, position.x, position.y - 15);
+			// 				}
+			// 				break;
+			// 			case StepType.CreateRoot:
+			// 				{
+			// 					infoNode.label = `Creating root node with value ${step.data.value}`;
+			// 					addNodeIfNotExists(infoNode);
 
-								network.moveNode(infoNodeId, position.x, position.y - 15);
-							}
-							break;
-						case StepType.CreateRoot:
-							{
-								infoNode.label = `Creating root node with value ${step.data.value}`;
-								addNodeIfNotExists(infoNode);
+			// 					network.moveNode(infoNodeId, 0, -20);
+			// 				}
+			// 				break;
+			// 			case StepType.CreateLeaf:
+			// 				{
+			// 					infoNode.label = `Creating leaf as ${step.data.direction} child`;
+			// 					addNodeIfNotExists(infoNode);
 
-								network.moveNode(infoNodeId, 0, -20);
-							}
-							break;
-						case StepType.CreateLeaf:
-							{
-								infoNode.label = `Creating leaf as ${step.data.direction} child`;
-								addNodeIfNotExists(infoNode);
+			// 					let position = network.getPosition(
+			// 						`dummy-${step.data.parentId}-${step.data.direction == 'left' ? 'L' : 'R'}`,
+			// 					);
 
-								let position = network.getPosition(
-									`dummy-${step.data.parentId}-${step.data.direction == 'left' ? 'L' : 'R'}`,
-								);
+			// 					network.moveNode(infoNodeId, position.x, position.y);
+			// 				}
+			// 				break;
+			// 			case StepType.Found:
+			// 				{
+			// 					infoNode.label = `Found!`;
+			// 					infoNode.color = '#aaffaa';
+			// 					addNodeIfNotExists(infoNode);
 
-								network.moveNode(infoNodeId, position.x, position.y);
-							}
-							break;
-						case StepType.Found:
-							{
-								infoNode.label = `Found!`;
-								infoNode.color = '#aaffaa';
-								addNodeIfNotExists(infoNode);
+			// 					let position = network.getPosition(step.data.nodeId);
+			// 					position.y -= 40;
 
-								let position = network.getPosition(step.data.nodeId);
-								position.y -= 40;
+			// 					network.moveNode(infoNodeId, position.x, position.y);
+			// 				}
+			// 				break;
+			// 			case StepType.Drop:
+			// 				{
+			// 					infoNode.label = `Drop ${step.data.value}\n${step.data.reason}`;
+			// 					infoNode.color = '#ffaaaa';
+			// 					addNodeIfNotExists(infoNode);
 
-								network.moveNode(infoNodeId, position.x, position.y);
-							}
-							break;
-						case StepType.Drop:
-							{
-								infoNode.label = `Drop ${step.data.value}\n${step.data.reason}`;
-								infoNode.color = '#ffaaaa';
-								addNodeIfNotExists(infoNode);
+			// 					let position = network.getPosition(step.data.fromId);
+			// 					position.y += 50;
 
-								let position = network.getPosition(step.data.fromId);
-								position.y += 50;
-
-								network.moveNode(infoNodeId, position.x, position.y);
-							}
-							break;
-					}
-				}
-			}
+			// 					network.moveNode(infoNodeId, position.x, position.y);
+			// 				}
+			// 				break;
+			// 		}
+			// 	}
+			// }
 		});
 	});
 
-	function updateGraph() {
+	function updateGraph(operation: OperationData) {
 		let tree: BSTree;
-		if (operationManager.getListData().showSteps) {
-			tree = operationManager.getStartTree() as BSTree;
-		} else {
-			tree = operationManager.getEndTree() as BSTree;
-		}
+		tree = operation.endSnapshot as BSTree;
+		// if (operationManager.getListData().showSteps) {
+		// 	tree = operationManager.getStartTree() as BSTree;
+		// } else {
+		// 	tree = operationManager.getEndTree() as BSTree;
+		// }
 		({ nodes, edges } = bsTreetoGraph(tree.root));
 		network.setData({ nodes, edges });
 	}
