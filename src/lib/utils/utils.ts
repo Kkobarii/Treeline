@@ -18,3 +18,16 @@ export function enforceMinMax(el: HTMLInputElement) {
 		el.value = clampInput(parseInt(el.value)).toString();
 	}
 }
+
+export function relationTextToSymbol(text: string): string {
+	switch (text) {
+		case 'less':
+			return '<';
+		case 'greater':
+			return '>';
+		case 'equal':
+			return '=';
+		default:
+			return '?';
+	}
+}

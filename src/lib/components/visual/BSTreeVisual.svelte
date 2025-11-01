@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { OperationData, StepData, StepType } from '$lib/operation/operationData';
+	import { BSTreeSteps, OperationData } from '$lib/operation/operationData';
 	import {
 		CurrentOperationChangedEvent,
 		CurrentStepChangedEvent,
@@ -8,6 +8,7 @@
 	} from '$lib/operation/operationManager';
 	import type { BSTree } from '$lib/structures/bsTree';
 	import { bsTreetoGraph } from '$lib/utils/graphs';
+	import { relationTextToSymbol } from '$lib/utils/utils';
 	import { onMount } from 'svelte';
 	import { Network, type Edge, type Node } from 'vis-network/standalone';
 
@@ -187,21 +188,21 @@
 		removeNodeIfExists(infoNodeId);
 		const infoNode = createInfoNode();
 
-		// switch (step.currentStep.type) {
-		// 	case StepType.Compare:
-		// 		{
-		// 			let resultText = step.currentStep.data.result == 'less' ? '<' : step.currentStep.data.result == 'greater' ? '>' : '=';
-		// 			infoNode.label = `Comparing ${step.currentStep.data.value} ${resultText} ${step.currentStep.data.comparisonValue}`;
+		switch (step.currentStep.type as BSTreeSteps.StepType) {
+			case BSTreeSteps.StepType.Compare:
+				{
+					let data = step.currentStep.data as BSTreeSteps.CompareData;
+					infoNode.label = `Comparing ${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`;
 
-		// 			addNodeIfNotExists(infoNode);
+					addNodeIfNotExists(infoNode);
 
-		// 			let position = network.getPosition(step.currentStep.data.comparisonId);
-		// 			position.y -= 40;
+					let position = network.getPosition(data.comparisonId);
+					position.y -= 40;
 
-		// 			network.moveNode(infoNodeId, position.x, position.y);
-		// 		}
-		// 		break;
-		// }
+					network.moveNode(infoNodeId, position.x, position.y);
+				}
+				break;
+		}
 	}
 
 	function updateGraph(operation: OperationData) {
