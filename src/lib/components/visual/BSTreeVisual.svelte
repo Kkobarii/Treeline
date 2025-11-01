@@ -1,6 +1,11 @@
 <script lang="ts">
-	import { OperationData, StepType } from '$lib/operation/operationData';
-	import { CurrentOperationChangedEvent, EventType, type OperationManager } from '$lib/operation/operationManager';
+	import { OperationData, StepData, StepType } from '$lib/operation/operationData';
+	import {
+		CurrentOperationChangedEvent,
+		CurrentStepChangedEvent,
+		EventType,
+		type OperationManager,
+	} from '$lib/operation/operationManager';
 	import type { BSTree } from '$lib/structures/bsTree';
 	import { bsTreetoGraph } from '$lib/utils/graphs';
 	import { onMount } from 'svelte';
@@ -42,8 +47,11 @@
 
 		operationManager.addEventListener(EventType.CurrentOperationChanged, (e: Event) => {
 			const event = e as CustomEvent<CurrentOperationChangedEvent>;
-			console.log('CurrentOperationChanged event received:', event.detail.currentOperation);
-			updateGraph(event.detail.currentOperation);
+			// console.log('CurrentOperationChanged event received:', event.detail.currentOperation);
+
+			// if (!operationManager.getShowSteps()) {
+			handleOperationAnimation(event.detail);
+			// }
 
 			// if (event.detail.list) {
 			// 	let listData = operationManager.getListData();
@@ -156,16 +164,49 @@
 			// 	}
 			// }
 		});
+
+		operationManager.addEventListener(EventType.CurrentStepChanged, (e: Event) => {
+			const event = e as CustomEvent<CurrentStepChangedEvent>;
+			// console.log('CurrentStepChanged event received:', event.detail.currentStep);
+
+			if (operationManager.getShowSteps()) {
+				handleStepAnimation(event.detail);
+			}
+		});
 	});
+
+	function handleOperationAnimation(operation: CurrentOperationChangedEvent) {
+		console.log('Handling operation animation:', operation);
+
+		updateGraph(operation.currentOperation);
+	}
+
+	function handleStepAnimation(step: CurrentStepChangedEvent) {
+		console.log('Handling step animation:', step);
+
+		removeNodeIfExists(infoNodeId);
+		const infoNode = createInfoNode();
+
+		// switch (step.currentStep.type) {
+		// 	case StepType.Compare:
+		// 		{
+		// 			let resultText = step.currentStep.data.result == 'less' ? '<' : step.currentStep.data.result == 'greater' ? '>' : '=';
+		// 			infoNode.label = `Comparing ${step.currentStep.data.value} ${resultText} ${step.currentStep.data.comparisonValue}`;
+
+		// 			addNodeIfNotExists(infoNode);
+
+		// 			let position = network.getPosition(step.currentStep.data.comparisonId);
+		// 			position.y -= 40;
+
+		// 			network.moveNode(infoNodeId, position.x, position.y);
+		// 		}
+		// 		break;
+		// }
+	}
 
 	function updateGraph(operation: OperationData) {
 		let tree: BSTree;
 		tree = operation.endSnapshot as BSTree;
-		// if (operationManager.getListData().showSteps) {
-		// 	tree = operationManager.getStartTree() as BSTree;
-		// } else {
-		// 	tree = operationManager.getEndTree() as BSTree;
-		// }
 		({ nodes, edges } = bsTreetoGraph(tree.root));
 		network.setData({ nodes, edges });
 	}

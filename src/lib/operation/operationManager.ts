@@ -10,23 +10,56 @@ export enum EventType {
 	OperationListChanged = 'operationListChanged',
 }
 
+export enum ChangeDirection {
+	Forward = 'forward',
+	Backward = 'backward',
+	Unknown = 'unknown',
+}
+
 export class CurrentOperationChangedEvent {
+	public direction: ChangeDirection;
+
 	public currentOperationId: number;
 	public currentOperation: OperationData;
 
-	constructor(currentOperationId: number, currentOperation: OperationData) {
+	public previousOperationId?: number;
+	public previousOperation?: OperationData;
+
+	constructor(
+		direction: ChangeDirection,
+		currentOperationId: number,
+		currentOperation: OperationData,
+		previousOperationId?: number,
+		previousOperation?: OperationData,
+	) {
+		this.direction = direction;
 		this.currentOperationId = currentOperationId;
 		this.currentOperation = currentOperation;
+		this.previousOperationId = previousOperationId;
+		this.previousOperation = previousOperation;
 	}
 }
 
 export class CurrentStepChangedEvent {
+	public direction: ChangeDirection;
+
 	public currentStepId: number;
 	public currentStep: StepData;
 
-	constructor(currentStepId: number, currentStep: StepData) {
+	public previousStepId?: number;
+	public previousStep?: StepData;
+	constructor(
+		direction: ChangeDirection,
+		currentStepId: number,
+		currentStep: StepData,
+		previousStepId?: number,
+		previousStep?: StepData,
+	) {
+		this.direction = direction;
 		this.currentStepId = currentStepId;
 		this.currentStep = currentStep;
+		this.previousStepId = previousStepId;
+		this.previousStep = previousStep;
 	}
 }
 
@@ -72,19 +105,28 @@ export class OperationManager {
 		if (!this.listeners[eventType]) {
 			this.listeners[eventType] = [];
 		}
-		console.log('Adding listener for', eventType);
+		// console.log('Adding listener for', eventType);
 		this.listeners[eventType]!.push(listener);
 		this.emit(eventType); // to make sure the listener is up to date
 	}
 
 	emit(eventType: EventType, data?: any) {
 		if (!data) {
+			// Mainly for first call when adding listener
 			switch (eventType) {
 				case EventType.CurrentOperationChanged:
-					data = new CurrentOperationChangedEvent(this.currentOperation, this.operations[this.currentOperation]);
+					data = new CurrentOperationChangedEvent(
+						ChangeDirection.Unknown,
+						this.currentOperation,
+						this.operations[this.currentOperation],
+					);
 					break;
 				case EventType.CurrentStepChanged:
-					data = new CurrentStepChangedEvent(this.currentStep, this.operations[this.currentOperation].steps[this.currentStep]);
+					data = new CurrentStepChangedEvent(
+						ChangeDirection.Unknown,
+						this.currentStep,
+						this.operations[this.currentOperation].steps[this.currentStep],
+					);
 					break;
 				case EventType.ShowStepsToggled:
 					data = this.showSteps;
@@ -131,11 +173,33 @@ export class OperationManager {
 	}
 
 	private incrementCurrentStep() {
-		this.setCurrentStep(this.currentStep + 1);
+		this.currentStep++;
+
+		this.emit(
+			EventType.CurrentStepChanged,
+			new CurrentStepChangedEvent(
+				ChangeDirection.Forward,
+				this.currentStep,
+				this.operations[this.currentOperation].steps[this.currentStep],
+				this.currentStep - 1,
+				this.operations[this.currentOperation].steps[this.currentStep - 1],
+			),
+		);
 	}
 
 	private decrementCurrentStep() {
-		this.setCurrentStep(this.currentStep - 1);
+		this.currentStep--;
+
+		this.emit(
+			EventType.CurrentStepChanged,
+			new CurrentStepChangedEvent(
+				ChangeDirection.Backward,
+				this.currentStep,
+				this.operations[this.currentOperation].steps[this.currentStep],
+				this.currentStep + 1,
+				this.operations[this.currentOperation].steps[this.currentStep + 1],
+			),
+		);
 	}
 
 	private setCurrentOperation(op: number) {
@@ -147,19 +211,49 @@ export class OperationManager {
 	}
 
 	private incrementCurrentOperation() {
-		this.setCurrentOperation(this.currentOperation + 1);
+		this.currentOperation++;
+
+		this.emit(
+			EventType.CurrentOperationChanged,
+			new CurrentOperationChangedEvent(
+				ChangeDirection.Forward,
+				this.currentOperation,
+				this.operations[this.currentOperation],
+				this.currentOperation - 1,
+				this.operations[this.currentOperation - 1],
+			),
+		);
 	}
 
 	private decrementCurrentOperation() {
-		if (!this.showSteps) {
-			this.setCurrentOperation(this.currentOperation - 1);
-		} else {
-			this.currentOperation--;
-			this.emit(EventType.CurrentOperationChanged);
+		this.currentOperation--;
+		this.emit(
+			EventType.CurrentOperationChanged,
+			new CurrentOperationChangedEvent(
+				ChangeDirection.Backward,
+				this.currentOperation,
+				this.operations[this.currentOperation],
+				this.currentOperation + 1,
+				this.operations[this.currentOperation + 1],
+			),
+		);
 
-			let previousOp = this.operations[this.currentOperation];
-			this.setCurrentStep(previousOp.steps.length - 1);
+		if (this.showSteps) {
+			this.currentStep = this.operations[this.currentOperation].steps.length - 1;
+		} else {
+			this.currentStep = 0;
 		}
+
+		this.emit(
+			EventType.CurrentStepChanged,
+			new CurrentStepChangedEvent(
+				ChangeDirection.Backward,
+				this.currentStep,
+				this.operations[this.currentOperation].steps[this.currentStep],
+				0,
+				this.operations[this.currentOperation + 1].steps[0],
+			),
+		);
 	}
 
 	reset() {
@@ -229,5 +323,9 @@ export class OperationManager {
 				this.decrementCurrentOperation();
 			}
 		}
+	}
+
+	getShowSteps(): boolean {
+		return this.showSteps;
 	}
 }
