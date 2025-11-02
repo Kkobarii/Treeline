@@ -186,7 +186,7 @@
 		console.log('Handling step animation:', step);
 
 		removeNodeIfExists(infoNodeId);
-		const infoNode = createInfoNode();
+		let infoNode = createInfoNode();
 
 		switch (step.currentStep.type as BSTreeSteps.StepType) {
 			case BSTreeSteps.StepType.Compare:
