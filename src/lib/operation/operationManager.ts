@@ -223,6 +223,8 @@ export class OperationManager {
 				this.operations[this.currentOperation - 1],
 			),
 		);
+
+		this.setCurrentStep(0);
 	}
 
 	private decrementCurrentOperation() {
@@ -239,9 +241,9 @@ export class OperationManager {
 		);
 
 		if (this.showSteps) {
-			this.currentStep = this.operations[this.currentOperation].steps.length - 1;
+			this.setCurrentStep(this.operations[this.currentOperation].steps.length - 1);
 		} else {
-			this.currentStep = 0;
+			this.setCurrentStep(0);
 		}
 
 		this.emit(
@@ -327,5 +329,21 @@ export class OperationManager {
 
 	getShowSteps(): boolean {
 		return this.showSteps;
+	}
+
+	getCurrentOperationIndex(): number {
+		return this.currentOperation;
+	}
+
+	getCurrentOperation(): OperationData {
+		return this.operations[this.getCurrentOperationIndex()];
+	}
+
+	getCurrentStepIndex(): number {
+		return this.currentStep;
+	}
+
+	getCurrentStep(): StepData {
+		return this.getCurrentOperation().steps[this.getCurrentStepIndex()];
 	}
 }

@@ -40,7 +40,7 @@ export class DataStructure {
 	}
 
 	operation(type: OperationTypeValue, value: number | null): OperationData {
-		const data: OperationData = new OperationData(type + ' ' + value, this.snapshot());
+		const data: OperationData = new OperationData(type.split('.')[1] + ' ' + value, this.snapshot());
 		this.doOperation(type, value, data);
 		data.end(this.snapshot());
 		return data;
