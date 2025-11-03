@@ -1,14 +1,20 @@
 import type { BSTreeNode } from '$lib/structures/bsTree';
-import type { Edge, Node } from 'vis-network';
+import { DataSet } from 'vis-data';
+import { type Edge, type Node } from 'vis-network';
 
-export function bsTreetoGraph(root: BSTreeNode | null, nodes: Node[] = [], edges: Edge[] = [], parent: string | number | null = null) {
+export function bsTreetoGraph(
+	root: BSTreeNode | null,
+	nodes: DataSet<Node> = new DataSet<Node>(),
+	edges: DataSet<Edge> = new DataSet<Edge>(),
+	parent: string | number | null = null,
+) {
 	if (!root) return { nodes, edges };
 
 	const nodeId = root.id;
-	nodes.push({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
+	nodes.add({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
 
 	if (parent !== null) {
-		edges.push({ from: parent, to: nodeId });
+		edges.add({ from: parent, to: nodeId });
 	}
 
 	if (root.left) {
@@ -16,15 +22,15 @@ export function bsTreetoGraph(root: BSTreeNode | null, nodes: Node[] = [], edges
 		nodes = result.nodes;
 		edges = result.edges;
 	} else {
-		const dummyId = `dummy-${nodeId}-L`;
-		nodes.push({
+		const dummyId = getDummyNodeId(nodeId, 'left');
+		nodes.add({
 			id: dummyId,
 			label: '',
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
 		});
-		edges.push({ from: nodeId, to: dummyId, dashes: true });
+		edges.add({ id: `edge-${nodeId}-left`, from: nodeId, to: dummyId, dashes: true });
 	}
 
 	if (root.right) {
@@ -32,16 +38,20 @@ export function bsTreetoGraph(root: BSTreeNode | null, nodes: Node[] = [], edges
 		nodes = result.nodes;
 		edges = result.edges;
 	} else {
-		const dummyId = `dummy-${nodeId}-R`;
-		nodes.push({
+		const dummyId = getDummyNodeId(nodeId, 'right');
+		nodes.add({
 			id: dummyId,
 			label: '',
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
 		});
-		edges.push({ from: nodeId, to: dummyId, dashes: true });
+		edges.add({ id: `edge-${nodeId}-right`, from: nodeId, to: dummyId, dashes: true });
 	}
 
 	return { nodes, edges };
+}
+
+export function getDummyNodeId(parentId: number, direction: 'left' | 'right'): string {
+	return `dummy-${parentId}-${direction == 'left' ? 'L' : 'R'}`;
 }
