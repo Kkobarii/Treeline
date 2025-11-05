@@ -220,6 +220,7 @@ export namespace BSTreeSteps {
 			public childValue: number,
 			public newParentNodeId: number,
 			public newParentValue: number,
+			public successorNodeId: number,
 		) {
 			super(
 				`Relink child node ${childNodeId} with value ${childValue} from successor to parent node ${newParentNodeId} with value ${newParentValue}`,
@@ -232,11 +233,12 @@ export namespace BSTreeSteps {
 		childValue: number,
 		newParentNodeId: number,
 		newParentValue: number,
+		successorNodeId: number,
 	): StepData {
 		return new StepData(
 			0,
 			StepType.RelinkSuccessorChild,
-			new RelinkSuccessorChildData(childNodeId, childValue, newParentNodeId, newParentValue),
+			new RelinkSuccessorChildData(childNodeId, childValue, newParentNodeId, newParentValue, successorNodeId),
 		);
 	}
 

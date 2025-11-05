@@ -188,7 +188,42 @@
 		});
 	}
 
-	function animateLegsGrowth(nodeId: string | number, durationMs: number = movementDurationMs) {
+	function animateNodeShrink(
+		nodeId: string | number,
+		initialSize: number = options.nodes.font.size,
+		durationMs: number = movementDurationMs,
+	) {
+		return new Promise<void>(resolve => {
+			if (!nodes.get(nodeId)) {
+				resolve();
+				console.warn(`animateNodeShrink: Node ${nodeId} does not exist.`);
+				return;
+			}
+
+			const initialScale = 1.0;
+			const targetScale = 0.1;
+
+			const cancel = addAnimation((dt, elapsed) => {
+				const t = Math.min(1, elapsed / durationMs);
+				const scale = lerp(initialScale, targetScale, t);
+
+				nodes.update({
+					id: nodeId,
+					font: { size: initialSize * scale },
+					opacity: Math.min(1, scale + 0.1),
+				});
+
+				if (t >= 1) {
+					cancel();
+					resolve();
+					return false;
+				}
+				return true;
+			});
+		});
+	}
+
+	async function animateLegsGrowth(nodeId: string | number, durationMs: number = movementDurationMs) {
 		let leftDummyId = getDummyNodeId(Number(nodeId), 'left');
 		let rightDummyId = getDummyNodeId(Number(nodeId), 'right');
 
@@ -203,18 +238,41 @@
 		animateNodeMovement(rightDummyId, initialPos, rightFinalPos, durationMs);
 	}
 
+	async function animateLegsShrink(nodeId: string | number, durationMs: number = movementDurationMs) {
+		let leftDummyId = getDummyNodeId(Number(nodeId), 'left');
+		let rightDummyId = getDummyNodeId(Number(nodeId), 'right');
+
+		let finalPos = network.getPosition(nodeId);
+
+		if (nodes.get(leftDummyId) != null) {
+			let initialPosLeft = network.getPosition(leftDummyId);
+			animateNodeMovement(leftDummyId, initialPosLeft, finalPos, durationMs);
+		}
+
+		if (nodes.get(rightDummyId) != null) {
+			let initialPosRight = network.getPosition(rightDummyId);
+			animateNodeMovement(rightDummyId, initialPosRight, finalPos, durationMs);
+		}
+	}
+
 	function animateAddingNode(nodeId: number) {
 		animateNodeGrowth(nodeId);
 		animateLegsGrowth(nodeId);
 	}
 
-	function animateAnnotateNode(annotation: string, nodeId?: number) {
+	function animateRemovingNode(nodeId: number) {
+		animateLegsShrink(nodeId);
+		animateNodeShrink(nodeId);
+	}
+
+	function animateAnnotateNode(annotation: string, nodeId?: string | number) {
 		console.log('Animating annotate node:', annotation, 'above node:', nodeId);
 		nodes.update({
 			id: infoNodeId,
 			label: annotation,
 			hidden: false,
 			color: infoNodeColor,
+			font: { color: 'black', size: infoNodeSize },
 		});
 
 		if (nodeId === undefined) {
@@ -249,6 +307,9 @@
 			id: infoNodeId,
 			hidden: true,
 		});
+
+		let snapshot = operationManager.getCurrentOperation().endSnapshot as BSTree;
+		updateGraph(snapshot);
 	}
 
 	function handleCreateRootStep(data: BSTreeSteps.CreateRootData) {
@@ -305,17 +366,89 @@
 		}
 	}
 
+	function handleDropStep(data: BSTreeSteps.DropData) {
+		console.log('Animating drop value step:', data);
+
+		animateAnnotateNode(`Drop value ${data.value}`, data.fromId);
+
+		// move info node downwards to indicate dropping
+		let positionFrom = getPositionAbove(data.fromId);
+		let positionTo = { x: positionFrom.x, y: positionFrom.y + 400 };
+
+		animateNodeMovement(infoNodeId, positionFrom, positionTo);
+	}
+
+	function handleFoundStep(data: BSTreeSteps.FoundData) {
+		console.log('Animating found step:', data);
+
+		animateAnnotateNode(`Found node with value ${data.value}`, data.nodeId);
+
+		// highlight found node
+		nodes.update([{ id: data.nodeId, color: { background: '#7CFC00' } }]);
+	}
+
+	function handleMarkToDeleteStep(data: BSTreeSteps.MarkToDeleteData) {
+		console.log('Animating mark to delete step:', data);
+
+		animateAnnotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
+
+		// highlight marked node
+		nodes.update([{ id: data.nodeId, color: { background: '#FF4500' } }]);
+	}
+
+	async function handleDeleteStep(data: BSTreeSteps.DeleteData) {
+		console.log('Animating delete step:', data);
+
+		animateAnnotateNode(`Delete node with value ${data.value}`, data.nodeId);
+
+		// remove node from graph
+		await animateRemovingNode(data.nodeId);
+		// nodes.remove(data.nodeId);
+	}
+
+	async function handleReplaceWithChildStep(data: BSTreeSteps.ReplaceWithChildData) {
+		console.log('Animating replace with child step:', data);
+
+		animateAnnotateNode(`Replace node with its ${data.direction} child`, data.oldNodeId);
+
+		// remove node from graph
+		animateNodeMovement(data.newNodeId, network.getPosition(data.newNodeId), network.getPosition(data.oldNodeId));
+		animateRemovingNode(data.oldNodeId);
+	}
+
+	async function handleRelinkSuccessorChildStep(data: BSTreeSteps.RelinkSuccessorChildData) {
+		console.log('Animating relink successor child step:', data);
+
+		animateAnnotateNode(`Relink inorder successor's child`, data.childNodeId);
+
+		// unlink child from successor and link to parent
+		edges.remove(`edge-${data.successorNodeId}-${data.childValue < data.newParentValue ? 'left' : 'right'}`);
+		edges.add({
+			id: `edge-${data.newParentNodeId}-${data.childValue < data.newParentValue ? 'left' : 'right'}`,
+			from: data.newParentNodeId,
+			to: data.childNodeId,
+		});
+	}
+
+	async function handleReplaceWithInorderSuccessorStep(data: BSTreeSteps.ReplaceWithInorderSuccessorData) {
+		console.log('Animating replace with inorder successor step:', data);
+
+		animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
+
+		// move successor to old node position
+		await animateLegsShrink(data.successorNodeId);
+		// remove successor legs first
+		edges.remove(`edge-${data.successorNodeId}-left`);
+		edges.remove(`edge-${data.successorNodeId}-right`);
+		await animateNodeMovement(data.successorNodeId, network.getPosition(data.successorNodeId), network.getPosition(data.oldNodeId));
+
+		// remove node from graph
+		animateRemovingNode(data.oldNodeId);
+	}
+
 	function handleStepAnimation(step: CurrentStepChangedEvent) {
 		console.log('Handling step animation:', step);
 		clearDisconnectedDummyNodes();
-
-		// removeNodeIfExists(infoNodeId);
-		// let infoNode = createInfoNode();
-
-		// if (step.previousStep && step.previousStep.type === BSTreeSteps.StepType.End) {
-		// 	let snapshot = operationManager.getCurrentOperation().startSnapshot as BSTree;
-		// 	// setNetwork(snapshot);
-		// }
 
 		switch (step.currentStep.type as BSTreeSteps.StepType) {
 			case BSTreeSteps.StepType.Start: {
@@ -346,85 +479,49 @@
 				handleTraverseStep(data, step.direction);
 				break;
 			}
+			case BSTreeSteps.StepType.Drop: {
+				let data = step.currentStep.data as BSTreeSteps.DropData;
+				handleDropStep(data);
+				break;
+			}
+			case BSTreeSteps.StepType.Found: {
+				let data = step.currentStep.data as BSTreeSteps.FoundData;
+				handleFoundStep(data);
+				break;
+			}
+			case BSTreeSteps.StepType.MarkToDelete: {
+				let data = step.currentStep.data as BSTreeSteps.MarkToDeleteData;
+				handleMarkToDeleteStep(data);
+				break;
+			}
+			case BSTreeSteps.StepType.Delete: {
+				let data = step.currentStep.data as BSTreeSteps.DeleteData;
+				handleDeleteStep(data);
+				break;
+			}
+			case BSTreeSteps.StepType.ReplaceWithChild: {
+				let data = step.currentStep.data as BSTreeSteps.ReplaceWithChildData;
+				handleReplaceWithChildStep(data);
+				break;
+			}
+			case BSTreeSteps.StepType.FoundInorderSuccessor: {
+				let data = step.currentStep.data as BSTreeSteps.FoundInorderSuccessorData;
+				handleFoundStep(new BSTreeSteps.FoundData(data.successorId, data.successorValue));
+				break;
+			}
+			case BSTreeSteps.StepType.RelinkSuccessorChild: {
+				let data = step.currentStep.data as BSTreeSteps.RelinkSuccessorChildData;
+				handleRelinkSuccessorChildStep(data);
+				break;
+			}
+			case BSTreeSteps.StepType.ReplaceWithInorderSuccessor: {
+				let data = step.currentStep.data as BSTreeSteps.ReplaceWithInorderSuccessorData;
+				handleReplaceWithInorderSuccessorStep(data);
+				break;
+			}
 		}
 
 		network.fit();
-		// 	// case BSTreeSteps.StepType.End: {
-		// 	// 	// set tree as end snapshot
-		// 	// 	let snapshot: BSTree;
-		// 	// 	console.log('Setting end snapshot');
-		// 	// 	snapshot = operationManager.getCurrentOperation().endSnapshot as BSTree;
-		// 	// 	setNetwork(snapshot);
-		// 	// 	break;
-		// 	// }
-		// 	// case BSTreeSteps.StepType.Compare: {
-		// 	// 	// put comparison info node above comparison node
-		// 	// 	let data = step.currentStep.data as BSTreeSteps.CompareData;
-		// 	// 	infoNode.label = `Compare\n${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`;
-		// 	// 	addNodeIfNotExists(infoNode);
-
-		// 	// 	moveInfoNodeAbove(data.comparisonId);
-		// 	// 	break;
-		// 	// }
-		// 	// case BSTreeSteps.StepType.Traverse: {
-		// 	// 	let data = step.currentStep.data as BSTreeSteps.TraverseData;
-		// 	// 	infoNode.label = `Traverse to ${data.direction} child`;
-		// 	// 	addNodeIfNotExists(infoNode);
-
-		// 	// 	if (step.direction == ChangeDirection.Forward) {
-		// 	// 		// animate movement from current position to target
-		// 	// 		let positionFrom = getPositionAbove(data.fromId);
-		// 	// 		let positionTo;
-		// 	// 		if (data.toId == -1) {
-		// 	// 			positionTo = getPositionAbove(getDummyNodeId(data.fromId, data.direction));
-		// 	// 		} else {
-		// 	// 			positionTo = getPositionAbove(data.toId);
-		// 	// 		}
-
-		// 	// 		await animateInfoNodeMovement(positionFrom, positionTo);
-		// 	// 	} else {
-		// 	// 		// just snap back to fromId
-		// 	// 		if (data.toId == -1) {
-		// 	// 			moveInfoNodeAbove(getDummyNodeId(data.fromId, data.direction));
-		// 	// 		} else {
-		// 	// 			moveInfoNodeAbove(data.toId);
-		// 	// 		}
-		// 	// 	}
-		// 	// 	break;
-		// 	// }
-		// 	// case BSTreeSteps.StepType.CreateRoot: {
-		// 	// 	let data = step.currentStep.data as BSTreeSteps.CreateRootData;
-		// 	// 	infoNode.label = `Create root node\nwith value ${data.value}`;
-		// 	// 	addNodeIfNotExists(infoNode);
-
-		// 	// 	network.moveNode(infoNodeId, 0, -20);
-		// 	// 	break;
-		// 	// }
-		// 	// case BSTreeSteps.StepType.CreateLeaf: {
-		// 	// 	let data = step.currentStep.data as BSTreeSteps.CreateLeafData;
-		// 	// 	infoNode.label = `Create leaf\nas ${data.direction} child`;
-		// 	// 	addNodeIfNotExists(infoNode);
-
-		// 	// 	if (step.direction == ChangeDirection.Forward) {
-		// 	// 		// animate movement from current position to target
-		// 	// 		let positionFrom = getPositionAbove(data.parentId);
-		// 	// 		let positionTo = getPositionAbove(getDummyNodeId(data.parentId, data.direction), 0);
-
-		// 	// 		await animateInfoNodeMovement(positionFrom, positionTo);
-		// 	// 	} else {
-		// 	// 		// just snap back to parent
-		// 	// 		moveInfoNodeAbove(getDummyNodeId(data.parentId, data.direction), 0);
-		// 	// 	}
-		// 	// 	break;
-		// 	// }
-		// 	case BSTreeSteps.StepType.Found: {
-		// 		let data = step.currentStep.data as BSTreeSteps.FoundData;
-		// 		// infoNode.label = `Found node\nwith value ${data.value}`;
-		// 		console.log('Found node with value', data.value);
-		// 		nodes.update([{ id: data.nodeId, color: { background: '#7CFC00' } }]);
-		// 		break;
-		// 	}
-		// }
 	}
 
 	function clearDisconnectedDummyNodes() {
@@ -449,12 +546,14 @@
 		});
 
 		if (parentId !== undefined && direction !== undefined) {
+			let edgeId = `edge-${parentId}-${direction}`;
+			nodes.remove(getDummyNodeId(parentId, direction));
+			edges.remove(edgeId);
 			edges.add({
-				id: `edge-${parentId}-${direction}`,
+				id: edgeId,
 				from: parentId,
 				to: nodeId,
 			});
-			nodes.remove(getDummyNodeId(parentId, direction));
 
 			if (direction === 'left') {
 				// switch this node position and the right dummy node position
@@ -515,6 +614,10 @@
 				edges.add(e);
 			}
 		}
+
+		// clear disconnected dummy nodes
+		clearDisconnectedDummyNodes();
+		network.fit();
 	}
 </script>
 

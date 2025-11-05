@@ -11,7 +11,11 @@ export function bsTreetoGraph(
 	if (!root) return { nodes, edges };
 
 	const nodeId = root.id;
-	nodes.add({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
+	if (!nodes.get(nodeId)) {
+		nodes.add({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
+	} else {
+		nodes.update({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
+	}
 
 	if (parent !== null) {
 		edges.add({ from: parent, to: nodeId });

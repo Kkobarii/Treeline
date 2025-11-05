@@ -137,7 +137,7 @@ export class BSTree extends DataStructure {
 				}
 				data.step(BSTreeSteps.FoundInorderSuccessor(node.id, inorderSuccessor.id, inorderSuccessor.value));
 
-				if (parent !== node) {
+				if (parent !== node && inorderSuccessor.right) {
 					parent.left = inorderSuccessor.right;
 					data.step(
 						BSTreeSteps.RelinkSuccessorChild(
@@ -145,6 +145,7 @@ export class BSTree extends DataStructure {
 							inorderSuccessor.right!.value,
 							parent.id,
 							parent.value,
+							inorderSuccessor.id,
 						),
 					);
 				}
