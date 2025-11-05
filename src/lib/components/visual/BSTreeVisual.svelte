@@ -50,6 +50,9 @@
 	const infoNodeSize = 15;
 	const infoNodeColor = '#aaaaaa';
 
+	import { NetworkAnimator } from '$lib/visual/networkAnimator';
+	let net: NetworkAnimator | null = null;
+
 	onMount(() => {
 		({ nodes, edges } = bsTreetoGraph(null));
 		nodes.add({
@@ -61,6 +64,16 @@
 			hidden: true,
 		});
 		network = new Network(container, { nodes, edges }, options);
+
+		net = new NetworkAnimator({
+			network,
+			nodes,
+			edges,
+			infoNodeId,
+			infoNodeAboveOffset,
+			movementDurationMs,
+			infoNodeSize,
+		});
 
 		network.on('selectNode', params => {
 			if (params.nodes.length == 1) {
@@ -112,175 +125,14 @@
 		});
 	});
 
-	function snapNodeTo(nodeId: string | number, x: number, y: number) {
-		network.moveNode(nodeId, x, y);
-	}
-
-	function snapNodeAbove(nodeId: string | number, aboveId: string | number, howMuch = infoNodeAboveOffset) {
-		const position = network.getPosition(aboveId);
-		snapNodeTo(nodeId, position.x, position.y - howMuch);
-	}
-
-	function getPositionAbove(aboveId: string | number, howMuch = infoNodeAboveOffset): Position {
-		const position = network.getPosition(aboveId);
-		return { x: position.x, y: position.y - howMuch };
-	}
-
-	export function animateNodeMovement(nodeId: string | number, from: Position, to: Position, durationMs: number = movementDurationMs) {
-		return new Promise<void>(resolve => {
-			// Ensure node exists
-			if (!nodes.get(nodeId)) {
-				resolve();
-				console.warn(`animateNodeMovement: Node ${nodeId} does not exist.`);
-				return;
-			}
-
-			// start at from position
-			network.moveNode(nodeId, from.x, from.y);
-
-			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / durationMs);
-				const x = lerp(from.x, to.x, t);
-				const y = lerp(from.y, to.y, t);
-
-				network.moveNode(nodeId, x, y);
-
-				if (t >= 1) {
-					cancel();
-					resolve();
-					return false;
-				}
-				return true;
-			});
-		});
-	}
-
-	function animateNodeGrowth(
-		nodeId: string | number,
-		targetSize: number = options.nodes.font.size,
-		durationMs: number = movementDurationMs,
-	) {
-		return new Promise<void>(resolve => {
-			if (!nodes.get(nodeId)) {
-				resolve();
-				console.warn(`animateNodeGrowth: Node ${nodeId} does not exist.`);
-				return;
-			}
-
-			const initialScale = 0.1;
-			const targetScale = 1.0;
-
-			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / durationMs);
-				const scale = lerp(initialScale, targetScale, t);
-
-				nodes.update({
-					id: nodeId,
-					font: { size: targetSize * scale },
-				});
-
-				if (t >= 1) {
-					cancel();
-					resolve();
-					return false;
-				}
-				return true;
-			});
-		});
-	}
-
-	function animateNodeShrink(
-		nodeId: string | number,
-		initialSize: number = options.nodes.font.size,
-		durationMs: number = movementDurationMs,
-	) {
-		return new Promise<void>(resolve => {
-			if (!nodes.get(nodeId)) {
-				resolve();
-				console.warn(`animateNodeShrink: Node ${nodeId} does not exist.`);
-				return;
-			}
-
-			const initialScale = 1.0;
-			const targetScale = 0.1;
-
-			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / durationMs);
-				const scale = lerp(initialScale, targetScale, t);
-
-				nodes.update({
-					id: nodeId,
-					font: { size: initialSize * scale },
-					opacity: Math.min(1, scale + 0.1),
-				});
-
-				if (t >= 1) {
-					cancel();
-					resolve();
-					return false;
-				}
-				return true;
-			});
-		});
-	}
-
-	async function animateLegsGrowth(nodeId: string | number, durationMs: number = movementDurationMs) {
-		let leftDummyId = getDummyNodeId(Number(nodeId), 'left');
-		let rightDummyId = getDummyNodeId(Number(nodeId), 'right');
-
-		let initialPos = network.getPosition(nodeId);
-		let leftFinalPos = network.getPosition(leftDummyId);
-		let rightFinalPos = network.getPosition(rightDummyId);
-
-		snapNodeTo(leftDummyId, initialPos.x - infoNodeAboveOffset, initialPos.y);
-		snapNodeTo(rightDummyId, initialPos.x + infoNodeAboveOffset, initialPos.y);
-
-		animateNodeMovement(leftDummyId, initialPos, leftFinalPos, durationMs);
-		animateNodeMovement(rightDummyId, initialPos, rightFinalPos, durationMs);
-	}
-
-	async function animateLegsShrink(nodeId: string | number, durationMs: number = movementDurationMs) {
-		let leftDummyId = getDummyNodeId(Number(nodeId), 'left');
-		let rightDummyId = getDummyNodeId(Number(nodeId), 'right');
-
-		let finalPos = network.getPosition(nodeId);
-
-		if (nodes.get(leftDummyId) != null) {
-			let initialPosLeft = network.getPosition(leftDummyId);
-			animateNodeMovement(leftDummyId, initialPosLeft, finalPos, durationMs);
-		}
-
-		if (nodes.get(rightDummyId) != null) {
-			let initialPosRight = network.getPosition(rightDummyId);
-			animateNodeMovement(rightDummyId, initialPosRight, finalPos, durationMs);
-		}
-	}
-
 	function animateAddingNode(nodeId: number) {
-		animateNodeGrowth(nodeId);
-		animateLegsGrowth(nodeId);
+		net!.animateNodeGrowth(nodeId);
+		net!.animateLegsGrowth(nodeId);
 	}
 
 	function animateRemovingNode(nodeId: number) {
-		animateLegsShrink(nodeId);
-		animateNodeShrink(nodeId);
-	}
-
-	function animateAnnotateNode(annotation: string, nodeId?: string | number) {
-		console.log('Animating annotate node:', annotation, 'above node:', nodeId);
-		nodes.update({
-			id: infoNodeId,
-			label: annotation,
-			hidden: false,
-			color: infoNodeColor,
-			font: { color: 'black', size: infoNodeSize },
-		});
-
-		if (nodeId === undefined) {
-			snapNodeTo(infoNodeId, 0, 0);
-		} else {
-			snapNodeAbove(infoNodeId, nodeId, infoNodeAboveOffset);
-		}
+		net!.animateLegsShrink(nodeId);
+		net!.animateNodeShrink(nodeId);
 	}
 
 	function handleOperationAnimation(operation: CurrentOperationChangedEvent) {
@@ -294,10 +146,11 @@
 
 		let snapshot = operationManager.getCurrentOperation().startSnapshot as BSTree;
 		ensureTree(snapshot);
+		removeColoring();
 
 		// put operation name into info node, position above root and grow it
-		animateAnnotateNode(`${operationManager.getCurrentOperation().operation.toString()}`, snapshot.root?.id);
-		animateNodeGrowth(infoNodeId, infoNodeSize);
+		net!.animateAnnotateNode(`${operationManager.getCurrentOperation().operation.toString()}`, snapshot.root?.id);
+		net!.animateNodeGrowth(infoNodeId, infoNodeSize);
 	}
 
 	function handleEndStep() {
@@ -320,7 +173,7 @@
 		animateAddingNode(data.nodeId);
 
 		// say what we're doing in info node
-		animateAnnotateNode(`Create root node with value ${data.value}`, data.nodeId);
+		net!.animateAnnotateNode(`Create root node with value ${data.value}`, data.nodeId);
 	}
 
 	function handleCreateLeafStep(data: Step.BSTree.CreateLeafData) {
@@ -330,39 +183,39 @@
 		animateAddingNode(data.nodeId);
 
 		// say what we're doing in info node
-		animateAnnotateNode(`Create ${data.direction} child with value ${data.value}`, data.nodeId);
-		animateNodeMovement(infoNodeId, getPositionAbove(data.parentId), getPositionAbove(data.nodeId));
+		net!.animateAnnotateNode(`Create ${data.direction} child with value ${data.value}`, data.nodeId);
+		net!.animateNodeMovement(infoNodeId, net!.getPositionAbove(data.parentId), net!.getPositionAbove(data.nodeId));
 	}
 
 	function handleCompareStep(data: Step.BSTree.CompareData, direction: ChangeDirection) {
 		console.log('Animating compare step:', data, direction);
 
 		let relationSymbol = relationTextToSymbol(data.result);
-		animateAnnotateNode(`Compare ${data.value} ${relationSymbol} ${data.comparisonValue}`, data.comparisonId);
+		net!.animateAnnotateNode(`Compare ${data.value} ${relationSymbol} ${data.comparisonValue}`, data.comparisonId);
 	}
 
 	function handleTraverseStep(data: Step.BSTree.TraverseData, direction: ChangeDirection) {
 		console.log('Animating traverse step:', data, direction);
 
-		animateAnnotateNode(`Traverse to ${data.direction} child`, data.fromId);
+		net!.animateAnnotateNode(`Traverse to ${data.direction} child`, data.fromId);
 
-		let positionFrom = getPositionAbove(data.fromId);
+		let positionFrom = net!.getPositionAbove(data.fromId);
 		let positionTo;
 		if (data.toId == -1) {
-			positionTo = getPositionAbove(getDummyNodeId(data.fromId, data.direction));
+			positionTo = net!.getPositionAbove(getDummyNodeId(data.fromId, data.direction));
 		} else {
-			positionTo = getPositionAbove(data.toId);
+			positionTo = net!.getPositionAbove(data.toId);
 		}
 
 		if (direction == ChangeDirection.Forward) {
 			// animate movement from current position to target
-			animateNodeMovement(infoNodeId, positionFrom, positionTo);
+			net!.animateNodeMovement(infoNodeId, positionFrom, positionTo);
 		} else {
 			// just snap back to fromId
 			if (data.toId == -1) {
-				snapNodeAbove(infoNodeId, getDummyNodeId(data.fromId, data.direction));
+				net!.snapNodeAbove(infoNodeId, getDummyNodeId(data.fromId, data.direction));
 			} else {
-				snapNodeAbove(infoNodeId, data.toId);
+				net!.snapNodeAbove(infoNodeId, data.toId);
 			}
 		}
 	}
@@ -370,19 +223,19 @@
 	function handleDropStep(data: Step.BSTree.DropData) {
 		console.log('Animating drop value step:', data);
 
-		animateAnnotateNode(`Drop value ${data.value}`, data.fromId);
+		net!.animateAnnotateNode(`Drop value ${data.value}`, data.fromId);
 
 		// move info node downwards to indicate dropping
-		let positionFrom = getPositionAbove(data.fromId);
+		let positionFrom = net!.getPositionAbove(data.fromId);
 		let positionTo = { x: positionFrom.x, y: positionFrom.y + 400 };
 
-		animateNodeMovement(infoNodeId, positionFrom, positionTo);
+		net!.animateNodeMovement(infoNodeId, positionFrom, positionTo);
 	}
 
 	function handleFoundStep(data: Step.BSTree.FoundData) {
 		console.log('Animating found step:', data);
 
-		animateAnnotateNode(`Found node with value ${data.value}`, data.nodeId);
+		net!.animateAnnotateNode(`Found node with value ${data.value}`, data.nodeId);
 
 		// highlight found node
 		nodes.update([{ id: data.nodeId, color: { background: '#7CFC00' } }]);
@@ -391,7 +244,7 @@
 	function handleMarkToDeleteStep(data: Step.BSTree.MarkToDeleteData) {
 		console.log('Animating mark to delete step:', data);
 
-		animateAnnotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
+		net!.animateAnnotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
 
 		// highlight marked node
 		nodes.update([{ id: data.nodeId, color: { background: '#FF4500' } }]);
@@ -400,7 +253,7 @@
 	async function handleDeleteStep(data: Step.BSTree.DeleteData) {
 		console.log('Animating delete step:', data);
 
-		animateAnnotateNode(`Delete node with value ${data.value}`, data.nodeId);
+		net!.animateAnnotateNode(`Delete node with value ${data.value}`, data.nodeId);
 
 		// remove node from graph
 		await animateRemovingNode(data.nodeId);
@@ -410,17 +263,17 @@
 	async function handleReplaceWithChildStep(data: Step.BSTree.ReplaceWithChildData) {
 		console.log('Animating replace with child step:', data);
 
-		animateAnnotateNode(`Replace node with its ${data.direction} child`, data.oldNodeId);
+		net!.animateAnnotateNode(`Replace node with its ${data.direction} child`, data.oldNodeId);
 
 		// remove node from graph
-		animateNodeMovement(data.newNodeId, network.getPosition(data.newNodeId), network.getPosition(data.oldNodeId));
+		net!.animateNodeMovement(data.newNodeId, network.getPosition(data.newNodeId), network.getPosition(data.oldNodeId));
 		animateRemovingNode(data.oldNodeId);
 	}
 
 	async function handleRelinkSuccessorChildStep(data: Step.BSTree.RelinkSuccessorChildData) {
 		console.log('Animating relink successor child step:', data);
 
-		animateAnnotateNode(`Relink inorder successor's child`, data.childNodeId);
+		net!.animateAnnotateNode(`Relink inorder successor's child`, data.childNodeId);
 
 		// unlink child from successor and link to parent
 		edges.remove(`edge-${data.successorNodeId}-${data.childValue < data.newParentValue ? 'left' : 'right'}`);
@@ -434,14 +287,18 @@
 	async function handleReplaceWithInorderSuccessorStep(data: Step.BSTree.ReplaceWithInorderSuccessorData) {
 		console.log('Animating replace with inorder successor step:', data);
 
-		animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
+		net!.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 
 		// move successor to old node position
-		await animateLegsShrink(data.successorNodeId);
+		await net!.animateLegsShrink(data.successorNodeId);
 		// remove successor legs first
 		edges.remove(`edge-${data.successorNodeId}-left`);
 		edges.remove(`edge-${data.successorNodeId}-right`);
-		await animateNodeMovement(data.successorNodeId, network.getPosition(data.successorNodeId), network.getPosition(data.oldNodeId));
+		await net!.animateNodeMovement(
+			data.successorNodeId,
+			network.getPosition(data.successorNodeId),
+			network.getPosition(data.oldNodeId),
+		);
 
 		// remove node from graph
 		animateRemovingNode(data.oldNodeId);
@@ -451,7 +308,19 @@
 		console.log('Handling step animation:', step);
 		clearDisconnectedDummyNodes();
 
-		switch (step.currentStep.type as StepTypeValue) {
+		let currentStep = step.direction === 'forward' ? step.currentStep : step.previousStep;
+
+		if (!currentStep) {
+			return;
+		}
+
+		if (step.direction === 'forward' && currentStep.startSnapshot) {
+			ensureTree(currentStep.startSnapshot as BSTree);
+		} else if (step.direction === 'backward' && currentStep.endSnapshot) {
+			ensureTree(currentStep.endSnapshot as BSTree);
+		}
+
+		switch (currentStep.type as StepTypeValue) {
 			case StepType.BSTree.Start: {
 				handleStartStep();
 				break;
@@ -461,62 +330,62 @@
 				break;
 			}
 			case StepType.BSTree.CreateRoot: {
-				let data = step.currentStep.data as Step.BSTree.CreateRootData;
+				let data = currentStep.data as Step.BSTree.CreateRootData;
 				handleCreateRootStep(data);
 				break;
 			}
 			case StepType.BSTree.CreateLeaf: {
-				let data = step.currentStep.data as Step.BSTree.CreateLeafData;
+				let data = currentStep.data as Step.BSTree.CreateLeafData;
 				handleCreateLeafStep(data);
 				break;
 			}
 			case StepType.BSTree.Compare: {
-				let data = step.currentStep.data as Step.BSTree.CompareData;
+				let data = currentStep.data as Step.BSTree.CompareData;
 				handleCompareStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.Traverse: {
-				let data = step.currentStep.data as Step.BSTree.TraverseData;
+				let data = currentStep.data as Step.BSTree.TraverseData;
 				handleTraverseStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.Drop: {
-				let data = step.currentStep.data as Step.BSTree.DropData;
+				let data = currentStep.data as Step.BSTree.DropData;
 				handleDropStep(data);
 				break;
 			}
 			case StepType.BSTree.Found: {
-				let data = step.currentStep.data as Step.BSTree.FoundData;
+				let data = currentStep.data as Step.BSTree.FoundData;
 				handleFoundStep(data);
 				break;
 			}
 			case StepType.BSTree.MarkToDelete: {
-				let data = step.currentStep.data as Step.BSTree.MarkToDeleteData;
+				let data = currentStep.data as Step.BSTree.MarkToDeleteData;
 				handleMarkToDeleteStep(data);
 				break;
 			}
 			case StepType.BSTree.Delete: {
-				let data = step.currentStep.data as Step.BSTree.DeleteData;
+				let data = currentStep.data as Step.BSTree.DeleteData;
 				handleDeleteStep(data);
 				break;
 			}
 			case StepType.BSTree.ReplaceWithChild: {
-				let data = step.currentStep.data as Step.BSTree.ReplaceWithChildData;
+				let data = currentStep.data as Step.BSTree.ReplaceWithChildData;
 				handleReplaceWithChildStep(data);
 				break;
 			}
 			case StepType.BSTree.FoundInorderSuccessor: {
-				let data = step.currentStep.data as Step.BSTree.FoundInorderSuccessorData;
+				let data = currentStep.data as Step.BSTree.FoundInorderSuccessorData;
 				handleFoundStep(new Step.BSTree.FoundData(data.successorId, data.successorValue));
 				break;
 			}
 			case StepType.BSTree.RelinkSuccessorChild: {
-				let data = step.currentStep.data as Step.BSTree.RelinkSuccessorChildData;
+				let data = currentStep.data as Step.BSTree.RelinkSuccessorChildData;
 				handleRelinkSuccessorChildStep(data);
 				break;
 			}
 			case StepType.BSTree.ReplaceWithInorderSuccessor: {
-				let data = step.currentStep.data as Step.BSTree.ReplaceWithInorderSuccessorData;
+				let data = currentStep.data as Step.BSTree.ReplaceWithInorderSuccessorData;
 				handleReplaceWithInorderSuccessorStep(data);
 				break;
 			}
@@ -605,7 +474,7 @@
 				continue;
 			} else {
 				nodes.add(n);
-				animateNodeGrowth(n.id!);
+				net!.animateNodeGrowth(n.id!);
 			}
 		}
 
@@ -627,6 +496,15 @@
 		// clear disconnected dummy nodes
 		clearDisconnectedDummyNodes();
 		network.fit();
+	}
+
+	function removeColoring() {
+		let updatedNodes: Node[] = [];
+		for (let node of nodes.get()) {
+			if (node.id === infoNodeId || node.id.toString().startsWith('dummy-')) continue;
+			updatedNodes.push({ id: node.id!, color: options.nodes.color });
+		}
+		nodes.update(updatedNodes);
 	}
 </script>
 
