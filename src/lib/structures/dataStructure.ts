@@ -20,6 +20,27 @@ export const OperationType = {
 export type OperationTypeValue = (typeof OperationType.BSTree)[keyof typeof OperationType.BSTree];
 // | (typeof OperationType.Stack)[keyof typeof OperationType.Stack];
 
+export const StepType = {
+	BSTree: {
+		Start: 'Start',
+		End: 'End',
+		CreateRoot: 'CreateRoot',
+		CreateLeaf: 'CreateLeaf',
+		Compare: 'Compare',
+		Traverse: 'Traverse',
+		Drop: 'Drop',
+		Found: 'Found',
+		MarkToDelete: 'MarkToDelete',
+		Delete: 'Delete',
+		ReplaceWithChild: 'ReplaceWithChild',
+		FoundInorderSuccessor: 'FoundInorderSuccessor',
+		RelinkSuccessorChild: 'RelinkSuccessorChild',
+		ReplaceWithInorderSuccessor: 'ReplaceWithInorderSuccessor',
+	},
+};
+
+export type StepTypeValue = (typeof StepType.BSTree)[keyof typeof StepType.BSTree];
+
 export class DataNode {
 	id: number;
 
