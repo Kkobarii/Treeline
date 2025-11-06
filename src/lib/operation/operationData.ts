@@ -10,7 +10,7 @@ export class OperationData {
 	constructor(operation: string, startSnapshot: DataStructure) {
 		this.operation = operation;
 		this.startSnapshot = startSnapshot;
-		this.steps = [new StepData(0, 'Start', { action: 'Start' })];
+		this.steps = [new StepData(0, 'Start', { action: 'Start' }, startSnapshot, startSnapshot)];
 		this.endSnapshot = null;
 	}
 
@@ -20,7 +20,7 @@ export class OperationData {
 	}
 
 	end(endSnapshot: DataStructure) {
-		this.step(new StepData(this.steps.length, 'End', { action: 'End' }));
+		this.step(new StepData(this.steps.length, 'End', { action: 'End' }, endSnapshot, endSnapshot));
 		this.endSnapshot = endSnapshot;
 	}
 }

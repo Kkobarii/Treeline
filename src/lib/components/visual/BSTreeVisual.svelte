@@ -86,7 +86,7 @@
 
 		operationManager.addEventListener(EventType.CurrentOperationChanged, (e: Event) => {
 			const event = e as CustomEvent<CurrentOperationChangedEvent>;
-			console.log('CurrentOperationChanged event received:', event.detail.currentOperation);
+			console.debug('CurrentOperationChanged event received:', event.detail);
 
 			if (!operationManager.getShowSteps()) {
 				handleOperationAnimation(event.detail);
@@ -95,7 +95,7 @@
 
 		operationManager.addEventListener(EventType.CurrentStepChanged, (e: Event) => {
 			const event = e as CustomEvent<CurrentStepChangedEvent>;
-			console.log('CurrentStepChanged event received:', event.detail.currentStep);
+			console.debug('CurrentStepChanged event received:', event.detail);
 
 			if (operationManager.getShowSteps()) {
 				handleStepAnimation(event.detail);
@@ -103,7 +103,7 @@
 		});
 
 		operationManager.addEventListener(EventType.ShowStepsToggled, () => {
-			console.log('ShowStepsToggled event received');
+			console.debug('ShowStepsToggled event received');
 
 			// Clear any ongoing animations
 			clearAnimations();
@@ -125,14 +125,12 @@
 		});
 	});
 
-	function animateAddingNode(nodeId: number) {
-		net!.animateNodeGrowth(nodeId);
-		net!.animateLegsGrowth(nodeId);
+	async function animateAddingNode(nodeId: number): Promise<void> {
+		await Promise.all([net!.animateNodeGrowth(nodeId), net!.animateLegsGrowth(nodeId)]);
 	}
 
-	function animateRemovingNode(nodeId: number) {
-		net!.animateLegsShrink(nodeId);
-		net!.animateNodeShrink(nodeId);
+	async function animateRemovingNode(nodeId: number): Promise<void> {
+		await Promise.all([net!.animateLegsShrink(nodeId), net!.animateNodeShrink(nodeId)]);
 	}
 
 	function handleOperationAnimation(operation: CurrentOperationChangedEvent) {
@@ -141,16 +139,24 @@
 		ensureTree(operation.currentOperation.endSnapshot as BSTree);
 	}
 
-	function handleStartStep() {
-		console.log('Animating start step');
+	async function handleStartStep(direction: ChangeDirection) {
+		console.log('Animating start step', direction);
 
-		let snapshot = operationManager.getCurrentOperation().startSnapshot as BSTree;
-		ensureTree(snapshot);
-		removeColoring();
+		let info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
 
 		// put operation name into info node, position above root and grow it
-		net!.animateAnnotateNode(`${operationManager.getCurrentOperation().operation.toString()}`, snapshot.root?.id);
-		net!.animateNodeGrowth(infoNodeId, infoNodeSize);
+		if (direction === ChangeDirection.Backward) {
+			// hide info node
+			nodes.update({
+				id: infoNodeId,
+				hidden: true,
+			});
+		} else {
+			let snapshot = operationManager.getCurrentOperation().startSnapshot as BSTree;
+			ensureTree(snapshot);
+			await Promise.all([net!.changeInfoNodeAnnotation(info), net!.animateNodeGrowth(infoNodeId, infoNodeSize)]);
+		}
+		removeColoring();
 	}
 
 	function handleEndStep() {
@@ -166,38 +172,64 @@
 		ensureTree(snapshot);
 	}
 
-	function handleCreateRootStep(data: Step.BSTree.CreateRootData) {
+	async function handleCreateRootStep(data: Step.BSTree.CreateRootData, direction: ChangeDirection) {
 		console.log('Animating create root step:', data);
 
-		addNode(data.nodeId, data.value);
-		animateAddingNode(data.nodeId);
+		if (direction === ChangeDirection.Backward) {
+			// if going backwards, remove the node to the before state
+			await Promise.all([
+				net!.animateAnnotateNode(`Create root node with value ${data.value}`, data.nodeId),
+				animateRemovingNode(data.nodeId),
+			]);
+			removeNode(data.nodeId);
+			return;
+		}
 
-		// say what we're doing in info node
-		net!.animateAnnotateNode(`Create root node with value ${data.value}`, data.nodeId);
+		// add node to graph
+		addNode(data.nodeId, data.value);
+		await Promise.all([
+			net!.animateAnnotateNode(`Create root node with value ${data.value}`, data.nodeId),
+			animateAddingNode(data.nodeId),
+		]);
 	}
 
-	function handleCreateLeafStep(data: Step.BSTree.CreateLeafData) {
+	async function handleCreateLeafStep(data: Step.BSTree.CreateLeafData, direction: ChangeDirection) {
 		console.log('Animating create leaf step:', data);
 
+		let info = `Create ${data.direction} child with value ${data.value}`;
+
+		if (direction === ChangeDirection.Backward) {
+			// if going backwards, remove the node to the before state
+			await Promise.all([
+				net!.animateAnnotateNode(info, data.nodeId),
+				animateRemovingNode(data.nodeId),
+				net!.animateNodeMovement(infoNodeId, net!.getPositionAbove(data.nodeId), net!.getPositionAbove(data.parentId)),
+			]);
+			removeNode(data.nodeId, data.parentId, data.direction);
+			net!.snapNodeAbove(infoNodeId, data.parentId);
+			return;
+		}
+
+		// add node to parent
 		addNode(data.nodeId, data.value, data.parentId, data.direction);
-		animateAddingNode(data.nodeId);
 
 		// say what we're doing in info node
-		net!.animateAnnotateNode(`Create ${data.direction} child with value ${data.value}`, data.nodeId);
-		net!.animateNodeMovement(infoNodeId, net!.getPositionAbove(data.parentId), net!.getPositionAbove(data.nodeId));
+		await Promise.all([
+			net!.animateAnnotateNode(info, data.parentId),
+			animateAddingNode(data.nodeId),
+			net!.animateNodeMovement(infoNodeId, net!.getPositionAbove(data.parentId), net!.getPositionAbove(data.nodeId)),
+		]);
 	}
 
-	function handleCompareStep(data: Step.BSTree.CompareData, direction: ChangeDirection) {
+	async function handleCompareStep(data: Step.BSTree.CompareData, direction: ChangeDirection) {
 		console.log('Animating compare step:', data, direction);
 
 		let relationSymbol = relationTextToSymbol(data.result);
-		net!.animateAnnotateNode(`Compare ${data.value} ${relationSymbol} ${data.comparisonValue}`, data.comparisonId);
+		await net!.animateAnnotateNode(`Compare ${data.value} ${relationSymbol} ${data.comparisonValue}`, data.comparisonId);
 	}
 
-	function handleTraverseStep(data: Step.BSTree.TraverseData, direction: ChangeDirection) {
+	async function handleTraverseStep(data: Step.BSTree.TraverseData, direction: ChangeDirection) {
 		console.log('Animating traverse step:', data, direction);
-
-		net!.animateAnnotateNode(`Traverse to ${data.direction} child`, data.fromId);
 
 		let positionFrom = net!.getPositionAbove(data.fromId);
 		let positionTo;
@@ -209,71 +241,100 @@
 
 		if (direction == ChangeDirection.Forward) {
 			// animate movement from current position to target
+			await net!.animateAnnotateNode(`Traverse to ${data.direction} child`, data.fromId);
 			net!.animateNodeMovement(infoNodeId, positionFrom, positionTo);
 		} else {
-			// just snap back to fromId
-			if (data.toId == -1) {
-				net!.snapNodeAbove(infoNodeId, getDummyNodeId(data.fromId, data.direction));
-			} else {
-				net!.snapNodeAbove(infoNodeId, data.toId);
-			}
+			// animate movement from target position to current position
+			await net!.animateAnnotateNode(`Traverse to ${data.direction} child`, data.toId);
+			net!.animateNodeMovement(infoNodeId, positionTo, positionFrom);
 		}
 	}
 
-	function handleDropStep(data: Step.BSTree.DropData) {
+	async function handleDropStep(data: Step.BSTree.DropData, direction: ChangeDirection) {
 		console.log('Animating drop value step:', data);
-
-		net!.animateAnnotateNode(`Drop value ${data.value}`, data.fromId);
 
 		// move info node downwards to indicate dropping
 		let positionFrom = net!.getPositionAbove(data.fromId);
 		let positionTo = { x: positionFrom.x, y: positionFrom.y + 400 };
 
-		net!.animateNodeMovement(infoNodeId, positionFrom, positionTo);
+		if (direction == ChangeDirection.Forward) {
+			await Promise.all([
+				net!.animateAnnotateNode(`Drop value ${data.value}`, data.fromId),
+				net!.animateNodeMovement(infoNodeId, positionFrom, positionTo),
+			]);
+		} else {
+			await Promise.all([
+				net!.changeInfoNodeAnnotation(`Drop value ${data.value}`),
+				net!.animateNodeMovement(infoNodeId, positionTo, positionFrom),
+			]);
+		}
 	}
 
-	function handleFoundStep(data: Step.BSTree.FoundData) {
+	function handleFoundStep(data: Step.BSTree.FoundData, direction: ChangeDirection) {
 		console.log('Animating found step:', data);
 
 		net!.animateAnnotateNode(`Found node with value ${data.value}`, data.nodeId);
 
 		// highlight found node
-		nodes.update([{ id: data.nodeId, color: { background: '#7CFC00' } }]);
+		let color = direction === ChangeDirection.Forward ? '#7CFC00' : options.nodes.color;
+		nodes.update([{ id: data.nodeId, color: { background: color } }]);
 	}
 
-	function handleMarkToDeleteStep(data: Step.BSTree.MarkToDeleteData) {
+	function handleMarkToDeleteStep(data: Step.BSTree.MarkToDeleteData, direction: ChangeDirection) {
 		console.log('Animating mark to delete step:', data);
 
 		net!.animateAnnotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
 
 		// highlight marked node
-		nodes.update([{ id: data.nodeId, color: { background: '#FF4500' } }]);
+		let color = direction === ChangeDirection.Forward ? '#FF4500' : options.nodes.color;
+		nodes.update([{ id: data.nodeId, color: { background: color } }]);
 	}
 
-	async function handleDeleteStep(data: Step.BSTree.DeleteData) {
+	async function handleDeleteStep(data: Step.BSTree.DeleteData, direction: ChangeDirection) {
 		console.log('Animating delete step:', data);
 
 		net!.animateAnnotateNode(`Delete node with value ${data.value}`, data.nodeId);
 
+		if (direction === ChangeDirection.Backward) {
+			// if going backwards, ensure graph reflects the before state
+			ensureTree(data.startSnapshot! as BSTree);
+			// set color to red
+			let color = '#FF4500';
+			nodes.update([{ id: data.nodeId, color: { background: color } }]);
+			return;
+		}
+
 		// remove node from graph
 		await animateRemovingNode(data.nodeId);
-		// nodes.remove(data.nodeId);
+		// removeNode(data.nodeId);
 	}
 
-	async function handleReplaceWithChildStep(data: Step.BSTree.ReplaceWithChildData) {
+	async function handleReplaceWithChildStep(data: Step.BSTree.ReplaceWithChildData, direction: ChangeDirection) {
 		console.log('Animating replace with child step:', data);
 
 		net!.animateAnnotateNode(`Replace node with its ${data.direction} child`, data.oldNodeId);
+
+		if (direction === ChangeDirection.Backward) {
+			// if going backwards, ensure graph reflects the before state
+			ensureTree(data.startSnapshot! as BSTree);
+			return;
+		}
 
 		// remove node from graph
 		net!.animateNodeMovement(data.newNodeId, network.getPosition(data.newNodeId), network.getPosition(data.oldNodeId));
 		animateRemovingNode(data.oldNodeId);
 	}
 
-	async function handleRelinkSuccessorChildStep(data: Step.BSTree.RelinkSuccessorChildData) {
+	async function handleRelinkSuccessorChildStep(data: Step.BSTree.RelinkSuccessorChildData, direction: ChangeDirection) {
 		console.log('Animating relink successor child step:', data);
 
 		net!.animateAnnotateNode(`Relink inorder successor's child`, data.childNodeId);
+
+		if (direction === ChangeDirection.Backward) {
+			// if going backwards, ensure graph reflects the before state
+			ensureTree(data.startSnapshot! as BSTree);
+			return;
+		}
 
 		// unlink child from successor and link to parent
 		edges.remove(`edge-${data.successorNodeId}-${data.childValue < data.newParentValue ? 'left' : 'right'}`);
@@ -284,8 +345,15 @@
 		});
 	}
 
-	async function handleReplaceWithInorderSuccessorStep(data: Step.BSTree.ReplaceWithInorderSuccessorData) {
+	async function handleReplaceWithInorderSuccessorStep(data: Step.BSTree.ReplaceWithInorderSuccessorData, direction: ChangeDirection) {
 		console.log('Animating replace with inorder successor step:', data);
+
+		if (direction === ChangeDirection.Backward) {
+			// if going backwards, ensure graph reflects the before state
+			ensureTree(data.startSnapshot! as BSTree);
+			net!.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
+			return;
+		}
 
 		net!.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 
@@ -304,11 +372,11 @@
 		animateRemovingNode(data.oldNodeId);
 	}
 
-	function handleStepAnimation(step: CurrentStepChangedEvent) {
-		console.log('Handling step animation:', step);
+	async function handleStepAnimation(step: CurrentStepChangedEvent) {
+		// console.log('Handling step animation:', step);
 		clearDisconnectedDummyNodes();
 
-		let currentStep = step.direction === 'forward' ? step.currentStep : step.previousStep;
+		let currentStep = step.direction === 'backward' ? step.previousStep : step.currentStep;
 
 		if (!currentStep) {
 			return;
@@ -322,7 +390,7 @@
 
 		switch (currentStep.type as StepTypeValue) {
 			case StepType.BSTree.Start: {
-				handleStartStep();
+				handleStartStep(step.direction);
 				break;
 			}
 			case StepType.BSTree.End: {
@@ -331,12 +399,12 @@
 			}
 			case StepType.BSTree.CreateRoot: {
 				let data = currentStep.data as Step.BSTree.CreateRootData;
-				handleCreateRootStep(data);
+				await handleCreateRootStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.CreateLeaf: {
 				let data = currentStep.data as Step.BSTree.CreateLeafData;
-				handleCreateLeafStep(data);
+				await handleCreateLeafStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.Compare: {
@@ -351,42 +419,42 @@
 			}
 			case StepType.BSTree.Drop: {
 				let data = currentStep.data as Step.BSTree.DropData;
-				handleDropStep(data);
+				handleDropStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.Found: {
 				let data = currentStep.data as Step.BSTree.FoundData;
-				handleFoundStep(data);
+				handleFoundStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.MarkToDelete: {
 				let data = currentStep.data as Step.BSTree.MarkToDeleteData;
-				handleMarkToDeleteStep(data);
+				handleMarkToDeleteStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.Delete: {
 				let data = currentStep.data as Step.BSTree.DeleteData;
-				handleDeleteStep(data);
+				handleDeleteStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.ReplaceWithChild: {
 				let data = currentStep.data as Step.BSTree.ReplaceWithChildData;
-				handleReplaceWithChildStep(data);
+				handleReplaceWithChildStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.FoundInorderSuccessor: {
 				let data = currentStep.data as Step.BSTree.FoundInorderSuccessorData;
-				handleFoundStep(new Step.BSTree.FoundData(data.successorId, data.successorValue));
+				handleFoundStep(new Step.BSTree.FoundData(data.successorId, data.successorValue), step.direction);
 				break;
 			}
 			case StepType.BSTree.RelinkSuccessorChild: {
 				let data = currentStep.data as Step.BSTree.RelinkSuccessorChildData;
-				handleRelinkSuccessorChildStep(data);
+				handleRelinkSuccessorChildStep(data, step.direction);
 				break;
 			}
 			case StepType.BSTree.ReplaceWithInorderSuccessor: {
 				let data = currentStep.data as Step.BSTree.ReplaceWithInorderSuccessorData;
-				handleReplaceWithInorderSuccessorStep(data);
+				handleReplaceWithInorderSuccessorStep(data, step.direction);
 				break;
 			}
 		}
@@ -398,6 +466,7 @@
 			ensureTree(step.currentStep.startSnapshot as BSTree);
 		}
 
+		clearDisconnectedDummyNodes();
 		network.fit();
 	}
 
@@ -406,9 +475,10 @@
 		for (let node of nodes.get()) {
 			if (typeof node.id === 'string' && node.id.startsWith('dummy-')) {
 				// dummy node
-				let connectedEdges = network.getConnectedEdges(node.id);
+				let connectedEdges = network.getConnectedNodes(node.id);
 				if (connectedEdges.length === 0) {
 					toRemove.push(node.id as string);
+					console.debug('Removing disconnected dummy node:', node.id);
 				}
 			}
 		}
@@ -416,6 +486,11 @@
 	}
 
 	function addNode(nodeId: number, value: number, parentId?: number, direction?: 'left' | 'right') {
+		if (nodes.get(nodeId)) {
+			console.warn(`Node with id ${nodeId} already exists. Skipping addNode.`);
+			return;
+		}
+
 		nodes.add({
 			id: nodeId,
 			title: `Node ${nodeId}`,
@@ -464,25 +539,86 @@
 		});
 	}
 
+	function removeNode(nodeId: number, parentId?: number, direction?: 'left' | 'right') {
+		// get connected edges and remove them
+		let connectedEdges = network.getConnectedEdges(nodeId);
+		edges.remove(connectedEdges);
+
+		// remove the node itself
+		nodes.remove(nodeId);
+
+		// remove dummy children if they exist
+		if (nodes.get(getDummyNodeId(nodeId, 'left'))) {
+			nodes.remove(getDummyNodeId(nodeId, 'left'));
+		}
+		if (nodes.get(getDummyNodeId(nodeId, 'right'))) {
+			nodes.remove(getDummyNodeId(nodeId, 'right'));
+		}
+
+		if (parentId === undefined || direction === undefined) {
+			return;
+		}
+
+		// add back dummy node to parent
+		nodes.add({
+			id: getDummyNodeId(parentId, direction),
+			color: 'transparent',
+		});
+		edges.add({
+			id: `edge-${parentId}-${direction}`,
+			from: parentId,
+			to: getDummyNodeId(parentId, direction),
+			dashes: true,
+		});
+
+		// if left child was removed, we need to re-add the right child node to the graph
+		if (direction === 'left') {
+			// get right child of parent
+			let rightChildEdgeId = `edge-${parentId}-right`;
+			let rightChildEdge = edges.get(rightChildEdgeId);
+
+			if (!rightChildEdge || !rightChildEdge.to) {
+				console.warn(`Right child edge not found for parent ${parentId}`);
+				return;
+			}
+
+			let node = nodes.get(rightChildEdge.to);
+			if (!node) {
+				console.warn(`Right child node not found for parent ${parentId}`);
+				return;
+			}
+
+			// remove this node from graph and add it back again
+			nodes.remove(node.id!);
+			nodes.add(node);
+		}
+	}
+
 	function ensureTree(tree: BSTree) {
+		console.info('Ensuring tree');
 		let newData = bsTreetoGraph(tree.root);
 
 		// update existing nodes or add new ones
 		for (let n of newData.nodes.get()) {
 			if (nodes.get(n.id!)) {
+				// console.debug('Updating existing node:', n.id!);
 				nodes.update(n);
-				continue;
 			} else {
 				nodes.add(n);
 				net!.animateNodeGrowth(n.id!);
+				console.debug('Added new node:', n.id!);
 			}
 		}
 
-		// delete nodes that are no longer present
+		// delete nodes that are no longer present and also check node sizes
 		let newNodeIds = new Set(newData.nodes.get().map(n => n.id));
 		for (let existingNode of nodes.get()) {
-			if (!newNodeIds.has(existingNode.id)) {
+			if (!newNodeIds.has(existingNode.id) && existingNode.id !== infoNodeId) {
 				nodes.remove(existingNode.id!);
+				console.debug('Removed dead node:', existingNode.id);
+			} else if (existingNode.id != infoNodeId && !existingNode.id.toString().startsWith('dummy-')) {
+				// check node sizes
+				nodes.update([{ id: existingNode.id!, font: { size: options.nodes.font.size } }]);
 			}
 		}
 
@@ -495,7 +631,6 @@
 
 		// clear disconnected dummy nodes
 		clearDisconnectedDummyNodes();
-		network.fit();
 	}
 
 	function removeColoring() {

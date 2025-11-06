@@ -169,7 +169,7 @@ export class NetworkAnimator {
 		await Promise.all(promises);
 	}
 
-	async animateAnnotateNode(annotation: string, nodeId?: string | number) {
+	async changeInfoNodeAnnotation(annotation: string) {
 		try {
 			this.nodes.update({
 				id: this.infoNodeId,
@@ -178,6 +178,12 @@ export class NetworkAnimator {
 				color: '#aaaaaa',
 				font: { color: 'black', size: this.infoNodeSize },
 			} as any);
+		} catch {}
+	}
+
+	async animateAnnotateNode(annotation: string, nodeId?: string | number) {
+		try {
+			await this.changeInfoNodeAnnotation(annotation);
 			if (nodeId === undefined) this.snapNodeTo(this.infoNodeId, 0, 0);
 			else this.snapNodeAbove(this.infoNodeId, nodeId, this.infoNodeAboveOffset);
 		} catch {}
