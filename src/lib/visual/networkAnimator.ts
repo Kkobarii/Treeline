@@ -209,4 +209,13 @@ export class NetworkAnimator {
 			else this.snapNodeAbove(this.infoNodeId, nodeId, this.infoNodeAboveOffset);
 		} catch {}
 	}
+
+	/**
+	 * Smoothly fit the network to the current nodes using network.moveTo animation.
+	 * Computes a bounding box for visible nodes (skips info/dummy nodes) and
+	 * calculates an approximate scale to fit them into the container with padding.
+	 */
+	async animateFit(durationMs: number = 1000, paddingPx: number = 40): Promise<void> {
+		this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' }, padding: paddingPx });
+	}
 }

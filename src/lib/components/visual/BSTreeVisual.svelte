@@ -467,7 +467,7 @@
 		}
 
 		clearDisconnectedDummyNodes();
-		network.fit();
+		await net!.animateFit();
 	}
 
 	function clearDisconnectedDummyNodes() {
