@@ -1,6 +1,6 @@
 import { addAnimation } from '$lib/animation/animator';
 import type { DataSet } from 'vis-data';
-import type { Network, Position } from 'vis-network';
+import type { Font, Network, NodeOptions, Position } from 'vis-network';
 
 type Node = any;
 
@@ -8,29 +8,40 @@ export interface NetworkAnimatorOpts {
 	network: Network;
 	nodes: DataSet<Node>;
 	edges: DataSet<any>;
-	infoNodeId: string | number;
-	infoNodeAboveOffset?: number;
-	movementDurationMs?: number;
-	infoNodeSize?: number;
+	nodeOptions: NodeOptions;
+	infoNodeOptions: NodeOptions;
 }
 
 export class NetworkAnimator {
 	network: Network;
 	nodes: DataSet<Node>;
 	edges: DataSet<any>;
-	infoNodeId: string | number;
-	infoNodeAboveOffset: number;
-	movementDurationMs: number;
-	infoNodeSize: number;
+	nodeOptions: NodeOptions;
+	infoNodeOptions: NodeOptions;
+	movementDurationMs: number = 500;
+	infoNodeId: string = 'info-node';
+	infoNodeAboveOffset: number = 50;
 
 	constructor(opts: NetworkAnimatorOpts) {
 		this.network = opts.network;
 		this.nodes = opts.nodes;
 		this.edges = opts.edges;
-		this.infoNodeId = opts.infoNodeId;
-		this.infoNodeAboveOffset = opts.infoNodeAboveOffset ?? 50;
-		this.movementDurationMs = opts.movementDurationMs ?? 500;
-		this.infoNodeSize = opts.infoNodeSize ?? 15;
+		this.nodeOptions = opts.nodeOptions;
+		this.infoNodeOptions = opts.infoNodeOptions;
+	}
+
+	createInfoNode() {
+		try {
+			this.nodes.add({
+				id: this.infoNodeId,
+				label: 'Info',
+				x: 0,
+				y: 0,
+				font: this.infoNodeOptions.font,
+				color: this.infoNodeOptions.color,
+				hidden: true,
+			});
+		} catch {}
 	}
 
 	getPosition(nodeId: string | number): Position {
@@ -63,19 +74,20 @@ export class NetworkAnimator {
 	}
 
 	private getNodeFontSize(nodeId: string | number): number {
+		let fontSize = (this.infoNodeOptions.font as Font).size!;
 		try {
 			const n: any = this.nodes.get(nodeId as any);
-			if (!n) return this.infoNodeSize;
+			if (!n) return fontSize;
 			const font = n.font;
-			if (!font) return this.infoNodeSize;
+			if (!font) return fontSize;
 			if (typeof font === 'string') {
 				const m = font.match(/(\d+(?:\.\d+)?)/);
 				if (m) return parseFloat(m[1]);
-				return this.infoNodeSize;
+				return fontSize;
 			}
-			return font.size ?? this.infoNodeSize;
+			return font.size ?? fontSize;
 		} catch {
-			return this.infoNodeSize;
+			return fontSize;
 		}
 	}
 
@@ -175,8 +187,17 @@ export class NetworkAnimator {
 				id: this.infoNodeId,
 				label: annotation,
 				hidden: false,
-				color: '#aaaaaa',
-				font: { color: 'black', size: this.infoNodeSize },
+				color: this.infoNodeOptions.color,
+				font: this.infoNodeOptions.font,
+			} as any);
+		} catch {}
+	}
+
+	async hideInfoNode() {
+		try {
+			this.nodes.update({
+				id: this.infoNodeId,
+				hidden: true,
 			} as any);
 		} catch {}
 	}

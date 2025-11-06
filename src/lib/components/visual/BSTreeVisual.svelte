@@ -14,14 +14,39 @@
 	import { addAnimation, clearAnimations } from '$lib/animation/animator';
 	import { DataSet } from 'vis-data';
 	import { StepType, type StepTypeValue } from '$lib/structures/dataStructure';
-	import { Step } from '$lib/operation/operationData';
+	import { NetworkAnimator } from '$lib/visual/networkAnimator';
+	import { Step } from '$lib/operation/stepData';
 
 	export let operationManager: OperationManager;
 
 	let nodes: DataSet<Node>;
 	let edges: DataSet<Edge>;
 
-	let data;
+	let nodeOptions = {
+		shape: 'box',
+		color: '#9fd4ff',
+		font: { color: 'black', size: 30 },
+	};
+
+	let infoNodeOptions = {
+		shape: 'ellipse',
+		color: '#aaaaaa',
+		font: { color: 'black', size: 15 },
+		id: 'info-node',
+		aboveOffset: 50,
+	};
+	const infoNodeId = infoNodeOptions.id;
+
+	let dummyNodeOptions = {
+		shape: 'ellipse',
+		color: 'transparent',
+		font: { color: 'transparent', size: 1 },
+	};
+	let dummyEdgeOptions = {
+		dashes: true,
+		color: 'gray',
+	};
+
 	let options = {
 		layout: {
 			hierarchical: {
@@ -35,45 +60,26 @@
 		interaction: {
 			dragNodes: false,
 		},
-		nodes: {
-			shape: 'box',
-			color: '#9fd4ff',
-			font: { color: 'black', size: 30 },
-		},
+		nodes: nodeOptions,
 	};
 	let container: HTMLElement = document.getElementById('network')!;
 	let network: Network;
 
-	const infoNodeId = 'info-node';
-	const infoNodeAboveOffset = 50;
-	const movementDurationMs = 500;
-	const infoNodeSize = 15;
-	const infoNodeColor = '#aaaaaa';
-
-	import { NetworkAnimator } from '$lib/visual/networkAnimator';
 	let net: NetworkAnimator | null = null;
 
 	onMount(() => {
 		({ nodes, edges } = bsTreetoGraph(null));
-		nodes.add({
-			id: infoNodeId,
-			title: 'Info Node',
-			label: 'Info',
-			color: infoNodeColor,
-			font: { color: 'black', size: infoNodeSize },
-			hidden: true,
-		});
 		network = new Network(container, { nodes, edges }, options);
 
 		net = new NetworkAnimator({
 			network,
 			nodes,
 			edges,
-			infoNodeId,
-			infoNodeAboveOffset,
-			movementDurationMs,
-			infoNodeSize,
+			infoNodeOptions,
+			nodeOptions,
 		});
+
+		net.createInfoNode();
 
 		network.on('selectNode', params => {
 			if (params.nodes.length == 1) {
@@ -147,14 +153,11 @@
 		// put operation name into info node, position above root and grow it
 		if (direction === ChangeDirection.Backward) {
 			// hide info node
-			nodes.update({
-				id: infoNodeId,
-				hidden: true,
-			});
+			net!.hideInfoNode();
 		} else {
 			let snapshot = operationManager.getCurrentOperation().startSnapshot as BSTree;
 			ensureTree(snapshot);
-			await Promise.all([net!.changeInfoNodeAnnotation(info), net!.animateNodeGrowth(infoNodeId, infoNodeSize)]);
+			await Promise.all([net!.changeInfoNodeAnnotation(info), net!.animateNodeGrowth(infoNodeId, infoNodeOptions.font.size!)]);
 		}
 		removeColoring();
 	}
@@ -163,10 +166,7 @@
 		console.log('Animating end step');
 
 		// hide info node
-		nodes.update({
-			id: infoNodeId,
-			hidden: true,
-		});
+		net?.hideInfoNode();
 
 		let snapshot = operationManager.getCurrentOperation().endSnapshot as BSTree;
 		ensureTree(snapshot);
