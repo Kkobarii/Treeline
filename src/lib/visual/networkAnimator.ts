@@ -216,6 +216,6 @@ export class NetworkAnimator {
 	 * calculates an approximate scale to fit them into the container with padding.
 	 */
 	async animateFit(durationMs: number = 1000, paddingPx: number = 40): Promise<void> {
-		this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' }, padding: paddingPx });
+		this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
 	}
 }

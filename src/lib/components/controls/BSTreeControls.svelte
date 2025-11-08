@@ -8,12 +8,18 @@
 	export let operationManager: OperationManager;
 
 	let manualValue: number = 0;
+	let locked: boolean = false;
 
 	onMount(() => {
 		operationManager.addEventListener(EventType.InputValueChanged, (e: Event) => {
 			const event = e as CustomEvent<InputValueChangedEvent>;
 			console.log('InputValueChanged event received:', event.detail.inputValue);
 			manualValue = event.detail.inputValue;
+		});
+
+		operationManager.addEventListener(EventType.AnimationLockChanged, (e: Event) => {
+			const ev = e as CustomEvent<boolean>;
+			locked = ev.detail;
 		});
 	});
 </script>
@@ -26,12 +32,14 @@
 		<div>
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Insert, Math.floor(Math.random() * 1000))}>
+				on:click={() => operationManager?.operation(OperationType.BSTree.Insert, Math.floor(Math.random() * 1000))}
+				disabled={locked}>
 				Insert Random Node
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager?.reset()}>
+				on:click={() => operationManager?.reset()}
+				disabled={locked}>
 				Reset
 			</button>
 		</div>
@@ -43,20 +51,24 @@
 				max="999"
 				min="0"
 				on:keyup={e => enforceMinMax(e.target as HTMLInputElement)}
-				on:change={e => operationManager?.updateCurrentValue(manualValue)} />
+				on:change={e => operationManager?.updateCurrentValue(manualValue)}
+				disabled={locked} />
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Insert, manualValue)}>
+				on:click={() => operationManager?.operation(OperationType.BSTree.Insert, manualValue)}
+				disabled={locked}>
 				Insert
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Remove, manualValue)}>
+				on:click={() => operationManager?.operation(OperationType.BSTree.Remove, manualValue)}
+				disabled={locked}>
 				Remove
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Find, manualValue)}>
+				on:click={() => operationManager?.operation(OperationType.BSTree.Find, manualValue)}
+				disabled={locked}>
 				Find
 			</button>
 		</div>

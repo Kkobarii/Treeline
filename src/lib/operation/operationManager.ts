@@ -6,6 +6,7 @@ export enum EventType {
 	CurrentOperationChanged = 'currentOperationChanged',
 	CurrentStepChanged = 'currentStepChanged',
 	ShowStepsToggled = 'showStepsToggled',
+	AnimationLockChanged = 'animationLockChanged',
 	InputValueChanged = 'inputValueChanged',
 	OperationListChanged = 'operationListChanged',
 }
@@ -90,6 +91,8 @@ export class OperationManager {
 
 	private showSteps: boolean = false;
 
+	private locked: boolean = false;
+
 	constructor(structureType: StructureType) {
 		this.structureType = structureType;
 		let emptySnapshot = createEmptyStructure(structureType);
@@ -131,6 +134,9 @@ export class OperationManager {
 				case EventType.ShowStepsToggled:
 					data = this.showSteps;
 					break;
+				case EventType.AnimationLockChanged:
+					data = this.locked;
+					break;
 				case EventType.OperationListChanged:
 					data = new OperationListChangedEvent(this.operations);
 					break;
@@ -145,6 +151,18 @@ export class OperationManager {
 				listener(new CustomEvent(eventType, { detail: data }));
 			});
 		}
+	}
+
+	/**
+	 * Lock/unlock controls while animations are running.
+	 */
+	setLocked(value: boolean) {
+		this.locked = value;
+		this.emit(EventType.AnimationLockChanged, this.locked);
+	}
+
+	isLocked(): boolean {
+		return this.locked;
 	}
 
 	operation(type: OperationTypeValue, value: number) {

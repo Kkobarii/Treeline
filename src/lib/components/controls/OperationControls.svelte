@@ -7,6 +7,7 @@
 
 	let canDoNext: boolean = false;
 	let canDoPrevious: boolean = false;
+	let locked: boolean = false;
 
 	let operations: OperationData[] = [];
 	let currentOperation: number = 0;
@@ -40,6 +41,12 @@
 		operationManager.addEventListener(EventType.ShowStepsToggled, () => {
 			updateCanDoFlags();
 		});
+
+		operationManager.addEventListener(EventType.AnimationLockChanged, (e: Event) => {
+			const ev = e as CustomEvent<boolean>;
+			locked = ev.detail;
+			updateCanDoFlags();
+		});
 	});
 
 	function updateCanDoFlags() {
@@ -62,20 +69,21 @@
 	<button
 		type="button"
 		on:click={() => operationManager.previous()}
-		disabled={!canDoPrevious}>
+		disabled={!canDoPrevious || locked}>
 		Previous
 	</button>
 	<button
 		type="button"
 		on:click={() => operationManager.next()}
-		disabled={!canDoNext}>
+		disabled={!canDoNext || locked}>
 		Next
 	</button>
 	<input
 		id="steps-checkbox"
 		type="checkbox"
 		class="h-4 w-4"
-		on:change={() => operationManager.toggleShowSteps()} />
+		on:change={() => operationManager.toggleShowSteps()}
+		disabled={locked} />
 	<label
 		for="steps-checkbox"
 		class="mr-4">
@@ -99,7 +107,7 @@
 									class="{operations[currentOperation].steps[currentStep] === step && operations[currentOperation] === op
 										? 'bg-gray-400'
 										: 'text-gray-700'} operation-step rounded p-1 text-sm">
-									{step.id + 1}: {step.data.action}
+									{step.id + 1}: {(step.data as any).action}
 								</li>
 							{/each}
 						</ul>

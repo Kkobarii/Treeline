@@ -139,10 +139,18 @@
 		await Promise.all([net!.animateLegsShrink(nodeId), net!.animateNodeShrink(nodeId)]);
 	}
 
-	function handleOperationAnimation(operation: CurrentOperationChangedEvent) {
-		console.log('Handling operation animation:', operation);
+	async function handleOperationAnimation(operation: CurrentOperationChangedEvent) {
+		// Lock controls while operation-level animation runs
+		operationManager.setLocked(true);
+		try {
+			console.log('Handling operation animation:', operation);
 
-		ensureTree(operation.currentOperation.endSnapshot as BSTree);
+			ensureTree(operation.currentOperation.endSnapshot as BSTree);
+
+			if (net) await net.animateFit();
+		} finally {
+			operationManager.setLocked(false);
+		}
 	}
 
 	async function handleStartStep(direction: ChangeDirection) {
@@ -373,101 +381,108 @@
 	}
 
 	async function handleStepAnimation(step: CurrentStepChangedEvent) {
-		// console.log('Handling step animation:', step);
-		clearDisconnectedDummyNodes();
+		// Lock controls while animation runs
+		operationManager.setLocked(true);
+		try {
+			// console.log('Handling step animation:', step);
+			clearDisconnectedDummyNodes();
 
-		let currentStep = step.direction === 'backward' ? step.previousStep : step.currentStep;
+			let currentStep = step.direction === 'backward' ? step.previousStep : step.currentStep;
 
-		if (!currentStep) {
-			return;
+			if (!currentStep) {
+				return;
+			}
+
+			if (step.direction === 'forward' && currentStep.startSnapshot) {
+				ensureTree(currentStep.startSnapshot as BSTree);
+			} else if (step.direction === 'backward' && currentStep.endSnapshot) {
+				ensureTree(currentStep.endSnapshot as BSTree);
+			}
+
+			switch (currentStep.type as StepTypeValue) {
+				case StepType.BSTree.Start: {
+					handleStartStep(step.direction);
+					break;
+				}
+				case StepType.BSTree.End: {
+					handleEndStep();
+					break;
+				}
+				case StepType.BSTree.CreateRoot: {
+					let data = currentStep.data as Step.BSTree.CreateRootData;
+					await handleCreateRootStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.CreateLeaf: {
+					let data = currentStep.data as Step.BSTree.CreateLeafData;
+					await handleCreateLeafStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.Compare: {
+					let data = currentStep.data as Step.BSTree.CompareData;
+					handleCompareStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.Traverse: {
+					let data = currentStep.data as Step.BSTree.TraverseData;
+					handleTraverseStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.Drop: {
+					let data = currentStep.data as Step.BSTree.DropData;
+					handleDropStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.Found: {
+					let data = currentStep.data as Step.BSTree.FoundData;
+					handleFoundStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.MarkToDelete: {
+					let data = currentStep.data as Step.BSTree.MarkToDeleteData;
+					handleMarkToDeleteStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.Delete: {
+					let data = currentStep.data as Step.BSTree.DeleteData;
+					handleDeleteStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.ReplaceWithChild: {
+					let data = currentStep.data as Step.BSTree.ReplaceWithChildData;
+					handleReplaceWithChildStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.FoundInorderSuccessor: {
+					let data = currentStep.data as Step.BSTree.FoundInorderSuccessorData;
+					handleFoundStep(new Step.BSTree.FoundData(data.successorId, data.successorValue), step.direction);
+					break;
+				}
+				case StepType.BSTree.RelinkSuccessorChild: {
+					let data = currentStep.data as Step.BSTree.RelinkSuccessorChildData;
+					handleRelinkSuccessorChildStep(data, step.direction);
+					break;
+				}
+				case StepType.BSTree.ReplaceWithInorderSuccessor: {
+					let data = currentStep.data as Step.BSTree.ReplaceWithInorderSuccessorData;
+					handleReplaceWithInorderSuccessorStep(data, step.direction);
+					break;
+				}
+			}
+
+			if (step.direction === 'forward' && step.currentStep.endSnapshot) {
+				ensureTree(step.currentStep.endSnapshot as BSTree);
+			}
+			if (step.direction === 'backward' && step.currentStep.startSnapshot) {
+				ensureTree(step.currentStep.startSnapshot as BSTree);
+			}
+
+			clearDisconnectedDummyNodes();
+			await net!.animateFit();
+		} finally {
+			// unlock controls even if there was an error
+			operationManager.setLocked(false);
 		}
-
-		if (step.direction === 'forward' && currentStep.startSnapshot) {
-			ensureTree(currentStep.startSnapshot as BSTree);
-		} else if (step.direction === 'backward' && currentStep.endSnapshot) {
-			ensureTree(currentStep.endSnapshot as BSTree);
-		}
-
-		switch (currentStep.type as StepTypeValue) {
-			case StepType.BSTree.Start: {
-				handleStartStep(step.direction);
-				break;
-			}
-			case StepType.BSTree.End: {
-				handleEndStep();
-				break;
-			}
-			case StepType.BSTree.CreateRoot: {
-				let data = currentStep.data as Step.BSTree.CreateRootData;
-				await handleCreateRootStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.CreateLeaf: {
-				let data = currentStep.data as Step.BSTree.CreateLeafData;
-				await handleCreateLeafStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.Compare: {
-				let data = currentStep.data as Step.BSTree.CompareData;
-				handleCompareStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.Traverse: {
-				let data = currentStep.data as Step.BSTree.TraverseData;
-				handleTraverseStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.Drop: {
-				let data = currentStep.data as Step.BSTree.DropData;
-				handleDropStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.Found: {
-				let data = currentStep.data as Step.BSTree.FoundData;
-				handleFoundStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.MarkToDelete: {
-				let data = currentStep.data as Step.BSTree.MarkToDeleteData;
-				handleMarkToDeleteStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.Delete: {
-				let data = currentStep.data as Step.BSTree.DeleteData;
-				handleDeleteStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.ReplaceWithChild: {
-				let data = currentStep.data as Step.BSTree.ReplaceWithChildData;
-				handleReplaceWithChildStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.FoundInorderSuccessor: {
-				let data = currentStep.data as Step.BSTree.FoundInorderSuccessorData;
-				handleFoundStep(new Step.BSTree.FoundData(data.successorId, data.successorValue), step.direction);
-				break;
-			}
-			case StepType.BSTree.RelinkSuccessorChild: {
-				let data = currentStep.data as Step.BSTree.RelinkSuccessorChildData;
-				handleRelinkSuccessorChildStep(data, step.direction);
-				break;
-			}
-			case StepType.BSTree.ReplaceWithInorderSuccessor: {
-				let data = currentStep.data as Step.BSTree.ReplaceWithInorderSuccessorData;
-				handleReplaceWithInorderSuccessorStep(data, step.direction);
-				break;
-			}
-		}
-
-		if (step.direction === 'forward' && step.currentStep.endSnapshot) {
-			ensureTree(step.currentStep.endSnapshot as BSTree);
-		}
-		if (step.direction === 'backward' && step.currentStep.startSnapshot) {
-			ensureTree(step.currentStep.startSnapshot as BSTree);
-		}
-
-		clearDisconnectedDummyNodes();
-		await net!.animateFit();
 	}
 
 	function clearDisconnectedDummyNodes() {
