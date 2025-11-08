@@ -91,7 +91,8 @@ export class OperationManager {
 
 	private showSteps: boolean = false;
 
-	private locked: boolean = false;
+	// ref-counted lock to support nested animations
+	private lockCount: number = 0;
 
 	constructor(structureType: StructureType) {
 		this.structureType = structureType;
@@ -135,7 +136,7 @@ export class OperationManager {
 					data = this.showSteps;
 					break;
 				case EventType.AnimationLockChanged:
-					data = this.locked;
+					data = this.isLocked();
 					break;
 				case EventType.OperationListChanged:
 					data = new OperationListChangedEvent(this.operations);
@@ -155,14 +156,30 @@ export class OperationManager {
 
 	/**
 	 * Lock/unlock controls while animations are running.
+	 * Deprecated: prefer beginAnimation()/endAnimation() for ref-counted locking.
 	 */
 	setLocked(value: boolean) {
-		this.locked = value;
-		this.emit(EventType.AnimationLockChanged, this.locked);
+		if (value) this.beginAnimation();
+		else this.endAnimation();
 	}
 
 	isLocked(): boolean {
-		return this.locked;
+		return this.lockCount > 0;
+	}
+
+	beginAnimation() {
+		this.lockCount++;
+		if (this.lockCount === 1) {
+			this.emit(EventType.AnimationLockChanged, true);
+		}
+	}
+
+	endAnimation() {
+		if (this.lockCount <= 0) return;
+		this.lockCount--;
+		if (this.lockCount === 0) {
+			this.emit(EventType.AnimationLockChanged, false);
+		}
 	}
 
 	operation(type: OperationTypeValue, value: number) {
