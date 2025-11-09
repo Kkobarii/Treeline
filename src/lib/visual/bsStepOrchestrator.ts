@@ -26,6 +26,7 @@ export async function playOperation(renderer: RendererAPI, operationManager: Ope
 
 export async function playStep(renderer: RendererAPI, operationManager: OperationManager, stepEvent: CurrentStepChangedEvent) {
 	operationManager.setLocked(true);
+	console.log('playStep', stepEvent);
 	try {
 		renderer.clearDisconnectedDummyNodes();
 
@@ -40,15 +41,15 @@ export async function playStep(renderer: RendererAPI, operationManager: Operatio
 		}
 
 		// pick handler based on step type; call forward/backward variant
-		const isForward = stepEvent.direction === 'forward';
+		const isForward = stepEvent.direction === 'forward' || stepEvent.direction === 'unknown';
 		switch (currentStep.type as StepTypeValue) {
 			case StepType.BSTree.Start:
 				if (isForward) await Handlers.handleStartForward(renderer, operationManager);
 				else await Handlers.handleStartBackward(renderer, operationManager);
 				break;
 			case StepType.BSTree.End:
-				if (isForward) await Handlers.handleEndForward(renderer);
-				else await Handlers.handleEndBackward(renderer);
+				if (isForward) await Handlers.handleEndForward(renderer, operationManager);
+				else await Handlers.handleEndBackward(renderer, operationManager);
 				break;
 			case StepType.BSTree.CreateRoot:
 				if (isForward) await Handlers.handleCreateRootForward(renderer, currentStep.data as any);
@@ -87,8 +88,8 @@ export async function playStep(renderer: RendererAPI, operationManager: Operatio
 				else await Handlers.handleReplaceWithChildBackward(renderer, currentStep.data as any);
 				break;
 			case StepType.BSTree.FoundInorderSuccessor:
-				if (isForward) await Handlers.handleFoundForward(renderer, currentStep.data as any);
-				else await Handlers.handleFoundBackward(renderer, currentStep.data as any);
+				if (isForward) await Handlers.handleFoundInorderSuccessorForward(renderer, currentStep.data as any);
+				else await Handlers.handleFoundInorderSuccessorBackward(renderer, currentStep.data as any);
 				break;
 			case StepType.BSTree.RelinkSuccessorChild:
 				if (isForward) await Handlers.handleRelinkSuccessorChildForward(renderer, currentStep.data as any);
@@ -109,7 +110,7 @@ export async function playStep(renderer: RendererAPI, operationManager: Operatio
 		}
 
 		renderer.clearDisconnectedDummyNodes();
-		await renderer.animateFit();
+		// await renderer.animateFit();
 	} finally {
 		operationManager.setLocked(false);
 	}

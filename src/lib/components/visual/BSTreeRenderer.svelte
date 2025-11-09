@@ -3,6 +3,7 @@
 	import { Network, type Edge, type Node, type Options } from 'vis-network';
 	import { DataSet } from 'vis-data';
 	import { bsTreetoGraph, getDummyNodeId } from '$lib/utils/graphs';
+	import { computeLayoutForTree } from '$lib/visual/utils/layoutHelpers';
 	import type { BSTree } from '$lib/structures/bsTree';
 	import { NetworkAnimator } from '$lib/visual/networkAnimator';
 
@@ -130,8 +131,9 @@
 			}
 		}
 
-		nodes.add({ id: getDummyNodeId(nodeId, 'left'), color: 'transparent' });
-		nodes.add({ id: getDummyNodeId(nodeId, 'right'), color: 'transparent' });
+		// add transparent dummy children so layout keeps spacing
+		if (!nodes.get(getDummyNodeId(nodeId, 'left'))) nodes.add({ id: getDummyNodeId(nodeId, 'left'), color: 'transparent' } as any);
+		if (!nodes.get(getDummyNodeId(nodeId, 'right'))) nodes.add({ id: getDummyNodeId(nodeId, 'right'), color: 'transparent' } as any);
 		edges.add({ id: `edge-${nodeId}-left`, from: nodeId, to: getDummyNodeId(nodeId, 'left'), dashes: true });
 		edges.add({ id: `edge-${nodeId}-right`, from: nodeId, to: getDummyNodeId(nodeId, 'right'), dashes: true });
 	}
@@ -193,11 +195,23 @@
 		return animator?.animateNodeShrink(nodeId) ?? Promise.resolve();
 	}
 
+	export function animateNodeOpacityChange(nodeId: number | string, from: number, to: number) {
+		return animator?.animateNodeOpacityChange(nodeId, from, to) ?? Promise.resolve();
+	}
+
 	export function animateLegsGrowth(nodeId: number | string) {
 		return animator?.animateLegsGrowth(nodeId) ?? Promise.resolve();
 	}
 	export function animateLegsShrink(nodeId: number | string) {
 		return animator?.animateLegsShrink(nodeId) ?? Promise.resolve();
+	}
+
+	export function setNodeColor(nodeId: number | string, color: string) {
+		animator?.setNodeColor(nodeId, color);
+	}
+
+	export function resetNodeColor(nodeId: number | string) {
+		animator?.resetNodeColor(nodeId);
 	}
 
 	export function animateAnnotateNode(text: string, nodeId: number | string) {
@@ -214,6 +228,10 @@
 
 	export function snapNodeAbove(nodeId: number | string, parentId: number) {
 		animator?.snapNodeAbove(nodeId, parentId);
+	}
+
+	export function snapNodeTo(nodeId: number | string, x: number, y: number) {
+		animator?.snapNodeTo(nodeId, x, y);
 	}
 
 	export function getPositionAbove(nodeId: number | string) {

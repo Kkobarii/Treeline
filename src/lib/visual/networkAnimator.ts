@@ -1,6 +1,7 @@
 import { addAnimation } from '$lib/animation/animator';
 import type { DataSet } from 'vis-data';
 import type { Font, Network, NodeOptions, Position } from 'vis-network';
+import { clamp } from './utils/positioning';
 
 type Node = any;
 
@@ -58,9 +59,9 @@ export class NetworkAnimator {
 		return { x: pos.x, y: pos.y - (offset ?? this.infoNodeAboveOffset) };
 	}
 
-	snapNodeTo(nodeId: string | number, x: number, y: number) {
+	async snapNodeTo(nodeId: string | number, x: number, y: number) {
 		try {
-			(this.network as any).moveNode(nodeId, x, y);
+			await (this.network as any).moveNode(nodeId, x, y);
 		} catch {
 			try {
 				this.nodes.update({ id: nodeId, x, y } as any);
@@ -68,7 +69,7 @@ export class NetworkAnimator {
 		}
 	}
 
-	snapNodeAbove(infoNodeId: string | number, nodeId: string | number, offset?: number) {
+	async snapNodeAbove(infoNodeId: string | number, nodeId: string | number, offset?: number) {
 		const pos = this.getPosition(nodeId);
 		this.snapNodeTo(infoNodeId, pos.x, pos.y - (offset ?? this.infoNodeAboveOffset));
 	}
@@ -116,7 +117,12 @@ export class NetworkAnimator {
 	}
 
 	animateNodeGrowth(nodeId: string | number, finalSize: number = 30, durationMs: number = 300): Promise<void> {
-		const startSize = this.getNodeFontSize(nodeId);
+		const startSize = 0;
+
+		if (nodeId === this.infoNodeId) {
+			finalSize = (this.infoNodeOptions.font as Font).size!;
+		}
+
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
 				const t = Math.min(1, elapsed / durationMs);
@@ -153,31 +159,68 @@ export class NetworkAnimator {
 		});
 	}
 
+	animateNodeOpacityChange(nodeId: string | number, fromOpacity: number, toOpacity: number, durationMs: number = 300): Promise<void> {
+		const fontSize = this.getNodeFontSize(nodeId);
+		return new Promise(resolve => {
+			const cancel = addAnimation((dt, elapsed) => {
+				const t = Math.min(1, elapsed / durationMs);
+				const opacity = clamp(fromOpacity + (toOpacity - fromOpacity) * t, 0, 1);
+				try {
+					this.nodes.update({ id: nodeId, opacity: opacity, font: { size: fontSize * opacity } } as any);
+				} catch {}
+				if (t >= 1) {
+					cancel();
+					resolve();
+					return false;
+				}
+				return true;
+			});
+		});
+	}
+
+	setNodeColor(nodeId: string | number, color: string) {
+		try {
+			this.nodes.update({ id: nodeId, color } as any);
+		} catch {}
+	}
+
+	resetNodeColor(nodeId: string | number) {
+		try {
+			this.nodes.update({ id: nodeId, color: this.nodeOptions.color } as any);
+		} catch {}
+	}
+
 	async animateLegsGrowth(nodeId: string | number, durationMs?: number) {
-		const left = `dummy-${Number(nodeId)}-L`;
-		const right = `dummy-${Number(nodeId)}-R`;
 		const initial = this.getPosition(nodeId);
-		const leftFinal = this.getPosition(left);
-		const rightFinal = this.getPosition(right);
-		this.snapNodeTo(left, initial.x - this.infoNodeAboveOffset, initial.y);
-		this.snapNodeTo(right, initial.x + this.infoNodeAboveOffset, initial.y);
-		await Promise.all([
-			this.animateNodeMovement(left, { x: initial.x - this.infoNodeAboveOffset, y: initial.y }, leftFinal, durationMs),
-			this.animateNodeMovement(right, { x: initial.x + this.infoNodeAboveOffset, y: initial.y }, rightFinal, durationMs),
-		]);
+		let promises: Promise<void>[] = [];
+
+		const left = `dummy-${Number(nodeId)}-L`;
+		if (this.nodes.get(left)) {
+			const leftFinal = this.getPosition(left);
+			this.snapNodeTo(left, initial.x, initial.y);
+			promises.push(this.animateNodeMovement(left, initial, leftFinal, durationMs));
+		}
+
+		const right = `dummy-${Number(nodeId)}-R`;
+		if (this.nodes.get(right)) {
+			const rightFinal = this.getPosition(right);
+			this.snapNodeTo(right, initial.x, initial.y);
+			promises.push(this.animateNodeMovement(right, initial, rightFinal, durationMs));
+		}
+
+		await Promise.all(promises);
 	}
 
 	async animateLegsShrink(nodeId: string | number, durationMs?: number) {
-		const left = `dummy-${Number(nodeId)}-L`;
-		const right = `dummy-${Number(nodeId)}-R`;
 		const final = this.getPosition(nodeId);
 		const promises: Promise<void>[] = [];
-		try {
-			if (this.nodes.get(left)) promises.push(this.animateNodeMovement(left, this.getPosition(left), final, durationMs));
-		} catch {}
-		try {
-			if (this.nodes.get(right)) promises.push(this.animateNodeMovement(right, this.getPosition(right), final, durationMs));
-		} catch {}
+
+		const left = `dummy-${Number(nodeId)}-L`;
+		if (this.nodes.get(left)) promises.push(this.animateNodeMovement(left, this.getPosition(left), final, durationMs));
+
+		const right = `dummy-${Number(nodeId)}-R`;
+		if (this.nodes.get(right)) promises.push(this.animateNodeMovement(right, this.getPosition(right), final, durationMs));
+
 		await Promise.all(promises);
 	}
 
@@ -202,11 +245,28 @@ export class NetworkAnimator {
 		} catch {}
 	}
 
-	async animateAnnotateNode(annotation: string, nodeId?: string | number) {
+	findRootNode(): Node | null {
+		let root: Node | null = null;
+		for (const node of this.nodes.get()) {
+			if (node.parent === undefined && node.id !== this.infoNodeId) {
+				root = node;
+				break;
+			}
+		}
+		return root;
+	}
+
+	async animateAnnotateNode(annotation: string, nodeId: string | number | null) {
 		try {
 			await this.changeInfoNodeAnnotation(annotation);
-			if (nodeId === undefined) this.snapNodeTo(this.infoNodeId, 0, 0);
-			else this.snapNodeAbove(this.infoNodeId, nodeId, this.infoNodeAboveOffset);
+			if (nodeId === null) {
+				// find root node
+				const root = this.findRootNode();
+				if (root) await this.snapNodeAbove(this.infoNodeId, root.id, this.infoNodeAboveOffset);
+				else await this.snapNodeTo(this.infoNodeId, 0, 0);
+			} else {
+				await this.snapNodeAbove(this.infoNodeId, nodeId, this.infoNodeAboveOffset);
+			}
 		} catch {}
 	}
 
@@ -216,6 +276,7 @@ export class NetworkAnimator {
 	 * calculates an approximate scale to fit them into the container with padding.
 	 */
 	async animateFit(durationMs: number = 1000, paddingPx: number = 40): Promise<void> {
-		this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
+		// this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
+		if (this.network) this.network.fit();
 	}
 }
