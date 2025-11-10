@@ -44,6 +44,7 @@
 				sortMethod: 'directed',
 				shakeTowards: 'roots',
 				levelSeparation: 100,
+				treeSpacing: 0,
 			},
 		},
 		physics: false,
