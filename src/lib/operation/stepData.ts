@@ -194,6 +194,7 @@ export namespace Step {
 				public oldNodeId: number,
 				public successorNodeId: number,
 				public successorValue: number,
+				public successorParentId: number,
 				public startSnapshot: DataStructure,
 				public endSnapshot: DataStructure,
 			) {
@@ -205,13 +206,14 @@ export namespace Step {
 			oldNodeId: number,
 			successorNodeId: number,
 			successorValue: number,
+			successorParentId: number,
 			startSnapshot: DataStructure,
 			endSnapshot: DataStructure,
 		): StepData {
 			return new StepData(
 				0,
 				StepType.BSTree.ReplaceWithInorderSuccessor,
-				new ReplaceWithInorderSuccessorData(oldNodeId, successorNodeId, successorValue, startSnapshot, endSnapshot),
+				new ReplaceWithInorderSuccessorData(oldNodeId, successorNodeId, successorValue, successorParentId, startSnapshot, endSnapshot),
 			);
 		}
 

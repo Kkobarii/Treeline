@@ -208,7 +208,7 @@ export class BSTree extends DataStructure {
 		}
 
 		current.value = successor.value;
-		data.step(Step.BSTree.ReplaceWithInorderSuccessor(current.id, successor.id, successor.value, startSnapshot, this.snapshot()));
+		data.step(Step.BSTree.ReplaceWithInorderSuccessor(current.id, successor.id, successor.value, succParent.id, startSnapshot, this.snapshot()));
 		current.id = successor.id;
 
 		return true;

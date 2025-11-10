@@ -3,12 +3,16 @@ import { Step } from '$lib/operation/stepData';
 import type { BSTree } from '$lib/structures/bsTree';
 import { getDummyNodeId } from '$lib/utils/graphs';
 import { relationTextToSymbol } from '$lib/utils/utils';
+import { get } from 'svelte/store';
 
 // Minimal renderer API expected by handlers. Implementations may be more permissive.
 export type RendererAPI = {
 	ensureTree: (t: BSTree) => void;
 	addNode: (id: number, value: number, parentId?: number, direction?: 'left' | 'right') => void;
-	removeNode: (id: number, parentId?: number, direction?: 'left' | 'right') => void;
+	removeNode: (id: number | string, parentId?: number, direction?: 'left' | 'right') => void;
+	unlinkNode: (parentId: number, childId: number) => void;
+	linkNode: (parentId: number, childId: number, direction: 'left' | 'right') => void;
+	addDummyNode: (parentId: number, direction: 'left' | 'right') => void;
 	clearDisconnectedDummyNodes: () => void;
 	animateFit: () => Promise<void>;
 	animateNodeGrowth: (id: number | string) => Promise<void>;
@@ -223,20 +227,28 @@ export async function handleRelinkSuccessorChildBackward(renderer: RendererAPI, 
 export async function handleReplaceWithInorderSuccessorForward(renderer: RendererAPI, data: Step.BSTree.ReplaceWithInorderSuccessorData) {
 	await renderer.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 
+	// Remove dummy children of successor if any
 	await renderer.animateLegsShrink(data.successorNodeId);
+	renderer.removeNode(getDummyNodeId(data.successorNodeId, 'right'));
+	renderer.removeNode(getDummyNodeId(data.successorNodeId, 'left'));
+	
+	// Unlink successor from its parent
+	renderer.unlinkNode(data.successorParentId, data.successorNodeId);
+	renderer.addDummyNode(data.successorParentId, 'left');
 
-	if (renderer.edges) {
-		renderer.edges.remove(`edge-${data.successorNodeId}-left`);
-		renderer.edges.remove(`edge-${data.successorNodeId}-right`);
-	}
+	// Move back to new dummy position
+	const dummyPos = renderer.getPosition(getDummyNodeId(data.successorParentId, 'left'));
+	renderer.snapNodeTo(data.successorNodeId, dummyPos.x, dummyPos.y);
+	
+	// Shrink old node
+	await renderer.animateNodeShrink(data.oldNodeId);
 
+	// Move successor to old node's position
 	await renderer.animateNodeMovement(
 		data.successorNodeId,
 		renderer.getPosition(data.successorNodeId),
 		renderer.getPosition(data.oldNodeId),
 	);
-
-	await renderer.animateNodeShrink(data.oldNodeId);
 }
 
 export async function handleReplaceWithInorderSuccessorBackward(renderer: RendererAPI, data: Step.BSTree.ReplaceWithInorderSuccessorData) {

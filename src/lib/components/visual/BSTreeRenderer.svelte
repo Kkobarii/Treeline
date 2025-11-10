@@ -138,16 +138,22 @@
 		edges.add({ id: `edge-${nodeId}-right`, from: nodeId, to: getDummyNodeId(nodeId, 'right'), dashes: true });
 	}
 
-	export function removeNode(nodeId: number, parentId?: number, direction?: 'left' | 'right') {
+	export function removeNode(nodeId: number | string, parentId?: number, direction?: 'left' | 'right') {
 		const connectedEdges = network.getConnectedEdges(nodeId);
 		edges.remove(connectedEdges);
 		nodes.remove(nodeId);
 
-		if (nodes.get(getDummyNodeId(nodeId, 'left'))) nodes.remove(getDummyNodeId(nodeId, 'left'));
-		if (nodes.get(getDummyNodeId(nodeId, 'right'))) nodes.remove(getDummyNodeId(nodeId, 'right'));
+		if (typeof nodeId === 'number') {
+			if (nodes.get(getDummyNodeId(nodeId, 'left'))) nodes.remove(getDummyNodeId(nodeId, 'left'));
+			if (nodes.get(getDummyNodeId(nodeId, 'right'))) nodes.remove(getDummyNodeId(nodeId, 'right'));
+		}
 
 		if (parentId === undefined || direction === undefined) return;
 
+		addDummyNode(parentId, direction);
+	}
+
+	export function addDummyNode(parentId: number, direction: 'left' | 'right') {
 		nodes.add({ id: getDummyNodeId(parentId, direction), color: 'transparent' });
 		edges.add({ id: `edge-${parentId}-${direction}`, from: parentId, to: getDummyNodeId(parentId, direction), dashes: true });
 
@@ -161,6 +167,42 @@
 
 			nodes.remove(node.id!);
 			nodes.add(node);
+		}
+	}
+
+	export function linkNode(parentId: number, childId: number) {
+		let parentNode = nodes.get(parentId);
+		if (!parentNode) return;
+
+		let childNode = nodes.get(childId);
+		if (!childNode) return;
+
+		const direction = childNode.value! < parentNode.value! ? 'left' : 'right';
+		const edgeId = `edge-${parentId}-${direction}`;
+
+		nodes.remove(getDummyNodeId(parentId, direction));
+		edges.remove(edgeId);
+
+		edges.add({ id: edgeId, from: parentId, to: childId });
+	}
+
+	export function unlinkNode(parentId: number, childId: number) {
+		let parentNode = nodes.get(parentId);
+		if (!parentNode) return;
+
+		let childNode = nodes.get(childId);
+		if (!childNode) return;
+
+		let childEdges = network.getConnectedEdges(childId);
+
+		for (const edgeId of childEdges) {
+			const edge = edges.get(edgeId);
+			if (edge && edge.from === parentId) {
+				// set edge as transparent
+				edges.update({ id: edgeId, hidden: true });
+				console.log('Unlinked edge', edgeId);
+				break;
+			}
 		}
 	}
 
