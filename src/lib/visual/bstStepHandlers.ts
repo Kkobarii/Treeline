@@ -6,23 +6,29 @@ import { relationTextToSymbol } from '$lib/utils/utils';
 import type { BSTreeAnimator } from './bstAnimator';
 
 export async function handleStartForward(renderer: BSTreeAnimator, operationManager: OperationManager) {
+	renderer.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
+
 	const info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
 	await Promise.all([renderer.animateAnnotateNode(info, null), renderer.animateNodeGrowth('info-node')]);
 }
 
-export function handleStartBackward(renderer: BSTreeAnimator, _operationManager: OperationManager) {
-	renderer.hideInfoNode();
+export async function handleStartBackward(renderer: BSTreeAnimator, operationManager: OperationManager) {
+	// renderer.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
+
+	const info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
+	await Promise.all([renderer.animateAnnotateNode(info, null), renderer.animateNodeGrowth('info-node')]);
 }
 
 export function handleEndForward(renderer: BSTreeAnimator, operationManager: OperationManager) {
-	renderer.hideInfoNode();
-	// ensure tree has the state of operation end
 	renderer.ensureTree(operationManager.getCurrentOperation().endSnapshot as BSTree);
+
+	renderer.hideInfoNode();
 }
 
-export function handleEndBackward(renderer: BSTreeAnimator, _operationManager: OperationManager) {
-	// same as forward for now; orchestrator will restore snapshots
+export function handleEndBackward(renderer: BSTreeAnimator, operationManager: OperationManager) {
 	renderer.hideInfoNode();
+
+	renderer.ensureTree(operationManager.getCurrentOperation().endSnapshot as BSTree);
 }
 
 export async function handleCreateRootForward(renderer: BSTreeAnimator, data: Step.BSTree.CreateRootData) {

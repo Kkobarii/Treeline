@@ -120,7 +120,6 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 				} else {
 					this.addNodeRaw(n);
 					// animate growth for newly-added visible nodes
-					this.animateNodeGrowth(n.id!);
 				}
 			}
 
@@ -131,7 +130,7 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 					this.removeNodeRaw(existingNode.id!);
 				} else if (existingNode.id !== this.infoNodeId && !existingNode.id.toString().startsWith('dummy-')) {
 					// ensure font size matches configured nodeOptions
-					this.updateNodeRaw([{ id: existingNode.id!, font: { size: (this.nodeOptions as any).font.size } } as any]);
+					this.updateNodeRaw(existingNode);
 				}
 			}
 
@@ -150,6 +149,9 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 	protected reorderChildNodes(parentId: number | string, addedNodeId: number | string) {
 		for (const parentEdge of this.network.getConnectedEdges(parentId)) {
 			const childId = (this.edges.get(parentEdge) as any).to;
+
+			if (childId === parentId) continue; // skip self-loops
+
 			const rightChildNode = this.nodes.get(childId as number) as any;
 
 			if (rightChildNode) {
@@ -170,8 +172,6 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 			this.removeNodeRaw(getDummyNodeId(parentId, direction));
 			this.removeEdgeRaw(edgeId);
 			this.addEdgeRaw({ id: edgeId, from: parentId, to: nodeId });
-
-			console.log('Added edge', edgeId, 'from', parentId, 'to', nodeId);
 
 			if (direction === 'left') {
 				this.reorderChildNodes(parentId, nodeId);
@@ -208,10 +208,10 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 		if (parent === null || direction === null) return;
 
 		// recreate dummy node for parent
-		this.addNodeRaw({ id: getDummyNodeId(parent.id, direction), color: 'transparent' });
-		this.addEdgeRaw({ id: `edge-${parent.id}-${direction}`, from: parent.id, to: getDummyNodeId(parent.id, direction), dashes: true });
+		this.addNodeRaw({ id: getDummyNodeId(parent.id!, direction), color: 'transparent' });
+		this.addEdgeRaw({ id: `edge-${parent.id}-${direction}`, from: parent.id, to: getDummyNodeId(parent.id!, direction), dashes: true });
 		if (direction === 'left') {
-			this.reorderChildNodes(parent.id, getDummyNodeId(parent.id, direction));
+			this.reorderChildNodes(parent.id!, getDummyNodeId(parent.id!, direction));
 		}
 	}
 
@@ -257,5 +257,32 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 				this.addNodeRaw(node);
 			}
 		} catch {}
+	}
+
+	getParent(nodeId: string | number): Node | null {
+		try {
+			const connectedEdges = this.network.getConnectedEdges(nodeId);
+			for (const edgeId of connectedEdges) {
+				const edge = this.edges.get(edgeId);
+				if (edge && edge.to! === nodeId) {
+					return this.nodes.get(edge.from!);
+				}
+			}
+		} catch {}
+		return null;
+	}
+
+	getDirectionFromParent(nodeId: string | number): 'left' | 'right' | null {
+		const parent = this.getParent(nodeId);
+		if (!parent) return null;
+
+		for (const edgeId of this.network.getConnectedEdges(parent.id!)) {
+			const edge = this.edges.get(edgeId);
+			if (edge && edge.to! === nodeId) {
+				if (edge.id!.toString().endsWith('-left')) return 'left';
+				if (edge.id!.toString().endsWith('-right')) return 'right';
+			}
+		}
+		return null;
 	}
 }

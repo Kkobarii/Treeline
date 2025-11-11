@@ -1,9 +1,7 @@
 import { addAnimation } from '$lib/animation/animator';
 import type { DataSet } from 'vis-data';
-import type { Edge, Network, NodeOptions, Position } from 'vis-network';
+import type { Edge, Network, Node, NodeOptions, Position } from 'vis-network';
 import { clamp } from './utils/positioning';
-
-type Node = any;
 
 export interface NetworkAnimatorOpts {
 	network: Network;
@@ -13,15 +11,6 @@ export interface NetworkAnimatorOpts {
 	infoNodeOptions?: NodeOptions;
 }
 
-// Re-export the BST-specific animator under the historical name so other
-// modules that import `NetworkAnimator` from this module keep working.
-export { BSTreeAnimator as NetworkAnimator } from './bstAnimator';
-
-/**
- * BaseNetworkAnimator: provides low-level, structure-agnostic operations
- * on the vis Network and DataSets. Methods are public where callers may
- * use them, and protected where intended for subclass use only.
- */
 export class BaseNetworkAnimator {
 	network: Network;
 	nodes: DataSet<Node>;
@@ -38,32 +27,44 @@ export class BaseNetworkAnimator {
 
 	// --- low-level dataset/network ops ---
 	protected addNodeRaw(node: Node) {
+		console.debug('addNodeRaw', node);
 		try {
 			this.nodes.add(node);
 		} catch {}
 	}
 
 	protected updateNodeRaw(node: Node) {
+		console.debug('updateNodeRaw', node);
 		try {
 			this.nodes.update(node);
 		} catch {}
 	}
 
 	protected removeNodeRaw(id: string | number) {
+		console.debug('removeNodeRaw', id);
 		try {
 			this.nodes.remove(id);
 		} catch {}
 	}
 
 	protected addEdgeRaw(edge: Edge) {
+		console.debug('addEdgeRaw', edge);
 		try {
 			this.edges.add(edge);
 		} catch {}
 	}
 
 	protected removeEdgeRaw(id: string | number) {
+		console.debug('removeEdgeRaw', id);
 		try {
 			this.edges.remove(id);
+		} catch {}
+	}
+
+	protected updateEdgeRaw(edge: Edge) {
+		console.debug('updateEdgeRaw', edge);
+		try {
+			this.edges.update(edge);
 		} catch {}
 	}
 
@@ -75,37 +76,6 @@ export class BaseNetworkAnimator {
 			const node = this.nodes.get(nodeId as any) as any;
 			return { x: node?.x ?? 0, y: node?.y ?? 0 };
 		}
-	}
-
-	getParent(nodeId: string | number): Node | null {
-		console.log('getParent of', nodeId);
-		console.log('nodes:', this.nodes.get());
-		try {
-			const connectedEdges = this.network.getConnectedEdges(nodeId);
-			for (const edgeId of connectedEdges) {
-				const edge = this.edges.get(edgeId);
-				if (edge && edge.to! === nodeId) {
-					return this.nodes.get(edge.from!);
-				}
-			}
-		} catch {}
-		return null;
-	}
-
-	getDirectionFromParent(nodeId: string | number): 'left' | 'right' | null {
-		const parent = this.getParent(nodeId);
-		if (!parent) return null;
-		console.log('getDirectionFromParent', nodeId, 'parent', parent.id);
-
-		for (const edgeId of this.network.getConnectedEdges(parent.id)) {
-			const edge = this.edges.get(edgeId);
-			if (edge && edge.to! === nodeId) {
-				console.log('found edge', edge.id);
-				if (edge.id!.toString().endsWith('-left')) return 'left';
-				if (edge.id!.toString().endsWith('-right')) return 'right';
-			}
-		}
-		return null;
 	}
 
 	protected async moveNode(nodeId: string | number, x: number, y: number) {

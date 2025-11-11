@@ -19,7 +19,6 @@
 		operationManager.addEventListener(EventType.CurrentOperationChanged, (e: Event) => {
 			const event = e as CustomEvent<CurrentOperationChangedEvent>;
 			if (!operationManager.getShowSteps()) {
-				// pass the animator instance from the renderer component so handlers operate on the animator directly
 				playOperation(renderer?.getAnimator?.(), operationManager, event.detail);
 			}
 		});
@@ -32,7 +31,6 @@
 		});
 
 		operationManager.addEventListener(EventType.ShowStepsToggled, async () => {
-			// clear any ongoing animations
 			clearAnimations();
 
 			if (operationManager.getShowSteps()) {
@@ -40,13 +38,13 @@
 					currentStepId: operationManager.getCurrentStepIndex(),
 					currentStep: operationManager.getCurrentStep(),
 					direction: ChangeDirection.Forward,
-				} as any);
+				});
 			} else {
 				await playOperation(renderer?.getAnimator?.(), operationManager, {
 					currentOperationId: operationManager.getCurrentOperationIndex(),
 					currentOperation: operationManager.getCurrentOperation(),
 					direction: ChangeDirection.Forward,
-				} as any);
+				});
 			}
 		});
 	});
