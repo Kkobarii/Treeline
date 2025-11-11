@@ -11,18 +11,28 @@ export interface NetworkAnimatorOpts {
 	infoNodeOptions?: NodeOptions;
 }
 
+const DEFAULT_ANIMATION_DURATION_MS = 500;
+
 export class BaseNetworkAnimator {
 	network: Network;
 	nodes: DataSet<Node>;
 	edges: DataSet<Edge>;
 	nodeOptions: NodeOptions;
-	movementDurationMs: number = 500;
+	animationDurationMs: number = DEFAULT_ANIMATION_DURATION_MS;
 
 	constructor(opts: NetworkAnimatorOpts) {
 		this.network = opts.network;
 		this.nodes = opts.nodes;
 		this.edges = opts.edges;
 		this.nodeOptions = opts.nodeOptions;
+	}
+
+	public setAnimationDuration(durationMs: number) {
+		this.animationDurationMs = durationMs;
+	}
+
+	public resetAnimationDuration() {
+		this.animationDurationMs = DEFAULT_ANIMATION_DURATION_MS;
 	}
 
 	// --- low-level dataset/network ops ---
@@ -93,11 +103,10 @@ export class BaseNetworkAnimator {
 		return this.moveNode(nodeId, x, y);
 	}
 
-	animateNodeMovement(nodeId: string | number, from: Position, to: Position, durationMs?: number): Promise<void> {
-		const dur = durationMs ?? this.movementDurationMs;
+	animateNodeMovement(nodeId: string | number, from: Position, to: Position): Promise<void> {
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / dur);
+				const t = Math.min(1, elapsed / this.animationDurationMs);
 				const x = from.x + (to.x - from.x) * t;
 				const y = from.y + (to.y - from.y) * t;
 				try {
@@ -136,23 +145,23 @@ export class BaseNetworkAnimator {
 		}
 	}
 
-	animateNodeGrowth(nodeId: string | number, durationMs: number = 300): Promise<void> {
+	animateNodeGrowth(nodeId: string | number): Promise<void> {
 		const finalSize = this.getNodeFontSize(nodeId);
-		return this.changeNodeSize(nodeId, 0, finalSize, durationMs);
+		return this.changeNodeSize(nodeId, 0, finalSize);
 	}
 
-	animateNodeShrink(nodeId: string | number, durationMs: number = 300): Promise<void> {
+	animateNodeShrink(nodeId: string | number): Promise<void> {
 		const startSize = this.getNodeFontSize(nodeId);
-		return this.changeNodeSize(nodeId, startSize, 0, durationMs);
+		return this.changeNodeSize(nodeId, startSize, 0);
 	}
 
 	/**
 	 * Generic helper to animate a node font-size from startSize to endSize
 	 */
-	protected changeNodeSize(nodeId: string | number, startSize: number, endSize: number, durationMs: number = 300): Promise<void> {
+	protected changeNodeSize(nodeId: string | number, startSize: number, endSize: number): Promise<void> {
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / durationMs);
+				const t = Math.min(1, elapsed / this.animationDurationMs);
 				const size = Math.max(0, startSize + (endSize - startSize) * t);
 				try {
 					this.nodes.update({ id: nodeId, font: { size } } as any);
@@ -167,11 +176,11 @@ export class BaseNetworkAnimator {
 		});
 	}
 
-	animateNodeOpacityChange(nodeId: string | number, fromOpacity: number, toOpacity: number, durationMs: number = 300): Promise<void> {
+	animateNodeOpacityChange(nodeId: string | number, fromOpacity: number, toOpacity: number): Promise<void> {
 		const fontSize = this.getNodeFontSize(nodeId);
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / durationMs);
+				const t = Math.min(1, elapsed / this.animationDurationMs);
 				const opacity = clamp(fromOpacity + (toOpacity - fromOpacity) * t, 0, 1);
 				try {
 					this.nodes.update({ id: nodeId, opacity: opacity, font: { size: fontSize * opacity } } as any);
@@ -191,10 +200,19 @@ export class BaseNetworkAnimator {
 			this.nodes.update({ id: nodeId, color } as any);
 		} catch {}
 	}
+
 	resetNodeColor(nodeId: string | number) {
 		try {
 			this.nodes.update({ id: nodeId, color: (this.nodeOptions as any).color } as any);
 		} catch {}
+	}
+
+	resetFormatting() {
+		for (const node of this.nodes.get()) {
+			try {
+				this.updateNodeRaw({ id: node.id, color: this.nodeOptions?.color, font: this.nodeOptions?.font } as any);
+			} catch {}
+		}
 	}
 
 	async animateFit(durationMs: number = 1000) {

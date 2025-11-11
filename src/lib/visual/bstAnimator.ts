@@ -85,16 +85,16 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 			if (this.nodes.get(left)) {
 				const leftFinal = this.getPosition(left);
 				await this.snapNodeTo(left, parentPos.x, parentPos.y);
-				promises.push(this.animateNodeMovement(left, parentPos, leftFinal, durationMs));
+				promises.push(this.animateNodeMovement(left, parentPos, leftFinal));
 			}
 			if (this.nodes.get(right)) {
 				const rightFinal = this.getPosition(right);
 				await this.snapNodeTo(right, parentPos.x, parentPos.y);
-				promises.push(this.animateNodeMovement(right, parentPos, rightFinal, durationMs));
+				promises.push(this.animateNodeMovement(right, parentPos, rightFinal));
 			}
 		} else {
-			if (this.nodes.get(left)) promises.push(this.animateNodeMovement(left, this.getPosition(left), parentPos, durationMs));
-			if (this.nodes.get(right)) promises.push(this.animateNodeMovement(right, this.getPosition(right), parentPos, durationMs));
+			if (this.nodes.get(left)) promises.push(this.animateNodeMovement(left, this.getPosition(left), parentPos));
+			if (this.nodes.get(right)) promises.push(this.animateNodeMovement(right, this.getPosition(right), parentPos));
 		}
 
 		await Promise.all(promises);
@@ -119,7 +119,6 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 					this.updateNodeRaw(n);
 				} else {
 					this.addNodeRaw(n);
-					// animate growth for newly-added visible nodes
 				}
 			}
 
@@ -128,9 +127,6 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 			for (const existingNode of this.nodes.get()) {
 				if (!newNodeIds.has(existingNode.id) && existingNode.id !== this.infoNodeId) {
 					this.removeNodeRaw(existingNode.id!);
-				} else if (existingNode.id !== this.infoNodeId && !existingNode.id.toString().startsWith('dummy-')) {
-					// ensure font size matches configured nodeOptions
-					this.updateNodeRaw(existingNode);
 				}
 			}
 

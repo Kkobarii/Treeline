@@ -1,39 +1,54 @@
 import type { StepData } from '$lib/operation/operationData';
-import type { CurrentOperationChangedEvent, CurrentStepChangedEvent, OperationManager } from '$lib/operation/operationManager';
+import {
+	ChangeDirection,
+	type CurrentOperationChangedEvent,
+	type CurrentStepChangedEvent,
+	type OperationManager,
+} from '$lib/operation/operationManager';
 import type { BSTree } from '$lib/structures/bsTree';
 import { StepType, type StepTypeValue } from '$lib/structures/dataStructure';
 import type { BSTreeAnimator } from './bstAnimator';
 import * as StepHandlers from './bstStepHandlers';
 
 export async function playOperation(renderer: BSTreeAnimator, operationManager: OperationManager, opEvent: CurrentOperationChangedEvent) {
+	if (opEvent.currentOperation.operation === 'Empty') return;
+
 	operationManager.setLocked(true);
 	try {
+		console.log('Play full operation (fast playback)', opEvent);
+
 		renderer.clearDisconnectedDummyNodes();
 
-		if (opEvent.currentOperation.endSnapshot) {
-			renderer.ensureTree(opEvent.currentOperation.endSnapshot as BSTree);
+		const operation = opEvent.currentOperation;
+
+		renderer.ensureTree(operation.startSnapshot as BSTree);
+		renderer.resetFormatting();
+
+		if (opEvent.direction === ChangeDirection.Forward) {
+			const steps = operation.steps;
+			// iterate over the inner steps (skip Start at 0 and End at last)
+			for (let i = 0; i < steps.length - 1; i++) {
+				const step = steps[i];
+				try {
+					console.log(`Play operation step ${step.type} (fast playback)`, step);
+					await routeStep(step, renderer, operationManager, true);
+					await new Promise(resolve => setTimeout(resolve, 50));
+				} catch (err) {
+					// swallow per-step errors so the fast playback completes
+					console.warn('Fast operation playback step error', err);
+				}
+			}
 		}
 
-		if (opEvent.currentOperation.operation !== 'Empty') {
-			// Handle next to last step (last step is 'End' which we can skip)
-			const steps = opEvent.currentOperation.steps;
-			const targetStep = steps[steps.length - 2];
+		// ensure final authoritative snapshot and fit view
+		if (operation.endSnapshot) renderer.ensureTree(operation.endSnapshot as BSTree);
 
-			console.log(`Play operation to step ${targetStep.type} (final)`, targetStep);
-
-			// restore start snapshot for the target step
-			if (targetStep.startSnapshot) {
-				renderer.ensureTree(targetStep.startSnapshot as BSTree);
-			}
-
-			// route to this step
-			if (opEvent.direction !== 'backward') {
-				await routeStep(targetStep, renderer, operationManager);
-			}
-		}
+		// hide info node
+		renderer.hideInfoNode();
 
 		renderer.clearDisconnectedDummyNodes();
 		await renderer.animateFit();
+		console.log('Finished full operation playback');
 	} finally {
 		operationManager.setLocked(false);
 	}

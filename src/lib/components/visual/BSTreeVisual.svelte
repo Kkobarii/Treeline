@@ -33,14 +33,22 @@
 		operationManager.addEventListener(EventType.ShowStepsToggled, async () => {
 			clearAnimations();
 
+			const animator = renderer?.getAnimator?.();
+
 			if (operationManager.getShowSteps()) {
-				await playStep(renderer?.getAnimator?.(), operationManager, {
+				// Entering step-by-step mode: disable operation-playback
+				animator?.resetAnimationDuration();
+				await playStep(animator, operationManager, {
 					currentStepId: operationManager.getCurrentStepIndex(),
 					currentStep: operationManager.getCurrentStep(),
 					direction: ChangeDirection.Forward,
 				});
 			} else {
-				await playOperation(renderer?.getAnimator?.(), operationManager, {
+				// Switching to operations mode: enable operation-playback using
+				// the animator's persisted default. The animator will shorten
+				// durations for the fast step-through.
+				animator?.setAnimationDuration(75);
+				await playOperation(animator, operationManager, {
 					currentOperationId: operationManager.getCurrentOperationIndex(),
 					currentOperation: operationManager.getCurrentOperation(),
 					direction: ChangeDirection.Forward,
