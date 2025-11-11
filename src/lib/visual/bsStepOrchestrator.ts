@@ -1,42 +1,35 @@
 import type { CurrentOperationChangedEvent, CurrentStepChangedEvent, OperationManager } from '$lib/operation/operationManager';
 import type { BSTree } from '$lib/structures/bsTree';
 import { StepType, type StepTypeValue } from '$lib/structures/dataStructure';
-import type { RendererAPI } from './bstStepHandlers';
+import type { NetworkAnimator } from '$lib/visual/networkAnimator';
 import * as Handlers from './bstStepHandlers';
 
-/**
- * Orchestrator: sequences per-step animations using handlers and the renderer.
- * It is responsible for locking/unlocking the OperationManager while animations run,
- * restoring authoritative snapshots when required, and awaiting fit animations.
- */
-
-export async function playOperation(renderer: RendererAPI, operationManager: OperationManager, opEvent: CurrentOperationChangedEvent) {
+export async function playOperation(renderer: NetworkAnimator, operationManager: OperationManager, opEvent: CurrentOperationChangedEvent) {
 	operationManager.setLocked(true);
 	try {
 		// ensure the tree reflects the operation end state
-		if (opEvent.currentOperation && opEvent.currentOperation.endSnapshot) {
+		if (opEvent.currentOperation && opEvent.currentOperation.endSnapshot && renderer) {
 			renderer.ensureTree(opEvent.currentOperation.endSnapshot as BSTree);
+			await renderer.animateFit();
 		}
-
-		await renderer.animateFit();
 	} finally {
 		operationManager.setLocked(false);
 	}
 }
 
-export async function playStep(renderer: RendererAPI, operationManager: OperationManager, stepEvent: CurrentStepChangedEvent) {
+export async function playStep(renderer: NetworkAnimator, operationManager: OperationManager, stepEvent: CurrentStepChangedEvent) {
 	operationManager.setLocked(true);
 	console.log('playStep', stepEvent);
 	try {
-		renderer.clearDisconnectedDummyNodes();
+		renderer?.clearDisconnectedDummyNodes();
 
 		const currentStep = stepEvent.direction === 'backward' ? stepEvent.previousStep : stepEvent.currentStep;
 		if (!currentStep) return;
 
 		// restore start or end snapshot appropriate for the direction
-		if (stepEvent.direction === 'forward' && currentStep.startSnapshot) {
+		if (stepEvent.direction === 'forward' && currentStep.startSnapshot && renderer) {
 			renderer.ensureTree(currentStep.startSnapshot as BSTree);
-		} else if (stepEvent.direction === 'backward' && currentStep.endSnapshot) {
+		} else if (stepEvent.direction === 'backward' && currentStep.endSnapshot && renderer) {
 			renderer.ensureTree(currentStep.endSnapshot as BSTree);
 		}
 
@@ -102,14 +95,14 @@ export async function playStep(renderer: RendererAPI, operationManager: Operatio
 		}
 
 		// after handler run, restore authoritative snapshot for the step end
-		if (stepEvent.direction === 'forward' && stepEvent.currentStep?.endSnapshot) {
+		if (stepEvent.direction === 'forward' && stepEvent.currentStep?.endSnapshot && renderer) {
 			renderer.ensureTree(stepEvent.currentStep.endSnapshot as BSTree);
 		}
-		if (stepEvent.direction === 'backward' && stepEvent.currentStep?.startSnapshot) {
+		if (stepEvent.direction === 'backward' && stepEvent.currentStep?.startSnapshot && renderer) {
 			renderer.ensureTree(stepEvent.currentStep.startSnapshot as BSTree);
 		}
 
-		renderer.clearDisconnectedDummyNodes();
+		renderer?.clearDisconnectedDummyNodes();
 		// await renderer.animateFit();
 	} finally {
 		operationManager.setLocked(false);
