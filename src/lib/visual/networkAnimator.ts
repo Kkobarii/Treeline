@@ -88,6 +88,15 @@ export class BaseNetworkAnimator {
 		}
 	}
 
+	areNodesConnected(nodeId1: string | number, nodeId2: string | number): boolean {
+		try {
+			const connected = this.network.getConnectedNodes(nodeId1);
+			return connected.includes(nodeId1 as any);
+		} catch {
+			return false;
+		}
+	}
+
 	protected async moveNode(nodeId: string | number, x: number, y: number) {
 		try {
 			await (this.network as any).moveNode(nodeId, x, y);
@@ -161,7 +170,7 @@ export class BaseNetworkAnimator {
 	protected changeNodeSize(nodeId: string | number, startSize: number, endSize: number): Promise<void> {
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / this.animationDurationMs);
+				const t = Math.min(1, elapsed / (this.animationDurationMs / 5));
 				const size = Math.max(0, startSize + (endSize - startSize) * t);
 				try {
 					this.nodes.update({ id: nodeId, font: { size } } as any);
@@ -210,6 +219,7 @@ export class BaseNetworkAnimator {
 	resetFormatting() {
 		for (const node of this.nodes.get()) {
 			try {
+				if (node.id.toString().startsWith('dummy-')) continue;
 				this.updateNodeRaw({ id: node.id, color: this.nodeOptions?.color, font: this.nodeOptions?.font } as any);
 			} catch {}
 		}
@@ -223,5 +233,17 @@ export class BaseNetworkAnimator {
 				this.network.fit();
 			} catch {}
 		}
+	}
+
+	async hideNode(nodeId: string | number) {
+		try {
+			this.updateNodeRaw({ id: nodeId, hidden: true } as any);
+		} catch {}
+	}
+
+	async showNode(nodeId: string | number) {
+		try {
+			this.updateNodeRaw({ id: nodeId, hidden: false } as any);
+		} catch {}
 	}
 }

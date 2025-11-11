@@ -57,7 +57,7 @@ export async function playOperation(renderer: BSTreeAnimator, operationManager: 
 export async function playStep(renderer: BSTreeAnimator, operationManager: OperationManager, stepEvent: CurrentStepChangedEvent) {
 	operationManager.setLocked(true);
 	try {
-		renderer.clearDisconnectedDummyNodes();
+		// renderer.clearDisconnectedDummyNodes();
 		const isForward = stepEvent.direction === 'forward' || stepEvent.direction === 'unknown';
 
 		const currentStep = isForward ? stepEvent.currentStep : stepEvent.previousStep;

@@ -187,7 +187,7 @@ export class BSTree extends DataStructure {
 		data.step(Step.BSTree.FoundInorderSuccessor(current.id, successor.id, successor.value));
 
 		if (succParent !== current && successor.right) {
-			let startSnapshot = this.snapshot();
+			let startSnapshot2 = this.snapshot();
 			succParent.left = successor.right;
 			data.step(
 				Step.BSTree.RelinkSuccessorChild(
@@ -196,19 +196,32 @@ export class BSTree extends DataStructure {
 					succParent.id,
 					succParent.value,
 					successor.id,
-					startSnapshot,
+					startSnapshot2,
 					this.snapshot(),
 				),
 			);
 		}
 
 		let startSnapshot = this.snapshot();
+		if (succParent !== current && !successor.right) {
+			succParent.left = null;
+		}
+
 		if (current.right === successor) {
 			current.right = successor.right;
 		}
 
 		current.value = successor.value;
-		data.step(Step.BSTree.ReplaceWithInorderSuccessor(current.id, successor.id, successor.value, succParent.id, startSnapshot, this.snapshot()));
+		data.step(
+			Step.BSTree.ReplaceWithInorderSuccessor(
+				current.id,
+				successor.id,
+				successor.value,
+				succParent.id,
+				startSnapshot,
+				this.snapshot(),
+			),
+		);
 		current.id = successor.id;
 
 		return true;

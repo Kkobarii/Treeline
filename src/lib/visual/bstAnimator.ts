@@ -26,6 +26,15 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 		} catch {}
 	}
 
+	public addNodeRaw(node: Node): void {
+		super.addNodeRaw(node);
+		let parent = this.getParent(node.id!);
+
+		if (parent) {
+			this.reorderChildNodes(parent.id!, node.id!);
+		}
+	}
+
 	getPositionAbove(nodeId: string | number, offset?: number): Position {
 		const pos = this.getPosition(nodeId);
 		return { x: pos.x, y: pos.y - (offset ?? this.infoNodeAboveOffset) };
@@ -49,9 +58,7 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 	}
 
 	async hideInfoNode() {
-		try {
-			this.updateNodeRaw({ id: this.infoNodeId, hidden: true } as any);
-		} catch {}
+		this.hideNode(this.infoNodeId);
 	}
 
 	findRootNode(): Node | null {
@@ -74,7 +81,7 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 		} catch {}
 	}
 
-	protected async animateLegsMove(nodeId: string | number, grow: boolean, durationMs?: number) {
+	protected async animateLegsMove(nodeId: string | number, grow: boolean) {
 		const parentPos = this.getPosition(nodeId);
 		const promises: Promise<void>[] = [];
 
@@ -100,18 +107,18 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 		await Promise.all(promises);
 	}
 
-	async animateLegsGrowth(nodeId: string | number, durationMs?: number) {
-		return this.animateLegsMove(nodeId, true, durationMs);
+	async animateLegsGrowth(nodeId: string | number) {
+		return this.animateLegsMove(nodeId, true);
 	}
 
-	async animateLegsShrink(nodeId: string | number, durationMs?: number) {
-		return this.animateLegsMove(nodeId, false, durationMs);
+	async animateLegsShrink(nodeId: string | number) {
+		return this.animateLegsMove(nodeId, false);
 	}
 
 	// --- BST-specific dataset operations ---
 	ensureTree(tree: any) {
 		try {
-			const newData = bsTreetoGraph(tree?.root ?? null);
+			const newData = bsTreetoGraph(tree.root ?? null);
 
 			// update existing nodes or add new ones
 			for (const n of newData.nodes.get()) {
@@ -139,7 +146,9 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 			}
 
 			this.clearDisconnectedDummyNodes();
-		} catch {}
+		} catch (err) {
+			console.warn('BSTreeAnimator.ensureTree error', err);
+		}
 	}
 
 	protected reorderChildNodes(parentId: number | string, addedNodeId: number | string) {
@@ -153,8 +162,8 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 			if (rightChildNode) {
 				if (rightChildNode.id === addedNodeId) continue;
 
-				this.removeNodeRaw(rightChildNode.id!);
-				this.addNodeRaw(rightChildNode);
+				super.removeNodeRaw(rightChildNode.id!);
+				super.addNodeRaw(rightChildNode);
 			}
 		}
 	}
@@ -182,7 +191,7 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 		this.addEdgeRaw({ id: getEdgeId(nodeId, 'right'), from: nodeId, to: getDummyNodeId(nodeId, 'right'), dashes: true });
 	}
 
-	removeNode(nodeId: number | string) {
+	removeNode(nodeId: number | string, ignoreParent = false) {
 		let parent = this.getParent(nodeId);
 		let direction = this.getDirectionFromParent(nodeId);
 
@@ -193,7 +202,7 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 		} catch {}
 		this.removeNodeRaw(nodeId);
 
-		// recreate dummy children
+		// remove dummy children
 		try {
 			if (this.nodes.get(getDummyNodeId(nodeId as any, 'left'))) this.removeNodeRaw(getDummyNodeId(nodeId as any, 'left'));
 		} catch {}
@@ -201,7 +210,7 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 			if (this.nodes.get(getDummyNodeId(nodeId as any, 'right'))) this.removeNodeRaw(getDummyNodeId(nodeId as any, 'right'));
 		} catch {}
 
-		if (parent === null || direction === null) return;
+		if (parent === null || direction === null || ignoreParent) return;
 
 		// recreate dummy node for parent
 		this.addNodeRaw({ id: getDummyNodeId(parent.id!, direction), color: 'transparent' });
@@ -232,6 +241,20 @@ export class BSTreeAnimator extends BaseNetworkAnimator {
 					this.removeEdgeRaw(edgeId as any);
 					break;
 				}
+			}
+		} catch {}
+	}
+
+	public linkNode(parentId: number, childId: number) {
+		try {
+			const parentNode = this.nodes.get(parentId) as any;
+			const childNode = this.nodes.get(childId) as any;
+			if (!parentNode || !childNode) return;
+			const direction = childNode.label < parentNode.label ? 'left' : 'right';
+			this.addEdgeRaw({ id: `edge-${parentId}-${direction}`, from: parentId, to: childId });
+
+			if (direction === 'left') {
+				this.reorderChildNodes(parentId, childId);
 			}
 		} catch {}
 	}

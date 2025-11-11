@@ -19,10 +19,9 @@ export function bsTreetoGraph(
 
 	if (parent !== null) {
 		const parentNode = nodes.get(parent);
-		const parentLabel = parentNode ? parentNode.label : undefined;
-		const parentValue =
-			typeof parentLabel === 'number' ? parentLabel : typeof parentLabel === 'string' ? Number(parentLabel) : undefined;
-		const direction = parentValue !== undefined && !Number.isNaN(parentValue) ? (root.value < parentValue ? 'left' : 'right') : 'left';
+		const parentLabel = parentNode!.label!;
+		const parentValue = Number(parentLabel)!;
+		const direction = root.value < parentValue ? 'left' : 'right';
 		const edgeId = getEdgeId(parent, direction);
 		edges.add({ id: edgeId, from: parent, to: nodeId });
 	}
@@ -40,7 +39,7 @@ export function bsTreetoGraph(
 			size: 0.1,
 			color: 'transparent',
 		});
-		edges.add({ id: `edge-${nodeId}-left`, from: nodeId, to: dummyId, dashes: true });
+		edges.add({ id: getEdgeId(nodeId, 'left'), from: nodeId, to: dummyId, dashes: true });
 	}
 
 	if (root.right) {
@@ -56,7 +55,7 @@ export function bsTreetoGraph(
 			size: 0.1,
 			color: 'transparent',
 		});
-		edges.add({ id: `edge-${nodeId}-right`, from: nodeId, to: dummyId, dashes: true });
+		edges.add({ id: getEdgeId(nodeId, 'right'), from: nodeId, to: dummyId, dashes: true });
 	}
 
 	return { nodes, edges };

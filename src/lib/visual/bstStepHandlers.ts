@@ -7,6 +7,7 @@ import type { BSTreeAnimator } from './bstAnimator';
 
 export async function handleStartForward(renderer: BSTreeAnimator, operationManager: OperationManager) {
 	renderer.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
+	renderer.resetFormatting();
 
 	const info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
 	await Promise.all([renderer.animateAnnotateNode(info, null), renderer.animateNodeGrowth('info-node')]);
@@ -186,14 +187,31 @@ export async function handleFoundInorderSuccessorBackward(renderer: BSTreeAnimat
 
 export async function handleRelinkSuccessorChildForward(renderer: BSTreeAnimator, data: Step.BSTree.RelinkSuccessorChildData) {
 	renderer.animateAnnotateNode(`Relink inorder successor's child`, data.childNodeId);
-	if (renderer.edges) {
-		const leftOrRight = data.childValue < data.newParentValue ? 'left' : 'right';
-		renderer.edges.remove(`edge-${data.successorNodeId}-${leftOrRight}`);
-		renderer.edges.add({ id: `edge-${data.newParentNodeId}-${leftOrRight}`, from: data.newParentNodeId, to: data.childNodeId });
-	}
+
+	let originalChildPos = renderer.getPosition(data.childNodeId);
+	let originalSuccessorPos = renderer.getPosition(data.successorNodeId);
+
+	renderer.unlinkNode(data.successorNodeId, data.childNodeId);
+	renderer.unlinkNode(data.newParentNodeId, data.successorNodeId);
+
+	renderer.addDummyNode(data.successorNodeId, 'right');
+
+	renderer.linkNode(data.newParentNodeId, data.childNodeId);
+
+	let newChildPos = renderer.getPosition(data.childNodeId);
+	let newSuccessorPos = renderer.getPosition(data.successorNodeId);
+
+	renderer.snapNodeTo(data.childNodeId, originalChildPos.x, originalChildPos.y);
+	renderer.snapNodeTo(data.successorNodeId, originalSuccessorPos.x, originalSuccessorPos.y);
+
+	await Promise.all([
+		renderer.animateNodeMovement(data.childNodeId, originalChildPos, newChildPos),
+		renderer.animateNodeMovement(data.successorNodeId, originalSuccessorPos, newSuccessorPos),
+	]);
 }
 
 export async function handleRelinkSuccessorChildBackward(renderer: BSTreeAnimator, data: Step.BSTree.RelinkSuccessorChildData) {
+	renderer.animateAnnotateNode(`Relink inorder successor's child`, data.childNodeId);
 	renderer.ensureTree(data.startSnapshot! as BSTree);
 }
 
@@ -201,30 +219,38 @@ export async function handleReplaceWithInorderSuccessorForward(
 	renderer: BSTreeAnimator,
 	data: Step.BSTree.ReplaceWithInorderSuccessorData,
 ) {
+	renderer.removeNode(getDummyNodeId(data.successorNodeId, 'right'), true);
+	renderer.removeNode(getDummyNodeId(data.successorNodeId, 'left'), true);
+
+	let promises: Promise<void>[] = [];
+
+	// Unlink successor from its parent if its the parents left child
+	if (renderer.areNodesConnected(data.successorParentId, data.successorNodeId)) {
+		renderer.unlinkNode(data.successorParentId, data.successorNodeId);
+		renderer.addDummyNode(data.successorParentId, 'left');
+	}
+
 	await renderer.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 
-	// Remove dummy children of successor if any
-	await renderer.animateLegsShrink(data.successorNodeId);
-	renderer.removeNode(getDummyNodeId(data.successorNodeId, 'right'));
-	renderer.removeNode(getDummyNodeId(data.successorNodeId, 'left'));
-
-	// Unlink successor from its parent
-	renderer.unlinkNode(data.successorParentId, data.successorNodeId);
-	renderer.addDummyNode(data.successorParentId, 'left');
-
 	// Move back to new dummy position
-	const dummyPos = renderer.getPosition(getDummyNodeId(data.successorParentId, 'left'));
-	renderer.snapNodeTo(data.successorNodeId, dummyPos.x, dummyPos.y);
+	// const dummyPos = renderer.getPosition(getDummyNodeId(data.successorParentId, 'left'));
+	// renderer.snapNodeTo(data.successorNodeId, dummyPos.x, dummyPos.y);
 
 	// Shrink old node
-	await renderer.animateNodeShrink(data.oldNodeId);
+	promises.push(renderer.animateNodeShrink(data.oldNodeId));
 
 	// Move successor to old node's position
-	await renderer.animateNodeMovement(
-		data.successorNodeId,
-		renderer.getPosition(data.successorNodeId),
-		renderer.getPosition(data.oldNodeId),
+	promises.push(
+		renderer.animateNodeMovement(
+			data.successorNodeId,
+			renderer.getPosition(data.successorNodeId),
+			renderer.getPosition(data.oldNodeId),
+		),
 	);
+
+	await Promise.all(promises);
+
+	renderer.snapNodeTo(data.successorNodeId, renderer.getPosition(data.oldNodeId).x, renderer.getPosition(data.oldNodeId).y);
 }
 
 export async function handleReplaceWithInorderSuccessorBackward(
@@ -232,6 +258,9 @@ export async function handleReplaceWithInorderSuccessorBackward(
 	data: Step.BSTree.ReplaceWithInorderSuccessorData,
 ) {
 	renderer.ensureTree(data.startSnapshot! as BSTree);
+	renderer.resetFormatting();
+	renderer.setNodeColor(data.successorNodeId, '#7CFC00');
+	renderer.setNodeColor(data.oldNodeId, '#FF4500');
 	await renderer.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 }
 
