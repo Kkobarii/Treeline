@@ -13,7 +13,6 @@
 	onMount(() => {
 		operationManager.addEventListener(EventType.InputValueChanged, (e: Event) => {
 			const event = e as CustomEvent<InputValueChangedEvent>;
-			console.log('InputValueChanged event received:', event.detail.inputValue);
 			manualValue = event.detail.inputValue;
 		});
 
