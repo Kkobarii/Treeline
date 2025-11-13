@@ -1,8 +1,7 @@
 <script>
+	import { bubbleSortPseudocode } from '$lib/samplePseudocode';
 	import { flip } from 'svelte/animate';
 	import { cubicInOut } from 'svelte/easing';
-
-	import { bubbleSortPseudocode } from '$lib/samplePseudocode';
 
 	// Fake unsorted data
 	let numbers = $state([7, 2, 9, 4, 1, 6]);

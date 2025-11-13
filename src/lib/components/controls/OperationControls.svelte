@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-
 	import type { OperationData } from '$lib/operation/operationData';
 	import { CurrentOperationChangedEvent, CurrentStepChangedEvent, EventType, OperationManager } from '$lib/operation/operationManager';
+	import { onMount } from 'svelte';
 
 	export let operationManager: OperationManager;
 
