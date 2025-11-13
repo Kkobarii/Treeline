@@ -31,13 +31,13 @@
 		<div>
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Insert, Math.floor(Math.random() * 1000))}
+				on:click={() => operationManager.operation(OperationType.BSTree.Insert, Math.floor(Math.random() * 1000))}
 				disabled={locked}>
 				Insert Random Node
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager?.reset()}
+				on:click={() => operationManager.reset()}
 				disabled={locked}>
 				Reset
 			</button>
@@ -50,23 +50,23 @@
 				max="999"
 				min="0"
 				on:keyup={e => enforceMinMax(e.target as HTMLInputElement)}
-				on:change={e => operationManager?.updateCurrentValue(manualValue)}
+				on:change={e => operationManager.updateCurrentValue(manualValue)}
 				disabled={locked} />
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Insert, manualValue)}
+				on:click={() => operationManager.operation(OperationType.BSTree.Insert, manualValue)}
 				disabled={locked}>
 				Insert
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Remove, manualValue)}
+				on:click={() => operationManager.operation(OperationType.BSTree.Remove, manualValue)}
 				disabled={locked}>
 				Remove
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager?.operation(OperationType.BSTree.Find, manualValue)}
+				on:click={() => operationManager.operation(OperationType.BSTree.Find, manualValue)}
 				disabled={locked}>
 				Find
 			</button>

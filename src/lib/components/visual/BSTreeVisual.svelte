@@ -1,63 +1,92 @@
 <script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
+	import { Network, type Edge, type Node, type Options } from 'vis-network';
+	import { DataSet } from 'vis-data';
+	import { bsTreetoGraph } from '$lib/utils/graphs';
+	import type { OperationManager } from '$lib/operation/operationManager';
 	import {
 		ChangeDirection,
-		CurrentOperationChangedEvent,
-		CurrentStepChangedEvent,
 		EventType,
-		type OperationManager,
+		type CurrentOperationChangedEvent,
+		type CurrentStepChangedEvent,
 	} from '$lib/operation/operationManager';
-	import { onMount } from 'svelte';
+	import { BSTreeAnimator } from '$lib/animators/bstAnimator';
 	import { clearAnimations } from '$lib/animators/animator';
-	import BSTreeRenderer from '$lib/components/visual/BSTreeRenderer.svelte';
-	import { playStep, playOperation } from '$lib/visual/animationOrchestrator';
+	import { AnimationOrchestrator } from '$lib/visual/animationOrchestrator';
+	import { BSTStepHandlers } from '$lib/visual/bstStepHandlers';
+	import { Colors } from '$lib/assets/colors';
 
 	export let operationManager: OperationManager;
 
-	let renderer: any = null;
+	let container: HTMLElement | null = null;
+	let nodes: DataSet<Node>;
+	let edges: DataSet<Edge>;
+	let network: Network;
+
+	let animator: BSTreeAnimator;
+	let orchestrator: AnimationOrchestrator;
+
+	const nodeOptions = {
+		shape: 'box',
+		color: Colors.Node,
+		font: { color: 'black', size: 30 },
+	};
+
+	const infoNodeOptions = {
+		shape: 'ellipse',
+		color: Colors.Info,
+		font: { color: 'black', size: 15 },
+		id: 'info-node',
+		aboveOffset: 50,
+	} as const;
+
+	const options: Options = {
+		layout: {
+			hierarchical: {
+				direction: 'UD',
+				sortMethod: 'directed',
+				shakeTowards: 'roots',
+				levelSeparation: 100,
+				treeSpacing: 0,
+			},
+		},
+		physics: false,
+		interaction: { dragNodes: false },
+		nodes: nodeOptions,
+	};
 
 	onMount(() => {
-		operationManager.addEventListener(EventType.CurrentOperationChanged, (e: Event) => {
-			const event = e as CustomEvent<CurrentOperationChangedEvent>;
-			if (!operationManager.getShowSteps()) {
-				playOperation(renderer?.getAnimator?.(), operationManager, event.detail);
-			}
-		});
+		({ nodes, edges } = bsTreetoGraph(null));
+		network = new Network(container!, { nodes, edges }, options);
 
-		operationManager.addEventListener(EventType.CurrentStepChanged, (e: Event) => {
-			const event = e as CustomEvent<CurrentStepChangedEvent>;
-			if (operationManager.getShowSteps()) {
-				playStep(renderer?.getAnimator?.(), operationManager, event.detail);
-			}
-		});
+		animator = new BSTreeAnimator({ network, nodes, edges, infoNodeOptions, nodeOptions });
+		animator.createInfoNode();
 
-		operationManager.addEventListener(EventType.ShowStepsToggled, async () => {
-			clearAnimations();
+		orchestrator = new AnimationOrchestrator(animator, operationManager, new BSTStepHandlers());
 
-			const animator = renderer?.getAnimator?.();
-
-			if (operationManager.getShowSteps()) {
-				// Entering step-by-step mode: disable operation-playback
-				animator?.resetAnimationDuration();
-				await playStep(animator, operationManager, {
-					currentStepId: operationManager.getCurrentStepIndex(),
-					currentStep: operationManager.getCurrentStep(),
-					direction: ChangeDirection.Forward,
-				});
-			} else {
-				// Switching to operations mode: enable operation-playback using
-				// the animator's persisted default. The animator will shorten
-				// durations for the fast step-through.
-				animator?.setAnimationDuration(75);
-				await playOperation(animator, operationManager, {
-					currentOperationId: operationManager.getCurrentOperationIndex(),
-					currentOperation: operationManager.getCurrentOperation(),
-					direction: ChangeDirection.Forward,
-				});
+		network.on('selectNode', params => {
+			if (params.nodes.length === 1 && operationManager) {
+				const node = nodes.get(params.nodes[0]) as Node;
+				let label = node.label!;
+				operationManager.updateCurrentValue(parseInt(label));
 			}
 		});
 	});
+
+	onDestroy(() => {
+		try {
+			network?.destroy();
+		} catch (e) {
+			// ignore
+		}
+	});
+
+	export function getAnimator() {
+		return animator;
+	}
 </script>
 
-<BSTreeRenderer
-	bind:this={renderer}
-	{operationManager} />
+<div
+	bind:this={container}
+	class="h-full w-full rounded border border-gray-300">
+</div>
