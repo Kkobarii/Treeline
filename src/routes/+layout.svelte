@@ -9,7 +9,7 @@
 <ModeWatcher />
 
 <nav class="bg-primary-light w-full">
-	<div class="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4 backdrop-blur-sm">
+	<div class="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4 backdrop-blur-sm">
 		<a
 			href="/"
 			class="flex items-center gap-3 no-underline"

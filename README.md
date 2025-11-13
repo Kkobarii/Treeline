@@ -21,3 +21,9 @@ npm run dev
 
 - Additional data structures: AVL, Red-Black, Heap, Graphs.
 - Sorting visualizations (bubble, quicksort, mergesort).
+
+https://www.figma.com/color-palette-generator/?colors=7F7810-BD284C-E77F5A-E09FDB-DEC7AB
+
+https://tints.dev/palette/v1:Z3JlZW58NEM1RjMwfDUwMHxwfDB8MHwwfDEwMHxt
+https://tints.dev/palette/v1:cGlua3xGNkQzQzF8MzAwfHB8MHwwfDB8MTAwfG0
+https://tints.dev/palette/v1:Z3JleXwyOTI4MUF8NzAwfHB8MHwtM3wwfDEwMHxt
