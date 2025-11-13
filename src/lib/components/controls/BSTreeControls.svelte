@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { OperationType } from '$lib/structures/dataStructure';
-	import { EventType, InputValueChangedEvent, type OperationManager } from '$lib/operation/operationManager';
-	import { enforceMinMax } from '$lib/utils/utils';
 	import { onMount } from 'svelte';
+
+	import { EventType, InputValueChangedEvent, type OperationManager } from '$lib/operation/operationManager';
+	import { OperationType } from '$lib/structures/dataStructure';
+	import { enforceMinMax } from '$lib/utils/utils';
+
 	import OperationControls from './OperationControls.svelte';
 
 	export let operationManager: OperationManager;

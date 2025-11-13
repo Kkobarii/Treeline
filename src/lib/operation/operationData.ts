@@ -1,4 +1,5 @@
 import { DataStructure } from '$lib/structures/dataStructure';
+
 import { Step } from './stepData';
 
 export class OperationData {

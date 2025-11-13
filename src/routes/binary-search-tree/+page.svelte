@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { OperationManager } from '$lib/operation/operationManager';
-	import { StructureType } from '$lib/structures/dataStructure';
 	import BSTreeControls from '$lib/components/controls/BSTreeControls.svelte';
 	import BSTreeVisual from '$lib/components/visual/BSTreeVisual.svelte';
+	import { OperationManager } from '$lib/operation/operationManager';
+	import { StructureType } from '$lib/structures/dataStructure';
 
 	let operationManager: OperationManager = new OperationManager(StructureType.BSTree);
 </script>

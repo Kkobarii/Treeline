@@ -1,5 +1,6 @@
 import { BSTree } from '$lib/structures/bsTree';
 import { StructureType, type DataStructure } from '$lib/structures/dataStructure';
+
 import { deepCopy } from './utils';
 
 export function createEmptyStructure(type: StructureType): DataStructure {

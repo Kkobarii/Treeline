@@ -1,5 +1,7 @@
-import { bsTreetoGraph, getDummyNodeId, getEdgeId } from '$lib/utils/graphs';
 import type { Node, NodeOptions, Position } from 'vis-network';
+
+import { bsTreetoGraph, getDummyNodeId, getEdgeId } from '$lib/utils/graphs';
+
 import { DataStructureAnimator, type DataStructureAnimatorOpts } from './dataStructureAnimator';
 
 export class BSTreeAnimator extends DataStructureAnimator {

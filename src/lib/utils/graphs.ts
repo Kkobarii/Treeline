@@ -1,6 +1,7 @@
-import type { BSTreeNode } from '$lib/structures/bsTree';
 import { DataSet } from 'vis-data';
 import { type Edge, type Node } from 'vis-network';
+
+import type { BSTreeNode } from '$lib/structures/bsTree';
 
 export function bsTreetoGraph(
 	root: BSTreeNode | null,

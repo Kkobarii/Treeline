@@ -6,6 +6,7 @@ import type { BSTree } from '$lib/structures/bsTree';
 import { StepType, type StepTypeValue } from '$lib/structures/dataStructure';
 import { getDummyNodeId } from '$lib/utils/graphs';
 import { relationTextToSymbol } from '$lib/utils/utils';
+
 import type { BSTreeAnimator } from '../animators/bstAnimator';
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 import { StepHandlersBase } from './stepHandlersBase';

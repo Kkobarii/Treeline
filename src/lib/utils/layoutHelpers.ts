@@ -1,7 +1,8 @@
-import type { BSTree } from '$lib/structures/bsTree';
-import { bsTreetoGraph } from '$lib/utils/graphs';
 import { DataSet } from 'vis-data';
 import { Network } from 'vis-network';
+
+import type { BSTree } from '$lib/structures/bsTree';
+import { bsTreetoGraph } from '$lib/utils/graphs';
 
 /**
  * Compute layout positions for a BSTree by creating a temporary offscreen

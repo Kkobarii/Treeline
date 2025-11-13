@@ -1,5 +1,6 @@
 import type { StepData } from '$lib/operation/operationData';
 import type { OperationManager } from '$lib/operation/operationManager';
+
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 
 export abstract class StepHandlersBase {

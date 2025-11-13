@@ -1,6 +1,7 @@
 import { OperationData } from '$lib/operation/operationData';
 import { Step } from '$lib/operation/stepData';
 import { deepCopy } from '$lib/utils/utils';
+
 import { DataNode, DataStructure, OperationType, type OperationTypeValue } from './dataStructure';
 
 export class BSTreeNode extends DataNode {

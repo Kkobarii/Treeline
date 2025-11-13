@@ -7,6 +7,7 @@ import {
 	type CurrentStepChangedEvent,
 	type OperationManager,
 } from '$lib/operation/operationManager';
+
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 import type { StepHandlersBase } from './stepHandlersBase';
 

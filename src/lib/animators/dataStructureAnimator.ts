@@ -1,6 +1,8 @@
-import { addAnimation } from '$lib/animators/animator';
 import type { DataSet } from 'vis-data';
 import type { Edge, Network, Node, NodeOptions, Position } from 'vis-network';
+
+import { addAnimation } from '$lib/animators/animator';
+
 import { clamp } from '../utils/positioning';
 
 export interface DataStructureAnimatorOpts {

@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
-	import { Network, type Edge, type Node, type Options } from 'vis-network';
+	import { onDestroy, onMount } from 'svelte';
 	import { DataSet } from 'vis-data';
-	import { bsTreetoGraph } from '$lib/utils/graphs';
+	import { Network, type Edge, type Node, type Options } from 'vis-network';
+
+	import { clearAnimations } from '$lib/animators/animator';
+	import { BSTreeAnimator } from '$lib/animators/bstAnimator';
+	import { Colors } from '$lib/assets/colors';
 	import type { OperationManager } from '$lib/operation/operationManager';
 	import {
 		ChangeDirection,
@@ -10,11 +13,9 @@
 		type CurrentOperationChangedEvent,
 		type CurrentStepChangedEvent,
 	} from '$lib/operation/operationManager';
-	import { BSTreeAnimator } from '$lib/animators/bstAnimator';
-	import { clearAnimations } from '$lib/animators/animator';
+	import { bsTreetoGraph } from '$lib/utils/graphs';
 	import { AnimationOrchestrator } from '$lib/visual/animationOrchestrator';
 	import { BSTStepHandlers } from '$lib/visual/bstStepHandlers';
-	import { Colors } from '$lib/assets/colors';
 
 	export let operationManager: OperationManager;
 

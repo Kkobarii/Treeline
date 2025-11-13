@@ -1,4 +1,5 @@
 import { DataStructure, StepType } from '$lib/structures/dataStructure';
+
 import { StepData } from './operationData';
 
 export namespace Step {
@@ -213,7 +214,14 @@ export namespace Step {
 			return new StepData(
 				0,
 				StepType.BSTree.ReplaceWithInorderSuccessor,
-				new ReplaceWithInorderSuccessorData(oldNodeId, successorNodeId, successorValue, successorParentId, startSnapshot, endSnapshot),
+				new ReplaceWithInorderSuccessorData(
+					oldNodeId,
+					successorNodeId,
+					successorValue,
+					successorParentId,
+					startSnapshot,
+					endSnapshot,
+				),
 			);
 		}
 

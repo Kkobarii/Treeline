@@ -1,5 +1,6 @@
 import { StructureType, type OperationTypeValue } from '$lib/structures/dataStructure';
 import { createEmptyStructure, deepCopyStructure } from '$lib/utils/structures';
+
 import { OperationData, StepData } from './operationData';
 
 export enum EventType {
