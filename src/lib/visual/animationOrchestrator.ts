@@ -5,59 +5,59 @@ import {
 	type CurrentStepChangedEvent,
 	type OperationManager,
 } from '$lib/operation/operationManager';
-import type { BSTree } from '$lib/structures/bsTree';
 import { StepType, type StepTypeValue } from '$lib/structures/dataStructure';
-import type { BSTreeAnimator } from './bstAnimator';
+import type { BSTreeAnimator } from '../animators/bstAnimator';
+import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 import * as StepHandlers from './bstStepHandlers';
 
-export async function playOperation(renderer: BSTreeAnimator, operationManager: OperationManager, opEvent: CurrentOperationChangedEvent) {
-	if (opEvent.currentOperation.operation === 'Empty') return;
-
+export async function playOperation(
+	renderer: DataStructureAnimator,
+	operationManager: OperationManager,
+	opEvent: CurrentOperationChangedEvent,
+) {
 	operationManager.setLocked(true);
 	try {
 		console.log('Play full operation (fast playback)', opEvent);
 
-		renderer.clearDisconnectedDummyNodes();
-
 		const operation = opEvent.currentOperation;
 
-		renderer.ensureTree(operation.startSnapshot as BSTree);
 		renderer.resetFormatting();
 
-		if (opEvent.direction === ChangeDirection.Forward) {
+		if (opEvent.direction === ChangeDirection.Forward || opEvent.direction === ChangeDirection.Unknown) {
 			const steps = operation.steps;
-			// iterate over the inner steps (skip Start at 0 and End at last)
+			stepSetup(steps[0], renderer, true);
+
 			for (let i = 0; i < steps.length - 1; i++) {
-				const step = steps[i];
 				try {
-					console.log(`Play operation step ${step.type} (fast playback)`, step);
-					await routeStep(step, renderer, operationManager, true);
+					await animateStep(renderer, operationManager, steps[i], true);
 					await new Promise(resolve => setTimeout(resolve, 50));
 				} catch (err) {
-					// swallow per-step errors so the fast playback completes
+					console.warn('Fast operation playback step error', err);
+				}
+			}
+		} else if (opEvent.direction === ChangeDirection.Backward) {
+			const steps = operation.steps;
+			stepSetup(steps[steps.length - 1], renderer, false);
+
+			for (let i = steps.length - 1; i > 0; i--) {
+				try {
+					await animateStep(renderer, operationManager, steps[i], false);
+					await new Promise(resolve => setTimeout(resolve, 50));
+				} catch (err) {
 					console.warn('Fast operation playback step error', err);
 				}
 			}
 		}
 
-		// ensure final authoritative snapshot and fit view
-		if (operation.endSnapshot) renderer.ensureTree(operation.endSnapshot as BSTree);
-
-		// hide info node
-		renderer.hideInfoNode();
-
-		renderer.clearDisconnectedDummyNodes();
-		await renderer.animateFit();
 		console.log('Finished full operation playback');
 	} finally {
 		operationManager.setLocked(false);
 	}
 }
 
-export async function playStep(renderer: BSTreeAnimator, operationManager: OperationManager, stepEvent: CurrentStepChangedEvent) {
+export async function playStep(renderer: DataStructureAnimator, operationManager: OperationManager, stepEvent: CurrentStepChangedEvent) {
 	operationManager.setLocked(true);
 	try {
-		// renderer.clearDisconnectedDummyNodes();
 		const isForward = stepEvent.direction === 'forward' || stepEvent.direction === 'unknown';
 
 		const currentStep = isForward ? stepEvent.currentStep : stepEvent.previousStep;
@@ -65,32 +65,47 @@ export async function playStep(renderer: BSTreeAnimator, operationManager: Opera
 
 		console.log(`Play step ${currentStep.type} (${isForward ? 'forward' : 'backward'})`, currentStep);
 
-		// restore start or end snapshot appropriate for the direction
-		if (isForward && currentStep.startSnapshot) {
-			renderer.ensureTree(currentStep.startSnapshot as BSTree);
-		}
-		if (!isForward && currentStep.endSnapshot) {
-			renderer.ensureTree(currentStep.endSnapshot as BSTree);
-		}
-
-		// pick handler based on step type; call forward/backward variant
-		await routeStep(currentStep, renderer, operationManager, isForward);
-
-		// after handler run, restore authoritative snapshot for the step end
-		if (stepEvent.direction === 'forward' && stepEvent.currentStep?.endSnapshot && renderer) {
-			renderer.ensureTree(stepEvent.currentStep.endSnapshot as BSTree);
-		}
-		if (stepEvent.direction === 'backward' && stepEvent.currentStep?.startSnapshot && renderer) {
-			renderer.ensureTree(stepEvent.currentStep.startSnapshot as BSTree);
-		}
-
-		renderer.clearDisconnectedDummyNodes();
+		await animateStep(renderer, operationManager, currentStep, isForward);
 	} finally {
 		operationManager.setLocked(false);
 	}
 }
 
-async function routeStep(currentStep: StepData, renderer: BSTreeAnimator, operationManager: OperationManager, isForward: boolean = true) {
+async function animateStep(renderer: DataStructureAnimator, operationManager: OperationManager, currentStep: StepData, isForward: boolean) {
+	await stepSetup(currentStep, renderer, isForward);
+	await stepRoute(currentStep, renderer, operationManager, isForward);
+	await stepCleanup(currentStep, renderer, isForward);
+}
+
+async function stepSetup(currentStep: StepData, baseRenderer: DataStructureAnimator, isForward: boolean) {
+	let renderer = baseRenderer as BSTreeAnimator;
+	if (isForward && currentStep.startSnapshot) {
+		renderer.ensureTree(currentStep.startSnapshot);
+	}
+	if (!isForward && currentStep.endSnapshot) {
+		renderer.ensureTree(currentStep.endSnapshot);
+	}
+}
+
+async function stepCleanup(currentStep: StepData, baseRenderer: DataStructureAnimator, isForward: boolean) {
+	let renderer = baseRenderer as BSTreeAnimator;
+
+	if (isForward && currentStep.endSnapshot) {
+		renderer.ensureTree(currentStep.endSnapshot);
+	}
+	if (!isForward && currentStep.startSnapshot) {
+		renderer.ensureTree(currentStep.startSnapshot);
+	}
+}
+
+async function stepRoute(
+	currentStep: StepData,
+	baseRenderer: DataStructureAnimator,
+	operationManager: OperationManager,
+	isForward: boolean = true,
+) {
+	let renderer = baseRenderer as BSTreeAnimator;
+
 	switch (currentStep.type as StepTypeValue) {
 		case StepType.BSTree.Start:
 			if (isForward) await StepHandlers.handleStartForward(renderer, operationManager);

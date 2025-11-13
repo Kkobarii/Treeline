@@ -1,9 +1,9 @@
-import { addAnimation } from '$lib/animation/animator';
+import { addAnimation } from '$lib/animators/animator';
 import type { DataSet } from 'vis-data';
 import type { Edge, Network, Node, NodeOptions, Position } from 'vis-network';
-import { clamp } from './utils/positioning';
+import { clamp } from '../utils/positioning';
 
-export interface NetworkAnimatorOpts {
+export interface DataStructureAnimatorOpts {
 	network: Network;
 	nodes: DataSet<Node>;
 	edges: DataSet<Edge>;
@@ -13,14 +13,14 @@ export interface NetworkAnimatorOpts {
 
 const DEFAULT_ANIMATION_DURATION_MS = 500;
 
-export class BaseNetworkAnimator {
+export class DataStructureAnimator {
 	network: Network;
 	nodes: DataSet<Node>;
 	edges: DataSet<Edge>;
 	nodeOptions: NodeOptions;
 	animationDurationMs: number = DEFAULT_ANIMATION_DURATION_MS;
 
-	constructor(opts: NetworkAnimatorOpts) {
+	constructor(opts: DataStructureAnimatorOpts) {
 		this.network = opts.network;
 		this.nodes = opts.nodes;
 		this.edges = opts.edges;
@@ -91,7 +91,7 @@ export class BaseNetworkAnimator {
 	areNodesConnected(nodeId1: string | number, nodeId2: string | number): boolean {
 		try {
 			const connected = this.network.getConnectedNodes(nodeId1);
-			return connected.includes(nodeId1 as any);
+			return connected.includes(nodeId2 as any);
 		} catch {
 			return false;
 		}

@@ -4,7 +4,7 @@
 	import { DataSet } from 'vis-data';
 	import { bsTreetoGraph } from '$lib/utils/graphs';
 	import type { OperationManager } from '$lib/operation/operationManager';
-	import { BSTreeAnimator } from '$lib/visual/bstAnimator';
+	import { BSTreeAnimator } from '$lib/animators/bstAnimator';
 
 	let container: HTMLElement | null = null;
 

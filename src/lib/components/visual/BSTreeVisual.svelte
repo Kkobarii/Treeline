@@ -7,9 +7,9 @@
 		type OperationManager,
 	} from '$lib/operation/operationManager';
 	import { onMount } from 'svelte';
-	import { clearAnimations } from '$lib/animation/animator';
+	import { clearAnimations } from '$lib/animators/animator';
 	import BSTreeRenderer from '$lib/components/visual/BSTreeRenderer.svelte';
-	import { playStep, playOperation } from '$lib/visual/bsStepOrchestrator';
+	import { playStep, playOperation } from '$lib/visual/animationOrchestrator';
 
 	export let operationManager: OperationManager;
 

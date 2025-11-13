@@ -3,7 +3,7 @@ import { Step } from '$lib/operation/stepData';
 import type { BSTree } from '$lib/structures/bsTree';
 import { getDummyNodeId } from '$lib/utils/graphs';
 import { relationTextToSymbol } from '$lib/utils/utils';
-import type { BSTreeAnimator } from './bstAnimator';
+import type { BSTreeAnimator } from '../animators/bstAnimator';
 
 export async function handleStartForward(renderer: BSTreeAnimator, operationManager: OperationManager) {
 	renderer.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
@@ -224,6 +224,8 @@ export async function handleReplaceWithInorderSuccessorForward(
 
 	let promises: Promise<void>[] = [];
 
+	let oldSuccPos = renderer.getPosition(data.successorNodeId);
+
 	// Unlink successor from its parent if its the parents left child
 	if (renderer.areNodesConnected(data.successorParentId, data.successorNodeId)) {
 		renderer.unlinkNode(data.successorParentId, data.successorNodeId);
@@ -232,9 +234,8 @@ export async function handleReplaceWithInorderSuccessorForward(
 
 	await renderer.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 
-	// Move back to new dummy position
-	// const dummyPos = renderer.getPosition(getDummyNodeId(data.successorParentId, 'left'));
-	// renderer.snapNodeTo(data.successorNodeId, dummyPos.x, dummyPos.y);
+	// Move back to position
+	renderer.snapNodeTo(data.successorNodeId, oldSuccPos.x, oldSuccPos.y);
 
 	// Shrink old node
 	promises.push(renderer.animateNodeShrink(data.oldNodeId));
@@ -263,5 +264,3 @@ export async function handleReplaceWithInorderSuccessorBackward(
 	renderer.setNodeColor(data.oldNodeId, '#FF4500');
 	await renderer.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 }
-
-export default {};

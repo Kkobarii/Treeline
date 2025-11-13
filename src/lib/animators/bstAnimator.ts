@@ -1,13 +1,13 @@
 import { bsTreetoGraph, getDummyNodeId, getEdgeId } from '$lib/utils/graphs';
 import type { Node, NodeOptions, Position } from 'vis-network';
-import { BaseNetworkAnimator, type NetworkAnimatorOpts } from './networkAnimator';
+import { DataStructureAnimator, type DataStructureAnimatorOpts } from './dataStructureAnimator';
 
-export class BSTreeAnimator extends BaseNetworkAnimator {
+export class BSTreeAnimator extends DataStructureAnimator {
 	infoNodeOptions: NodeOptions | undefined;
 	infoNodeId: string = 'info-node';
 	infoNodeAboveOffset: number = 50;
 
-	constructor(opts: NetworkAnimatorOpts) {
+	constructor(opts: DataStructureAnimatorOpts) {
 		super(opts);
 		this.infoNodeOptions = opts.infoNodeOptions;
 	}
