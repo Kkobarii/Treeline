@@ -7,8 +7,9 @@
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { bsTreeToGraph } from '$lib/data-structures/utils/graphs';
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
-	import { BSTreeStepHandlers } from '$lib/da$lib/data-structures/structures/bsTree/bsTreeStepHandlerort { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
+	import { BSTreeStepHandler } from '$lib/data-structures/structures/bsTree/bsTreeStepHandler';
 	import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
+	import { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
 
 	export let operationManager: OperationManager;
 
@@ -61,7 +62,7 @@
 		annotator = new DataStructureAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
 		animator.createInfoNode();
 
-		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new BSTreeStepHandlers());
+		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new BSTreeStepHandler());
 
 		network.on('selectNode', params => {
 			if (params.nodes.length === 1 && operationManager) {
