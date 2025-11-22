@@ -7,7 +7,7 @@ import { StepType, type StepTypeValue } from '$lib/structures/dataStructure';
 import { getDummyNodeId } from '$lib/utils/graphs';
 import { relationTextToSymbol } from '$lib/utils/utils';
 
-import type { BSTreeAnimator } from '../animators/bstAnimator';
+import type { BSTreeAnimator } from '$lib/animators/bsTreeAnimator';
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 import { StepHandlersBase } from './stepHandlersBase';
 
@@ -55,7 +55,8 @@ async function handleCreateRootBackward(animator: BSTreeAnimator, data: Step.BST
 
 async function handleCreateLeafForward(animator: BSTreeAnimator, data: Step.BSTree.CreateLeafData) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
-	animator.addNode(data.nodeId, data.value, data.parentId, data.direction);
+	const childNumber = data.direction === 'left' ? 0 : 1;
+	animator.addNode(data.nodeId, data.value, data.parentId, childNumber);
 	await Promise.all([
 		animator.animateAnnotateNode(info, data.parentId),
 		animator.animateNodeGrowth(data.nodeId),
@@ -221,8 +222,10 @@ async function handleRelinkSuccessorChildBackward(animator: BSTreeAnimator, data
 }
 
 async function handleReplaceWithInorderSuccessorForward(animator: BSTreeAnimator, data: Step.BSTree.ReplaceWithInorderSuccessorData) {
-	animator.removeNode(getDummyNodeId(data.successorNodeId, 'right'), true);
-	animator.removeNode(getDummyNodeId(data.successorNodeId, 'left'), true);
+	if (animator.nodeExists(getDummyNodeId(data.successorNodeId, 0)))
+		animator.removeNode(getDummyNodeId(data.successorNodeId, 0), true);
+	if (animator.nodeExists(getDummyNodeId(data.successorNodeId, 1)))
+		animator.removeNode(getDummyNodeId(data.successorNodeId, 1), true);
 
 	let promises: Promise<void>[] = [];
 
@@ -231,7 +234,7 @@ async function handleReplaceWithInorderSuccessorForward(animator: BSTreeAnimator
 	// Unlink successor from its parent if its the parents left child
 	if (animator.areNodesConnected(data.successorParentId, data.successorNodeId)) {
 		animator.unlinkNode(data.successorParentId, data.successorNodeId);
-		animator.addDummyNode(data.successorParentId, 'left');
+		animator.addDummyNode(data.successorParentId, 0);
 	}
 
 	await animator.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
@@ -264,7 +267,7 @@ async function handleReplaceWithInorderSuccessorBackward(animator: BSTreeAnimato
 	await animator.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 }
 
-export class BSTStepHandlers extends StepHandlersBase {
+export class BSTreeStepHandlers extends StepHandlersBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, isForward: boolean) {
 		let animator = baseAnimator as BSTreeAnimator;
 		if (isForward && currentStep.startSnapshot) {

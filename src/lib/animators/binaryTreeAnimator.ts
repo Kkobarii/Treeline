@@ -1,10 +1,10 @@
 import type { Node, NodeOptions, Position } from 'vis-network';
 
-import { bsTreetoGraph, getDummyNodeId, getEdgeId } from '$lib/utils/graphs';
+import { bsTreeToGraph, getDummyNodeId, getEdgeId } from '$lib/utils/graphs';
 
 import { DataStructureAnimator, type DataStructureAnimatorOpts } from './dataStructureAnimator';
 
-export class BSTreeAnimator extends DataStructureAnimator {
+export class BinaryTreeAnimator extends DataStructureAnimator {
 	infoNodeOptions: NodeOptions | undefined;
 	infoNodeId: string = 'info-node';
 	infoNodeAboveOffset: number = 50;
@@ -30,11 +30,6 @@ export class BSTreeAnimator extends DataStructureAnimator {
 
 	public addNodeRaw(node: Node): void {
 		super.addNodeRaw(node);
-		let parent = this.getParent(node.id!);
-
-		if (parent) {
-			this.reorderChildNodes(parent.id!, node.id!);
-		}
 	}
 
 	getPositionAbove(nodeId: string | number, offset?: number): Position {
@@ -87,8 +82,8 @@ export class BSTreeAnimator extends DataStructureAnimator {
 		const parentPos = this.getPosition(nodeId);
 		const promises: Promise<void>[] = [];
 
-		const left = getDummyNodeId(nodeId, 'left');
-		const right = getDummyNodeId(nodeId, 'right');
+		const left = getDummyNodeId(nodeId, 0);
+		const right = getDummyNodeId(nodeId, 1);
 
 		if (grow) {
 			if (this.nodes.get(left)) {
@@ -117,85 +112,62 @@ export class BSTreeAnimator extends DataStructureAnimator {
 		return this.animateLegsMove(nodeId, false);
 	}
 
-	// --- BST-specific dataset operations ---
-	ensureTree(tree: any) {
-		try {
-			const newData = bsTreetoGraph(tree.root ?? null);
+	protected reorderChildNodes(parentId: number | string) {
+		const childrenList : Node[] = [];
+		console.log(`Reordering children of parent ${parentId}`);
 
-			// update existing nodes or add new ones
-			for (const n of newData.nodes.get()) {
-				if (this.nodes.get(n.id!)) {
-					this.updateNodeRaw(n);
-				} else {
-					this.addNodeRaw(n);
-				}
-			}
-
-			// remove nodes that are no longer present (except info node)
-			const newNodeIds = new Set(newData.nodes.get().map((n: any) => n.id));
-			for (const existingNode of this.nodes.get()) {
-				if (!newNodeIds.has(existingNode.id) && existingNode.id !== this.infoNodeId) {
-					this.removeNodeRaw(existingNode.id!);
-				}
-			}
-
-			// rebuild edges from authoritative graph
-			try {
-				this.edges.clear();
-			} catch {}
-			for (const e of newData.edges.get()) {
-				if (!this.edges.get(e.id!)) this.addEdgeRaw(e);
-			}
-
-			this.clearDisconnectedDummyNodes();
-		} catch (err) {
-			console.warn('BSTreeAnimator.ensureTree error', err);
-		}
-	}
-
-	protected reorderChildNodes(parentId: number | string, addedNodeId: number | string) {
 		for (const parentEdge of this.network.getConnectedEdges(parentId)) {
 			const childId = (this.edges.get(parentEdge) as any).to;
 
 			if (childId === parentId) continue; // skip self-loops
 
-			const rightChildNode = this.nodes.get(childId as number) as any;
+			const childNode = this.nodes.get(childId as number) as Node;
+			if (childNode) childrenList.push(childNode);
+		}
+		console.log(`Children of parent ${parentId}:`, childrenList.map(c => `${c.value}: ${c.id}`));
 
-			if (rightChildNode) {
-				if (rightChildNode.id === addedNodeId) continue;
+		// sort children by value
+		childrenList.sort((a, b) => {
+			if (a.value === undefined || b.value === undefined) return 0;
+			return (a.value as number) - (b.value as number);
+		});
+		console.log(`Reordered children of parent ${parentId}:`, childrenList.map(c => `${c.value}: ${c.id}`));
 
-				super.removeNodeRaw(rightChildNode.id!);
-				super.addNodeRaw(rightChildNode);
-			}
+		// remove and re-add edges in sorted order
+		for (const childNode of childrenList) {
+			console.log(`Re-linking child node ${childNode.id} with value ${childNode.value}`);
+			this.removeNodeRaw(childNode.id!);
+			this.addNodeRaw(childNode);
 		}
 	}
 
-	addNode(nodeId: number, value: number, parentId?: number, direction?: 'left' | 'right') {
+	addNode(nodeId: number, value: number | string, parentId?: number, childNumber?: number) {
 		if (this.nodes.get(nodeId)) return;
 		this.addNodeRaw({ id: nodeId, title: `Node ${nodeId}`, label: `${value}` });
 
-		if (parentId !== undefined && direction !== undefined) {
-			const edgeId = getEdgeId(parentId, direction);
-			this.removeNodeRaw(getDummyNodeId(parentId, direction));
+		if (parentId !== undefined && childNumber !== undefined) {
+			this.updateNodeRaw({ id: nodeId, label: value.toString(), title: `Node ${nodeId}: ${value}`, value: childNumber });
+			
+			const edgeId = getEdgeId(parentId, childNumber);
+			this.removeNodeRaw(getDummyNodeId(parentId, childNumber));
 			this.removeEdgeRaw(edgeId);
 			this.addEdgeRaw({ id: edgeId, from: parentId, to: nodeId });
 
-			if (direction === 'left') {
-				this.reorderChildNodes(parentId, nodeId);
-			}
+			this.reorderChildNodes(parentId);
 		}
 
-		if (!this.nodes.get(getDummyNodeId(nodeId, 'left'))) this.addNodeRaw({ id: getDummyNodeId(nodeId, 'left'), color: 'transparent' });
-		if (!this.nodes.get(getDummyNodeId(nodeId, 'right')))
-			this.addNodeRaw({ id: getDummyNodeId(nodeId, 'right'), color: 'transparent' });
+		if (!this.nodes.get(getDummyNodeId(nodeId, 0))) 
+			this.addNodeRaw({ id: getDummyNodeId(nodeId, 0), color: 'transparent' });
+		if (!this.nodes.get(getDummyNodeId(nodeId, 1)))
+			this.addNodeRaw({ id: getDummyNodeId(nodeId, 1), color: 'transparent' });
 
-		this.addEdgeRaw({ id: getEdgeId(nodeId, 'left'), from: nodeId, to: getDummyNodeId(nodeId, 'left'), dashes: true });
-		this.addEdgeRaw({ id: getEdgeId(nodeId, 'right'), from: nodeId, to: getDummyNodeId(nodeId, 'right'), dashes: true });
+		this.addEdgeRaw({ id: getEdgeId(nodeId, 0), from: nodeId, to: getDummyNodeId(nodeId, 0), dashes: true });
+		this.addEdgeRaw({ id: getEdgeId(nodeId, 1), from: nodeId, to: getDummyNodeId(nodeId, 1), dashes: true });
 	}
 
 	removeNode(nodeId: number | string, ignoreParent = false) {
 		let parent = this.getParent(nodeId);
-		let direction = this.getDirectionFromParent(nodeId);
+		let value = this.nodes.get(nodeId)!.value!;
 
 		// remove node and its edges
 		try {
@@ -206,20 +178,18 @@ export class BSTreeAnimator extends DataStructureAnimator {
 
 		// remove dummy children
 		try {
-			if (this.nodes.get(getDummyNodeId(nodeId as any, 'left'))) this.removeNodeRaw(getDummyNodeId(nodeId as any, 'left'));
+			if (this.nodes.get(getDummyNodeId(nodeId as any, 0))) this.removeNodeRaw(getDummyNodeId(nodeId as any, 0));
 		} catch {}
 		try {
-			if (this.nodes.get(getDummyNodeId(nodeId as any, 'right'))) this.removeNodeRaw(getDummyNodeId(nodeId as any, 'right'));
+			if (this.nodes.get(getDummyNodeId(nodeId as any, 1))) this.removeNodeRaw(getDummyNodeId(nodeId as any, 1));
 		} catch {}
 
-		if (parent === null || direction === null || ignoreParent) return;
+		if (parent === null || ignoreParent) return;
 
 		// recreate dummy node for parent
-		this.addNodeRaw({ id: getDummyNodeId(parent.id!, direction), color: 'transparent' });
-		this.addEdgeRaw({ id: `edge-${parent.id}-${direction}`, from: parent.id, to: getDummyNodeId(parent.id!, direction), dashes: true });
-		if (direction === 'left') {
-			this.reorderChildNodes(parent.id!, getDummyNodeId(parent.id!, direction));
-		}
+		this.addNodeRaw({ id: getDummyNodeId(parent.id!, value), color: 'transparent' });
+		this.addEdgeRaw({ id: `edge-${parent.id}-${value}`, from: parent.id, to: getDummyNodeId(parent.id!, value), dashes: true });
+		this.reorderChildNodes(parent.id!);
 	}
 
 	clearDisconnectedDummyNodes() {
@@ -252,31 +222,21 @@ export class BSTreeAnimator extends DataStructureAnimator {
 			const parentNode = this.nodes.get(parentId) as any;
 			const childNode = this.nodes.get(childId) as any;
 			if (!parentNode || !childNode) return;
-			const direction = childNode.label < parentNode.label ? 'left' : 'right';
-			this.addEdgeRaw({ id: `edge-${parentId}-${direction}`, from: parentId, to: childId });
 
-			if (direction === 'left') {
-				this.reorderChildNodes(parentId, childId);
-			}
+			const childNodeValue = childNode.value!;
+
+			this.addEdgeRaw({ id: `edge-${parentId}-${childNodeValue}`, from: parentId, to: childId });
+			this.reorderChildNodes(parentId);
 		} catch {}
 	}
 
 	// Recreate the dummy child for a parent in the given direction.
-	public addDummyNode(parentId: number, direction: 'left' | 'right') {
+	public addDummyNode(parentId: number, direction: 'left' | 'right' | number) {
 		try {
 			this.addNodeRaw({ id: getDummyNodeId(parentId, direction), color: 'transparent' });
 			this.addEdgeRaw({ id: `edge-${parentId}-${direction}`, from: parentId, to: getDummyNodeId(parentId, direction), dashes: true });
-			if (direction === 'left') {
-				const rightChildEdgeId = `edge-${parentId}-right`;
-				const rightChildEdge: any = this.edges.get(rightChildEdgeId as any);
-				if (!rightChildEdge || !(rightChildEdge as any).to) return;
-
-				const node = this.nodes.get((rightChildEdge as any).to as number) as any;
-				if (!node) return;
-
-				this.removeNodeRaw(node.id!);
-				this.addNodeRaw(node);
-			}
+			
+			this.reorderChildNodes(parentId);
 		} catch {}
 	}
 
@@ -290,20 +250,6 @@ export class BSTreeAnimator extends DataStructureAnimator {
 				}
 			}
 		} catch {}
-		return null;
-	}
-
-	getDirectionFromParent(nodeId: string | number): 'left' | 'right' | null {
-		const parent = this.getParent(nodeId);
-		if (!parent) return null;
-
-		for (const edgeId of this.network.getConnectedEdges(parent.id!)) {
-			const edge = this.edges.get(edgeId);
-			if (edge && edge.to! === nodeId) {
-				if (edge.id!.toString().endsWith('-left')) return 'left';
-				if (edge.id!.toString().endsWith('-right')) return 'right';
-			}
-		}
 		return null;
 	}
 }

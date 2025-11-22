@@ -5,10 +5,10 @@
 
 	import { Colors } from '$lib/assets/colors';
 	import type { OperationManager } from '$lib/operation/operationManager';
-	import { bsTreeToGraph } from '$lib/utils/graphs';
+	import { avlTreeToGraph as avlTreeToGraph } from '$lib/utils/graphs';
 	import { AnimationOrchestrator } from '$lib/visual/animationOrchestrator';
-	import { BSTreeStepHandlers } from '$lib/visual/bsTreeStepHandlers';
-	import { BSTreeAnimator } from '$lib/animators/bsTreeAnimator';
+	import { AVLTreeAnimator } from '$lib/animators/avlTreeAnimator';
+	import { AVLTreeStepHandlers } from '$lib/visual/avlTreeStepHandlers';
 
 	export let operationManager: OperationManager;
 
@@ -17,7 +17,7 @@
 	let edges: DataSet<Edge>;
 	let network: Network;
 
-	let animator: BSTreeAnimator;
+	let animator: AVLTreeAnimator;
 	let orchestrator: AnimationOrchestrator;
 
 	const nodeOptions = {
@@ -50,18 +50,18 @@
 	};
 
 	onMount(() => {
-		({ nodes, edges } = bsTreeToGraph(null));
+		({ nodes, edges } = avlTreeToGraph(null));
 		network = new Network(container!, { nodes, edges }, options);
 
-		animator = new BSTreeAnimator({ network, nodes, edges, infoNodeOptions, nodeOptions });
+		animator = new AVLTreeAnimator({ network, nodes, edges, infoNodeOptions, nodeOptions });
 		animator.createInfoNode();
 
-		orchestrator = new AnimationOrchestrator(animator, operationManager, new BSTreeStepHandlers());
+		orchestrator = new AnimationOrchestrator(animator, operationManager, new AVLTreeStepHandlers());
 
 		network.on('selectNode', params => {
 			if (params.nodes.length === 1 && operationManager) {
 				const node = nodes.get(params.nodes[0]) as Node;
-				console.log('Node selected:', node);
+                console.log('Node selected:', node);
 				let label = node.label!;
 				operationManager.updateCurrentValue(parseInt(label));
 			}

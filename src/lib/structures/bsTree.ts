@@ -24,13 +24,13 @@ export class BSTree extends DataStructure {
 
 	protected doOperation(type: OperationTypeValue, value: number | null, data: OperationData): void {
 		switch (type) {
-			case OperationType.BSTree.Insert:
+			case OperationType.Tree.Insert:
 				this.insert(value as number, data);
 				break;
-			case OperationType.BSTree.Remove:
+			case OperationType.Tree.Remove:
 				this.remove(value as number, data);
 				break;
-			case OperationType.BSTree.Find:
+			case OperationType.Tree.Find:
 				this.find(value as number, data);
 				break;
 			default:

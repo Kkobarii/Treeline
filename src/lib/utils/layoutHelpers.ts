@@ -2,7 +2,7 @@ import { DataSet } from 'vis-data';
 import { Network } from 'vis-network';
 
 import type { BSTree } from '$lib/structures/bsTree';
-import { bsTreetoGraph } from '$lib/utils/graphs';
+import { bsTreeToGraph } from '$lib/utils/graphs';
 
 /**
  * Compute layout positions for a BSTree by creating a temporary offscreen
@@ -10,7 +10,7 @@ import { bsTreetoGraph } from '$lib/utils/graphs';
  * Returns a Map<nodeId, Position>.
  */
 export async function computeLayoutForTree(tree: BSTree, options: any, containerSize?: { width: number; height: number }) {
-	const { nodes: newNodes, edges: newEdges } = bsTreetoGraph(tree.root);
+	const { nodes: newNodes, edges: newEdges } = bsTreeToGraph(tree.root);
 
 	// create offscreen div
 	const tempDiv = document.createElement('div');

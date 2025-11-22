@@ -3,13 +3,14 @@ import { deepCopy } from '$lib/utils/utils';
 
 export enum StructureType {
 	BSTree = 'BSTree',
+	AVLTree = 'AVLTree',
 }
 
 export const OperationType = {
-	BSTree: {
-		Insert: 'BSTree.Insert',
-		Find: 'BSTree.Find',
-		Remove: 'BSTree.Remove',
+	Tree: {
+		Insert: 'Tree.Insert',
+		Find: 'Tree.Find',
+		Remove: 'Tree.Remove',
 	},
 	// Stack: {
 	// 	Push: 'Stack.Push',
@@ -17,7 +18,8 @@ export const OperationType = {
 	// },
 } as const;
 
-export type OperationTypeValue = (typeof OperationType.BSTree)[keyof typeof OperationType.BSTree];
+export type OperationTypeValue =
+	| (typeof OperationType.Tree)[keyof typeof OperationType.Tree]
 // | (typeof OperationType.Stack)[keyof typeof OperationType.Stack];
 
 export const StepType = {
@@ -37,9 +39,29 @@ export const StepType = {
 		RelinkSuccessorChild: 'RelinkSuccessorChild',
 		ReplaceWithInorderSuccessor: 'ReplaceWithInorderSuccessor',
 	},
+	AVLTree: {
+		Start: 'Start',
+		End: 'End',
+		CreateRoot: 'CreateRoot',
+		CreateLeaf: 'CreateLeaf',
+		Compare: 'Compare',
+		Traverse: 'Traverse',
+		Drop: 'Drop',
+		Found: 'Found',
+		MarkToDelete: 'MarkToDelete',
+		Delete: 'Delete',
+		ReplaceWithChild: 'ReplaceWithChild',
+		RotateLeft: 'RotateLeft',
+		RotateRight: 'RotateRight',
+		FoundInorderSuccessor: 'FoundInorderSuccessor',
+		RelinkSuccessorChild: 'RelinkSuccessorChild',
+		ReplaceWithInorderSuccessor: 'ReplaceWithInorderSuccessor',
+	},
 };
 
-export type StepTypeValue = (typeof StepType.BSTree)[keyof typeof StepType.BSTree];
+export type StepTypeValue =
+	| (typeof StepType.BSTree)[keyof typeof StepType.BSTree]
+	| (typeof StepType.AVLTree)[keyof typeof StepType.AVLTree];
 
 export class DataNode {
 	id: number;

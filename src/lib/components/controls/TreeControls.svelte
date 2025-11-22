@@ -33,7 +33,7 @@
 		<div>
 			<button
 				type="button"
-				on:click={() => operationManager.operation(OperationType.BSTree.Insert, Math.floor(Math.random() * 1000))}
+				on:click={() => operationManager.operation(OperationType.Tree.Insert, Math.floor(Math.random() * 1000))}
 				disabled={locked}>
 				Insert Random Node
 			</button>
@@ -56,19 +56,19 @@
 				disabled={locked} />
 			<button
 				type="button"
-				on:click={() => operationManager.operation(OperationType.BSTree.Insert, manualValue)}
+				on:click={() => operationManager.operation(OperationType.Tree.Insert, manualValue)}
 				disabled={locked}>
 				Insert
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager.operation(OperationType.BSTree.Remove, manualValue)}
+				on:click={() => operationManager.operation(OperationType.Tree.Remove, manualValue)}
 				disabled={locked}>
 				Remove
 			</button>
 			<button
 				type="button"
-				on:click={() => operationManager.operation(OperationType.BSTree.Find, manualValue)}
+				on:click={() => operationManager.operation(OperationType.Tree.Find, manualValue)}
 				disabled={locked}>
 				Find
 			</button>

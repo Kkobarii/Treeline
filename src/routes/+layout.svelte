@@ -32,6 +32,9 @@
 				href="/binary-search-tree"
 				class="text-foreground text-xl hover:underline">Binary Search Tree</a>
 			<a
+				href="/avl-tree"
+				class="text-foreground text-xl hover:underline">AVL Tree</a>
+			<a
 				href="/sorting"
 				class="text-foreground text-xl hover:underline">Sorting</a>
 		</div>

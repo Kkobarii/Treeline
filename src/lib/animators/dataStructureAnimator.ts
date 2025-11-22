@@ -80,6 +80,14 @@ export class DataStructureAnimator {
 		} catch {}
 	}
 
+	nodeExists(nodeId: string | number): boolean {
+		try {
+			return this.nodes.get(nodeId as any) !== null;
+		} catch {
+			return false;
+		}
+	}
+
 	// --- positioning and movement ---
 	getPosition(nodeId: string | number): Position {
 		try {
