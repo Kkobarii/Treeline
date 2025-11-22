@@ -8,7 +8,7 @@ import {
 	type OperationManager,
 } from '$lib/data-structures/operation/operationManager';
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
-import type { StepHandlersBase } from './stepHandlersBase';
+import type { StepHandlerBase } from './stepHandlerBase';
 import type { DataStructureAnnotator } from '../annotators/dataStructureAnnotator';
 
 export class AnimationOrchestrator {
@@ -16,7 +16,7 @@ export class AnimationOrchestrator {
 		public animator: DataStructureAnimator,
 		public annotator: DataStructureAnnotator,
 		public operationManager: OperationManager,
-		public handlers: StepHandlersBase,
+		public handlers: StepHandlerBase,
 	) {
 		operationManager.addEventListener(EventType.CurrentOperationChanged, (e: Event) => {
 			const event = e as CustomEvent<CurrentOperationChangedEvent>;

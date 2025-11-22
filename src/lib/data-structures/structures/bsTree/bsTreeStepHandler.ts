@@ -8,7 +8,7 @@ import { getDummyNodeId } from '$lib/data-structures/utils/graphs';
 import { relationTextToSymbol } from '$lib/data-structures/utils/utils';
 
 import type { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
-import { StepHandlersBase } from '$lib/data-structures/visual/orchestrators/stepHandlersBase';
+import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import type { DataStructureAnimator } from '$lib/data-structures/visual/animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
@@ -275,7 +275,7 @@ async function handleReplaceWithInorderSuccessorBackward(animator: BSTreeAnimato
 	await animator.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 }
 
-export class BSTreeStepHandlers extends StepHandlersBase {
+export class BSTreeStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as BSTreeAnimator;
 		if (isForward && currentStep.startSnapshot) {

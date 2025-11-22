@@ -8,7 +8,7 @@ import { getDummyNodeId } from '$lib/data-structures/utils/graphs';
 import { relationTextToSymbol } from '$lib/data-structures/utils/utils';
 
 import type { AVLTreeAnimator } from '$lib/data-structures/structures/avlTree/avlTreeAnimator';
-import { StepHandlersBase } from '$lib/data-structures/visual/orchestrators/stepHandlersBase';
+import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import type { DataStructureAnimator } from '$lib/data-structures/visual/animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
@@ -266,7 +266,7 @@ async function handleReplaceWithInorderSuccessorBackward(animator: AVLTreeAnimat
     // await animator.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
 }
 
-export class AVLTreeStepHandlers extends StepHandlersBase {
+export class AVLTreeStepHandler extends StepHandlerBase {
     async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
         let animator = baseAnimator as AVLTreeAnimator;
         if (isForward && currentStep.startSnapshot) {

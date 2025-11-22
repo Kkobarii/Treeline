@@ -7,7 +7,7 @@
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { avlTreeToGraph as avlTreeToGraph } from '$lib/data-structures/utils/graphs';
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
-	import { AVLTreeStepHandlers } from '$lib/data-structures/structures/avlTree/avlTreeStepHandlers';
+	import { AVLTreeStepHandler } from '$lib/data-structures/structures/avlTree/avlTreeStepHandler';
 	import { AVLTreeAnimator } from '$lib/data-structures/structures/avlTree/avlTreeAnimator';
 	import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
@@ -61,7 +61,7 @@
 		animator = new AVLTreeAnimator({ network, nodes, edges, infoNodeOptions, nodeOptions });
 		annotator = new DataStructureAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
 
-		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new AVLTreeStepHandlers());
+		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new AVLTreeStepHandler());
 
 		network.on('selectNode', params => {
 			if (params.nodes.length === 1 && operationManager) {

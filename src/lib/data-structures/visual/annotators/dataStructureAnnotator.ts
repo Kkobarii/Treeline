@@ -33,7 +33,7 @@ class Annotation {
                 return { x: domPos.x, y: domPos.y - this.aboveOffset * this.annotator.getScale() };
             }
         }
-        return { x: this.annotator.canvas.width / 2, y: this.annotator.canvas.height / 2 };
+        return this.annotator.network.canvasToDOM({ x: 0, y: 0 });
     }
 
     getBoundingRect(): { x: number, y: number, width: number, height: number } {
@@ -141,14 +141,6 @@ export class DataStructureAnnotator {
             }
         }
 
-        let nodePos;
-        if (nodeId === null) {
-            nodePos = { x: this.canvas.width / 2, y: this.canvas.height / 2 };
-        } else {
-            nodePos = this.network.canvasToDOM(this.network.getPosition(nodeId));
-        }
-
-        if (!nodePos) return;
         this.clearCanvas();
 
         this.currentAnnotation = new Annotation(this, text, nodeId);

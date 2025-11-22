@@ -7,8 +7,7 @@
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { bsTreeToGraph } from '$lib/data-structures/utils/graphs';
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
-	import { BSTreeStepHandlers } from '$lib/data-structures/structures/bsTree/bsTreeStepHandlers';
-	import { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
+	import { BSTreeStepHandlers } from '$lib/da$lib/data-structures/structures/bsTree/bsTreeStepHandlerort { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
 	import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
 	export let operationManager: OperationManager;

@@ -4,7 +4,7 @@ import type { OperationManager } from '$lib/data-structures/operation/operationM
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '../annotators/dataStructureAnnotator';
 
-export abstract class StepHandlersBase {
+export abstract class StepHandlerBase {
 	/** Prepare renderer for the incoming step (apply start snapshot when forward, end snapshot when backward). */
 	abstract stepSetup(
 		currentStep: StepData, 
