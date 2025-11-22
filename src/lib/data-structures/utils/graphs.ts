@@ -78,14 +78,31 @@ export function avlTreeToGraph(
 	// add node to graph
 	const nodeId = root.id;
 	if (!nodes.get(nodeId)) {
-		nodes.add({ id: nodeId, label: root.value.toString() + ` (h=${root.height})`, title: `Node ${nodeId}: ${root.value}` });
+		nodes.add({ 
+			id: nodeId, 
+			label: root.value.toString(), 
+			title: `Node ${nodeId}: ${root.value}`
+		});
+		nodes.add({
+			id: `height-${nodeId}`, 
+			label: `h=${root.height}`, 
+			title: `Height of node ${nodeId}`,
+			shape: 'box',
+			color: '#FFD700',
+			font: { size: 10 },
+		});
 	} else {
-		nodes.update({ id: nodeId, label: root.value.toString() + ` (h=${root.height})`, title: `Node ${nodeId}: ${root.value}` });
+		nodes.update({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
 	}
 
 	// link to parent if successorInfo is provided
 	if (successorInfo !== null) {
-		nodes.update({ id: nodeId, label: root.value.toString() + ` (h=${root.height})`, title: `Node ${nodeId}: ${root.value}`, value: successorInfo.childNumber });
+		nodes.update({ 
+			id: nodeId, 
+			label: root.value.toString(), 
+			title: `Node ${nodeId}: ${root.value}`, 
+			value: successorInfo.childNumber 
+		});
 		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
 		log(`Adding edge ${edgeId} from ${successorInfo.parentId} to ${nodeId}`);
 		edges.add({ id: edgeId, from: successorInfo.parentId, to: nodeId });

@@ -45,8 +45,19 @@ export class AVLTreeAnimator extends BinaryTreeAnimator {
 			}
 
 			this.clearDisconnectedDummyNodes();
+			this.placeHeightNodes();
 		} catch (err) {
 			console.warn('AVLTreeAnimator.ensureTree error', err);
+		}
+	}
+
+	placeHeightNodes() {
+		for (const node of this.nodes.get()) {
+			if (typeof node.id === 'string' && node.id.startsWith('height-')) {
+				const originalNodeId = node.id.replace('height-', '');
+				const originalNodePos = this.getPosition(originalNodeId);
+				this.snapNodeTo(node.id, originalNodePos.x + 20, originalNodePos.y - 30);
+			}
 		}
 	}
 }
