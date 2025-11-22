@@ -10,6 +10,7 @@ import { relationTextToSymbol } from '$lib/data-structures/utils/utils';
 import type { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
 import { StepHandlersBase } from '$lib/data-structures/visual/orchestrators/stepHandlersBase';
 import type { DataStructureAnimator } from '$lib/data-structures/visual/animators/dataStructureAnimator';
+import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
 async function handleStartForward(animator: BSTreeAnimator, operationManager: OperationManager) {
 	animator.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
@@ -275,7 +276,7 @@ async function handleReplaceWithInorderSuccessorBackward(animator: BSTreeAnimato
 }
 
 export class BSTreeStepHandlers extends StepHandlersBase {
-	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, isForward: boolean) {
+	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as BSTreeAnimator;
 		if (isForward && currentStep.startSnapshot) {
 			animator.ensureTree(currentStep.startSnapshot);
@@ -285,7 +286,7 @@ export class BSTreeStepHandlers extends StepHandlersBase {
 		}
 	}
 
-	async stepCleanup(currentStep: StepData, baseAnimator: DataStructureAnimator, isForward: boolean) {
+	async stepCleanup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as BSTreeAnimator;
 
 		if (isForward && currentStep.endSnapshot) {
@@ -299,6 +300,7 @@ export class BSTreeStepHandlers extends StepHandlersBase {
 	async stepRoute(
 		currentStep: StepData,
 		baseAnimator: DataStructureAnimator,
+		baseAnnotator: DataStructureAnnotator,
 		operationManager: OperationManager,
 		isForward: boolean = true,
 	) {

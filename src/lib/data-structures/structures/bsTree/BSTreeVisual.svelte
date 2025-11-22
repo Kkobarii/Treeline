@@ -9,6 +9,7 @@
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
 	import { BSTreeStepHandlers } from '$lib/data-structures/structures/bsTree/bsTreeStepHandlers';
 	import { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
+	import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
 	export let operationManager: OperationManager;
 
@@ -17,8 +18,12 @@
 	let edges: DataSet<Edge>;
 	let network: Network;
 
-	let animator: BSTreeAnimator;
 	let orchestrator: AnimationOrchestrator;
+	let animator: BSTreeAnimator;
+	let annotator: DataStructureAnnotator;
+
+	let overlayCanvas: HTMLCanvasElement | null = null;
+	let showOverlay: boolean = true;
 
 	const nodeOptions = {
 		shape: 'box',
@@ -54,9 +59,10 @@
 		network = new Network(container!, { nodes, edges }, options);
 
 		animator = new BSTreeAnimator({ network, nodes, edges, infoNodeOptions, nodeOptions });
+		annotator = new DataStructureAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
 		animator.createInfoNode();
 
-		orchestrator = new AnimationOrchestrator(animator, operationManager, new BSTreeStepHandlers());
+		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new BSTreeStepHandlers());
 
 		network.on('selectNode', params => {
 			if (params.nodes.length === 1 && operationManager) {
@@ -66,6 +72,18 @@
 				operationManager.updateCurrentValue(parseInt(label));
 			}
 		});
+
+		network.on('afterDrawing', () => {
+			if (showOverlay) {
+				overlayCanvas!.height = container!.clientHeight;
+				overlayCanvas!.width = container!.clientWidth;
+
+				annotator.redrawCanvas();
+			}
+		});
+
+		overlayCanvas!.height = container!.clientHeight;
+  		overlayCanvas!.width = container!.clientWidth;
 	});
 
 	onDestroy(() => {
@@ -81,7 +99,24 @@
 	}
 </script>
 
-<div
-	bind:this={container}
-	class="h-full w-full rounded border border-gray-300">
+<div class="w-full h-full rounded border border-gray-300 relative">
+	<div
+		bind:this={container}
+		class="absolute inset-0 rounded border border-gray-300">
+	</div>
+	<canvas bind:this={overlayCanvas} class="absolute inset-0 pointer-events-none z-50 rounded">
+	</canvas>
 </div>
+
+<button class="mt-2"
+ 	on:click={() => { 
+		showOverlay = !showOverlay; 
+		if (showOverlay) {
+			annotator.redrawCanvas();
+		} else {
+			annotator.clearCanvas();
+		}
+		console.log('Overlay toggled:', showOverlay); 
+	}}>
+	{showOverlay ? 'Hide' : 'Show'} Overlay
+</button>

@@ -9,10 +9,12 @@ import {
 } from '$lib/data-structures/operation/operationManager';
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 import type { StepHandlersBase } from './stepHandlersBase';
+import type { DataStructureAnnotator } from '../annotators/dataStructureAnnotator';
 
 export class AnimationOrchestrator {
 	constructor(
 		public animator: DataStructureAnimator,
+		public annotator: DataStructureAnnotator,
 		public operationManager: OperationManager,
 		public handlers: StepHandlersBase,
 	) {
@@ -58,11 +60,12 @@ export class AnimationOrchestrator {
 
 			const operation = opEvent.currentOperation;
 
+			this.annotator.clearAnnotation();
 			this.animator.resetFormatting();
 
 			if (opEvent.direction === ChangeDirection.Forward || opEvent.direction === ChangeDirection.Unknown) {
 				const steps = operation.steps;
-				this.handlers.stepSetup(steps[0], this.animator, true);
+				this.handlers.stepSetup(steps[0], this.animator, this.annotator, true);
 
 				for (let i = 0; i < steps.length - 1; i++) {
 					try {
@@ -74,7 +77,7 @@ export class AnimationOrchestrator {
 				}
 			} else if (opEvent.direction === ChangeDirection.Backward) {
 				const steps = operation.steps;
-				this.handlers.stepSetup(steps[steps.length - 1], this.animator, false);
+				this.handlers.stepSetup(steps[steps.length - 1], this.animator, this.annotator, false);
 
 				for (let i = steps.length - 1; i > 0; i--) {
 					try {
@@ -110,8 +113,8 @@ export class AnimationOrchestrator {
 	}
 
 	private async animateStep(currentStep: StepData, isForward: boolean) {
-		await this.handlers.stepSetup(currentStep, this.animator, isForward);
-		await this.handlers.stepRoute(currentStep, this.animator, this.operationManager, isForward);
-		await this.handlers.stepCleanup(currentStep, this.animator, isForward);
+		await this.handlers.stepSetup(currentStep, this.animator, this.annotator, isForward);
+		await this.handlers.stepRoute(currentStep, this.animator, this.annotator, this.operationManager, isForward);
+		await this.handlers.stepCleanup(currentStep, this.animator, this.annotator, isForward);
 	}
 }

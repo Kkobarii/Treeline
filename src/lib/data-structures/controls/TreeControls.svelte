@@ -27,7 +27,7 @@
 
 <div
 	class="rounded bg-gray-100 p-4"
-	style="width: 25em; height: 100%;">
+	style="width: 100%; height: 100%;">
 	<div>
 		<h2 class="mb-2 text-xl font-semibold">Tree Controls</h2>
 		<div>

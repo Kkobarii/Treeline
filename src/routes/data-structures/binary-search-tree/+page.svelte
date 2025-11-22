@@ -11,7 +11,7 @@
 <div
 	class="display: mb-4 flex"
 	style="height: 75vh;">
-	<div>
+	<div style="flex-grow: 1;">
 		<BSTreeVisual {operationManager} />
 	</div>
 
