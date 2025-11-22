@@ -13,15 +13,33 @@ npm run dev
 # open http://localhost:5173
 ```
 
-## Current
+## Current implementation state
 
-- Binary Search Tree visualization (insert / find / remove).
-- Step-by-step mode and fast operation playback.
+Data Structures:
+- 🟡 Binary Search Tree
+- 🟠 AVL Tree
+- 🔴 Red-black tree
+- 🔴 B-tree
+- 🔴 Heap
+- 🔴 Linked List
+- 🔴 Stack
+- 🔴 Queue
 
-## Planned
+Sorting Algorithms:
+- 🔴 Bubble Sort
+- 🔴 Insertion Sort
+- 🔴 Selection Sort
+- 🔴 Merge Sort
+- 🔴 Quick Sort
+- 🔴 Heap Sort
 
-- Additional data structures: AVL, Red-Black, Heap, Graphs.
-- Sorting visualizations (bubble, quicksort, mergesort).
+Legend:
+- 🔴 Not started
+- 🟠 In progress
+- 🟡 Needs polish
+- 🟢 Done (as much as it can be)
+
+## Color palettes used
 
 https://www.figma.com/color-palette-generator/?colors=7F7810-BD284C-E77F5A-E09FDB-DEC7AB
 
