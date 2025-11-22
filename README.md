@@ -1,3 +1,4 @@
+[![Deploy to GitHub Pages](https://github.com/Kkobarii/Treeline/actions/workflows/deploy.yml/badge.svg)](https://github.com/Kkobarii/Treeline/actions/workflows/deploy.yml)
 # Treeline
 
 Simple Svelte + TypeScript visualizer for data structures and algorithms.
