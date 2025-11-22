@@ -52,6 +52,13 @@ export class AVLTree extends DataStructure {
         return this.height(node.left) - this.height(node.right);
     }
 
+    //
+    //     y                             x
+    //    / \                           / \
+    //   x   T3     Right Rotate(y)    T1  y
+    //  / \          - - - - - - - ->     / \
+    // T1  T2                           T2  T3
+    //
     private rightRotate(y: AVLTreeNode): AVLTreeNode {
         const x = y.left as AVLTreeNode;
         const T2 = x.right;
@@ -67,6 +74,13 @@ export class AVLTree extends DataStructure {
         return x;
     }
 
+    //
+    //   x                             y
+    //  / \                           / \
+    // T1  y     Left Rotate(x)      x   T3
+    //    / \    - - - - - - - ->   / \
+    //   T2  T3                   T1  T2
+    //
     private leftRotate(x: AVLTreeNode): AVLTreeNode {
         const y = x.right as AVLTreeNode;
         const T2 = y.left;

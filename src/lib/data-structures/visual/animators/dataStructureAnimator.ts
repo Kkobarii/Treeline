@@ -225,7 +225,7 @@ export class DataStructureAnimator {
 	resetFormatting() {
 		for (const node of this.nodes.get()) {
 			try {
-				if (node.id.toString().startsWith('dummy-')) continue;
+				if (node.id.toString().startsWith('dummy-') || node.id.toString().startsWith('height-') || node.id.toString().startsWith('info-')) continue;
 				this.updateNodeRaw({ id: node.id, color: this.nodeOptions?.color, font: this.nodeOptions?.font } as any);
 			} catch {}
 		}

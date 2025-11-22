@@ -60,4 +60,20 @@ export class AVLTreeAnimator extends BinaryTreeAnimator {
 			}
 		}
 	}
+
+	getHeight(nodeId: string | number): number | null {
+		const heightNodeId = `height-${nodeId}`;
+		try {
+			const heightNode = this.nodes.get(heightNodeId as any) as any;
+			if (heightNode && heightNode.label) {
+				const match = heightNode.label.match(/h=(\-?\d+)/);
+				if (match) {
+					return parseInt(match[1], 10);
+				}
+			}
+			return null;
+		} catch {
+			return null;
+		}
+	}
 }
