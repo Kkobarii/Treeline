@@ -29,13 +29,13 @@
 		<!-- Links -->
 		<div class="ml-6 hidden items-center gap-4 md:flex">
 			<a
-				href="/binary-search-tree"
+				href="/data-structures/binary-search-tree"
 				class="text-foreground text-xl hover:underline">Binary Search Tree</a>
 			<a
-				href="/avl-tree"
+				href="/data-structures/avl-tree"
 				class="text-foreground text-xl hover:underline">AVL Tree</a>
 			<a
-				href="/sorting"
+				href="/sorting-algorithms/mock"
 				class="text-foreground text-xl hover:underline">Sorting</a>
 		</div>
 
