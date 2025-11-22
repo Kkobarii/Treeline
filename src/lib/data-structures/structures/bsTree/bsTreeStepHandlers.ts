@@ -56,8 +56,11 @@ async function handleCreateRootBackward(animator: BSTreeAnimator, data: Step.BST
 async function handleCreateLeafForward(animator: BSTreeAnimator, data: Step.BSTree.CreateLeafData) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
 	const childNumber = data.direction === 'left' ? 0 : 1;
+	const startPositions = animator.getNodePositions();
 	animator.addNode(data.nodeId, data.value, data.parentId, childNumber);
+	const endPositions = animator.getNodePositions();
 	await Promise.all([
+		animator.animateRelayout(startPositions, endPositions),
 		animator.animateAnnotateNode(info, data.parentId),
 		animator.animateNodeGrowth(data.nodeId),
 		animator.animateLegsGrowth(data.nodeId),
@@ -73,8 +76,12 @@ async function handleCreateLeafBackward(animator: BSTreeAnimator, data: Step.BST
 		animator.animateLegsShrink(data.nodeId),
 		animator.animateNodeMovement('info-node', animator.getPositionAbove(data.nodeId), animator.getPositionAbove(data.parentId)),
 	]);
+	const startPositions = animator.getNodePositions();
+	animator.snapNodeAbove('info-node', data.parentId);
 	animator.removeNode(data.nodeId);
 	animator.snapNodeAbove('info-node', data.parentId);
+	const endPositions = animator.getNodePositions();
+	await animator.animateRelayout(startPositions, endPositions);
 }
 
 async function handleCompareForward(animator: BSTreeAnimator, data: Step.BSTree.CompareData) {
@@ -107,7 +114,7 @@ async function handleDropForward(animator: BSTreeAnimator, data: Step.BSTree.Dro
 	const positionTo = { x: positionFrom.x, y: positionFrom.y + 200 };
 	await Promise.all([
 		animator.animateNodeMovement('info-node', positionFrom, positionTo),
-		animator.animateNodeOpacityChange('info-node', 1, 0),
+		// animator.animateNodeOpacityChange('info-node', 1, 0),
 	]);
 	animator.hideInfoNode();
 }
@@ -119,7 +126,7 @@ async function handleDropBackward(animator: BSTreeAnimator, data: Step.BSTree.Dr
 	const positionTo = { x: positionFrom.x, y: positionFrom.y + 200 };
 	await Promise.all([
 		animator.animateNodeMovement('info-node', positionTo, positionFrom),
-		animator.animateNodeOpacityChange('info-node', 0, 1),
+		// animator.animateNodeOpacityChange('info-node', 0, 1),
 	]);
 }
 

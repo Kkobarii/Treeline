@@ -88,6 +88,7 @@ export class AnimationOrchestrator {
 
 			console.log('Finished full operation playback');
 		} finally {
+			this.animator.animateFit();
 			this.operationManager.setLocked(false);
 		}
 	}

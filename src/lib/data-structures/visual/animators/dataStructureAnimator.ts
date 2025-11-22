@@ -38,7 +38,7 @@ export class DataStructureAnimator {
 	}
 
 	// --- low-level dataset/network ops ---
-	protected addNodeRaw(node: Node) {
+	protected async addNodeRaw(node: Node) {
 		console.debug('addNodeRaw', node);
 		try {
 			this.nodes.add(node);
@@ -117,7 +117,6 @@ export class DataStructureAnimator {
 		}
 	}
 
-	// Expose a public snap helper for callers that want an immediate move.
 	public async snapNodeTo(nodeId: string | number, x: number, y: number) {
 		return this.moveNode(nodeId, x, y);
 	}
@@ -174,9 +173,6 @@ export class DataStructureAnimator {
 		return this.changeNodeSize(nodeId, startSize, 0);
 	}
 
-	/**
-	 * Generic helper to animate a node font-size from startSize to endSize
-	 */
 	protected changeNodeSize(nodeId: string | number, startSize: number, endSize: number): Promise<void> {
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
@@ -237,11 +233,9 @@ export class DataStructureAnimator {
 
 	async animateFit(durationMs: number = 1000) {
 		try {
-			this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
+			this.network.fit();
+			// this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
 		} catch {
-			try {
-				this.network.fit();
-			} catch {}
 		}
 	}
 
@@ -255,5 +249,35 @@ export class DataStructureAnimator {
 		try {
 			this.updateNodeRaw({ id: nodeId, hidden: false } as any);
 		} catch {}
+	}
+
+	getNodePositions(): Map<string | number, Position> {
+		const result = new Map<string | number, Position>();
+		for (const node of this.nodes.get()) {
+			try {
+				const p = this.network.getPosition(node.id);
+				result.set(node.id as string | number, p);
+			} catch {
+				if (typeof node.x === 'number' && typeof node.y === 'number') {
+					result.set(node.id as string | number, { x: node.x, y: node.y });
+				}
+			}
+		}
+		return result;
+	}
+
+	async animateRelayout(fromPositions: Map<string | number, Position>, newPositions: Map<string | number, Position>) {
+		const anims: Promise<void>[] = [];
+		for (const [nodeId, newPos] of newPositions) {
+			if (nodeId.toString().startsWith('info-')) continue;
+			const fromPos = fromPositions.get(nodeId);
+			if (fromPos) {
+				anims.push(this.animateNodeMovement(nodeId, fromPos, newPos));
+			} else {
+				// new node, just snap
+				await this.snapNodeTo(nodeId, newPos.x, newPos.y);
+			}
+		}
+		await Promise.all(anims);
 	}
 }

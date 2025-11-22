@@ -28,10 +28,6 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 		} catch {}
 	}
 
-	public addNodeRaw(node: Node): void {
-		super.addNodeRaw(node);
-	}
-
 	getPositionAbove(nodeId: string | number, offset?: number): Position {
 		const pos = this.getPosition(nodeId);
 		return { x: pos.x, y: pos.y - (offset ?? this.infoNodeAboveOffset) };
@@ -114,7 +110,7 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 
 	protected reorderChildNodes(parentId: number | string) {
 		const childrenList : Node[] = [];
-		console.log(`Reordering children of parent ${parentId}`);
+		// console.log(`Reordering children of parent ${parentId}`);
 
 		for (const parentEdge of this.network.getConnectedEdges(parentId)) {
 			const childId = (this.edges.get(parentEdge) as any).to;
@@ -124,18 +120,18 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 			const childNode = this.nodes.get(childId as number) as Node;
 			if (childNode) childrenList.push(childNode);
 		}
-		console.log(`Children of parent ${parentId}:`, childrenList.map(c => `${c.value}: ${c.id}`));
+		// console.log(`Children of parent ${parentId}:`, childrenList.map(c => `${c.value}: ${c.id}`));
 
 		// sort children by value
 		childrenList.sort((a, b) => {
 			if (a.value === undefined || b.value === undefined) return 0;
 			return (a.value as number) - (b.value as number);
 		});
-		console.log(`Reordered children of parent ${parentId}:`, childrenList.map(c => `${c.value}: ${c.id}`));
+		// console.log(`Reordered children of parent ${parentId}:`, childrenList.map(c => `${c.value}: ${c.id}`));
 
 		// remove and re-add edges in sorted order
 		for (const childNode of childrenList) {
-			console.log(`Re-linking child node ${childNode.id} with value ${childNode.value}`);
+			// console.log(`Re-linking child node ${childNode.id} with value ${childNode.value}`);
 			this.removeNodeRaw(childNode.id!);
 			this.addNodeRaw(childNode);
 		}
