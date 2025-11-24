@@ -27,10 +27,14 @@ class Annotation {
 
     getPosition(): { x: number, y: number } {
         if (this.followingNodeId !== null) {
+            try {
             let nodePos = this.annotator.network.getPosition(this.followingNodeId);
             if (nodePos) {
                 let domPos = this.annotator.network.canvasToDOM(nodePos);
                 return { x: domPos.x, y: domPos.y - this.aboveOffset * this.annotator.getScale() };
+            }
+            } catch {
+                // node might not exist
             }
         }
         return this.annotator.network.canvasToDOM({ x: 0, y: 0 });
@@ -134,14 +138,16 @@ export class DataStructureAnnotator {
                         break;
                     }
                 }
-                if (isRoot && !node.id!.toString().includes("height")) {
+                if (isRoot && !node.id!.toString().includes("height") && !node.id!.toString().includes("info")) {
                     nodeId = node.id!;
                     break;
                 }
             }
         }
 
-        this.clearCanvas();
+        if (this.currentAnnotation) {
+            this.currentAnnotation.clear(this.ctx);
+        }
 
         this.currentAnnotation = new Annotation(this, text, nodeId);
         this.currentAnnotation.draw(this.ctx);

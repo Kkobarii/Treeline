@@ -12,160 +12,131 @@ import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepH
 import type { DataStructureAnimator } from '$lib/data-structures/visual/animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
-async function handleStartForward(animator: BSTreeAnimator, operationManager: OperationManager) {
+async function handleStartForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
 	animator.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
 	animator.resetFormatting();
 
 	const info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
-	await Promise.all([animator.animateAnnotateNode(info, null), animator.animateNodeGrowth('info-node')]);
+	annotator.annotateNode(info, null);
 }
 
-async function handleStartBackward(animator: BSTreeAnimator, operationManager: OperationManager) {
+async function handleStartBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
 	// animator.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
 
 	const info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
-	await Promise.all([animator.animateAnnotateNode(info, null), animator.animateNodeGrowth('info-node')]);
+	annotator.annotateNode(info, null);
 }
 
-function handleEndForward(animator: BSTreeAnimator, operationManager: OperationManager) {
+function handleEndForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
 	animator.ensureTree(operationManager.getCurrentOperation().endSnapshot as BSTree);
 
-	animator.hideInfoNode();
+	annotator.clearAnnotation();
 }
 
-function handleEndBackward(animator: BSTreeAnimator, operationManager: OperationManager) {
-	animator.hideInfoNode();
-
+function handleEndBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
+	annotator.clearAnnotation();
 	animator.ensureTree(operationManager.getCurrentOperation().endSnapshot as BSTree);
 }
 
-async function handleCreateRootForward(animator: BSTreeAnimator, data: Step.BSTree.CreateRootData) {
+async function handleCreateRootForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateRootData) {
 	animator.addNode(data.nodeId, data.value);
-	animator.animateAnnotateNode(`Create root node with value ${data.value}`, data.nodeId);
+	annotator.annotateNode(`Create root node with value ${data.value}`, data.nodeId);
 	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
 }
 
-async function handleCreateRootBackward(animator: BSTreeAnimator, data: Step.BSTree.CreateRootData) {
+async function handleCreateRootBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateRootData) {
+	annotator.annotateNode(`Create root node with value ${data.value}`, data.nodeId);
 	await Promise.all([
-		animator.animateAnnotateNode(`Create root node with value ${data.value}`, data.nodeId),
 		animator.animateNodeShrink(data.nodeId),
 		animator.animateLegsShrink(data.nodeId),
 	]);
 	animator.removeNode(data.nodeId);
 }
 
-async function handleCreateLeafForward(animator: BSTreeAnimator, data: Step.BSTree.CreateLeafData) {
+async function handleCreateLeafForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateLeafData) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
 	const childNumber = data.direction === 'left' ? 0 : 1;
-	const startPositions = animator.getNodePositions();
 	animator.addNode(data.nodeId, data.value, data.parentId, childNumber);
-	const endPositions = animator.getNodePositions();
+	annotator.annotateNode(info, data.nodeId);
 	await Promise.all([
-		animator.animateRelayout(startPositions, endPositions),
-		animator.animateAnnotateNode(info, data.parentId),
 		animator.animateNodeGrowth(data.nodeId),
 		animator.animateLegsGrowth(data.nodeId),
-		animator.animateNodeMovement('info-node', animator.getPositionAbove(data.parentId), animator.getPositionAbove(data.nodeId)),
 	]);
 }
 
-async function handleCreateLeafBackward(animator: BSTreeAnimator, data: Step.BSTree.CreateLeafData) {
+async function handleCreateLeafBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateLeafData) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
+	annotator.annotateNode(info, data.parentId);
+
 	await Promise.all([
-		animator.animateAnnotateNode(info, data.nodeId),
 		animator.animateNodeShrink(data.nodeId),
 		animator.animateLegsShrink(data.nodeId),
-		animator.animateNodeMovement('info-node', animator.getPositionAbove(data.nodeId), animator.getPositionAbove(data.parentId)),
 	]);
-	const startPositions = animator.getNodePositions();
-	animator.snapNodeAbove('info-node', data.parentId);
+
 	animator.removeNode(data.nodeId);
-	animator.snapNodeAbove('info-node', data.parentId);
-	const endPositions = animator.getNodePositions();
-	await animator.animateRelayout(startPositions, endPositions);
 }
 
-async function handleCompareForward(animator: BSTreeAnimator, data: Step.BSTree.CompareData) {
-	await animator.animateAnnotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
+async function handleCompareForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CompareData) {
+	annotator.annotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
 }
 
-async function handleCompareBackward(animator: BSTreeAnimator, data: Step.BSTree.CompareData) {
-	await animator.animateAnnotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
+async function handleCompareBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CompareData) {
+	annotator.annotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
 }
 
-async function handleTraverseForward(animator: BSTreeAnimator, data: Step.BSTree.TraverseData) {
-	const positionFrom = animator.getPositionAbove(data.fromId);
-	const positionTo =
-		data.toId === -1 ? animator.getPositionAbove(getDummyNodeId(data.fromId, data.direction)) : animator.getPositionAbove(data.toId);
-	await animator.animateAnnotateNode(`Traverse to ${data.direction} child`, data.fromId);
-	animator.animateNodeMovement('info-node', positionFrom, positionTo);
+async function handleTraverseForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.TraverseData) {
+	annotator.annotateNode(`Traverse to ${data.direction} child`, data.fromId);
 }
 
-async function handleTraverseBackward(animator: BSTreeAnimator, data: Step.BSTree.TraverseData) {
-	const positionFrom = animator.getPositionAbove(data.fromId);
-	const positionTo =
-		data.toId === -1 ? animator.getPositionAbove(getDummyNodeId(data.fromId, data.direction)) : animator.getPositionAbove(data.toId);
-	await animator.animateAnnotateNode(`Traverse to ${data.direction} child`, data.toId);
-	animator.animateNodeMovement('info-node', positionTo, positionFrom);
+async function handleTraverseBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.TraverseData) {
+	annotator.annotateNode(`Traverse to ${data.direction} child`, data.fromId);
 }
 
-async function handleDropForward(animator: BSTreeAnimator, data: Step.BSTree.DropData) {
-	await animator.animateAnnotateNode(`Drop value ${data.value}`, data.fromId);
-	const positionFrom = animator.getPositionAbove(data.fromId);
-	const positionTo = { x: positionFrom.x, y: positionFrom.y + 200 };
-	await Promise.all([
-		animator.animateNodeMovement('info-node', positionFrom, positionTo),
-		// animator.animateNodeOpacityChange('info-node', 1, 0),
-	]);
-	animator.hideInfoNode();
+async function handleDropForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.DropData) {
+	annotator.annotateNode(`Drop value ${data.value}`, data.fromId);
+	// todo animate drop
 }
 
-async function handleDropBackward(animator: BSTreeAnimator, data: Step.BSTree.DropData) {
-	await animator.changeInfoNodeAnnotation(`Drop value ${data.value}`);
-
-	const positionFrom = animator.getPositionAbove(data.fromId);
-	const positionTo = { x: positionFrom.x, y: positionFrom.y + 200 };
-	await Promise.all([
-		animator.animateNodeMovement('info-node', positionTo, positionFrom),
-		// animator.animateNodeOpacityChange('info-node', 0, 1),
-	]);
+async function handleDropBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.DropData) {
+	annotator.annotateNode(`Drop value ${data.value}`, data.fromId);
+	// todo animate drop
 }
 
-function handleFoundForward(animator: BSTreeAnimator, data: Step.BSTree.FoundData) {
-	animator.animateAnnotateNode(`Found node with value ${data.value}`, data.nodeId);
+function handleFoundForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.FoundData) {
+	annotator.annotateNode(`Found node with value ${data.value}`, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Green);
 }
 
-function handleFoundBackward(animator: BSTreeAnimator, data: Step.BSTree.FoundData) {
-	animator.animateAnnotateNode(`Found node with value ${data.value}`, data.nodeId);
+function handleFoundBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.FoundData) {
+	annotator.annotateNode(`Found node with value ${data.value}`, data.nodeId);
 	animator.resetNodeColor(data.nodeId);
 }
 
-function handleMarkToDeleteForward(animator: BSTreeAnimator, data: Step.BSTree.MarkToDeleteData) {
-	animator.animateAnnotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
+function handleMarkToDeleteForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.MarkToDeleteData) {
+	annotator.annotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Red);
 }
 
-function handleMarkToDeleteBackward(animator: BSTreeAnimator, data: Step.BSTree.MarkToDeleteData) {
-	animator.animateAnnotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
+function handleMarkToDeleteBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.MarkToDeleteData) {
+	annotator.annotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
 	animator.resetNodeColor(data.nodeId);
 }
 
-async function handleDeleteForward(animator: BSTreeAnimator, data: Step.BSTree.DeleteData) {
-	animator.animateAnnotateNode(`Delete node with value ${data.value}`, data.nodeId);
+async function handleDeleteForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.DeleteData) {
+	annotator.annotateNode(`Delete node with value ${data.value}`, data.nodeId);
 	await Promise.all([animator.animateNodeShrink(data.nodeId), animator.animateLegsShrink(data.nodeId)]);
 	// animator.removeNode(data.nodeId);
 }
 
-async function handleDeleteBackward(animator: BSTreeAnimator, data: Step.BSTree.DeleteData) {
+async function handleDeleteBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.DeleteData) {
 	animator.ensureTree(data.startSnapshot! as BSTree);
-	animator.animateAnnotateNode(`Delete node with value ${data.value}`, data.nodeId);
+	annotator.annotateNode(`Delete node with value ${data.value}`, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Red);
 	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
 }
 
-async function handleReplaceWithChildForward(animator: BSTreeAnimator, data: Step.BSTree.ReplaceWithChildData) {
-	animator.animateAnnotateNode(`Replace node with its ${data.direction} child`, data.oldNodeId);
+async function handleReplaceWithChildForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.ReplaceWithChildData) {
+	annotator.annotateNode(`Replace node with its ${data.direction} child`, data.oldNodeId);
 	await Promise.all([
 		animator.animateNodeMovement(data.newNodeId, animator.getPosition(data.newNodeId), animator.getPosition(data.oldNodeId)),
 		animator.animateNodeShrink(data.oldNodeId),
@@ -173,9 +144,9 @@ async function handleReplaceWithChildForward(animator: BSTreeAnimator, data: Ste
 	]);
 }
 
-async function handleReplaceWithChildBackward(animator: BSTreeAnimator, data: Step.BSTree.ReplaceWithChildData) {
+async function handleReplaceWithChildBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.ReplaceWithChildData) {
 	animator.ensureTree(data.startSnapshot! as BSTree);
-	animator.animateAnnotateNode(`Replace node with its ${data.direction} child`, data.oldNodeId);
+	annotator.annotateNode(`Replace node with its ${data.direction} child`, data.oldNodeId);
 	animator.setNodeColor(data.oldNodeId, Colors.Red);
 
 	const childPosition = animator.getPosition(data.newNodeId);
@@ -189,18 +160,18 @@ async function handleReplaceWithChildBackward(animator: BSTreeAnimator, data: St
 	]);
 }
 
-async function handleFoundInorderSuccessorForward(animator: BSTreeAnimator, data: Step.BSTree.FoundInorderSuccessorData) {
-	animator.animateAnnotateNode(`Found inorder successor`, data.successorId);
-	animator.setNodeColor(data.successorId, Colors.Green);
+async function handleFoundInorderSuccessorForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.FoundInorderSuccessorData) {
+	annotator.annotateNode(`Found inorder successor`, data.successorId);
+	animator.setNodeColor(data.successorId, Colors.Blue);
 }
 
-async function handleFoundInorderSuccessorBackward(animator: BSTreeAnimator, data: Step.BSTree.FoundInorderSuccessorData) {
-	animator.animateAnnotateNode(`Found inorder successor`, data.successorId);
+async function handleFoundInorderSuccessorBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.FoundInorderSuccessorData) {
+	annotator.annotateNode(`Found inorder successor`, data.successorId);
 	animator.resetNodeColor(data.successorId);
 }
 
-async function handleRelinkSuccessorChildForward(animator: BSTreeAnimator, data: Step.BSTree.RelinkSuccessorChildData) {
-	animator.animateAnnotateNode(`Relink inorder successor's child`, data.childNodeId);
+async function handleRelinkSuccessorChildForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.RelinkSuccessorChildData) {
+	annotator.annotateNode(`Relink inorder successor's child`, data.childNodeId);
 
 	let originalChildPos = animator.getPosition(data.childNodeId);
 	let originalSuccessorPos = animator.getPosition(data.successorNodeId);
@@ -224,12 +195,12 @@ async function handleRelinkSuccessorChildForward(animator: BSTreeAnimator, data:
 	]);
 }
 
-async function handleRelinkSuccessorChildBackward(animator: BSTreeAnimator, data: Step.BSTree.RelinkSuccessorChildData) {
-	animator.animateAnnotateNode(`Relink inorder successor's child`, data.childNodeId);
+async function handleRelinkSuccessorChildBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.RelinkSuccessorChildData) {
+	annotator.annotateNode(`Relink inorder successor's child`, data.childNodeId);
 	animator.ensureTree(data.startSnapshot! as BSTree);
 }
 
-async function handleReplaceWithInorderSuccessorForward(animator: BSTreeAnimator, data: Step.BSTree.ReplaceWithInorderSuccessorData) {
+async function handleReplaceWithInorderSuccessorForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.ReplaceWithInorderSuccessorData) {
 	if (animator.nodeExists(getDummyNodeId(data.successorNodeId, 0)))
 		animator.removeNode(getDummyNodeId(data.successorNodeId, 0), true);
 	if (animator.nodeExists(getDummyNodeId(data.successorNodeId, 1)))
@@ -245,7 +216,7 @@ async function handleReplaceWithInorderSuccessorForward(animator: BSTreeAnimator
 		animator.addDummyNode(data.successorParentId, 0);
 	}
 
-	await animator.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
+	annotator.annotateNode(`Replace node with inorder successor`, data.oldNodeId);
 
 	// Move back to position
 	animator.snapNodeTo(data.successorNodeId, oldSuccPos.x, oldSuccPos.y);
@@ -267,12 +238,12 @@ async function handleReplaceWithInorderSuccessorForward(animator: BSTreeAnimator
 	animator.snapNodeTo(data.successorNodeId, animator.getPosition(data.oldNodeId).x, animator.getPosition(data.oldNodeId).y);
 }
 
-async function handleReplaceWithInorderSuccessorBackward(animator: BSTreeAnimator, data: Step.BSTree.ReplaceWithInorderSuccessorData) {
+async function handleReplaceWithInorderSuccessorBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.ReplaceWithInorderSuccessorData) {
 	animator.ensureTree(data.startSnapshot! as BSTree);
 	animator.resetFormatting();
-	animator.setNodeColor(data.successorNodeId, Colors.Green);
+	animator.setNodeColor(data.successorNodeId, Colors.Blue);
 	animator.setNodeColor(data.oldNodeId, Colors.Red);
-	await animator.animateAnnotateNode(`Replace node with inorder successor`, data.oldNodeId);
+	annotator.annotateNode(`Replace node with inorder successor`, data.oldNodeId);
 }
 
 export class BSTreeStepHandler extends StepHandlerBase {
@@ -305,63 +276,64 @@ export class BSTreeStepHandler extends StepHandlerBase {
 		isForward: boolean = true,
 	) {
 		let animator = baseAnimator as BSTreeAnimator;
+		let annotator = baseAnnotator as DataStructureAnnotator;
 
 		switch (currentStep.type as StepTypeValue) {
 			case StepType.BSTree.Start:
-				if (isForward) await handleStartForward(animator, operationManager);
-				else await handleStartBackward(animator, operationManager);
+				if (isForward) await handleStartForward(animator, annotator, operationManager);
+				else await handleStartBackward(animator, annotator, operationManager);
 				break;
 			case StepType.BSTree.End:
-				if (isForward) await handleEndForward(animator, operationManager);
-				else await handleEndBackward(animator, operationManager);
+				if (isForward) await handleEndForward(animator, annotator, operationManager);
+				else await handleEndBackward(animator, annotator, operationManager);
 				break;
 			case StepType.BSTree.CreateRoot:
-				if (isForward) await handleCreateRootForward(animator, currentStep.data as any);
-				else await handleCreateRootBackward(animator, currentStep.data as any);
+				if (isForward) await handleCreateRootForward(animator, annotator, currentStep.data as any);
+				else await handleCreateRootBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.CreateLeaf:
-				if (isForward) await handleCreateLeafForward(animator, currentStep.data as any);
-				else await handleCreateLeafBackward(animator, currentStep.data as any);
+				if (isForward) await handleCreateLeafForward(animator, annotator, currentStep.data as any);
+				else await handleCreateLeafBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.Compare:
-				if (isForward) await handleCompareForward(animator, currentStep.data as any);
-				else await handleCompareBackward(animator, currentStep.data as any);
+				if (isForward) await handleCompareForward(animator, annotator, currentStep.data as any);
+				else await handleCompareBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.Traverse:
-				if (isForward) await handleTraverseForward(animator, currentStep.data as any);
-				else await handleTraverseBackward(animator, currentStep.data as any);
+				if (isForward) await handleTraverseForward(animator, annotator, currentStep.data as any);
+				else await handleTraverseBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.Drop:
-				if (isForward) await handleDropForward(animator, currentStep.data as any);
-				else await handleDropBackward(animator, currentStep.data as any);
+				if (isForward) await handleDropForward(animator, annotator, currentStep.data as any);
+				else await handleDropBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.Found:
-				if (isForward) await handleFoundForward(animator, currentStep.data as any);
-				else await handleFoundBackward(animator, currentStep.data as any);
+				if (isForward) await handleFoundForward(animator, annotator, currentStep.data as any);
+				else await handleFoundBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.MarkToDelete:
-				if (isForward) await handleMarkToDeleteForward(animator, currentStep.data as any);
-				else await handleMarkToDeleteBackward(animator, currentStep.data as any);
+				if (isForward) await handleMarkToDeleteForward(animator, annotator, currentStep.data as any);
+				else await handleMarkToDeleteBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.Delete:
-				if (isForward) await handleDeleteForward(animator, currentStep.data as any);
-				else await handleDeleteBackward(animator, currentStep.data as any);
+				if (isForward) await handleDeleteForward(animator, annotator, currentStep.data as any);
+				else await handleDeleteBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.ReplaceWithChild:
-				if (isForward) await handleReplaceWithChildForward(animator, currentStep.data as any);
-				else await handleReplaceWithChildBackward(animator, currentStep.data as any);
+				if (isForward) await handleReplaceWithChildForward(animator, annotator, currentStep.data as any);
+				else await handleReplaceWithChildBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.FoundInorderSuccessor:
-				if (isForward) await handleFoundInorderSuccessorForward(animator, currentStep.data as any);
-				else await handleFoundInorderSuccessorBackward(animator, currentStep.data as any);
+				if (isForward) await handleFoundInorderSuccessorForward(animator, annotator, currentStep.data as any);
+				else await handleFoundInorderSuccessorBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.RelinkSuccessorChild:
-				if (isForward) await handleRelinkSuccessorChildForward(animator, currentStep.data as any);
-				else await handleRelinkSuccessorChildBackward(animator, currentStep.data as any);
+				if (isForward) await handleRelinkSuccessorChildForward(animator, annotator, currentStep.data as any);
+				else await handleRelinkSuccessorChildBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.BSTree.ReplaceWithInorderSuccessor:
-				if (isForward) await handleReplaceWithInorderSuccessorForward(animator, currentStep.data as any);
-				else await handleReplaceWithInorderSuccessorBackward(animator, currentStep.data as any);
+				if (isForward) await handleReplaceWithInorderSuccessorForward(animator, annotator, currentStep.data as any);
+				else await handleReplaceWithInorderSuccessorBackward(animator, annotator, currentStep.data as any);
 				break;
 		}
 	}
