@@ -1,8 +1,8 @@
 import { DataSet } from 'vis-data';
 import { type Edge, type Node } from 'vis-network';
 
-import type { BSTreeNode } from '$lib/data-structures/structures/bsTree/bsTree';
 import type { AVLTreeNode } from '$lib/data-structures/structures/avlTree/avlTree';
+import type { BSTreeNode } from '$lib/data-structures/structures/bsTree/bsTree';
 
 function log(...args: any[]) {
 	// Uncomment the next line to enable logging
@@ -19,9 +19,10 @@ export function bsTreeToGraph(
 
 	const nodeId = root.id;
 	if (!nodes.get(nodeId)) {
-		nodes.add({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
+		nodes.add({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(new NodeData(0)) });
 	} else {
-		nodes.update({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
+		console.warn('Updating existing node in bsTreeToGraph:', nodeId);
+		nodes.update({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(new NodeData(0)) });
 	}
 
 	if (successorInfo !== null) {
@@ -41,7 +42,7 @@ export function bsTreeToGraph(
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
-			value: 0,
+			title: NodeData.toTitle(new NodeData(0)),
 		});
 		edges.add({ id: getEdgeId(nodeId, 0), from: nodeId, to: dummyId, dashes: true });
 	}
@@ -58,7 +59,7 @@ export function bsTreeToGraph(
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
-			value: 1,
+			title: NodeData.toTitle(new NodeData(1)),
 		});
 		edges.add({ id: getEdgeId(nodeId, 1), from: nodeId, to: dummyId, dashes: true });
 	}
@@ -81,18 +82,11 @@ export function avlTreeToGraph(
 		nodes.add({ 
 			id: nodeId, 
 			label: root.value.toString(), 
-			title: `Node ${nodeId}: ${root.value}`
-		});
-		nodes.add({
-			id: `height-${nodeId}`, 
-			label: `h=${root.height}`, 
-			title: `Height of node ${nodeId}`,
-			shape: 'box',
-			color: '#FFD700',
-			font: { size: 10 },
+			title: NodeData.toTitle(new AVLTreeNodeData(0, root.height))
 		});
 	} else {
-		nodes.update({ id: nodeId, label: root.value.toString(), title: `Node ${nodeId}: ${root.value}` });
+		console.warn('Updating existing node in avlTreeToGraph:', nodeId);
+		nodes.update({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(new AVLTreeNodeData(0, root.height)) });
 	}
 
 	// link to parent if successorInfo is provided
@@ -100,8 +94,7 @@ export function avlTreeToGraph(
 		nodes.update({ 
 			id: nodeId, 
 			label: root.value.toString(), 
-			title: `Node ${nodeId}: ${root.value}`, 
-			value: successorInfo.childNumber 
+			title: NodeData.toTitle(new AVLTreeNodeData(successorInfo.childNumber, root.height))
 		});
 		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
 		log(`Adding edge ${edgeId} from ${successorInfo.parentId} to ${nodeId}`);
@@ -123,7 +116,7 @@ export function avlTreeToGraph(
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
-			value: 0,
+			title: NodeData.toTitle(new AVLTreeNodeData(0, 0)),
 		});
 		edges.add({ id: getEdgeId(nodeId, 0), from: nodeId, to: dummyId, dashes: true });
 	}
@@ -142,7 +135,7 @@ export function avlTreeToGraph(
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
-			value: 1,
+			title: NodeData.toTitle(new AVLTreeNodeData(1, 0)),
 		});
 		edges.add({ id: getEdgeId(nodeId, 1), from: nodeId, to: dummyId, dashes: true });
 	}
@@ -160,4 +153,57 @@ export function getDummyNodeId(parentId: number | string, direction: 'left' | 'r
 
 export function getEdgeId(parentId: number | string, direction: 'left' | 'right' | number): string {
 	return `edge-${parentId}-${direction}`;
+}
+
+export class NodeData {
+	constructor(public childNumber: number) {}
+
+	static fromNode(node: Node): NodeData {
+		let childNumber = -1;
+		if (node.title && typeof node.title === 'object' && 'childNumber' in node.title) {
+			childNumber = (node.title as any).childNumber;
+		}
+		return new NodeData(childNumber);
+	}
+
+	static toTitle(nodeData: NodeData): string {
+		return JSON.stringify(nodeData);
+	}
+
+	lessThan(other: NodeData | number): boolean {
+		const otherChild = typeof other === 'number' ? other : other.childNumber;
+		return this.childNumber < otherChild;
+	}
+
+	greaterThan(other: NodeData | number): boolean {
+		const otherChild = typeof other === 'number' ? other : other.childNumber;
+		return this.childNumber > otherChild;
+	}
+
+	compareTo(other: NodeData | number): number {
+		const otherChild = typeof other === 'number' ? other : other.childNumber;
+		if (this.childNumber < otherChild) return -1;
+		if (this.childNumber > otherChild) return 1;
+		return 0;
+	}
+}
+
+export class AVLTreeNodeData extends NodeData {
+	constructor(childNumber: number, public height: number) {
+		super(childNumber);
+	}
+
+	static fromNode(node: Node): AVLTreeNodeData {
+		let childNumber = -1;
+		let height = -1;
+		if (node.title && typeof node.title === 'object') {
+			if ('childNumber' in node.title) {
+				childNumber = (node.title as any).childNumber;
+			}
+			if ('height' in node.title) {
+				height = (node.title as any).height;
+			}
+		}
+		return new AVLTreeNodeData(childNumber, height);
+	}
 }

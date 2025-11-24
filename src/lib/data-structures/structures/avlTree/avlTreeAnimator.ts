@@ -1,7 +1,7 @@
 import { avlTreeToGraph } from '$lib/data-structures/utils/graphs';
 
-import { type DataStructureAnimatorOpts } from '../../visual/animators/dataStructureAnimator';
 import { BinaryTreeAnimator } from '../../visual/animators/binaryTreeAnimator';
+import { type DataStructureAnimatorOpts } from '../../visual/animators/dataStructureAnimator';
 
 export class AVLTreeAnimator extends BinaryTreeAnimator {
 
@@ -45,35 +45,8 @@ export class AVLTreeAnimator extends BinaryTreeAnimator {
 			}
 
 			this.clearDisconnectedDummyNodes();
-			this.placeHeightNodes();
 		} catch (err) {
 			console.warn('AVLTreeAnimator.ensureTree error', err);
-		}
-	}
-
-	placeHeightNodes() {
-		for (const node of this.nodes.get()) {
-			if (typeof node.id === 'string' && node.id.startsWith('height-')) {
-				const originalNodeId = node.id.replace('height-', '');
-				const originalNodePos = this.getPosition(originalNodeId);
-				this.snapNodeTo(node.id, originalNodePos.x + 20, originalNodePos.y - 30);
-			}
-		}
-	}
-
-	getHeight(nodeId: string | number): number | null {
-		const heightNodeId = `height-${nodeId}`;
-		try {
-			const heightNode = this.nodes.get(heightNodeId as any) as any;
-			if (heightNode && heightNode.label) {
-				const match = heightNode.label.match(/h=(\-?\d+)/);
-				if (match) {
-					return parseInt(match[1], 10);
-				}
-			}
-			return null;
-		} catch {
-			return null;
 		}
 	}
 }

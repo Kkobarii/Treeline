@@ -138,7 +138,7 @@ export class DataStructureAnnotator {
                         break;
                     }
                 }
-                if (isRoot && !node.id!.toString().includes("height")) {
+                if (isRoot) {
                     nodeId = node.id!;
                     break;
                 }

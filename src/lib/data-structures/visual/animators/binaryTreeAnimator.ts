@@ -1,6 +1,6 @@
-import type { Node, NodeOptions, Position } from 'vis-network';
+import type { Node } from 'vis-network';
 
-import { getDummyNodeId, getEdgeId } from '$lib/data-structures/utils/graphs';
+import { getDummyNodeId, getEdgeId, NodeData } from '$lib/data-structures/utils/graphs';
 
 import { DataStructureAnimator, type DataStructureAnimatorOpts } from './dataStructureAnimator';
 
@@ -62,18 +62,20 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 			const childNode = this.nodes.get(childId as number) as Node;
 			if (childNode) childrenList.push(childNode);
 		}
-		// console.log(`Children of parent ${parentId}:`, childrenList.map(c => `${c.value}: ${c.id}`));
+		// console.log(`Children of parent ${parentId}:`, childrenList.map(c => `${c.title}: ${c.id}`));
 
-		// sort children by value
+		// sort children by title
 		childrenList.sort((a, b) => {
-			if (a.value === undefined || b.value === undefined) return 0;
-			return (a.value as number) - (b.value as number);
+			// title is NodeData serialized as string
+			const aData = NodeData.fromNode(a);
+			const bData = NodeData.fromNode(b);
+			return aData.compareTo(bData);
 		});
-		// console.log(`Reordered children of parent ${parentId}:`, childrenList.map(c => `${c.value}: ${c.id}`));
+		// console.log(`Reordered children of parent ${parentId}:`, childrenList.map(c => `${c.title}: ${c.id}`));
 
 		// remove and re-add nodes in sorted order
 		for (const childNode of childrenList) {
-			// console.log(`Re-linking child node ${childNode.id} with value ${childNode.value}`);
+			// console.log(`Re-linking child node ${childNode.id} with title ${childNode.title}`);
 			this.removeNodeRaw(childNode.id!);
 			this.addNodeRaw(childNode);
 		}

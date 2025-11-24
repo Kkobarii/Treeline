@@ -15,7 +15,7 @@
 	onMount(() => {
 		operationManager.addEventListener(EventType.InputValueChanged, (e: Event) => {
 			const event = e as CustomEvent<InputValueChangedEvent>;
-			manualValue = event.detail.inputValue;
+			if (!isNaN(event.detail.inputValue)) manualValue = event.detail.inputValue;
 		});
 
 		operationManager.addEventListener(EventType.AnimationLockChanged, (e: Event) => {
