@@ -24,10 +24,10 @@ export class AVLTreeAnimator extends BinaryTreeAnimator {
 				}
 			}
 
-			// remove nodes that are no longer present (except info node)
+			// remove nodes that are no longer present
 			const newNodeIds = new Set(newData.nodes.get().map((n: any) => n.id));
 			for (const existingNode of this.nodes.get()) {
-				if (!newNodeIds.has(existingNode.id) && existingNode.id !== this.infoNodeId) {
+				if (!newNodeIds.has(existingNode.id)) {
 					this.removeNodeRaw(existingNode.id!);
 				}
 			}

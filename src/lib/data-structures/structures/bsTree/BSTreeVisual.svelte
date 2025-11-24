@@ -1,21 +1,20 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { DataSet } from 'vis-data';
 	import { Network, type Edge, type Node, type Options } from 'vis-network';
 
 	import { Colors } from '$lib/assets/colors';
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
-	import { bsTreeToGraph } from '$lib/data-structures/utils/graphs';
-	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
+	import { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
 	import { BSTreeStepHandler } from '$lib/data-structures/structures/bsTree/bsTreeStepHandler';
 	import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
-	import { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
+	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
 
 	export let operationManager: OperationManager;
 
 	let container: HTMLElement | null = null;
-	let nodes: DataSet<Node>;
-	let edges: DataSet<Edge>;
+	let nodes: DataSet<Node> = new DataSet<Node>();
+	let edges: DataSet<Edge> = new DataSet<Edge>();
 	let network: Network;
 
 	let orchestrator: AnimationOrchestrator;
@@ -31,14 +30,6 @@
 		font: { color: 'black', size: 30 },
 	};
 
-	const infoNodeOptions = {
-		shape: 'ellipse',
-		color: Colors.Info,
-		font: { color: 'black', size: 15 },
-		id: 'info-node',
-		aboveOffset: 50,
-	} as const;
-
 	const options: Options = {
 		layout: {
 			hierarchical: {
@@ -52,24 +43,28 @@
 		physics: false,
 		interaction: { dragNodes: false },
 		nodes: nodeOptions,
+		edges: {
+			chosen: false,
+		},
 	};
 
 	onMount(() => {
-		({ nodes, edges } = bsTreeToGraph(null));
 		network = new Network(container!, { nodes, edges }, options);
 
-		animator = new BSTreeAnimator({ network, nodes, edges, infoNodeOptions, nodeOptions });
+		animator = new BSTreeAnimator({ network, nodes, edges, nodeOptions });
 		annotator = new DataStructureAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
-		animator.createInfoNode();
 
 		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new BSTreeStepHandler());
 
 		network.on('selectNode', params => {
-			if (params.nodes.length === 1 && operationManager) {
+			if (params.nodes.length === 1) {
 				const node = nodes.get(params.nodes[0]) as Node;
 				console.log('Node selected:', node);
-				let label = node.label!;
-				operationManager.updateCurrentValue(parseInt(label));
+				operationManager.updateCurrentValue(parseInt(node.label!));
+
+				setTimeout(() => {
+					network.unselectAll();
+				}, 200);
 			}
 		});
 
@@ -81,42 +76,30 @@
 				annotator.redrawCanvas();
 			}
 		});
-
-		overlayCanvas!.height = container!.clientHeight;
-  		overlayCanvas!.width = container!.clientWidth;
 	});
-
-	onDestroy(() => {
-		try {
-			network?.destroy();
-		} catch (e) {
-			// ignore
-		}
-	});
-
-	export function getAnimator() {
-		return animator;
-	}
 </script>
 
-<div class="w-full h-full rounded border border-gray-300 relative">
+<div class="relative h-full w-full rounded border border-gray-300">
 	<div
 		bind:this={container}
 		class="absolute inset-0 rounded border border-gray-300">
 	</div>
-	<canvas bind:this={overlayCanvas} class="absolute inset-0 pointer-events-none z-50 rounded">
+	<canvas
+		bind:this={overlayCanvas}
+		class="pointer-events-none absolute inset-0 z-50 rounded">
 	</canvas>
 </div>
 
-<button class="mt-2"
- 	on:click={() => { 
-		showOverlay = !showOverlay; 
+<button
+	class="mt-2"
+	on:click={() => {
+		showOverlay = !showOverlay;
 		if (showOverlay) {
 			annotator.redrawCanvas();
 		} else {
 			annotator.clearCanvas();
 		}
-		console.log('Overlay toggled:', showOverlay); 
+		console.log('Overlay toggled:', showOverlay);
 	}}>
 	{showOverlay ? 'Hide' : 'Show'} Overlay
 </button>

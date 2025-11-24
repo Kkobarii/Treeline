@@ -10,7 +10,6 @@ export interface DataStructureAnimatorOpts {
 	nodes: DataSet<Node>;
 	edges: DataSet<Edge>;
 	nodeOptions: NodeOptions;
-	infoNodeOptions?: NodeOptions;
 }
 
 const DEFAULT_ANIMATION_DURATION_MS = 500;
@@ -225,7 +224,7 @@ export class DataStructureAnimator {
 	resetFormatting() {
 		for (const node of this.nodes.get()) {
 			try {
-				if (node.id.toString().startsWith('dummy-') || node.id.toString().startsWith('height-') || node.id.toString().startsWith('info-')) continue;
+				if (node.id.toString().startsWith('dummy-') || node.id.toString().startsWith('height-')) continue;
 				this.updateNodeRaw({ id: node.id, color: this.nodeOptions?.color, font: this.nodeOptions?.font } as any);
 			} catch {}
 		}
@@ -269,7 +268,6 @@ export class DataStructureAnimator {
 	async animateRelayout(fromPositions: Map<string | number, Position>, newPositions: Map<string | number, Position>) {
 		const anims: Promise<void>[] = [];
 		for (const [nodeId, newPos] of newPositions) {
-			if (nodeId.toString().startsWith('info-')) continue;
 			const fromPos = fromPositions.get(nodeId);
 			if (fromPos) {
 				anims.push(this.animateNodeMovement(nodeId, fromPos, newPos));
