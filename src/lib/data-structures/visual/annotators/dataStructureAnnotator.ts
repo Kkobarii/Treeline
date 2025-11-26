@@ -20,7 +20,6 @@ class Annotation {
     constructor(
         public annotator: DataStructureAnnotator,
         public text: string, 
-
         public followingNodeId: string | number | null = null,
     ) {
     }
@@ -28,11 +27,9 @@ class Annotation {
     getPosition(): { x: number, y: number } {
         if (this.followingNodeId !== null) {
             try {
-            let nodePos = this.annotator.network.getPosition(this.followingNodeId);
-            if (nodePos) {
+                let nodePos = this.annotator.network.getPosition(this.followingNodeId);
                 let domPos = this.annotator.network.canvasToDOM(nodePos);
                 return { x: domPos.x, y: domPos.y - this.aboveOffset * this.annotator.getScale() };
-            }
             } catch {
                 // node might not exist
             }
@@ -45,6 +42,7 @@ class Annotation {
         let ctx = this.annotator.ctx;
         ctx.font = `${this.fontSize * this.annotator.getScale()}px Arial`;
         let padding = this.padding * this.annotator.getScale();
+        
         let textWidth = ctx.measureText(this.text).width;
         let textHeight = this.fontSize * this.annotator.getScale();
 
@@ -56,38 +54,17 @@ class Annotation {
         return { x: boxX, y: boxY, width: boxWidth, height: boxHeight };
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    draw() {
         let pos = this.getPosition();
-        let fontSize = this.fontSize * this.annotator.getScale();
-        let padding = this.padding * this.annotator.getScale();
-        ctx.font = `${fontSize}px Arial`;
-        let textHeight = fontSize;
-        let textWidth = ctx.measureText(this.text).width;
+        let rect = this.getBoundingRect();
 
-        let boxX = pos.x - textWidth / 2 - padding;
-        let boxY = pos.y - textHeight / 2 - padding;
-        let boxWidth = textWidth + padding * 2;
-        let boxHeight = textHeight + padding * 2;
-
-        // draw box
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.strokeStyle = shadeColor(this.color, -40);
-        ctx.lineWidth = 2;
-        ctx.roundRect(boxX, boxY, boxWidth, boxHeight, this.roundRadius);
-        ctx.stroke();
-        ctx.fill();
-
-        // draw text
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = 'black';
-        ctx.fillText(this.text, pos.x, pos.y);
+        this.annotator.drawRectangle(rect.x, rect.y, rect.width, rect.height, this.color);
+        this.annotator.drawText(this.text, pos.x, pos.y, this.fontSize);
     }
 
-    clear(ctx: CanvasRenderingContext2D) {
+    clear() {
         let rect = this.getBoundingRect();
-        ctx.clearRect(rect.x - 2, rect.y - 2, rect.width + 4, rect.height + 4);
+        this.annotator.clearRectangle(rect.x, rect.y, rect.width, rect.height);
     }
 }
 
@@ -119,7 +96,7 @@ export class DataStructureAnnotator {
     public redrawCanvas() {
         this.clearCanvas();
         if (this.currentAnnotation) {
-            this.currentAnnotation.draw(this.ctx);
+            this.currentAnnotation.draw();
         }
     }
 
@@ -146,17 +123,39 @@ export class DataStructureAnnotator {
         }
 
         if (this.currentAnnotation) {
-            this.currentAnnotation.clear(this.ctx);
+            this.currentAnnotation.clear();
         }
 
         this.currentAnnotation = new Annotation(this, text, nodeId);
-        this.currentAnnotation.draw(this.ctx);
+        this.currentAnnotation.draw();
     }
 
     public clearAnnotation() {
         if (this.currentAnnotation) {
-            this.currentAnnotation.clear(this.ctx);
+            this.currentAnnotation.clear();
             this.currentAnnotation = null;
         }
+    }
+
+    public drawRectangle(x: number, y: number, width: number, height: number, color: string, roundRadius: number = 5) {
+        this.ctx.beginPath();
+        this.ctx.fillStyle = color;
+        this.ctx.strokeStyle = shadeColor(color, -40);
+        this.ctx.lineWidth = 2;
+        this.ctx.roundRect(x, y, width, height, roundRadius * this.getScale());
+        this.ctx.stroke();
+        this.ctx.fill();
+    }
+
+    public clearRectangle(x: number, y: number, width: number, height: number) {
+        this.ctx.clearRect(x - 2, y - 2, width + 4, height + 4);
+    }
+
+    public drawText(text: string, x: number, y: number, fontSize: number, textAlign: CanvasTextAlign = "center", textBaseline: CanvasTextBaseline = "middle", color: string = 'black') {
+        this.ctx.font = `${fontSize * this.getScale()}px Arial`;
+        this.ctx.fillStyle = color;
+        this.ctx.textAlign = textAlign;
+        this.ctx.textBaseline = textBaseline;
+        this.ctx.fillText(text, x, y);
     }
 }

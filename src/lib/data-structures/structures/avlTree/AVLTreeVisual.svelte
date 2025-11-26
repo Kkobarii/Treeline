@@ -5,10 +5,11 @@
 
 	import { Colors } from '$lib/assets/colors';
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
-	import { AVLTreeAnimator } from '$lib/data-structures/structures/avlTree/avlTreeAnimator';
-	import { AVLTreeStepHandler } from '$lib/data-structures/structures/avlTree/avlTreeStepHandler';
-	import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
+
+	import { AVLTreeAnimator } from './avlTreeAnimator';
+	import { AVLTreeAnnotator } from './avlTreeAnnotator';
+	import { AVLTreeStepHandler } from './avlTreeStepHandler';
 
 	export let operationManager: OperationManager;
 
@@ -19,7 +20,7 @@
 
 	let orchestrator: AnimationOrchestrator;
 	let animator: AVLTreeAnimator;
-	let annotator: DataStructureAnnotator;
+	let annotator: AVLTreeAnnotator;
 
 	let overlayCanvas: HTMLCanvasElement | null = null;
 	let showOverlay: boolean = true;
@@ -52,7 +53,7 @@
 		network = new Network(container!, { nodes, edges }, options);
 
 		animator = new AVLTreeAnimator({ network, nodes, edges, nodeOptions });
-		annotator = new DataStructureAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
+		annotator = new AVLTreeAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
 
 		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new AVLTreeStepHandler());
 

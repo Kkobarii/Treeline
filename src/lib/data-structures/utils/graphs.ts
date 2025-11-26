@@ -76,17 +76,27 @@ export function avlTreeToGraph(
 	if (!root) return { nodes, edges };
 	log('avlTreeToGraph called with root:', root);
 
+	function getBalanceValue(n: any): number {
+		if (!n) return 0;
+
+		const leftH = n.left && typeof n.left.height === 'number' ? n.left.height : 0;
+		const rightH = n.right && typeof n.right.height === 'number' ? n.right.height : 0;
+
+		return rightH - leftH;
+	}
+
 	// add node to graph
 	const nodeId = root.id;
+	const balance = getBalanceValue(root);
 	if (!nodes.get(nodeId)) {
-		nodes.add({ 
+		nodes.add({
 			id: nodeId, 
 			label: root.value.toString(), 
-			title: NodeData.toTitle(new AVLTreeNodeData(0, root.height))
+			title: NodeData.toTitle(new AVLTreeNodeData(0, root.height ?? 0, balance))
 		});
 	} else {
 		console.warn('Updating existing node in avlTreeToGraph:', nodeId);
-		nodes.update({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(new AVLTreeNodeData(0, root.height)) });
+		nodes.update({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(new AVLTreeNodeData(0, root.height ?? 0, balance)) });
 	}
 
 	// link to parent if successorInfo is provided
@@ -94,7 +104,7 @@ export function avlTreeToGraph(
 		nodes.update({ 
 			id: nodeId, 
 			label: root.value.toString(), 
-			title: NodeData.toTitle(new AVLTreeNodeData(successorInfo.childNumber, root.height))
+			title: NodeData.toTitle(new AVLTreeNodeData(successorInfo.childNumber, root.height ?? 0, getBalanceValue(root)))
 		});
 		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
 		log(`Adding edge ${edgeId} from ${successorInfo.parentId} to ${nodeId}`);
@@ -116,7 +126,7 @@ export function avlTreeToGraph(
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
-			title: NodeData.toTitle(new AVLTreeNodeData(0, 0)),
+			title: NodeData.toTitle(new AVLTreeNodeData(0, 0, 0)),
 		});
 		edges.add({ id: getEdgeId(nodeId, 0), from: nodeId, to: dummyId, dashes: true });
 	}
@@ -135,7 +145,7 @@ export function avlTreeToGraph(
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
-			title: NodeData.toTitle(new AVLTreeNodeData(1, 0)),
+			title: NodeData.toTitle(new AVLTreeNodeData(1, 0, 0)),
 		});
 		edges.add({ id: getEdgeId(nodeId, 1), from: nodeId, to: dummyId, dashes: true });
 	}
@@ -149,6 +159,10 @@ class SuccessorInfo {
 
 export function getDummyNodeId(parentId: number | string, direction: 'left' | 'right' | number): string {
 	return `dummy-${parentId}-${direction}`;
+}
+
+export function isDummyNodeId(nodeId: string | number): boolean {
+	return typeof nodeId === 'string' && nodeId.startsWith('dummy-');
 }
 
 export function getEdgeId(parentId: number | string, direction: 'left' | 'right' | number): string {
@@ -189,21 +203,27 @@ export class NodeData {
 }
 
 export class AVLTreeNodeData extends NodeData {
-	constructor(childNumber: number, public height: number) {
+	constructor(childNumber: number, public height: number, public balance: number) {
 		super(childNumber);
 	}
 
 	static fromNode(node: Node): AVLTreeNodeData {
 		let childNumber = -1;
-		let height = -1;
-		if (node.title && typeof node.title === 'object') {
-			if ('childNumber' in node.title) {
-				childNumber = (node.title as any).childNumber;
+		let height = NaN;
+		let balance = NaN;
+		if (node.title && typeof node.title === 'string') {
+			let titleObj = JSON.parse(node.title);
+
+			if ('childNumber' in titleObj) {
+				childNumber = titleObj.childNumber;
 			}
-			if ('height' in node.title) {
-				height = (node.title as any).height;
+			if ('height' in titleObj) {
+				height = titleObj.height;
+			}
+			if ('balance' in titleObj) {
+				balance = titleObj.balance;
 			}
 		}
-		return new AVLTreeNodeData(childNumber, height);
+		return new AVLTreeNodeData(childNumber, height, balance);
 	}
 }

@@ -5,10 +5,11 @@
 
 	import { Colors } from '$lib/assets/colors';
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
-	import { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
-	import { BSTreeStepHandler } from '$lib/data-structures/structures/bsTree/bsTreeStepHandler';
-	import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
+
+	import { BSTreeAnimator } from './bsTreeAnimator';
+	import { BSTreeAnnotator } from './bsTreeAnnotator';
+	import { BSTreeStepHandler } from './bsTreeStepHandler';
 
 	export let operationManager: OperationManager;
 
@@ -19,7 +20,7 @@
 
 	let orchestrator: AnimationOrchestrator;
 	let animator: BSTreeAnimator;
-	let annotator: DataStructureAnnotator;
+	let annotator: BSTreeAnnotator;
 
 	let overlayCanvas: HTMLCanvasElement | null = null;
 	let showOverlay: boolean = true;
@@ -52,7 +53,7 @@
 		network = new Network(container!, { nodes, edges }, options);
 
 		animator = new BSTreeAnimator({ network, nodes, edges, nodeOptions });
-		annotator = new DataStructureAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
+		annotator = new BSTreeAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
 
 		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new BSTreeStepHandler());
 
