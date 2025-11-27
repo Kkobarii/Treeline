@@ -78,6 +78,7 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 			// console.log(`Re-linking child node ${childNode.id} with title ${childNode.title}`);
 			this.removeNodeRaw(childNode.id!);
 			this.addNodeRaw(childNode);
+			this.reorderChildNodes(childNode.id!);
 		}
 	}
 

@@ -17,6 +17,9 @@ export function bsTreeToGraph(
 ) {
 	if (!root) return { nodes, edges };
 
+	log('bsTreeToGraph called with root:', root);
+	log('SuccessorInfo:', successorInfo);
+
 	const nodeId = root.id;
 	if (!nodes.get(nodeId)) {
 		nodes.add({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(new NodeData(0)) });
@@ -26,7 +29,13 @@ export function bsTreeToGraph(
 	}
 
 	if (successorInfo !== null) {
+		nodes.update({ 
+			id: nodeId,
+			label: root.value.toString(),
+			title: NodeData.toTitle(new NodeData(successorInfo.childNumber))
+		});
 		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
+		log(`Adding edge ${edgeId} from ${successorInfo.parentId} to ${nodeId}`);
 		edges.add({ id: edgeId, from: successorInfo.parentId, to: nodeId });
 	}
 
