@@ -1,5 +1,6 @@
 import { Colors } from "$lib/assets/colors";
 import { AVLTreeNodeData, isDummyNodeId } from "$lib/data-structures/utils/graphs";
+import { VIS_NETWORK_TOP_BB_OFFSET } from "$lib/data-structures/visual/annotators/constants";
 import { DataStructureAnnotator } from "$lib/data-structures/visual/annotators/dataStructureAnnotator";
 
 class HeightBalanceAnnotation {
@@ -29,7 +30,7 @@ class HeightBalanceAnnotation {
     getPosition(): { x: number, y: number } {
         try {
             let box = this.annotator.network.getBoundingBox(this.followingNodeId);
-            let pos = this.annotator.network.canvasToDOM({ x: box.right + this.rightOffset, y: box.top + 6.2 }); // random offset that vis js puts to bounding box
+            let pos = this.annotator.network.canvasToDOM({ x: box.right + this.rightOffset, y: box.top + VIS_NETWORK_TOP_BB_OFFSET }); // random offset that vis js puts to bounding box
             return { x: pos.x, y: pos.y };
         } catch {
             // node might not exist

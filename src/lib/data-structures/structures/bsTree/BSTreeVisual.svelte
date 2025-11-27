@@ -24,6 +24,7 @@
 
 	let overlayCanvas: HTMLCanvasElement | null = null;
 	let showOverlay: boolean = true;
+	let debugMode: boolean = false;
 
 	const nodeOptions = {
 		shape: 'box',
@@ -54,6 +55,7 @@
 
 		animator = new BSTreeAnimator({ network, nodes, edges, nodeOptions });
 		annotator = new BSTreeAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
+		debugMode = annotator.debugMode;
 
 		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new BSTreeStepHandler());
 
@@ -103,4 +105,19 @@
 		console.log('Overlay toggled:', showOverlay);
 	}}>
 	{showOverlay ? 'Hide' : 'Show'} Overlay
+</button>
+
+<button
+	class="mt-2 ml-2"
+	on:click={() => {
+		debugMode = !debugMode;
+		// ensure overlay is visible when enabling debug mode
+		if (debugMode && !showOverlay) {
+			showOverlay = true;
+		}
+		annotator.setDebugMode(debugMode);
+		if (showOverlay) annotator.redrawCanvas();
+		console.log('Debug mode:', debugMode);
+	}}>
+	{debugMode ? 'Disable' : 'Enable'} Debug Mode
 </button>

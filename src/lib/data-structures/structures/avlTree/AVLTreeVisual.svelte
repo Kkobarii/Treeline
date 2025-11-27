@@ -24,6 +24,7 @@
 
 	let overlayCanvas: HTMLCanvasElement | null = null;
 	let showOverlay: boolean = true;
+	let debugMode: boolean = false;
 
 	const nodeOptions = {
 		shape: 'box',
@@ -54,6 +55,7 @@
 
 		animator = new AVLTreeAnimator({ network, nodes, edges, nodeOptions });
 		annotator = new AVLTreeAnnotator({ canvas: overlayCanvas!, network, nodes, edges });
+		debugMode = annotator.debugMode;
 
 		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new AVLTreeStepHandler());
 
@@ -103,4 +105,18 @@
 		console.log('Overlay toggled:', showOverlay);
 	}}>
 	{showOverlay ? 'Hide' : 'Show'} Overlay
+</button>
+
+<button
+	class="mt-2 ml-2"
+	on:click={() => {
+		debugMode = !debugMode;
+		if (debugMode && !showOverlay) {
+			showOverlay = true;
+		}
+		annotator.setDebugMode(debugMode);
+		if (showOverlay) annotator.redrawCanvas();
+		console.log('Debug mode:', debugMode);
+	}}>
+	{debugMode ? 'Disable' : 'Enable'} Debug Mode
 </button>

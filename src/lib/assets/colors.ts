@@ -5,6 +5,7 @@ export const Colors = {
     Yellow: '#FFD700',
 	Node: '#9fd4ff',
 	Info: '#aaaaaa',
+    Id: '#dddddd',
 };
 
 export function shadeColor(color: string, percent: number) {

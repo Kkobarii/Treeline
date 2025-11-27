@@ -1,4 +1,3 @@
-import { clearAnimations } from '$lib/utils/animator';
 import type { StepData } from '$lib/data-structures/operation/operationData';
 import {
 	ChangeDirection,
@@ -7,9 +6,10 @@ import {
 	type CurrentStepChangedEvent,
 	type OperationManager,
 } from '$lib/data-structures/operation/operationManager';
+import { clearAnimations } from '$lib/utils/animator';
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
-import type { StepHandlerBase } from './stepHandlerBase';
 import type { DataStructureAnnotator } from '../annotators/dataStructureAnnotator';
+import type { StepHandlerBase } from './stepHandlerBase';
 
 export class AnimationOrchestrator {
 	constructor(
