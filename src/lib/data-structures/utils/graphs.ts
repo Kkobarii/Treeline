@@ -174,8 +174,11 @@ export class NodeData {
 
 	static fromNode(node: Node): NodeData {
 		let childNumber = -1;
-		if (node.title && typeof node.title === 'object' && 'childNumber' in node.title) {
-			childNumber = (node.title as any).childNumber;
+		if (node.title && typeof node.title === 'string') {
+			let titleObj = JSON.parse(node.title);
+			if ('childNumber' in titleObj) {
+				childNumber = titleObj.childNumber;
+			}
 		}
 		return new NodeData(childNumber);
 	}

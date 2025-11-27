@@ -83,10 +83,10 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 
 	addNode(nodeId: number, value: number | string, parentId?: number, childNumber?: number) {
 		if (this.nodes.get(nodeId)) return;
-		this.addNodeRaw({ id: nodeId, title: `Node ${nodeId}`, label: `${value}` });
+		this.addNodeRaw({ id: nodeId, title: NodeData.toTitle(new NodeData(0)), label: value.toString() });
 
 		if (parentId !== undefined && childNumber !== undefined) {
-			this.updateNodeRaw({ id: nodeId, label: value.toString(), title: `Node ${nodeId}: ${value}`, value: childNumber });
+			this.updateNodeRaw({ id: nodeId, label: value.toString(), title: NodeData.toTitle(new NodeData(childNumber)) });
 			
 			const edgeId = getEdgeId(parentId, childNumber);
 			this.removeNodeRaw(getDummyNodeId(parentId, childNumber));
@@ -107,7 +107,7 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 
 	removeNode(nodeId: number | string, ignoreParent = false) {
 		let parent = this.getParent(nodeId);
-		let value = this.nodes.get(nodeId)!.value!;
+		let nodeData = NodeData.fromNode(this.nodes.get(nodeId) as Node);
 
 		// remove node and its edges
 		try {
@@ -127,8 +127,8 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 		if (parent === null || ignoreParent) return;
 
 		// recreate dummy node for parent
-		this.addNodeRaw({ id: getDummyNodeId(parent.id!, value), color: 'transparent' });
-		this.addEdgeRaw({ id: `edge-${parent.id}-${value}`, from: parent.id, to: getDummyNodeId(parent.id!, value), dashes: true });
+		this.addNodeRaw({ id: getDummyNodeId(parent.id!, nodeData.childNumber), color: 'transparent', title: NodeData.toTitle(new NodeData(nodeData.childNumber)) });
+		this.addEdgeRaw({ id: `edge-${parent.id}-${nodeData.childNumber}`, from: parent.id, to: getDummyNodeId(parent.id!, nodeData.childNumber), dashes: true });
 		this.reorderChildNodes(parent.id!);
 	}
 
@@ -162,16 +162,16 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 			const childNode = this.nodes.get(childId) as any;
 			if (!parentNode || !childNode) return;
 
-			const childNodeValue = childNode.value!;
+			const childNodeData = NodeData.fromNode(childNode);
 
-			this.addEdgeRaw({ id: `edge-${parentId}-${childNodeValue}`, from: parentId, to: childId });
+			this.addEdgeRaw({ id: `edge-${parentId}-${childNodeData.childNumber}`, from: parentId, to: childId });
 			this.reorderChildNodes(parentId);
 		} catch {}
 	}
 
-	public addDummyNode(parentId: number, direction: 'left' | 'right' | number) {
+	public addDummyNode(parentId: number, direction: number) {
 		try {
-			this.addNodeRaw({ id: getDummyNodeId(parentId, direction), color: 'transparent' });
+			this.addNodeRaw({ id: getDummyNodeId(parentId, direction), color: 'transparent', title: NodeData.toTitle(new NodeData(direction as number)) });
 			this.addEdgeRaw({ id: `edge-${parentId}-${direction}`, from: parentId, to: getDummyNodeId(parentId, direction), dashes: true });
 			
 			this.reorderChildNodes(parentId);

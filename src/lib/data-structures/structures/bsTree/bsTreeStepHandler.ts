@@ -179,7 +179,7 @@ async function handleRelinkSuccessorChildForward(animator: BSTreeAnimator, annot
 	animator.unlinkNode(data.successorNodeId, data.childNodeId);
 	animator.unlinkNode(data.newParentNodeId, data.successorNodeId);
 
-	animator.addDummyNode(data.successorNodeId, 'right');
+	animator.addDummyNode(data.successorNodeId, 1);
 
 	animator.linkNode(data.newParentNodeId, data.childNodeId);
 
