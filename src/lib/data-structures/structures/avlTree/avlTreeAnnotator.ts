@@ -3,19 +3,20 @@ import { AVLTreeNodeData, isDummyNodeId } from "$lib/data-structures/utils/graph
 import { VIS_NETWORK_TOP_BB_OFFSET } from "$lib/data-structures/visual/annotators/constants";
 import { DataStructureAnnotator } from "$lib/data-structures/visual/annotators/dataStructureAnnotator";
 
-class HeightBalanceAnnotation {
-    fontSize: number = 9;
+import { BaseAnnotation } from "$lib/data-structures/visual/annotators/baseAnnotation";
+
+class HeightBalanceAnnotation extends BaseAnnotation {
     rightOffset: number = 1;
     color: string = Colors.Yellow;
-    padding: number = 2;
 
-    heightText : string;
-    balanceText : string;
+    heightText: string;
+    balanceText: string;
 
-    constructor(
-        public annotator: DataStructureAnnotator,
-        public followingNodeId: string | number,
-    ) {
+    constructor(public annotator: DataStructureAnnotator, public followingNodeId: string | number) {
+        super(annotator);
+        this.fontSize = 9;
+        this.padding = 2;
+
         let nodeData = this.annotator.nodes.get(followingNodeId);
         if (nodeData && nodeData.title) {
             let avlData = AVLTreeNodeData.fromNode(nodeData);
@@ -29,8 +30,8 @@ class HeightBalanceAnnotation {
 
     getPosition(): { x: number, y: number } {
         try {
-            let box = this.annotator.network.getBoundingBox(this.followingNodeId);
-            let pos = this.annotator.network.canvasToDOM({ x: box.right + this.rightOffset, y: box.top + VIS_NETWORK_TOP_BB_OFFSET }); // random offset that vis js puts to bounding box
+            let box = this.annotator.network.getBoundingBox(this.followingNodeId as any);
+            let pos = this.annotator.network.canvasToDOM({ x: box.right + this.rightOffset, y: box.top + VIS_NETWORK_TOP_BB_OFFSET });
             return { x: pos.x, y: pos.y };
         } catch {
             // node might not exist
@@ -38,32 +39,23 @@ class HeightBalanceAnnotation {
         return this.annotator.network.canvasToDOM({ x: 0, y: 0 });
     }
 
-    getBoundingRect(): { x: number, y: number, width: number, height: number } {
-        let pos = this.getPosition();
-        let ctx = this.annotator.ctx;
-        ctx.font = `${this.fontSize * this.annotator.getScale()}px Arial`;
-        let padding = this.padding * this.annotator.getScale();
-
-        let textWidth = Math.max(ctx.measureText(this.heightText).width, ctx.measureText(this.balanceText).width);
-        let textHeight = this.fontSize * this.annotator.getScale() * 2; // two lines of text
-
-        let boxX = pos.x - padding;
-        let boxY = pos.y;
-        let boxWidth = textWidth + padding * 2;
-        let boxHeight = textHeight + padding * 2;
-
-        return { x: boxX, y: boxY, width: boxWidth, height: boxHeight };
-    }
-
     draw() {
-        let pos = this.getPosition();
-        let rect = this.getBoundingRect();
+        const pos = this.getPosition();
+        // measure both lines and compute box
+        const h = this.measure(this.heightText, this.fontSize);
+        const b = this.measure(this.balanceText, this.fontSize);
+        const textWidth = Math.max(h.width, b.width);
+        const textHeight = (h.height + b.height);
 
-        pos.y += this.padding * this.annotator.getScale();
+        const box = this.computeBox(pos, textWidth, textHeight, this.padding, 'left', 'top');
+        this.annotator.drawRectangle(box.x, box.y, box.width, box.height, this.color);
 
-        this.annotator.drawRectangle(rect.x, rect.y, rect.width, rect.height, this.color);
-        this.annotator.drawText(this.heightText, pos.x, pos.y, this.fontSize, 'left', 'top');
-        this.annotator.drawText(this.balanceText, pos.x, pos.y + (this.fontSize * this.annotator.getScale()), this.fontSize, 'left', 'top');
+        // draw two lines stacked
+        const scale = this.annotator.getScale();
+        const line1Y = pos.y + this.padding * scale;
+        this.annotator.drawText(this.heightText, pos.x, line1Y, this.fontSize, 'left', 'top');
+        const line2Y = line1Y + (this.fontSize * scale);
+        this.annotator.drawText(this.balanceText, pos.x, line2Y, this.fontSize, 'left', 'top');
     }
 }
 

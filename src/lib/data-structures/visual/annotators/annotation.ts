@@ -1,18 +1,13 @@
 import { Colors } from "$lib/assets/colors";
+import { BaseAnnotation } from "./baseAnnotation";
 import type { DataStructureAnnotator } from "./dataStructureAnnotator";
 
-export class Annotation {
-    fontSize: number = 16;
+export class Annotation extends BaseAnnotation {
     aboveOffset: number = 40;
     color: string = Colors.Info;
-    padding: number = 5;
-    roundRadius: number = 8;
 
-    constructor(
-        public annotator: DataStructureAnnotator,
-        public text: string, 
-        public followingNodeId: string | number | null = null,
-    ) {
+    constructor(public annotator: DataStructureAnnotator, public text: string, public followingNodeId: string | number | null = null) {
+        super(annotator);
     }
 
     getPosition(): { x: number, y: number } {
@@ -28,34 +23,16 @@ export class Annotation {
         return this.annotator.network.canvasToDOM({ x: 0, y: 0 });
     }
 
-    getBoundingRect(): { x: number, y: number, width: number, height: number } {
-        let pos = this.getPosition();
-        let ctx = this.annotator.ctx;
-        ctx.font = `${this.fontSize * this.annotator.getScale()}px Arial`;
-        let padding = this.padding * this.annotator.getScale();
-        
-        let textWidth = ctx.measureText(this.text).width;
-        let textHeight = this.fontSize * this.annotator.getScale();
-
-        let boxX = pos.x - textWidth / 2 - padding;
-        let boxY = pos.y - textHeight / 2 - padding;
-        let boxWidth = textWidth + padding * 2;
-        let boxHeight = textHeight + padding * 2;
-
-        return { x: boxX, y: boxY, width: boxWidth, height: boxHeight };
-    }
-
     draw() {
-        let pos = this.getPosition();
-        let rect = this.getBoundingRect();
-
-        this.annotator.drawRectangle(rect.x, rect.y, rect.width, rect.height, this.color);
-        this.annotator.drawText(this.text, pos.x, pos.y, this.fontSize);
+        const pos = this.getPosition();
+        this.renderBoxedText(pos, this.text, this.fontSize, this.padding, this.color, 'center', 'middle');
     }
 
     clear() {
-        let rect = this.getBoundingRect();
-        this.annotator.clearRectangle(rect.x, rect.y, rect.width, rect.height);
+        const pos = this.getPosition();
+        const { width: textWidth, height: textHeight } = this.measure(this.text, this.fontSize);
+        const box = this.computeBox(pos, textWidth, textHeight, this.padding, 'center', 'middle');
+        this.annotator.clearRectangle(box.x, box.y, box.width, box.height);
     }
 }
 

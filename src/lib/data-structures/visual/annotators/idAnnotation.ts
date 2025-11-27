@@ -1,13 +1,16 @@
 import { Colors } from "$lib/assets/colors";
+import { BaseAnnotation } from './baseAnnotation';
 import { VIS_NETWORK_TOP_BB_OFFSET } from "./constants";
 import type { DataStructureAnnotator } from "./dataStructureAnnotator";
 
-export class IdAnnotation {
-    fontSize: number = 10;
-    padding: number = 2;
+export class IdAnnotation extends BaseAnnotation {
     color: string = Colors.Id;
 
-    constructor(public annotator: DataStructureAnnotator, public followingNodeId: string | number) {}
+    constructor(public annotator: DataStructureAnnotator, public followingNodeId: string | number) {
+        super(annotator);
+        this.fontSize = 10;
+        this.padding = 2;
+    }
 
     getPosition(): { x: number, y: number } {
         try {
@@ -20,35 +23,17 @@ export class IdAnnotation {
         return this.annotator.network.canvasToDOM({ x: 0, y: 0 });
     }
 
-    getBoundingRect(): { x: number, y: number, width: number, height: number } {
-        let pos = this.getPosition();
-        let ctx = this.annotator.ctx;
-        ctx.font = `${this.fontSize * this.annotator.getScale()}px Arial`;
-        let padding = this.padding * this.annotator.getScale();
-
-        let text = String(this.followingNodeId).trim();
-        let textWidth = ctx.measureText(text).width;
-        let textHeight = this.fontSize * this.annotator.getScale();
-
-        let boxX = pos.x - textWidth - padding;
-        let boxY = pos.y;
-        let boxWidth = textWidth + padding * 2;
-        let boxHeight = textHeight + padding * 2;
-
-        return { x: boxX, y: boxY, width: boxWidth, height: boxHeight };
-    }
-
     draw() {
-        let pos = this.getPosition();
-        let rect = this.getBoundingRect();
-
-        this.annotator.drawRectangle(rect.x, rect.y, rect.width, rect.height, this.color);
-        this.annotator.drawText(String(this.followingNodeId), pos.x, pos.y + this.padding * this.annotator.getScale(), this.fontSize, "right", "top");
+        const pos = this.getPosition();
+        // right/top alignment to match old behavior
+        this.renderBoxedText(pos, String(this.followingNodeId), this.fontSize, this.padding, this.color, 'right', 'top');
     }
 
     clear() {
-        let rect = this.getBoundingRect();
-        this.annotator.clearRectangle(rect.x, rect.y, rect.width, rect.height);
+        const pos = this.getPosition();
+        const { width: textWidth, height: textHeight } = this.measure(String(this.followingNodeId), this.fontSize);
+        const box = this.computeBox(pos, textWidth, textHeight, this.padding, 'right', 'top');
+        this.annotator.clearRectangle(box.x, box.y, box.width, box.height);
     }
 }
 
