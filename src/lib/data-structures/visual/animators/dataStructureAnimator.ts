@@ -41,42 +41,54 @@ export class DataStructureAnimator {
 		console.debug('addNodeRaw', node);
 		try {
 			this.nodes.add(node);
-		} catch {}
+		} catch {
+			console.warn('Failed to add node', node);
+		}
 	}
 
 	protected updateNodeRaw(node: Node) {
 		console.debug('updateNodeRaw', node);
 		try {
 			this.nodes.update(node);
-		} catch {}
+		} catch {
+			console.warn('Failed to update node', node);
+		}
 	}
 
 	protected removeNodeRaw(id: string | number) {
 		console.debug('removeNodeRaw', id);
 		try {
 			this.nodes.remove(id);
-		} catch {}
+		} catch {
+			console.warn('Failed to remove node', id);
+		}
 	}
 
 	protected addEdgeRaw(edge: Edge) {
 		console.debug('addEdgeRaw', edge);
 		try {
 			this.edges.add(edge);
-		} catch {}
+		} catch {
+			console.warn('Failed to add edge', edge);
+		}
 	}
 
 	protected removeEdgeRaw(id: string | number) {
 		console.debug('removeEdgeRaw', id);
 		try {
 			this.edges.remove(id);
-		} catch {}
+		} catch {
+			console.warn('Failed to remove edge', id);
+		}
 	}
 
 	protected updateEdgeRaw(edge: Edge) {
 		console.debug('updateEdgeRaw', edge);
 		try {
 			this.edges.update(edge);
-		} catch {}
+		} catch {
+			console.warn('Failed to update edge', edge);
+		}
 	}
 
 	nodeExists(nodeId: string | number): boolean {
@@ -236,18 +248,6 @@ export class DataStructureAnimator {
 			// this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
 		} catch {
 		}
-	}
-
-	async hideNode(nodeId: string | number) {
-		try {
-			this.updateNodeRaw({ id: nodeId, hidden: true } as any);
-		} catch {}
-	}
-
-	async showNode(nodeId: string | number) {
-		try {
-			this.updateNodeRaw({ id: nodeId, hidden: false } as any);
-		} catch {}
 	}
 
 	getNodePositions(): Map<string | number, Position> {

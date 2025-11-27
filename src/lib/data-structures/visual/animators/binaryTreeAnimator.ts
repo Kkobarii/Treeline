@@ -147,27 +147,36 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 	public unlinkNode(parentId: number, childId: number) {
 		try {
 			const childEdges = (this.network as any).getConnectedEdges(childId) as string[];
+			console.log(`Unlinking child node ${childId} from parent ${parentId}`);
+			console.log(`Child edges:`, childEdges);
 			for (const edgeId of childEdges) {
 				const edge = this.edges.get(edgeId);
+				console.log(`Checking edge ${edgeId} from ${edge?.from} to ${edge?.to}`);
 				if (edge && edge.from === parentId) {
 					this.removeEdgeRaw(edgeId as any);
 					break;
 				}
 			}
-		} catch {}
+		} catch (ex) {
+			console.warn(`Failed to unlink child node ${childId} from parent ${parentId}:`, ex);
+		}
+		console.log(`Unlinked child node ${childId} from parent ${parentId}`);
 	}
 
-	public linkNode(parentId: number, childId: number) {
+	public linkNode(parentId: number, childId: number, childNumber: number) {
 		try {
 			const parentNode = this.nodes.get(parentId) as any;
 			const childNode = this.nodes.get(childId) as any;
 			if (!parentNode || !childNode) return;
 
-			const childNodeData = NodeData.fromNode(childNode);
+			this.addEdgeRaw({ id: `edge-${parentId}-${childNumber}`, from: parentId, to: childId });
+			this.updateNodeRaw({ id: childId, title: NodeData.toTitle(new NodeData(childNumber)) });
 
-			this.addEdgeRaw({ id: `edge-${parentId}-${childNodeData.childNumber}`, from: parentId, to: childId });
+			console.log(`Linked node ${childId} to parent ${parentId} as child number ${childNumber}`);
 			this.reorderChildNodes(parentId);
-		} catch {}
+		} catch (ex) {
+			console.warn(`Failed to link node ${childId} to parent ${parentId} as child number ${childNumber}:`, ex);
+		}
 	}
 
 	public addDummyNode(parentId: number, direction: number) {

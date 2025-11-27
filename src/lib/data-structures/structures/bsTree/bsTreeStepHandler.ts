@@ -8,9 +8,9 @@ import { getDummyNodeId } from '$lib/data-structures/utils/graphs';
 import { relationTextToSymbol } from '$lib/data-structures/utils/utils';
 
 import type { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
-import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import type { DataStructureAnimator } from '$lib/data-structures/visual/animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
+import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 
 async function handleStartForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
 	animator.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
@@ -171,7 +171,7 @@ async function handleFoundInorderSuccessorBackward(animator: BSTreeAnimator, ann
 }
 
 async function handleRelinkSuccessorChildForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.RelinkSuccessorChildData) {
-	annotator.annotateNode(`Relink inorder successor's child`, data.childNodeId);
+	annotator.annotateNode(`Relink inorder successor's child`, data.newParentNodeId);
 
 	let originalChildPos = animator.getPosition(data.childNodeId);
 	let originalSuccessorPos = animator.getPosition(data.successorNodeId);
@@ -181,10 +181,15 @@ async function handleRelinkSuccessorChildForward(animator: BSTreeAnimator, annot
 
 	animator.addDummyNode(data.successorNodeId, 1);
 
-	animator.linkNode(data.newParentNodeId, data.childNodeId);
+	animator.linkNode(data.newParentNodeId, data.childNodeId, 0);
+
+	if (animator.nodeExists(getDummyNodeId(data.successorNodeId, 0)))
+		animator.removeNode(getDummyNodeId(data.successorNodeId, 0), true);
+	if (animator.nodeExists(getDummyNodeId(data.successorNodeId, 1)))
+		animator.removeNode(getDummyNodeId(data.successorNodeId, 1), true);
 
 	let newChildPos = animator.getPosition(data.childNodeId);
-	let newSuccessorPos = animator.getPosition(data.successorNodeId);
+	let newSuccessorPos = { x: newChildPos.x, y: newChildPos.y - 50 };
 
 	animator.snapNodeTo(data.childNodeId, originalChildPos.x, originalChildPos.y);
 	animator.snapNodeTo(data.successorNodeId, originalSuccessorPos.x, originalSuccessorPos.y);
@@ -196,7 +201,7 @@ async function handleRelinkSuccessorChildForward(animator: BSTreeAnimator, annot
 }
 
 async function handleRelinkSuccessorChildBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.RelinkSuccessorChildData) {
-	annotator.annotateNode(`Relink inorder successor's child`, data.childNodeId);
+	annotator.annotateNode(`Relink inorder successor's child`, data.newParentNodeId);
 	animator.ensureTree(data.startSnapshot! as BSTree);
 }
 
@@ -235,7 +240,7 @@ async function handleReplaceWithInorderSuccessorForward(animator: BSTreeAnimator
 
 	await Promise.all(promises);
 
-	animator.snapNodeTo(data.successorNodeId, animator.getPosition(data.oldNodeId).x, animator.getPosition(data.oldNodeId).y);
+	// animator.snapNodeTo(data.successorNodeId, animator.getPosition(data.oldNodeId).x, animator.getPosition(data.oldNodeId).y);
 }
 
 async function handleReplaceWithInorderSuccessorBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.ReplaceWithInorderSuccessorData) {
