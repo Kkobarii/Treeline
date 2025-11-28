@@ -39,9 +39,20 @@ function handleEndBackward(animator: BSTreeAnimator, annotator: DataStructureAnn
 }
 
 async function handleCreateRootForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateRootData) {
+	// create the actual node so we have a position to move the floating value into
 	animator.addNode(data.nodeId, data.value);
+	// if a floating value annotation exists, move it into the new node first
+	if ((annotator as any).currentValueAnnotation) {
+		try {
+			await (annotator as any).moveValueAnnotationTo(data.nodeId);
+		} catch {}
+	}
+
 	annotator.annotateNode(`Create root node with value ${data.value}`, data.nodeId);
 	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
+
+	// clear floating annotation after the node has appeared
+	try { (annotator as any).clearValueAnnotation(); } catch {}
 }
 
 async function handleCreateRootBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateRootData) {
@@ -56,12 +67,22 @@ async function handleCreateRootBackward(animator: BSTreeAnimator, annotator: Dat
 async function handleCreateLeafForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateLeafData) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
 	const childNumber = data.direction === 'left' ? 0 : 1;
+	// create actual node so it has a position to move the floating value into
 	animator.addNode(data.nodeId, data.value, data.parentId, childNumber);
+
+	if ((annotator as any).currentValueAnnotation) {
+		try {
+			await (annotator as any).moveValueAnnotationTo(data.nodeId);
+		} catch {}
+	}
+
 	annotator.annotateNode(info, data.nodeId);
 	await Promise.all([
 		animator.animateNodeGrowth(data.nodeId),
 		animator.animateLegsGrowth(data.nodeId),
 	]);
+
+	try { (annotator as any).clearValueAnnotation(); } catch {}
 }
 
 async function handleCreateLeafBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateLeafData) {
@@ -77,18 +98,48 @@ async function handleCreateLeafBackward(animator: BSTreeAnimator, annotator: Dat
 }
 
 async function handleCompareForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CompareData) {
+	// ensure a floating value annotation exists for the value being inserted
+	if (!(annotator as any).currentValueAnnotation) {
+		const rootId = annotator.findRootNodeId();
+		(annotator as any).createValueAnnotation(String(data.value), rootId);
+	}
+
+	// move floating value to the comparison node
+	if ((annotator as any).currentValueAnnotation) {
+		try {
+			await (annotator as any).moveValueAnnotationTo(data.comparisonId);
+		} catch {}
+	}
+
 	annotator.annotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
 }
 
 async function handleCompareBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CompareData) {
+	// in backward stepping, ensure floating value annotation reflects the compare
+	if (!(annotator as any).currentValueAnnotation) {
+		const rootId = annotator.findRootNodeId();
+		(annotator as any).createValueAnnotation(String(data.value), rootId);
+	}
+
+	if ((annotator as any).currentValueAnnotation) {
+		try { await (annotator as any).moveValueAnnotationTo(data.comparisonId); } catch {}
+	}
+
 	annotator.annotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
 }
 
 async function handleTraverseForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.TraverseData) {
+	// move floating value to the destination node during traversal
+	if ((annotator as any).currentValueAnnotation) {
+		try { await (annotator as any).moveValueAnnotationTo(data.toId); } catch {}
+	}
 	annotator.annotateNode(`Traverse to ${data.direction} child`, data.fromId);
 }
 
 async function handleTraverseBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.TraverseData) {
+	if ((annotator as any).currentValueAnnotation) {
+		try { await (annotator as any).moveValueAnnotationTo(data.toId); } catch {}
+	}
 	annotator.annotateNode(`Traverse to ${data.direction} child`, data.fromId);
 }
 

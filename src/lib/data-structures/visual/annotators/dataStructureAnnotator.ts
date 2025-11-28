@@ -4,6 +4,7 @@ import type { DataSet } from "vis-data";
 import type { Edge, Network, Node } from "vis-network";
 import { Annotation } from './annotation';
 import { IdAnnotation } from './idAnnotation';
+import { ValueAnnotation } from './valueAnnotation';
 
 export interface DataStructureAnnotatorOpts {
     canvas: HTMLCanvasElement;
@@ -24,6 +25,7 @@ export class DataStructureAnnotator {
     annotationCurrentNodeId: string | number | null = null;
 
     currentAnnotation: Annotation | null = null;
+    currentValueAnnotation: ValueAnnotation | null = null;
 
     constructor(opts: DataStructureAnnotatorOpts) {
         this.canvas = opts.canvas;
@@ -55,8 +57,13 @@ export class DataStructureAnnotator {
 
     public redrawCanvas() {
         this.clearCanvas();
+        // draw the normal annotation (textual) and any floating value annotation
         if (this.currentAnnotation) {
             this.currentAnnotation.draw();
+        }
+
+        if (this.currentValueAnnotation) {
+            this.currentValueAnnotation.draw();
         }
 
         if (this.debugMode) {
@@ -101,6 +108,39 @@ export class DataStructureAnnotator {
 
         this.currentAnnotation = new Annotation(this, text, nodeId);
         this.currentAnnotation.draw();
+    }
+
+    /**
+     * Create a value annotation; the annotation will be drawn above `startNodeId` if provided,
+     * otherwise at origin until moved.
+     */
+    public createValueAnnotation(text: string, startNodeId: string | number | null = null) {
+        if (this.currentValueAnnotation) {
+            this.currentValueAnnotation.clear();
+        }
+        this.currentValueAnnotation = new ValueAnnotation(this, text, startNodeId);
+        this.currentValueAnnotation.draw();
+    }
+
+    /** Animate moving the current value annotation to be above `nodeId`. Resolves when move completes. */
+    public async moveValueAnnotationTo(nodeId: string | number, duration?: number) {
+        if (!this.currentValueAnnotation) return;
+        await this.currentValueAnnotation.moveToNode(nodeId, duration);
+    }
+
+    /** Make the current value annotation follow a node (no animation). */
+    public followValueAnnotation(nodeId: string | number | null) {
+        if (!this.currentValueAnnotation) return;
+        this.currentValueAnnotation.followingNodeId = nodeId;
+        this.redrawCanvas();
+    }
+
+    /** Remove the current value annotation */
+    public clearValueAnnotation() {
+        if (!this.currentValueAnnotation) return;
+        this.currentValueAnnotation.clear();
+        this.currentValueAnnotation = null;
+        this.redrawCanvas();
     }
 
     public clearAnnotation() {

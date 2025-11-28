@@ -4,6 +4,7 @@ export const Colors = {
 	Red: '#FF4500',
     Yellow: '#FFD700',
 	Node: '#9fd4ff',
+    ValueNode: '#ffb347',
 	Info: '#aaaaaa',
     Id: '#dddddd',
 };
