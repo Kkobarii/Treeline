@@ -14,13 +14,12 @@ export class Annotation extends BaseAnnotation {
         if (this.followingNodeId !== null) {
             try {
                 let nodePos = this.annotator.network.getPosition(this.followingNodeId as any);
-                let domPos = this.annotator.network.canvasToDOM(nodePos);
-                return { x: domPos.x, y: domPos.y - this.aboveOffset * this.annotator.getScale() };
+                return { x: nodePos.x, y: nodePos.y - this.aboveOffset };
             } catch {
                 // node might not exist
             }
         }
-        return this.annotator.network.canvasToDOM({ x: 0, y: 0 });
+        return { x: 0, y: 0 };
     }
 
     draw() {
@@ -32,7 +31,11 @@ export class Annotation extends BaseAnnotation {
         const pos = this.getPosition();
         const { width: textWidth, height: textHeight } = this.measure(this.text, this.fontSize);
         const box = this.computeBox(pos, textWidth, textHeight, this.padding, 'center', 'middle');
-        this.annotator.clearRectangle(box.x, box.y, box.width, box.height);
+        
+        const scale = this.annotator.getScale();
+        const domTopLeft = this.annotator.network.canvasToDOM({ x: box.x, y: box.y });
+        
+        this.annotator.clearRectangle(domTopLeft.x, domTopLeft.y, box.width * scale, box.height * scale);
     }
 }
 

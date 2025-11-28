@@ -15,12 +15,11 @@ export class IdAnnotation extends BaseAnnotation {
     getPosition(): { x: number, y: number } {
         try {
             let nodePos = this.annotator.network.getBoundingBox(this.followingNodeId as any);
-            let domPos = this.annotator.network.canvasToDOM({ x: nodePos.left - 1, y: nodePos.top + VIS_NETWORK_TOP_BB_OFFSET });
-            return { x: domPos.x, y: domPos.y };
+            return { x: nodePos.left - 1, y: nodePos.top + VIS_NETWORK_TOP_BB_OFFSET };
         } catch {
             // node might not exist
         }
-        return this.annotator.network.canvasToDOM({ x: 0, y: 0 });
+        return { x: 0, y: 0 };
     }
 
     draw() {
@@ -33,7 +32,9 @@ export class IdAnnotation extends BaseAnnotation {
         const pos = this.getPosition();
         const { width: textWidth, height: textHeight } = this.measure(String(this.followingNodeId), this.fontSize);
         const box = this.computeBox(pos, textWidth, textHeight, this.padding, 'right', 'top');
-        this.annotator.clearRectangle(box.x, box.y, box.width, box.height);
+        const scale = this.annotator.getScale();
+        const domTopLeft = this.annotator.network.canvasToDOM({ x: box.x, y: box.y });
+        this.annotator.clearRectangle(domTopLeft.x, domTopLeft.y, box.width * scale, box.height * scale);
     }
 }
 

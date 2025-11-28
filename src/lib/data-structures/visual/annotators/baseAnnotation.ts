@@ -9,9 +9,11 @@ export class BaseAnnotation {
 
     measure(text: string, fontSize: number) {
         const ctx = this.annotator.ctx;
-        ctx.font = `${fontSize * this.annotator.getScale()}px Arial`;
-        const width = ctx.measureText(text).width;
-        const height = fontSize * this.annotator.getScale();
+        const scale = this.annotator.getScale();
+        ctx.font = `${fontSize * scale}px Arial`;
+        const widthPx = ctx.measureText(text).width;
+        const width = widthPx / scale;
+        const height = fontSize;
         return { width, height };
     }
 
@@ -20,7 +22,6 @@ export class BaseAnnotation {
      * pos is interpreted relative to alignment: e.g. alignX='right' means pos.x is the right edge.
      */
     computeBox(pos: { x: number; y: number }, textWidth: number, textHeight: number, padding: number, alignX: CanvasTextAlign, alignY: CanvasTextBaseline) {
-        padding = padding * this.annotator.getScale();
         
         let boxX = 0;
         if (alignX === 'center') boxX = pos.x - textWidth / 2 - padding;
@@ -42,10 +43,7 @@ export class BaseAnnotation {
         const { width: textWidth, height: textHeight } = this.measure(text, fontSize);
         const box = this.computeBox(pos, textWidth, textHeight, padding, alignX, alignY);
 
-        this.annotator.drawRectangle(box.x, box.y, box.width, box.height, color, this.roundRadius);
-
         // compute text coordinates and alignment for drawing
-        padding = padding * this.annotator.getScale();
         let textX = pos.x;
         if (alignX === 'left') { textX = pos.x + padding; }
         else if (alignX === 'right') { textX = pos.x; }
@@ -54,7 +52,15 @@ export class BaseAnnotation {
         if (alignY === 'top') { textY = pos.y + padding; }
         else if (alignY === 'bottom') { textY = pos.y - padding; }
 
-        this.annotator.drawText(text, textX, textY, fontSize, alignX, alignY);
+        // convert box (network units) to DOM/canvas pixels
+        const domTopLeft = this.annotator.network.canvasToDOM({ x: box.x, y: box.y });
+        const domW = box.width * this.annotator.getScale();
+        const domH = box.height * this.annotator.getScale();
+        this.annotator.drawRectangle(domTopLeft.x, domTopLeft.y, domW, domH, color, this.roundRadius);
+
+        // compute text coordinates in network units, then convert to DOM
+        const domTextPos = this.annotator.network.canvasToDOM({ x: textX, y: textY });
+        this.annotator.drawText(text, domTextPos.x, domTextPos.y, fontSize, alignX, alignY);
     }
 }
 

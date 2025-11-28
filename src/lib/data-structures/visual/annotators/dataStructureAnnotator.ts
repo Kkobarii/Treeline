@@ -74,22 +74,25 @@ export class DataStructureAnnotator {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    public annotateNode(text: string, nodeId: string | number | null) {
-        if (nodeId === null) {
-            // find root node
-            for (const node of this.nodes.get() as Node[]) {
-                let isRoot = true;
-                for (const edge of this.edges.get() as Edge[]) {
-                    if (edge.to === node.id) {
-                        isRoot = false;
-                        break;
-                    }
-                }
-                if (isRoot) {
-                    nodeId = node.id!;
+    public findRootNodeId(): string | number | null {
+        for (const node of this.nodes.get() as Node[]) {
+            let isRoot = true;
+            for (const edge of this.edges.get() as Edge[]) {
+                if (edge.to === node.id) {
+                    isRoot = false;
                     break;
                 }
             }
+            if (isRoot) {
+                return node.id!;
+            }
+        }
+        return null;
+    }
+
+    public annotateNode(text: string, nodeId: string | number | null) {
+        if (nodeId === null) {
+            nodeId = this.findRootNodeId();
         }
 
         if (this.currentAnnotation) {

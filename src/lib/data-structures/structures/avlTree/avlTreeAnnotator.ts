@@ -31,31 +31,35 @@ class HeightBalanceAnnotation extends BaseAnnotation {
     getPosition(): { x: number, y: number } {
         try {
             let box = this.annotator.network.getBoundingBox(this.followingNodeId as any);
-            let pos = this.annotator.network.canvasToDOM({ x: box.right + this.rightOffset, y: box.top + VIS_NETWORK_TOP_BB_OFFSET });
-            return { x: pos.x, y: pos.y };
+            return { x: box.right + this.rightOffset, y: box.top + VIS_NETWORK_TOP_BB_OFFSET };
         } catch {
             // node might not exist
         }
-        return this.annotator.network.canvasToDOM({ x: 0, y: 0 });
+        return { x: 0, y: 0 };
     }
 
     draw() {
         const pos = this.getPosition();
-        // measure both lines and compute box
+        // measure both lines and compute box (in network units)
         const h = this.measure(this.heightText, this.fontSize);
         const b = this.measure(this.balanceText, this.fontSize);
         const textWidth = Math.max(h.width, b.width);
         const textHeight = (h.height + b.height);
 
         const box = this.computeBox(pos, textWidth, textHeight, this.padding, 'left', 'top');
-        this.annotator.drawRectangle(box.x, box.y, box.width, box.height, this.color);
 
-        // draw two lines stacked
+        // convert box to DOM and draw
         const scale = this.annotator.getScale();
-        const line1Y = pos.y + this.padding * scale;
-        this.annotator.drawText(this.heightText, pos.x, line1Y, this.fontSize, 'left', 'top');
-        const line2Y = line1Y + (this.fontSize * scale);
-        this.annotator.drawText(this.balanceText, pos.x, line2Y, this.fontSize, 'left', 'top');
+        const domTopLeft = this.annotator.network.canvasToDOM({ x: box.x, y: box.y });
+        this.annotator.drawRectangle(domTopLeft.x, domTopLeft.y, box.width * scale, box.height * scale, this.color);
+
+        // draw two lines stacked — compute line positions in network units, then convert
+        const line1Y = pos.y + this.padding;
+        const domLine1 = this.annotator.network.canvasToDOM({ x: pos.x, y: line1Y });
+        this.annotator.drawText(this.heightText, domLine1.x, domLine1.y, this.fontSize, 'left', 'top');
+        const line2Y = line1Y + (this.fontSize);
+        const domLine2 = this.annotator.network.canvasToDOM({ x: pos.x, y: line2Y });
+        this.annotator.drawText(this.balanceText, domLine2.x, domLine2.y, this.fontSize, 'left', 'top');
     }
 }
 
