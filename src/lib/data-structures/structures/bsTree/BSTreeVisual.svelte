@@ -93,27 +93,34 @@
 	</canvas>
 </div>
 
-<button
-	class="mt-2"
-	on:click={() => {
-		showOverlay = !showOverlay;
-		annotator.toggleShown();
-		console.log('Overlay toggled:', showOverlay);
-	}}>
-	{showOverlay ? 'Hide' : 'Show'} Overlay
-</button>
+<div class="mt-2 flex">
+	<button
+		on:click={() => {
+			showOverlay = !showOverlay;
+			annotator.toggleShown();
+			console.log('Overlay toggled:', showOverlay);
+		}}>
+		{showOverlay ? 'Hide' : 'Show'} Overlay
+	</button>
 
-<button
-	class="mt-2 ml-2"
-	on:click={() => {
-		debugMode = !debugMode;
-		// ensure overlay is visible when enabling debug mode
-		if (debugMode && !showOverlay) {
-			showOverlay = true;
-		}
-		annotator.setDebugMode(debugMode);
-		if (showOverlay) annotator.redrawCanvas();
-		console.log('Debug mode:', debugMode);
-	}}>
-	{debugMode ? 'Disable' : 'Enable'} Debug Mode
-</button>
+	<button
+		hidden={!showOverlay}
+		class="ml-2"
+		style="padding: 1px!important;"
+		aria-label="Toggle debug mode"
+		on:click={() => {
+			debugMode = !debugMode;
+			annotator.toggleDebugMode();
+			console.log('Debug mode toggled:', debugMode);
+		}}>
+		<span class="inline-flex h-6 w-6 items-center justify-center rounded-full">
+			<img
+				src="/bug.svg"
+				alt={debugMode ? 'Disable debug mode' : 'Enable debug mode'}
+				width="18"
+				height="18"
+				class="h-4 w-4"
+				style="background: transparent; filter: {!debugMode ? 'invert(1) brightness(2)' : 'grayscale(1) brightness(0.8)'};" />
+		</span>
+	</button>
+</div>
