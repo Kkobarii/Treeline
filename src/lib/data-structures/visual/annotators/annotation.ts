@@ -3,7 +3,7 @@ import { BaseAnnotation } from "./baseAnnotation";
 import type { DataStructureAnnotator } from "./dataStructureAnnotator";
 
 export class Annotation extends BaseAnnotation {
-    aboveOffset: number = 40;
+    aboveOffset: number = -30;
     color: string = Colors.Info;
 
     constructor(public annotator: DataStructureAnnotator, public text: string, public followingNodeId: string | number | null = null) {

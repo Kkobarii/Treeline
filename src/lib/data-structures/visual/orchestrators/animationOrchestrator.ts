@@ -6,7 +6,7 @@ import {
 	type CurrentStepChangedEvent,
 	type OperationManager,
 } from '$lib/data-structures/operation/operationManager';
-import { clearAnimations } from '$lib/utils/animator';
+import { clearAnimations, DEFAULT_ANIMATION_DURATION_MS, FAST_PLAYBACK_DURATION_MS, setGlobalAnimationDuration } from '$lib/utils/animator';
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '../annotators/dataStructureAnnotator';
 import type { StepHandlerBase } from './stepHandlerBase';
@@ -36,14 +36,18 @@ export class AnimationOrchestrator {
 			clearAnimations();
 
 			if (operationManager.getShowSteps()) {
-				this.animator.resetAnimationDuration();
+				// ensure global duration is reset to default for step-by-step playback
+				setGlobalAnimationDuration(DEFAULT_ANIMATION_DURATION_MS);
+				this.annotator.showAnnotationNode();
 				await this.playStep({
 					currentStepId: operationManager.getCurrentStepIndex(),
 					currentStep: operationManager.getCurrentStep(),
 					direction: ChangeDirection.Forward,
 				});
 			} else {
-				this.animator.setAnimationDuration(75);
+				// set fast playback duration globally so annotators use same speed
+				setGlobalAnimationDuration(FAST_PLAYBACK_DURATION_MS);
+				this.annotator.hideAnnotationNode();
 				await this.playOperation({
 					currentOperationId: operationManager.getCurrentOperationIndex(),
 					currentOperation: operationManager.getCurrentOperation(),

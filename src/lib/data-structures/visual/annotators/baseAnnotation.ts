@@ -5,6 +5,8 @@ export class BaseAnnotation {
     padding: number = 4;
     roundRadius: number = 6;
 
+    shown: boolean = true;
+
     constructor(public annotator: DataStructureAnnotator) {}
 
     measure(text: string, fontSize: number) {
@@ -40,6 +42,8 @@ export class BaseAnnotation {
 
     /** Draw a single-line boxed text using alignment rules. */
     renderBoxedText(pos: { x: number; y: number }, text: string, fontSize: number, padding: number, color: string, alignX: CanvasTextAlign = 'center', alignY: CanvasTextBaseline = 'middle') {
+        if (!this.shown) return;
+
         const { width: textWidth, height: textHeight } = this.measure(text, fontSize);
         const box = this.computeBox(pos, textWidth, textHeight, padding, alignX, alignY);
 

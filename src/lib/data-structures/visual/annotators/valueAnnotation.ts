@@ -1,10 +1,12 @@
 import { Colors } from "$lib/assets/colors";
+import { addAnimation, getGlobalAnimationDuration } from '$lib/utils/animator';
 import { BaseAnnotation } from './baseAnnotation';
 import type { DataStructureAnnotator } from './dataStructureAnnotator';
 
 export class ValueAnnotation extends BaseAnnotation {
     aboveOffset: number = 40;
     color: string = Colors.ValueNode;
+    hidden: boolean = false;
 
     // when followingNodeId is set, position is derived from that node
     public followingNodeId: string | number | null = null;
@@ -14,8 +16,13 @@ export class ValueAnnotation extends BaseAnnotation {
 
     constructor(public annotator: DataStructureAnnotator, public text: string, public startFollowingNodeId: string | number | null = null) {
         super(annotator);
+        this.fontSize = 16;
         this.followingNodeId = startFollowingNodeId;
-        // initialize position to either the following node or origin
+        
+        if (this.followingNodeId === null) {
+            this.followingNodeId = annotator.findRootNodeId();
+        }
+
         if (this.followingNodeId !== null) {
             try {
                 const p = this.annotator.network.getPosition(this.followingNodeId as any);
@@ -39,8 +46,10 @@ export class ValueAnnotation extends BaseAnnotation {
     }
 
     draw() {
+        if (!this.hidden) {
         const pos = this.getPosition();
         this.renderBoxedText(pos, this.text, this.fontSize, this.padding, this.color, 'center', 'middle');
+        }
     }
 
     clear() {
@@ -56,7 +65,7 @@ export class ValueAnnotation extends BaseAnnotation {
      * Animate moving the value annotation to be above `nodeId`.
      * Resolves when animation completes and the annotation is set to follow the target node.
      */
-    async moveToNode(nodeId: string | number, duration: number = 400): Promise<void> {
+    async moveToNode(nodeId: string | number): Promise<void> {
         // compute start and target positions in network units
         const start = this.getPosition();
         let targetPos = { x: 0, y: 0 };
@@ -68,7 +77,7 @@ export class ValueAnnotation extends BaseAnnotation {
             targetPos = start;
         }
 
-        const startTime = performance.now();
+        // Use global duration when not specified
 
         // Temporarily stop following any node so getPosition() returns animPos during the animation
         const previousFollowing = this.followingNodeId;
@@ -76,9 +85,8 @@ export class ValueAnnotation extends BaseAnnotation {
 
         try {
             await new Promise<void>((resolve) => {
-                const step = (t: number) => {
-                    const elapsed = t - startTime;
-                    const tNorm = Math.min(1, Math.max(0, elapsed / duration));
+                const cancel = addAnimation((dt, elapsed) => {
+                    const tNorm = Math.min(1, Math.max(0, elapsed / getGlobalAnimationDuration()));
                     // ease in-out (smoothstep-like)
                     const ease = tNorm < 0.5 ? 2 * tNorm * tNorm : -1 + (4 - 2 * tNorm) * tNorm;
                     this.animPos = {
@@ -89,24 +97,34 @@ export class ValueAnnotation extends BaseAnnotation {
                     // trigger redraw
                     this.annotator.redrawCanvas();
 
-                    if (tNorm < 1) {
-                        requestAnimationFrame(step);
-                    } else {
+                    if (tNorm >= 1) {
                         // snap to exact target and start following the node
                         this.animPos = targetPos;
                         this.followingNodeId = nodeId;
                         this.annotator.redrawCanvas();
+                        cancel();
                         resolve();
+                        return false;
                     }
-                };
 
-                requestAnimationFrame(step);
+                    return true;
+                });
             });
         } finally {
             // If animation was interrupted, restore previous following state
             if (this.followingNodeId === null) this.followingNodeId = previousFollowing;
         }
         return;
+    }
+
+    hide() {
+        this.hidden = true;
+        this.clear();
+    }
+
+    show() {
+        this.hidden = false;
+        this.draw();
     }
 }
 

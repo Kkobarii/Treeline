@@ -54,3 +54,17 @@ export function addAnimation(fn: AnimFn) {
 export function clearAnimations() {
 	animItems = [];
 }
+
+
+export const DEFAULT_ANIMATION_DURATION_MS: number = 500;
+export const FAST_PLAYBACK_DURATION_MS: number = 75;
+
+export let animationDurationMs: number = DEFAULT_ANIMATION_DURATION_MS;
+
+export function setGlobalAnimationDuration(ms: number) {
+	animationDurationMs = ms;
+}
+
+export function getGlobalAnimationDuration(): number {
+	return animationDurationMs;
+}

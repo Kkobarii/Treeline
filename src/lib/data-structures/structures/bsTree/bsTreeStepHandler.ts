@@ -16,47 +16,60 @@ async function handleStartForward(animator: BSTreeAnimator, annotator: DataStruc
 	animator.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
 	animator.resetFormatting();
 
+	if (operationManager.getCurrentOperation().operation == 'Empty') {
+		const info = `The tree is empty`;
+		annotator.annotateNode(info, null);
+		return;
+	}
+
 	const info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
 	annotator.annotateNode(info, null);
+
+	// if tree has at least one node, create value annotation for the operation value
+	if (animator.hasNodes()) {
+		const value = operationManager.getCurrentOperation().operation.split(' ')[1];
+		annotator.createValueAnnotation(value, null);
+	}
 }
 
 async function handleStartBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
 	// animator.ensureTree(operationManager.getCurrentOperation().startSnapshot as BSTree);
 
+	if (operationManager.getCurrentOperation().operation == 'Empty') {
+		const info = `The tree is empty`;
+		annotator.annotateNode(info, null);
+		return;
+	}
+
 	const info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
 	annotator.annotateNode(info, null);
+	annotator.removeValueAnnotation();
 }
 
 function handleEndForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
 	animator.ensureTree(operationManager.getCurrentOperation().endSnapshot as BSTree);
 
 	annotator.clearAnnotation();
+	annotator.clearValueAnnotation();
 }
 
 function handleEndBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
 	annotator.clearAnnotation();
+	annotator.clearValueAnnotation();
 	animator.ensureTree(operationManager.getCurrentOperation().endSnapshot as BSTree);
 }
 
 async function handleCreateRootForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateRootData) {
-	// create the actual node so we have a position to move the floating value into
 	animator.addNode(data.nodeId, data.value);
-	// if a floating value annotation exists, move it into the new node first
-	if ((annotator as any).currentValueAnnotation) {
-		try {
-			await (annotator as any).moveValueAnnotationTo(data.nodeId);
-		} catch {}
-	}
 
 	annotator.annotateNode(`Create root node with value ${data.value}`, data.nodeId);
-	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
 
-	// clear floating annotation after the node has appeared
-	try { (annotator as any).clearValueAnnotation(); } catch {}
+	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
 }
 
 async function handleCreateRootBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateRootData) {
 	annotator.annotateNode(`Create root node with value ${data.value}`, data.nodeId);
+	
 	await Promise.all([
 		animator.animateNodeShrink(data.nodeId),
 		animator.animateLegsShrink(data.nodeId),
@@ -67,110 +80,83 @@ async function handleCreateRootBackward(animator: BSTreeAnimator, annotator: Dat
 async function handleCreateLeafForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateLeafData) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
 	const childNumber = data.direction === 'left' ? 0 : 1;
-	// create actual node so it has a position to move the floating value into
-	animator.addNode(data.nodeId, data.value, data.parentId, childNumber);
 
-	if ((annotator as any).currentValueAnnotation) {
-		try {
-			await (annotator as any).moveValueAnnotationTo(data.nodeId);
-		} catch {}
-	}
+	animator.addNode(data.nodeId, data.value, data.parentId, childNumber);
 
 	annotator.annotateNode(info, data.nodeId);
 	await Promise.all([
 		animator.animateNodeGrowth(data.nodeId),
 		animator.animateLegsGrowth(data.nodeId),
+		annotator.moveValueAnnotationTo(data.nodeId)
 	]);
 
-	try { (annotator as any).clearValueAnnotation(); } catch {}
+	annotator.clearValueAnnotation();
 }
 
 async function handleCreateLeafBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CreateLeafData) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
 	annotator.annotateNode(info, data.parentId);
+	annotator.createValueAnnotation(String(data.value), data.nodeId);
 
 	await Promise.all([
 		animator.animateNodeShrink(data.nodeId),
 		animator.animateLegsShrink(data.nodeId),
+		annotator.moveValueAnnotationTo(data.parentId)
 	]);
 
 	animator.removeNode(data.nodeId);
 }
 
 async function handleCompareForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CompareData) {
-	// ensure a floating value annotation exists for the value being inserted
-	if (!(annotator as any).currentValueAnnotation) {
-		const rootId = annotator.findRootNodeId();
-		(annotator as any).createValueAnnotation(String(data.value), rootId);
-	}
-
-	// move floating value to the comparison node
-	if ((annotator as any).currentValueAnnotation) {
-		try {
-			await (annotator as any).moveValueAnnotationTo(data.comparisonId);
-		} catch {}
-	}
-
 	annotator.annotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
 }
 
 async function handleCompareBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.CompareData) {
-	// in backward stepping, ensure floating value annotation reflects the compare
-	if (!(annotator as any).currentValueAnnotation) {
-		const rootId = annotator.findRootNodeId();
-		(annotator as any).createValueAnnotation(String(data.value), rootId);
-	}
-
-	if ((annotator as any).currentValueAnnotation) {
-		try { await (annotator as any).moveValueAnnotationTo(data.comparisonId); } catch {}
-	}
-
 	annotator.annotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
 }
 
 async function handleTraverseForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.TraverseData) {
-	// move floating value to the destination node during traversal
-	if ((annotator as any).currentValueAnnotation) {
-		try { await (annotator as any).moveValueAnnotationTo(data.toId); } catch {}
-	}
+	annotator.moveValueAnnotationTo(data.toId);
 	annotator.annotateNode(`Traverse to ${data.direction} child`, data.fromId);
 }
 
 async function handleTraverseBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.TraverseData) {
-	if ((annotator as any).currentValueAnnotation) {
-		try { await (annotator as any).moveValueAnnotationTo(data.toId); } catch {}
-	}
+	annotator.moveValueAnnotationTo(data.fromId);
 	annotator.annotateNode(`Traverse to ${data.direction} child`, data.fromId);
 }
 
 async function handleDropForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.DropData) {
 	annotator.annotateNode(`Drop value ${data.value}`, data.fromId);
-	// todo animate drop
+	annotator.clearValueAnnotation();
 }
 
 async function handleDropBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.DropData) {
 	annotator.annotateNode(`Drop value ${data.value}`, data.fromId);
-	// todo animate drop
+	annotator.createValueAnnotation(String(data.value), data.fromId);
 }
 
 function handleFoundForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.FoundData) {
 	annotator.annotateNode(`Found node with value ${data.value}`, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Green);
+	annotator.clearValueAnnotation();
 }
 
 function handleFoundBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.FoundData) {
 	annotator.annotateNode(`Found node with value ${data.value}`, data.nodeId);
 	animator.resetNodeColor(data.nodeId);
+	annotator.createValueAnnotation(String(data.value), data.nodeId);
 }
 
 function handleMarkToDeleteForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.MarkToDeleteData) {
 	annotator.annotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Red);
+	annotator.clearValueAnnotation();
 }
 
 function handleMarkToDeleteBackward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.MarkToDeleteData) {
 	annotator.annotateNode(`Mark node with value ${data.value} to delete`, data.nodeId);
 	animator.resetNodeColor(data.nodeId);
+	annotator.createValueAnnotation(String(data.value), data.nodeId);
 }
 
 async function handleDeleteForward(animator: BSTreeAnimator, annotator: DataStructureAnnotator, data: Step.BSTree.DeleteData) {

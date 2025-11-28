@@ -1,7 +1,7 @@
 import type { DataSet } from 'vis-data';
 import type { Edge, Network, Node, NodeOptions, Position } from 'vis-network';
 
-import { addAnimation } from '$lib/utils/animator';
+import { addAnimation, DEFAULT_ANIMATION_DURATION_MS, getGlobalAnimationDuration, setGlobalAnimationDuration } from '$lib/utils/animator';
 import { clamp } from '../../utils/utils';
 
 
@@ -12,14 +12,13 @@ export interface DataStructureAnimatorOpts {
 	nodeOptions: NodeOptions;
 }
 
-const DEFAULT_ANIMATION_DURATION_MS = 500;
-
 export class DataStructureAnimator {
 	network: Network;
 	nodes: DataSet<Node>;
 	edges: DataSet<Edge>;
 	nodeOptions: NodeOptions;
-	animationDurationMs: number = DEFAULT_ANIMATION_DURATION_MS;
+	// instance-level duration kept for API compatibility, but actual timing uses the global duration
+	animationDurationMs: number = getGlobalAnimationDuration();
 
 	constructor(opts: DataStructureAnimatorOpts) {
 		this.network = opts.network;
@@ -29,11 +28,13 @@ export class DataStructureAnimator {
 	}
 
 	public setAnimationDuration(durationMs: number) {
+		// keep instance value in sync, and update global duration so annotators pick it up
 		this.animationDurationMs = durationMs;
+		setGlobalAnimationDuration(durationMs);
 	}
 
 	public resetAnimationDuration() {
-		this.animationDurationMs = DEFAULT_ANIMATION_DURATION_MS;
+		this.setAnimationDuration(DEFAULT_ANIMATION_DURATION_MS);
 	}
 
 	// --- low-level dataset/network ops ---
@@ -99,6 +100,14 @@ export class DataStructureAnimator {
 		}
 	}
 
+	hasNodes(): boolean {
+		try {
+			return this.nodes.length > 0;
+		} catch {
+			return false;
+		}
+	}
+
 	// --- positioning and movement ---
 	getPosition(nodeId: string | number): Position {
 		try {
@@ -135,7 +144,7 @@ export class DataStructureAnimator {
 	animateNodeMovement(nodeId: string | number, from: Position, to: Position): Promise<void> {
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / this.animationDurationMs);
+				const t = Math.min(1, elapsed / getGlobalAnimationDuration());
 				const x = from.x + (to.x - from.x) * t;
 				const y = from.y + (to.y - from.y) * t;
 				try {
@@ -187,7 +196,7 @@ export class DataStructureAnimator {
 	protected changeNodeSize(nodeId: string | number, startSize: number, endSize: number): Promise<void> {
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / (this.animationDurationMs / 5));
+				const t = Math.min(1, elapsed / (getGlobalAnimationDuration() / 5));
 				const size = Math.max(0, startSize + (endSize - startSize) * t);
 				try {
 					this.nodes.update({ id: nodeId, font: { size } } as any);
@@ -206,7 +215,7 @@ export class DataStructureAnimator {
 		const fontSize = this.getNodeFontSize(nodeId);
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / this.animationDurationMs);
+				const t = Math.min(1, elapsed / getGlobalAnimationDuration());
 				const opacity = clamp(fromOpacity + (toOpacity - fromOpacity) * t, 0, 1);
 				try {
 					this.nodes.update({ id: nodeId, opacity: opacity, font: { size: fontSize * opacity } } as any);
