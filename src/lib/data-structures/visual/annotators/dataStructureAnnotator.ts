@@ -38,6 +38,8 @@ export class DataStructureAnnotator {
 
     // when true, draw per-node ids in the overlay for debugging
     public debugMode: boolean = false;
+    shown : boolean = true;
+    showAnnotation: boolean = true;
 
     public toggleDebugMode(): void {
         this.debugMode = !this.debugMode;
@@ -56,6 +58,11 @@ export class DataStructureAnnotator {
     }
 
     public redrawCanvas() {
+        if (!this.shown) {
+            this.clearCanvas();
+            return;
+        }
+
         this.clearCanvas();
         // draw the normal annotation (textual) and any floating value annotation
         if (this.currentAnnotation) {
@@ -111,8 +118,6 @@ export class DataStructureAnnotator {
         this.currentAnnotation.draw();
     }
 
-    showAnnotation: boolean = true;
-
     public showAnnotationNode() {
         this.showAnnotation = true;
         if (this.currentAnnotation) {
@@ -126,6 +131,15 @@ export class DataStructureAnnotator {
         if (this.currentAnnotation) {
             this.currentAnnotation.shown = false;
             this.redrawCanvas();
+        }
+    }
+
+    public toggleShown() {
+        this.shown = !this.shown;
+        if (this.shown) {
+            this.redrawCanvas();
+        } else {
+            this.clearCanvas();
         }
     }
 
@@ -172,6 +186,8 @@ export class DataStructureAnnotator {
     }
 
     public drawRectangle(x: number, y: number, width: number, height: number, color: string, roundRadius: number = 5) {
+        if (this.shown === false) return;
+
         this.ctx.beginPath();
         this.ctx.fillStyle = color;
         this.ctx.strokeStyle = shadeColor(color, -40);
@@ -186,6 +202,8 @@ export class DataStructureAnnotator {
     }
 
     public drawText(text: string, x: number, y: number, fontSize: number, textAlign: CanvasTextAlign = "center", textBaseline: CanvasTextBaseline = "middle", color: string = 'black') {
+        if (this.shown === false) return;
+
         this.ctx.font = `${fontSize * this.getScale()}px Arial`;
         this.ctx.fillStyle = color;
         this.ctx.textAlign = textAlign;

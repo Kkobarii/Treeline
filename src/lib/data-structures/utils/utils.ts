@@ -11,12 +11,18 @@ export function clampInput(value: number): number {
 	return clamp(value, inputConstraints.min, inputConstraints.max);
 }
 
-export function enforceMinMax(el: HTMLInputElement) {
+export function enforceMinMax(el: HTMLInputElement) : number {
+	// remove non-numeric characters
+	el.value = el.value.replace(/[^0-9]/g, '');
+
+	// clamp to min/max
 	if (el.value === '' || isNaN(parseInt(el.value))) {
 		el.value = inputConstraints.min.toString();
 	} else {
 		el.value = clampInput(parseInt(el.value)).toString();
 	}
+	
+	return parseInt(el.value);
 }
 
 export function relationTextToSymbol(text: string): string {

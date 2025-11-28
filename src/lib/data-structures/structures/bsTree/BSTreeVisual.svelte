@@ -97,11 +97,7 @@
 	class="mt-2"
 	on:click={() => {
 		showOverlay = !showOverlay;
-		if (showOverlay) {
-			annotator.redrawCanvas();
-		} else {
-			annotator.clearCanvas();
-		}
+		annotator.toggleShown();
 		console.log('Overlay toggled:', showOverlay);
 	}}>
 	{showOverlay ? 'Hide' : 'Show'} Overlay

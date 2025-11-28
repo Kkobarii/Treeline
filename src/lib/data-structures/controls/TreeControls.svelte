@@ -51,8 +51,11 @@
 				bind:value={manualValue}
 				max="999"
 				min="0"
-				on:keyup={e => enforceMinMax(e.target as HTMLInputElement)}
-				on:change={e => operationManager.updateCurrentValue(manualValue)}
+				on:keyup={e => (manualValue = enforceMinMax(e.target as HTMLInputElement))}
+				on:change={e => {
+					manualValue = enforceMinMax(e.target as HTMLInputElement);
+					operationManager.updateCurrentValue(manualValue);
+				}}
 				disabled={locked} />
 			<button
 				type="button"
