@@ -540,6 +540,31 @@ export namespace Step {
 			);
 		}
 
+		export class UpdateHeightBalanceData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public height: number,
+				public balance: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Update height and balance of node ${nodeId} to H:${height}, B:${balance}`);
+			}
+		}
+
+		export function UpdateHeightBalance(
+			nodeId: number,
+			height: number,
+			balance: number,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.AVLTree.UpdateHeightBalance,
+				new UpdateHeightBalanceData(nodeId, height, balance, startSnapshot, endSnapshot),
+			);
+		}
+
 		export class RotateLeftData extends StepDetail {
 			constructor(
 				public oldRootId: number,

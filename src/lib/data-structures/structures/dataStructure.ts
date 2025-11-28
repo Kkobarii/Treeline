@@ -51,6 +51,7 @@ export const StepType = {
 		MarkToDelete: 'MarkToDelete',
 		Delete: 'Delete',
 		ReplaceWithChild: 'ReplaceWithChild',
+		UpdateHeightBalance: 'UpdateHeightBalance',
 		RotateLeft: 'RotateLeft',
 		RotateRight: 'RotateRight',
 		FoundInorderSuccessor: 'FoundInorderSuccessor',

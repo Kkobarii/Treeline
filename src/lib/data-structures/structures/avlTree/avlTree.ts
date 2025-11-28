@@ -117,6 +117,7 @@ export class AVLTree extends DataStructure {
                     data.step(Step.AVLTree.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
                 } else {
                     let startSnapshot = this.snapshot();
+                    data.steps.pop();
                     data.step(Step.AVLTree.CreateLeaf(newNode.id, value, parentId, direction as 'left' | 'right', startSnapshot, this.snapshot()));
                 }
                 return newNode;
@@ -137,9 +138,10 @@ export class AVLTree extends DataStructure {
             // update height and rebalance
             this.updateHeight(node);
             const balance = this.getBalance(node);
+            data.step(Step.AVLTree.UpdateHeightBalance(node.id, node.height, balance, this.snapshot(), this.snapshot()));
 
             // Left Left
-            if (balance > 1 && value < (node.left as AVLTreeNode).value) {
+            if (balance > 1 && value < node.left!.value) {
                 let startSnapshot = this.snapshot();
                 const rotated = this.rightRotate(node);
                 data.step(Step.AVLTree.RotateRight(node.id, rotated.id, startSnapshot, this.snapshot()));
@@ -147,7 +149,7 @@ export class AVLTree extends DataStructure {
             }
 
             // Right Right
-            if (balance < -1 && value > (node.right as AVLTreeNode).value) {
+            if (balance < -1 && value > node.right!.value) {
                 let startSnapshot = this.snapshot();
                 const rotated = this.leftRotate(node);
                 data.step(Step.AVLTree.RotateLeft(node.id, rotated.id, startSnapshot, this.snapshot()));
@@ -155,18 +157,18 @@ export class AVLTree extends DataStructure {
             }
 
             // Left Right
-            if (balance > 1 && value > (node.left as AVLTreeNode).value) {
+            if (balance > 1 && value > node.left!.value) {
                 let startSnapshot = this.snapshot();
-                node.left = this.leftRotate(node.left as AVLTreeNode);
+                node.left = this.leftRotate(node.left!);
                 const rotated = this.rightRotate(node);
                 data.step(Step.AVLTree.RotateRight(node.id, rotated.id, startSnapshot, this.snapshot()));
                 return rotated;
             }
 
             // Right Left
-            if (balance < -1 && value < (node.right as AVLTreeNode).value) {
+            if (balance < -1 && value < node.right!.value) {
                 let startSnapshot = this.snapshot();
-                node.right = this.rightRotate(node.right as AVLTreeNode);
+                node.right = this.rightRotate(node.right!);
                 const rotated = this.leftRotate(node);
                 data.step(Step.AVLTree.RotateLeft(node.id, rotated.id, startSnapshot, this.snapshot()));
                 return rotated;
@@ -176,7 +178,8 @@ export class AVLTree extends DataStructure {
         };
 
         this.root = insertRec(this.root, null, null);
-        return this.find(value, data);
+        let tmpData = new OperationData("temp", this.snapshot());
+        return this.find(value, tmpData);
     }
 
     find(value: number, data: OperationData): AVLTreeNode | null {
@@ -324,9 +327,10 @@ export class AVLTree extends DataStructure {
             return node;
         };
 
-        const before = this.find(value, data);
+        let tmpData = new OperationData("temp", this.snapshot());
+        const before = this.find(value, tmpData);
         this.root = removeRec(this.root);
-        const after = this.find(value, data);
+        const after = this.find(value, tmpData);
 
         return before !== null && after === null;
     }

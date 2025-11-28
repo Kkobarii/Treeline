@@ -1,5 +1,6 @@
 import { OperationData } from '$lib/data-structures/operation/operationData';
 import { Step } from '$lib/data-structures/operation/stepData';
+import { getDummyNodeId } from '$lib/data-structures/utils/graphs';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
 import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';
@@ -90,11 +91,11 @@ export class BSTree extends DataStructure {
 				return current;
 			} else if (value < current.value) {
 				data.step(Step.BSTree.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
-				last = current.left?.id.toString() ?? `dummy-${current.id}-L`;
+				last = current.left?.id.toString() ?? getDummyNodeId(current.id, 'left');
 				current = current.left;
 			} else {
 				data.step(Step.BSTree.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
-				last = current.right?.id.toString() ?? `dummy-${current.id}-R`;
+				last = current.right?.id.toString() ?? getDummyNodeId(current.id, 'right');
 				current = current.right;
 			}
 		}
@@ -118,12 +119,12 @@ export class BSTree extends DataStructure {
 			data.step(Step.BSTree.Compare(value, current.id, current.value));
 			if (value < current.value) {
 				data.step(Step.BSTree.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
-				last = current.left?.id.toString() ?? `dummy-${current.id}-L`;
+				last = current.left?.id.toString() ?? getDummyNodeId(current.id, 'left');
 				parent = current;
 				current = current.left;
 			} else if (value > current.value) {
 				data.step(Step.BSTree.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
-				last = current.right?.id.toString() ?? `dummy-${current.id}-R`;
+				last = current.right?.id.toString() ?? getDummyNodeId(current.id, 'right');
 				parent = current;
 				current = current.right;
 			} else {
