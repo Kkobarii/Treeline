@@ -51,7 +51,7 @@ export class BSTree extends DataStructure {
 
 		let current = this.root;
 		while (true) {
-			data.step(Step.BSTree.Compare(value, current.id, current.value));
+					data.step(Step.BSTree.Compare(value, current.id, current.value));
 			if (value < current.value) {
 				if (!current.left) {
 					let startSnapshot = this.snapshot();
@@ -85,9 +85,9 @@ export class BSTree extends DataStructure {
 		let last = current?.id.toString();
 
 		while (current) {
-			data.step(Step.BSTree.Compare(value, current.id, current.value));
-			if (value === current.value) {
-				data.step(Step.BSTree.Found(current.id, value));
+					data.step(Step.BSTree.Compare(value, current.id, current.value));
+				if (value === current.value) {
+					data.step(Step.BSTree.Found(current.id, value));
 				return current;
 			} else if (value < current.value) {
 				data.step(Step.BSTree.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
@@ -106,7 +106,7 @@ export class BSTree extends DataStructure {
 
 	remove(value: number, data: OperationData): boolean {
 		if (!this.root) {
-			data.step(Step.BSTree.Drop(value, 'not found', 'root'));
+				data.step(Step.BSTree.Drop(value, 'not found', 'root'));
 			return false;
 		}
 
@@ -165,16 +165,7 @@ export class BSTree extends DataStructure {
 			} else {
 				parent.right = child;
 			}
-			data.step(
-				Step.BSTree.ReplaceWithChild(
-					current.id,
-					child.id,
-					child.value,
-					current.left ? 'left' : 'right',
-					startSnapshot,
-					this.snapshot(),
-				),
-			);
+			data.step(Step.BSTree.ReplaceWithChild(current.id, child.id, child.value, current.left ? 'left' : 'right', startSnapshot, this.snapshot()));
 			return true;
 		}
 
@@ -191,17 +182,7 @@ export class BSTree extends DataStructure {
 		if (succParent !== current && successor.right) {
 			let startSnapshot2 = this.snapshot();
 			succParent.left = successor.right;
-			data.step(
-				Step.BSTree.RelinkSuccessorChild(
-					successor.right!.id,
-					successor.right!.value,
-					succParent.id,
-					succParent.value,
-					successor.id,
-					startSnapshot2,
-					this.snapshot(),
-				),
-			);
+			data.step(Step.BSTree.RelinkSuccessorChild(successor.right!.id, successor.right!.value, succParent.id, succParent.value, successor.id, startSnapshot2, this.snapshot()));
 		}
 
 		let startSnapshot = this.snapshot();
@@ -214,16 +195,7 @@ export class BSTree extends DataStructure {
 		}
 
 		current.value = successor.value;
-		data.step(
-			Step.BSTree.ReplaceWithInorderSuccessor(
-				current.id,
-				successor.id,
-				successor.value,
-				succParent.id,
-				startSnapshot,
-				this.snapshot(),
-			),
-		);
+		data.step(Step.BSTree.ReplaceWithInorderSuccessor(current.id, successor.id, successor.value, succParent.id, startSnapshot, this.snapshot()));
 		current.id = successor.id;
 
 		return true;

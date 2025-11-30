@@ -110,15 +110,15 @@ export class AVLTree extends DataStructure {
             parentId: number | null,
             direction: 'left' | 'right' | null,
         ): AVLTreeNode | null => {
-            if (!node) {
+                if (!node) {
                 const newNode = new AVLTreeNode(this.generateId(), value);
                 if (parentId === null) {
                     let startSnapshot = this.snapshot();
-                    data.step(Step.AVLTree.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
+                        data.step(Step.AVLTree.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
                 } else {
                     let startSnapshot = this.snapshot();
                     data.steps.pop();
-                    data.step(Step.AVLTree.CreateLeaf(newNode.id, value, parentId, direction as 'left' | 'right', startSnapshot, this.snapshot()));
+                        data.step(Step.AVLTree.CreateLeaf(newNode.id, value, parentId, direction as 'left' | 'right', startSnapshot, this.snapshot()));
                 }
                 return newNode;
             }
@@ -235,9 +235,7 @@ export class AVLTree extends DataStructure {
                         data.step(Step.AVLTree.Delete(node.id, value, startSnapshot, this.snapshot()));
                         return null;
                     } else {
-                        data.step(
-                            Step.AVLTree.ReplaceWithChild(node.id, child.id, child.value, node.left ? 'left' : 'right', startSnapshot, this.snapshot()),
-                        );
+                        data.step(Step.AVLTree.ReplaceWithChild(node.id, child.id, child.value, node.left ? 'left' : 'right', startSnapshot, this.snapshot()));
                         return child;
                     }
                 }
@@ -255,17 +253,7 @@ export class AVLTree extends DataStructure {
                 if (succParent !== node && successor.right) {
                     let startSnapshot2 = this.snapshot();
                     succParent.left = successor.right;
-                    data.step(
-                        Step.AVLTree.RelinkSuccessorChild(
-                            successor.right!.id,
-                            successor.right!.value,
-                            succParent.id,
-                            succParent.value,
-                            successor.id,
-                            startSnapshot2,
-                            this.snapshot(),
-                        ),
-                    );
+                    data.step(Step.AVLTree.RelinkSuccessorChild(successor.right!.id, successor.right!.value, succParent.id, succParent.value, successor.id, startSnapshot2, this.snapshot()));
                 }
 
                 let startSnapshot = this.snapshot();
@@ -278,9 +266,7 @@ export class AVLTree extends DataStructure {
                 }
 
                 node.value = successor.value;
-                data.step(
-                    Step.AVLTree.ReplaceWithInorderSuccessor(node.id, successor.id, successor.value, succParent.id, startSnapshot, this.snapshot()),
-                );
+                data.step(Step.AVLTree.ReplaceWithInorderSuccessor(node.id, successor.id, successor.value, succParent.id, startSnapshot, this.snapshot()));
             }
 
             // if the tree had only one node

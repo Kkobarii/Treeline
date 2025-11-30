@@ -22,43 +22,34 @@ export type OperationTypeValue =
 	| (typeof OperationType.Tree)[keyof typeof OperationType.Tree]
 // | (typeof OperationType.Stack)[keyof typeof OperationType.Stack];
 
+// centralize common tree step names so BST and AVL share the same base values
+const BaseTreeSteps = {
+    Start: 'Start',
+    End: 'End',
+    CreateRoot: 'CreateRoot',
+    CreateLeaf: 'CreateLeaf',
+    Compare: 'Compare',
+    Traverse: 'Traverse',
+    Drop: 'Drop',
+    Found: 'Found',
+    MarkToDelete: 'MarkToDelete',
+    Delete: 'Delete',
+    ReplaceWithChild: 'ReplaceWithChild',
+    FoundInorderSuccessor: 'FoundInorderSuccessor',
+    RelinkSuccessorChild: 'RelinkSuccessorChild',
+    ReplaceWithInorderSuccessor: 'ReplaceWithInorderSuccessor',
+} as const;
+
 export const StepType = {
-	BSTree: {
-		Start: 'Start',
-		End: 'End',
-		CreateRoot: 'CreateRoot',
-		CreateLeaf: 'CreateLeaf',
-		Compare: 'Compare',
-		Traverse: 'Traverse',
-		Drop: 'Drop',
-		Found: 'Found',
-		MarkToDelete: 'MarkToDelete',
-		Delete: 'Delete',
-		ReplaceWithChild: 'ReplaceWithChild',
-		FoundInorderSuccessor: 'FoundInorderSuccessor',
-		RelinkSuccessorChild: 'RelinkSuccessorChild',
-		ReplaceWithInorderSuccessor: 'ReplaceWithInorderSuccessor',
-	},
-	AVLTree: {
-		Start: 'Start',
-		End: 'End',
-		CreateRoot: 'CreateRoot',
-		CreateLeaf: 'CreateLeaf',
-		Compare: 'Compare',
-		Traverse: 'Traverse',
-		Drop: 'Drop',
-		Found: 'Found',
-		MarkToDelete: 'MarkToDelete',
-		Delete: 'Delete',
-		ReplaceWithChild: 'ReplaceWithChild',
-		UpdateHeightBalance: 'UpdateHeightBalance',
-		RotateLeft: 'RotateLeft',
-		RotateRight: 'RotateRight',
-		FoundInorderSuccessor: 'FoundInorderSuccessor',
-		RelinkSuccessorChild: 'RelinkSuccessorChild',
-		ReplaceWithInorderSuccessor: 'ReplaceWithInorderSuccessor',
-	},
-};
+    BSTree: BaseTreeSteps,
+    AVLTree: {
+        // reuse base tree steps and add AVL-specific ones
+        ...BaseTreeSteps,
+        UpdateHeightBalance: 'UpdateHeightBalance',
+        RotateLeft: 'RotateLeft',
+        RotateRight: 'RotateRight',
+    },
+} as const;
 
 export type StepTypeValue =
 	| (typeof StepType.BSTree)[keyof typeof StepType.BSTree]
