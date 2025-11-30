@@ -43,7 +43,6 @@ const BaseTreeSteps = {
 export const StepType = {
     BSTree: BaseTreeSteps,
     AVLTree: {
-        // reuse base tree steps and add AVL-specific ones
         ...BaseTreeSteps,
         UpdateHeightBalance: 'UpdateHeightBalance',
         RotateLeft: 'RotateLeft',
