@@ -101,7 +101,7 @@ export class AVLTree extends DataStructure {
             const newNode = new AVLTreeNode(this.generateId(), value);
             let startSnapshot = this.snapshot();
             this.root = newNode;
-            data.step(Step.AVLTree.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
+            data.step(Step.Common.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
             return newNode;
         }
 
@@ -114,24 +114,24 @@ export class AVLTree extends DataStructure {
                 const newNode = new AVLTreeNode(this.generateId(), value);
                 if (parentId === null) {
                     let startSnapshot = this.snapshot();
-                        data.step(Step.AVLTree.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
+                        data.step(Step.Common.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
                 } else {
                     let startSnapshot = this.snapshot();
                     data.steps.pop();
-                        data.step(Step.AVLTree.CreateLeaf(newNode.id, value, parentId, direction as 'left' | 'right', startSnapshot, this.snapshot()));
+                        data.step(Step.Common.CreateLeaf(newNode.id, value, parentId, direction as 'left' | 'right', startSnapshot, this.snapshot()));
                 }
                 return newNode;
             }
 
-            data.step(Step.AVLTree.Compare(value, node.id, node.value));
+            data.step(Step.Common.Compare(value, node.id, node.value));
             if (value < node.value) {
-                data.step(Step.AVLTree.Traverse(node.id, node.left ? node.left.id : -1, 'left'));
+                data.step(Step.Common.Traverse(node.id, node.left ? node.left.id : -1, 'left'));
                 node.left = insertRec(node.left, node.id, 'left');
             } else if (value > node.value) {
-                data.step(Step.AVLTree.Traverse(node.id, node.right ? node.right.id : -1, 'right'));
+                data.step(Step.Common.Traverse(node.id, node.right ? node.right.id : -1, 'right'));
                 node.right = insertRec(node.right, node.id, 'right');
             } else {
-                data.step(Step.AVLTree.Drop(value, 'duplicate value', node.id.toString()));
+                data.step(Step.Common.Drop(value, 'duplicate value', node.id.toString()));
                 return node;
             }
 
@@ -187,44 +187,44 @@ export class AVLTree extends DataStructure {
         let last = current?.id.toString();
 
         while (current) {
-            data.step(Step.AVLTree.Compare(value, current.id, current.value));
+            data.step(Step.Common.Compare(value, current.id, current.value));
             if (value === current.value) {
-                data.step(Step.AVLTree.Found(current.id, value));
+                data.step(Step.Common.Found(current.id, value));
                 return current;
             } else if (value < current.value) {
-                data.step(Step.AVLTree.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
+                data.step(Step.Common.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
                 last = current.left?.id.toString() ?? `dummy-${current.id}-L`;
                 current = current.left;
             } else {
-                data.step(Step.AVLTree.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
+                data.step(Step.Common.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
                 last = current.right?.id.toString() ?? `dummy-${current.id}-R`;
                 current = current.right;
             }
         }
 
-        data.step(Step.AVLTree.Drop(value, 'not found', last!));
+        data.step(Step.Common.Drop(value, 'not found', last!));
         return null;
     }
 
     remove(value: number, data: OperationData): boolean {
         if (!this.root) {
-            data.step(Step.AVLTree.Drop(value, 'not found', 'root'));
+            data.step(Step.Common.Drop(value, 'not found', 'root'));
             return false;
         }
 
         const removeRec = (node: AVLTreeNode | null): AVLTreeNode | null => {
             if (!node) return null;
 
-            data.step(Step.AVLTree.Compare(value, node.id, node.value));
+            data.step(Step.Common.Compare(value, node.id, node.value));
             if (value < node.value) {
-                data.step(Step.AVLTree.Traverse(node.id, node.left ? node.left.id : -1, 'left'));
+                data.step(Step.Common.Traverse(node.id, node.left ? node.left.id : -1, 'left'));
                 node.left = removeRec(node.left);
             } else if (value > node.value) {
-                data.step(Step.AVLTree.Traverse(node.id, node.right ? node.right.id : -1, 'right'));
+                data.step(Step.Common.Traverse(node.id, node.right ? node.right.id : -1, 'right'));
                 node.right = removeRec(node.right);
             } else {
                 // found node
-                data.step(Step.AVLTree.MarkToDelete(node.id, value));
+                data.step(Step.Common.MarkToDelete(node.id, value));
 
                 // node with only one child or no child
                 if (!node.left || !node.right) {
@@ -232,10 +232,10 @@ export class AVLTree extends DataStructure {
                     let startSnapshot = this.snapshot();
                     if (!child) {
                         // no child
-                        data.step(Step.AVLTree.Delete(node.id, value, startSnapshot, this.snapshot()));
+                        data.step(Step.Common.Delete(node.id, value, startSnapshot, this.snapshot()));
                         return null;
                     } else {
-                        data.step(Step.AVLTree.ReplaceWithChild(node.id, child.id, child.value, node.left ? 'left' : 'right', startSnapshot, this.snapshot()));
+                        data.step(Step.Common.ReplaceWithChild(node.id, child.id, child.value, node.left ? 'left' : 'right', startSnapshot, this.snapshot()));
                         return child;
                     }
                 }
@@ -248,12 +248,12 @@ export class AVLTree extends DataStructure {
                     successor = successor.left;
                 }
 
-                data.step(Step.AVLTree.FoundInorderSuccessor(node.id, successor.id, successor.value));
+                data.step(Step.Common.FoundInorderSuccessor(node.id, successor.id, successor.value));
 
                 if (succParent !== node && successor.right) {
                     let startSnapshot2 = this.snapshot();
                     succParent.left = successor.right;
-                    data.step(Step.AVLTree.RelinkSuccessorChild(successor.right!.id, successor.right!.value, succParent.id, succParent.value, successor.id, startSnapshot2, this.snapshot()));
+                    data.step(Step.Common.RelinkSuccessorChild(successor.right!.id, successor.right!.value, succParent.id, succParent.value, successor.id, startSnapshot2, this.snapshot()));
                 }
 
                 let startSnapshot = this.snapshot();
@@ -266,7 +266,7 @@ export class AVLTree extends DataStructure {
                 }
 
                 node.value = successor.value;
-                data.step(Step.AVLTree.ReplaceWithInorderSuccessor(node.id, successor.id, successor.value, succParent.id, startSnapshot, this.snapshot()));
+                data.step(Step.Common.ReplaceWithInorderSuccessor(node.id, successor.id, successor.value, succParent.id, startSnapshot, this.snapshot()));
             }
 
             // if the tree had only one node

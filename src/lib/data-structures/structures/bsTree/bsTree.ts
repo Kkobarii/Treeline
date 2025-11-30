@@ -45,35 +45,35 @@ export class BSTree extends DataStructure {
 		if (!this.root) {
 			let startSnapshot = this.snapshot();
 			this.root = newNode;
-			data.step(Step.BSTree.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
+			data.step(Step.Common.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
 			return newNode;
 		}
 
 		let current = this.root;
 		while (true) {
-					data.step(Step.BSTree.Compare(value, current.id, current.value));
+					data.step(Step.Common.Compare(value, current.id, current.value));
 			if (value < current.value) {
 				if (!current.left) {
 					let startSnapshot = this.snapshot();
-					data.step(Step.BSTree.CreateLeaf(newNode.id, value, current.id, 'left', startSnapshot, this.snapshot()));
+						data.step(Step.Common.CreateLeaf(newNode.id, value, current.id, 'left', startSnapshot, this.snapshot()));
 					current.left = newNode;
 					break;
 				}
 
-				data.step(Step.BSTree.Traverse(current.id, current.left.id, 'left'));
+					data.step(Step.Common.Traverse(current.id, current.left.id, 'left'));
 				current = current.left;
 			} else if (value > current.value) {
 				if (!current.right) {
 					let startSnapshot = this.snapshot();
-					data.step(Step.BSTree.CreateLeaf(newNode.id, value, current.id, 'right', startSnapshot, this.snapshot()));
+						data.step(Step.Common.CreateLeaf(newNode.id, value, current.id, 'right', startSnapshot, this.snapshot()));
 					current.right = newNode;
 					break;
 				}
 
-				data.step(Step.BSTree.Traverse(current.id, current.right.id, 'right'));
+					data.step(Step.Common.Traverse(current.id, current.right.id, 'right'));
 				current = current.right;
 			} else {
-				data.step(Step.BSTree.Drop(value, 'duplicate value', current.id.toString()));
+						data.step(Step.Common.Drop(value, 'duplicate value', current.id.toString()));
 				break;
 			}
 		}
@@ -85,28 +85,28 @@ export class BSTree extends DataStructure {
 		let last = current?.id.toString();
 
 		while (current) {
-					data.step(Step.BSTree.Compare(value, current.id, current.value));
+						data.step(Step.Common.Compare(value, current.id, current.value));
 				if (value === current.value) {
-					data.step(Step.BSTree.Found(current.id, value));
+						data.step(Step.Common.Found(current.id, value));
 				return current;
 			} else if (value < current.value) {
-				data.step(Step.BSTree.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
+						data.step(Step.Common.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
 				last = current.left?.id.toString() ?? getDummyNodeId(current.id, 'left');
 				current = current.left;
 			} else {
-				data.step(Step.BSTree.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
+						data.step(Step.Common.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
 				last = current.right?.id.toString() ?? getDummyNodeId(current.id, 'right');
 				current = current.right;
 			}
 		}
 
-		data.step(Step.BSTree.Drop(value, 'not found', last!));
+				data.step(Step.Common.Drop(value, 'not found', last!));
 		return null;
 	}
 
 	remove(value: number, data: OperationData): boolean {
 		if (!this.root) {
-				data.step(Step.BSTree.Drop(value, 'not found', 'root'));
+					data.step(Step.Common.Drop(value, 'not found', 'root'));
 			return false;
 		}
 
@@ -116,14 +116,14 @@ export class BSTree extends DataStructure {
 
 		// descend to the node to delete
 		while (current) {
-			data.step(Step.BSTree.Compare(value, current.id, current.value));
+					data.step(Step.Common.Compare(value, current.id, current.value));
 			if (value < current.value) {
-				data.step(Step.BSTree.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
+						data.step(Step.Common.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
 				last = current.left?.id.toString() ?? getDummyNodeId(current.id, 'left');
 				parent = current;
 				current = current.left;
 			} else if (value > current.value) {
-				data.step(Step.BSTree.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
+						data.step(Step.Common.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
 				last = current.right?.id.toString() ?? getDummyNodeId(current.id, 'right');
 				parent = current;
 				current = current.right;
@@ -133,12 +133,12 @@ export class BSTree extends DataStructure {
 		}
 
 		if (!current) {
-			data.step(Step.BSTree.Drop(value, 'not found', last));
+					data.step(Step.Common.Drop(value, 'not found', last));
 			return false;
 		}
 
 		// mark for deletion
-		data.step(Step.BSTree.MarkToDelete(current.id, value));
+				data.step(Step.Common.MarkToDelete(current.id, value));
 
 		// Case 1: leaf
 		if (!current.left && !current.right) {
@@ -150,7 +150,7 @@ export class BSTree extends DataStructure {
 			} else {
 				parent.right = null;
 			}
-			data.step(Step.BSTree.Delete(current.id, value, startSnapshot, this.snapshot()));
+					data.step(Step.Common.Delete(current.id, value, startSnapshot, this.snapshot()));
 			return true;
 		}
 
@@ -165,7 +165,7 @@ export class BSTree extends DataStructure {
 			} else {
 				parent.right = child;
 			}
-			data.step(Step.BSTree.ReplaceWithChild(current.id, child.id, child.value, current.left ? 'left' : 'right', startSnapshot, this.snapshot()));
+					data.step(Step.Common.ReplaceWithChild(current.id, child.id, child.value, current.left ? 'left' : 'right', startSnapshot, this.snapshot()));
 			return true;
 		}
 
@@ -177,12 +177,12 @@ export class BSTree extends DataStructure {
 			successor = successor.left;
 		}
 
-		data.step(Step.BSTree.FoundInorderSuccessor(current.id, successor.id, successor.value));
+				data.step(Step.Common.FoundInorderSuccessor(current.id, successor.id, successor.value));
 
 		if (succParent !== current && successor.right) {
 			let startSnapshot2 = this.snapshot();
 			succParent.left = successor.right;
-			data.step(Step.BSTree.RelinkSuccessorChild(successor.right!.id, successor.right!.value, succParent.id, succParent.value, successor.id, startSnapshot2, this.snapshot()));
+					data.step(Step.Common.RelinkSuccessorChild(successor.right!.id, successor.right!.value, succParent.id, succParent.value, successor.id, startSnapshot2, this.snapshot()));
 		}
 
 		let startSnapshot = this.snapshot();
@@ -195,7 +195,7 @@ export class BSTree extends DataStructure {
 		}
 
 		current.value = successor.value;
-		data.step(Step.BSTree.ReplaceWithInorderSuccessor(current.id, successor.id, successor.value, succParent.id, startSnapshot, this.snapshot()));
+				data.step(Step.Common.ReplaceWithInorderSuccessor(current.id, successor.id, successor.value, succParent.id, startSnapshot, this.snapshot()));
 		current.id = successor.id;
 
 		return true;
