@@ -44,7 +44,10 @@ export class DataStructureAnnotator {
     public toggleDebugMode(): void {
         this.debugMode = !this.debugMode;
         if (this.debugMode) this.redrawCanvas();
-        else this.clearCanvas();
+        else {
+            this.clearCanvas();
+            this.redrawCanvas();
+        } 
     }
 
     public setDebugMode(v: boolean): void {
