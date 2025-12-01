@@ -2,7 +2,7 @@ import { Colors } from '$lib/assets/colors';
 import type { AVLTreeAnimator } from '$lib/data-structures/structures/avlTree/avlTreeAnimator';
 import type { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
 import { getDummyNodeId } from '$lib/data-structures/utils/graphs';
-import { relationTextToSymbol } from '$lib/data-structures/utils/utils';
+import { comparisonValuesToSymbol } from '$lib/data-structures/utils/utils';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
 // Use `any` for animator so this common module can work with BSTreeAnimator, AVLTreeAnimator, etc.
@@ -14,8 +14,8 @@ type AnyAnimator = BSTreeAnimator | AVLTreeAnimator;
 // Functions use the generic DataStructureAnimator API so both specific animators can call them.
 
 export async function handleStartForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, operationManager: any) {
-	if (animator.ensureTree) animator.ensureTree(operationManager.getCurrentOperation().startSnapshot);
-	if (animator.resetFormatting) animator.resetFormatting();
+	animator.ensureAndAnimate(operationManager.getCurrentOperation().startSnapshot);
+	animator.resetFormatting();
 
 	if (operationManager.getCurrentOperation().operation == 'Empty') {
 		const info = `The tree is empty`;
@@ -44,21 +44,21 @@ export async function handleStartBackwardCommon(animator: AnyAnimator, annotator
 	annotator.removeValueAnnotation();
 }
 
-export function handleEndForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, operationManager: any) {
-	if (animator.ensureTree) animator.ensureTree(operationManager.getCurrentOperation().endSnapshot);
+export async function handleEndForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, operationManager: any) {
+	await animator.ensureAndAnimate(operationManager.getCurrentOperation().endSnapshot);
 
 	annotator.clearAnnotation();
 	annotator.clearValueAnnotation();
 }
 
-export function handleEndBackwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, operationManager: any) {
+export async function handleEndBackwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, operationManager: any) {
 	annotator.clearAnnotation();
 	annotator.clearValueAnnotation();
-	if (animator.ensureTree) animator.ensureTree(operationManager.getCurrentOperation().endSnapshot);
+	await animator.ensureAndAnimate(operationManager.getCurrentOperation().endSnapshot);
 }
 
 export async function handleCreateRootForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
-	animator.addNode(data.nodeId, data.value);
+	animator.ensureTree(data.endSnapshot);
 	annotator.annotateNode(`Create root node with value ${data.value}`, data.nodeId);
 
 	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
@@ -66,18 +66,13 @@ export async function handleCreateRootForwardCommon(animator: AnyAnimator, annot
 
 export async function handleCreateRootBackwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
 	annotator.annotateNode(`Create root node with value ${data.value}`, data.nodeId);
-	await Promise.all([
-		animator.animateNodeShrink(data.nodeId),
-		animator.animateLegsShrink(data.nodeId),
-	]);
-	animator.removeNode(data.nodeId);
+	await Promise.all([animator.animateNodeShrink(data.nodeId), animator.animateLegsShrink(data.nodeId)]);
+	animator.ensureAndAnimate(data.startSnapshot);
 }
 
 export async function handleCreateLeafForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
-	const childNumber = data.direction === 'left' ? 0 : 1;
-
-	animator.addNode(data.nodeId, data.value, data.parentId, childNumber);
+	animator.ensureTree(data.endSnapshot);
 	annotator.annotateNode(info, data.nodeId);
 
 	await Promise.all([
@@ -99,15 +94,21 @@ export async function handleCreateLeafBackwardCommon(animator: AnyAnimator, anno
 		annotator.moveValueAnnotationTo(data.parentId),
 	]);
 
-	animator.removeNode(data.nodeId);
+	animator.ensureAndAnimate(data.startSnapshot);
 }
 
 export async function handleCompareForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
+	annotator.annotateNode(
+		`${data.value} ${comparisonValuesToSymbol(data.value, data.comparisonValue)} ${data.comparisonValue}`,
+		data.comparisonId,
+	);
 }
 
 export async function handleCompareBackwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`${data.value} ${relationTextToSymbol(data.result)} ${data.comparisonValue}`, data.comparisonId);
+	annotator.annotateNode(
+		`${data.value} ${comparisonValuesToSymbol(data.value, data.comparisonValue)} ${data.comparisonValue}`,
+		data.comparisonId,
+	);
 }
 
 export async function handleTraverseForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -161,10 +162,12 @@ export function handleMarkToDeleteBackwardCommon(animator: AnyAnimator, annotato
 export async function handleDeleteForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
 	annotator.annotateNode(`Delete node with value ${data.value}`, data.nodeId);
 	await Promise.all([animator.animateNodeShrink(data.nodeId), animator.animateLegsShrink(data.nodeId)]);
+	annotator.clearAnnotation();
+	animator.ensureAndAnimate(data.endSnapshot);
 }
 
 export async function handleDeleteBackwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
-	if (animator.ensureTree) animator.ensureTree(data.startSnapshot);
+	animator.ensureAndAnimate(data.startSnapshot);
 	annotator.annotateNode(`Delete node with value ${data.value}`, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Red);
 	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
@@ -180,16 +183,12 @@ export async function handleReplaceWithChildForwardCommon(animator: AnyAnimator,
 }
 
 export async function handleReplaceWithChildBackwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
-	if (animator.ensureTree) animator.ensureTree(data.startSnapshot);
+	animator.ensureTree(data.startSnapshot);
 	annotator.annotateNode(`Replace node with its ${data.direction} child`, data.oldNodeId);
 	animator.setNodeColor(data.oldNodeId, Colors.Red);
 
-	const childPosition = animator.getPosition(data.newNodeId);
-	const deletedParentPosition = animator.getPosition(data.oldNodeId);
-	animator.snapNodeTo(data.newNodeId, deletedParentPosition.x, deletedParentPosition.y);
-
 	await Promise.all([
-		animator.animateNodeMovement(data.newNodeId, deletedParentPosition, childPosition),
+		animator.animateNodeMovement(data.newNodeId, animator.getPosition(data.oldNodeId), animator.getPosition(data.newNodeId)),
 		animator.animateNodeGrowth(data.oldNodeId),
 		animator.animateLegsGrowth(data.oldNodeId),
 	]);

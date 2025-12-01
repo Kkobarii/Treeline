@@ -11,7 +11,7 @@ export function clampInput(value: number): number {
 	return clamp(value, inputConstraints.min, inputConstraints.max);
 }
 
-export function enforceMinMax(el: HTMLInputElement) : number {
+export function enforceMinMax(el: HTMLInputElement): number {
 	// remove non-numeric characters
 	el.value = el.value.replace(/[^0-9]/g, '');
 
@@ -21,11 +21,12 @@ export function enforceMinMax(el: HTMLInputElement) : number {
 	} else {
 		el.value = clampInput(parseInt(el.value)).toString();
 	}
-	
+
 	return parseInt(el.value);
 }
 
 export function relationTextToSymbol(text: string): string {
+	console.log('relationTextToSymbol', text);
 	switch (text) {
 		case 'less':
 			return '<';
@@ -36,6 +37,12 @@ export function relationTextToSymbol(text: string): string {
 		default:
 			return '?';
 	}
+}
+
+export function comparisonValuesToSymbol(a: number, b: number): string {
+	if (a < b) return '<';
+	if (a > b) return '>';
+	return '=';
 }
 
 export function lerp(a: number, b: number, t: number) {

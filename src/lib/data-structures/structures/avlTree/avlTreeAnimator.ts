@@ -5,7 +5,6 @@ import { BinaryTreeAnimator } from '../../visual/animators/binaryTreeAnimator';
 import { type DataStructureAnimatorOpts } from '../../visual/animators/dataStructureAnimator';
 
 export class AVLTreeAnimator extends BinaryTreeAnimator {
-
 	constructor(opts: DataStructureAnimatorOpts) {
 		super(opts);
 	}
@@ -24,7 +23,7 @@ export class AVLTreeAnimator extends BinaryTreeAnimator {
 					this.addNodeRaw(n);
 				}
 			}
-			
+
 			// remove nodes that are no longer present
 			const newNodeIds = new Set(newData.nodes.get().map((n: any) => n.id));
 			for (const existingNode of this.nodes.get()) {
@@ -44,7 +43,7 @@ export class AVLTreeAnimator extends BinaryTreeAnimator {
 			this.clearDisconnectedDummyNodes();
 			timer.checkpoint('cleanup');
 
-			timer.printReport('AVLTreeAnimator.ensureTree: ');
+			// timer.printReport('AVLTreeAnimator.ensureTree: ');
 		} catch (err) {
 			console.warn('AVLTreeAnimator.ensureTree error', err);
 		}

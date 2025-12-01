@@ -1,11 +1,10 @@
 import { bsTreeToGraph } from '$lib/data-structures/utils/graphs';
-
 import { Timer } from '$lib/utils/timer';
+
 import { BinaryTreeAnimator } from '../../visual/animators/binaryTreeAnimator';
 import { type DataStructureAnimatorOpts } from '../../visual/animators/dataStructureAnimator';
 
 export class BSTreeAnimator extends BinaryTreeAnimator {
-
 	constructor(opts: DataStructureAnimatorOpts) {
 		super(opts);
 	}
@@ -44,7 +43,7 @@ export class BSTreeAnimator extends BinaryTreeAnimator {
 			this.clearDisconnectedDummyNodes();
 			timer.checkpoint('cleanup');
 
-			timer.printReport('BSTreeAnimator.ensureTree: ');
+			// timer.printReport('BSTreeAnimator.ensureTree: ');
 		} catch (err) {
 			console.warn('BSTreeAnimator.ensureTree error', err);
 		}

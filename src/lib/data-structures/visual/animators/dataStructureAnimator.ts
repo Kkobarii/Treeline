@@ -1,9 +1,7 @@
 import type { DataSet } from 'vis-data';
-import type { Edge, Network, Node, NodeOptions, Position } from 'vis-network';
+import type { Edge, Font, Network, Node, NodeOptions, Position } from 'vis-network';
 
 import { addAnimation, DEFAULT_ANIMATION_DURATION_MS, getGlobalAnimationDuration, setGlobalAnimationDuration } from '$lib/utils/animator';
-import { clamp } from '../../utils/utils';
-
 
 export interface DataStructureAnimatorOpts {
 	network: Network;
@@ -165,60 +163,27 @@ export class DataStructureAnimator {
 	}
 
 	// --- visual helpers ---
-	protected getNodeFontSize(nodeId: string | number): number {
-		let defaultFontSize = (this.nodeOptions as any).font?.size ?? 14;
-		try {
-			const n: any = this.nodes.get(nodeId as any);
-			if (!n) return defaultFontSize;
-			const font = n.font;
-			if (!font) return defaultFontSize;
-			if (typeof font === 'string') {
-				const m = font.match(/(\d+(?:\.\d+)?)/);
-				if (m) return parseFloat(m[1]);
-				return defaultFontSize;
-			}
-			return font.size ?? defaultFontSize;
-		} catch {
-			return defaultFontSize;
-		}
+	protected getNodeFontSize(): number {
+		return (this.nodeOptions.font as Font)?.size ?? 14;
 	}
 
 	animateNodeGrowth(nodeId: string | number): Promise<void> {
-		const finalSize = this.getNodeFontSize(nodeId);
+		const finalSize = this.getNodeFontSize();
 		return this.changeNodeSize(nodeId, 0, finalSize);
 	}
 
 	animateNodeShrink(nodeId: string | number): Promise<void> {
-		const startSize = this.getNodeFontSize(nodeId);
+		const startSize = this.getNodeFontSize();
 		return this.changeNodeSize(nodeId, startSize, 0);
 	}
 
 	protected changeNodeSize(nodeId: string | number, startSize: number, endSize: number): Promise<void> {
 		return new Promise(resolve => {
 			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / (getGlobalAnimationDuration() / 5));
+				const t = Math.min(1, elapsed / getGlobalAnimationDuration());
 				const size = Math.max(0, startSize + (endSize - startSize) * t);
 				try {
 					this.nodes.update({ id: nodeId, font: { size } } as any);
-				} catch {}
-				if (t >= 1) {
-					cancel();
-					resolve();
-					return false;
-				}
-				return true;
-			});
-		});
-	}
-
-	animateNodeOpacityChange(nodeId: string | number, fromOpacity: number, toOpacity: number): Promise<void> {
-		const fontSize = this.getNodeFontSize(nodeId);
-		return new Promise(resolve => {
-			const cancel = addAnimation((dt, elapsed) => {
-				const t = Math.min(1, elapsed / getGlobalAnimationDuration());
-				const opacity = clamp(fromOpacity + (toOpacity - fromOpacity) * t, 0, 1);
-				try {
-					this.nodes.update({ id: nodeId, opacity: opacity, font: { size: fontSize * opacity } } as any);
 				} catch {}
 				if (t >= 1) {
 					cancel();
@@ -255,8 +220,7 @@ export class DataStructureAnimator {
 		try {
 			this.network.fit();
 			// this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
-		} catch {
-		}
+		} catch {}
 	}
 
 	getNodePositions(): Map<string | number, Position> {
@@ -271,13 +235,26 @@ export class DataStructureAnimator {
 				}
 			}
 		}
+
+		console.debug('getNodePositions', result);
+
 		return result;
 	}
 
-	async animateRelayout(fromPositions: Map<string | number, Position>, newPositions: Map<string | number, Position>) {
+	async animateRelayout(fromPositions: { [nodeId: string]: Position }, newPositions: { [nodeId: string]: Position }) {
+		// snap all nodes to fromPositions
+		for (const [nodeId, fromPos] of Object.entries(fromPositions)) {
+			try {
+				if (!newPositions[nodeId]) continue; // node is gone
+				await this.snapNodeTo(nodeId, fromPos.x, fromPos.y);
+			} catch {}
+		}
+
+		// animate to newPositions
 		const anims: Promise<void>[] = [];
-		for (const [nodeId, newPos] of newPositions) {
-			const fromPos = fromPositions.get(nodeId);
+		console.info('animateRelayout', { fromPositions, newPositions });
+		for (const [nodeId, newPos] of Object.entries(newPositions)) {
+			const fromPos = fromPositions[nodeId];
 			if (fromPos) {
 				anims.push(this.animateNodeMovement(nodeId, fromPos, newPos));
 			} else {
@@ -286,5 +263,18 @@ export class DataStructureAnimator {
 			}
 		}
 		await Promise.all(anims);
+		console.info('animateRelayout complete');
+	}
+
+	ensureTree(tree: any) {
+		// to be overridden in subclasses
+		return;
+	}
+
+	async ensureAndAnimate(tree: any) {
+		const oldPositions = this.network.getPositions();
+		this.ensureTree(tree);
+		const newPositions = this.network.getPositions();
+		return this.animateRelayout(oldPositions, newPositions);
 	}
 }

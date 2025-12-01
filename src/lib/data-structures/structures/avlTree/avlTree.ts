@@ -59,7 +59,7 @@ export class AVLTree extends DataStructure {
 	//  / \          - - - - - - - ->     / \
 	// T1  T2                           T2  T3
 	//
-	private rightRotate(y: AVLTreeNode, data: OperationData): AVLTreeNode {
+	private rightRotate(parent: AVLTreeNode | null, y: AVLTreeNode, data: OperationData): void {
 		const startSnapshot = this.snapshot();
 
 		const x = y.left as AVLTreeNode;
@@ -73,9 +73,16 @@ export class AVLTree extends DataStructure {
 		this.updateHeight(y);
 		this.updateHeight(x);
 
-		data.step(Step.AVLTree.RotateRight(y.id, x.id, T2 ? T2.id : null, startSnapshot, this.snapshot()));
+		// attach rotated subtree to parent (or set as root)
+		if (!parent) {
+			this.root = x;
+		} else if (parent.left === y) {
+			parent.left = x;
+		} else {
+			parent.right = x;
+		}
 
-		return x;
+		data.step(Step.AVLTree.RotateRight(y.id, x.id, T2 ? T2.id : null, startSnapshot, this.snapshot()));
 	}
 
 	//
@@ -85,7 +92,7 @@ export class AVLTree extends DataStructure {
 	//    / \    - - - - - - - ->   / \
 	//   T2  T3                   T1  T2
 	//
-	private leftRotate(x: AVLTreeNode, data: OperationData): AVLTreeNode {
+	private leftRotate(parent: AVLTreeNode | null, x: AVLTreeNode, data: OperationData): void {
 		const startSnapshot = this.snapshot();
 
 		const y = x.right as AVLTreeNode;
@@ -99,12 +106,20 @@ export class AVLTree extends DataStructure {
 		this.updateHeight(x);
 		this.updateHeight(y);
 
-		data.step(Step.AVLTree.RotateLeft(x.id, y.id, T2 ? T2.id : null, startSnapshot, this.snapshot()));
+		// attach rotated subtree to parent (or set as root)
+		if (!parent) {
+			this.root = y;
+		} else if (parent.left === x) {
+			parent.left = y;
+		} else {
+			parent.right = y;
+		}
 
-		return y;
+		data.step(Step.AVLTree.RotateLeft(x.id, y.id, T2 ? T2.id : null, startSnapshot, this.snapshot()));
 	}
 
 	insert(value: number, data: OperationData): AVLTreeNode | null {
+		// iterative insert so the root is updated at each step (suitable for screenshots)
 		if (!this.root) {
 			const newNode = new AVLTreeNode(this.generateId(), value);
 			let startSnapshot = this.snapshot();
@@ -113,69 +128,74 @@ export class AVLTree extends DataStructure {
 			return newNode;
 		}
 
-		const insertRec = (node: AVLTreeNode | null, parentId: number | null, direction: 'left' | 'right' | null): AVLTreeNode | null => {
-			if (!node) {
-				const newNode = new AVLTreeNode(this.generateId(), value);
-				if (parentId === null) {
-					let startSnapshot = this.snapshot();
-					data.step(Step.Common.CreateRoot(newNode.id, value, startSnapshot, this.snapshot()));
-				} else {
+		// traverse to insertion point, keeping path from root to parent
+		let current: AVLTreeNode | null = this.root;
+		const path: AVLTreeNode[] = [];
+
+		while (current) {
+			path.push(current);
+			data.step(Step.Common.Compare(value, current.id, current.value));
+			if (value < current.value) {
+				data.step(Step.Common.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
+				if (!current.left) {
+					const newNode = new AVLTreeNode(this.generateId(), value);
 					let startSnapshot = this.snapshot();
 					data.steps.pop();
-					data.step(
-						Step.Common.CreateLeaf(newNode.id, value, parentId, direction as 'left' | 'right', startSnapshot, this.snapshot()),
-					);
+					current.left = newNode;
+					data.step(Step.Common.CreateLeaf(newNode.id, value, current.id, 'left', startSnapshot, this.snapshot()));
+					break;
 				}
-				return newNode;
-			}
-
-			data.step(Step.Common.Compare(value, node.id, node.value));
-			if (value < node.value) {
-				data.step(Step.Common.Traverse(node.id, node.left ? node.left.id : -1, 'left'));
-				node.left = insertRec(node.left, node.id, 'left');
-			} else if (value > node.value) {
-				data.step(Step.Common.Traverse(node.id, node.right ? node.right.id : -1, 'right'));
-				node.right = insertRec(node.right, node.id, 'right');
+				current = current.left;
+			} else if (value > current.value) {
+				data.step(Step.Common.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
+				if (!current.right) {
+					const newNode = new AVLTreeNode(this.generateId(), value);
+					let startSnapshot = this.snapshot();
+					data.steps.pop();
+					current.right = newNode;
+					data.step(Step.Common.CreateLeaf(newNode.id, value, current.id, 'right', startSnapshot, this.snapshot()));
+					break;
+				}
+				current = current.right;
 			} else {
-				data.step(Step.Common.Drop(value, 'duplicate value', node.id.toString()));
-				return node;
+				data.step(Step.Common.Drop(value, 'duplicate value', current.id.toString()));
+				return current;
 			}
+		}
 
-			// update height and rebalance
+		// walk back up the path and rebalance as needed
+		while (path.length > 0) {
+			const node = path.pop()!;
 			this.updateHeight(node);
 			const balance = this.getBalance(node);
 			data.step(Step.AVLTree.UpdateHeightBalance(node.id, node.height, balance, this.snapshot(), this.snapshot()));
 
+			// determine parent for potential attachment
+			const parent = path.length > 0 ? path[path.length - 1] : null;
+
 			// Left Left
-			if (balance > 1 && value < node.left!.value) {
-				const rotated = this.rightRotate(node, data);
-				return rotated;
+			if (balance > 1 && value < (node.left as AVLTreeNode).value) {
+				this.rightRotate(parent, node, data);
 			}
 
 			// Right Right
-			if (balance < -1 && value > node.right!.value) {
-				const rotated = this.leftRotate(node, data);
-				return rotated;
+			else if (balance < -1 && value > (node.right as AVLTreeNode).value) {
+				this.leftRotate(parent, node, data);
 			}
 
 			// Left Right
-			if (balance > 1 && value > node.left!.value) {
-				node.left = this.leftRotate(node.left!, data);
-				const rotated = this.rightRotate(node, data);
-				return rotated;
+			else if (balance > 1 && value > (node.left as AVLTreeNode).value) {
+				this.leftRotate(node, node.left as AVLTreeNode, data);
+				this.rightRotate(parent, node, data);
 			}
 
 			// Right Left
-			if (balance < -1 && value < node.right!.value) {
-				node.right = this.rightRotate(node.right!, data);
-				const rotated = this.leftRotate(node, data);
-				return rotated;
+			else if (balance < -1 && value < (node.right as AVLTreeNode).value) {
+				this.rightRotate(node, node.right as AVLTreeNode, data);
+				this.leftRotate(parent, node, data);
 			}
+		}
 
-			return node;
-		};
-
-		this.root = insertRec(this.root, null, null);
 		let tmpData = new OperationData('temp', this.snapshot());
 		return this.find(value, tmpData);
 	}
@@ -210,132 +230,158 @@ export class AVLTree extends DataStructure {
 			return false;
 		}
 
-		const removeRec = (node: AVLTreeNode | null): AVLTreeNode | null => {
-			if (!node) return null;
+		// create tmpData snapshot-based checks like original
+		let tmpData = new OperationData('temp', this.snapshot());
+		const before = this.find(value, tmpData);
 
-			data.step(Step.Common.Compare(value, node.id, node.value));
-			if (value < node.value) {
-				data.step(Step.Common.Traverse(node.id, node.left ? node.left.id : -1, 'left'));
-				node.left = removeRec(node.left);
-			} else if (value > node.value) {
-				data.step(Step.Common.Traverse(node.id, node.right ? node.right.id : -1, 'right'));
-				node.right = removeRec(node.right);
+		// traverse to node to delete
+		let current: AVLTreeNode | null = this.root;
+		const path: AVLTreeNode[] = []; // nodes from root to parent of current
+		let parent: AVLTreeNode | null = null;
+		let found = false;
+
+		while (current) {
+			data.step(Step.Common.Compare(value, current.id, current.value));
+			if (value < current.value) {
+				data.step(Step.Common.Traverse(current.id, current.left ? current.left.id : -1, 'left'));
+				path.push(current);
+				parent = current;
+				current = current.left;
+			} else if (value > current.value) {
+				data.step(Step.Common.Traverse(current.id, current.right ? current.right.id : -1, 'right'));
+				path.push(current);
+				parent = current;
+				current = current.right;
 			} else {
-				// found node
-				data.step(Step.Common.MarkToDelete(node.id, value));
+				// found
+				data.step(Step.Common.MarkToDelete(current.id, value));
+				found = true;
+				break;
+			}
+		}
 
-				// node with only one child or no child
-				if (!node.left || !node.right) {
-					const child = node.left ? node.left : node.right;
-					let startSnapshot = this.snapshot();
-					if (!child) {
-						// no child
-						data.step(Step.Common.Delete(node.id, value, startSnapshot, this.snapshot()));
-						return null;
-					} else {
-						data.step(
-							Step.Common.ReplaceWithChild(
-								node.id,
-								child.id,
-								child.value,
-								node.left ? 'left' : 'right',
-								startSnapshot,
-								this.snapshot(),
-							),
-						);
-						return child;
-					}
+		if (!found) {
+			data.step(Step.Common.Drop(value, 'not found', parent ? parent.id.toString() : 'root'));
+			return false;
+		}
+
+		// case: node with at most one child
+		if (!current!.left || !current!.right) {
+			const child = current!.left ? current!.left : current!.right;
+			let startSnapshot = this.snapshot();
+			if (!child) {
+				// no child
+				data.step(Step.Common.Delete(current!.id, value, startSnapshot, this.snapshot()));
+				if (!parent) {
+					this.root = null;
+				} else if (parent.left === current) {
+					parent.left = null;
+				} else {
+					parent.right = null;
 				}
-
-				// node with two children: get inorder successor
-				let succParent = node;
-				let successor = node.right as AVLTreeNode;
-				while (successor.left) {
-					succParent = successor;
-					successor = successor.left;
-				}
-
-				data.step(Step.Common.FoundInorderSuccessor(node.id, successor.id, successor.value));
-
-				if (succParent !== node && successor.right) {
-					let startSnapshot2 = this.snapshot();
-					succParent.left = successor.right;
-					data.step(
-						Step.Common.RelinkSuccessorChild(
-							successor.right!.id,
-							successor.right!.value,
-							succParent.id,
-							succParent.value,
-							successor.id,
-							startSnapshot2,
-							this.snapshot(),
-						),
-					);
-				}
-
-				let startSnapshot = this.snapshot();
-				if (succParent !== node && !successor.right) {
-					succParent.left = null;
-				}
-
-				if (node.right === successor) {
-					node.right = successor.right;
-				}
-
-				node.value = successor.value;
+			} else {
 				data.step(
-					Step.Common.ReplaceWithInorderSuccessor(
-						node.id,
-						successor.id,
-						successor.value,
-						succParent.id,
+					Step.Common.ReplaceWithChild(
+						current!.id,
+						child.id,
+						child.value,
+						parent && parent.left === current ? 'left' : 'right',
 						startSnapshot,
+						this.snapshot(),
+					),
+				);
+				if (!parent) this.root = child;
+				else if (parent.left === current) parent.left = child;
+				else parent.right = child;
+			}
+
+			// rebalance starting from parent upwards
+		} else {
+			// node with two children: find inorder successor
+			let succParent = current!;
+			let successor = current!.right as AVLTreeNode;
+			// push current for rebalance path
+			path.push(current!);
+			while (successor.left) {
+				path.push(successor);
+				succParent = successor;
+				successor = successor.left;
+			}
+
+			data.step(Step.Common.FoundInorderSuccessor(current!.id, successor.id, successor.value));
+
+			if (succParent !== current! && successor.right) {
+				let startSnapshot2 = this.snapshot();
+				succParent.left = successor.right;
+				data.step(
+					Step.Common.RelinkSuccessorChild(
+						successor.right!.id,
+						successor.right!.value,
+						succParent.id,
+						succParent.value,
+						successor.id,
+						startSnapshot2,
 						this.snapshot(),
 					),
 				);
 			}
 
-			// if the tree had only one node
-			if (!node) return null;
+			let startSnapshot = this.snapshot();
+			if (succParent !== current! && !successor.right) {
+				succParent.left = null;
+			}
 
-			// update height and balance
+			if (current!.right === successor) {
+				current!.right = successor.right;
+			}
+
+			current!.value = successor.value;
+			data.step(
+				Step.Common.ReplaceWithInorderSuccessor(
+					current!.id,
+					successor.id,
+					successor.value,
+					succParent.id,
+					startSnapshot,
+					this.snapshot(),
+				),
+			);
+		}
+
+		// rebalance walking up the path
+		while (path.length > 0) {
+			const node = path.pop()!;
 			this.updateHeight(node);
 			const balance = this.getBalance(node);
+			// record balance update
+			data.step(Step.AVLTree.UpdateHeightBalance(node.id, node.height, balance, this.snapshot(), this.snapshot()));
+
+			const parentAttach = path.length > 0 ? path[path.length - 1] : null;
 
 			// Left Left
 			if (balance > 1 && this.getBalance(node.left) >= 0) {
-				const rotated = this.rightRotate(node, data);
-				return rotated;
+				this.rightRotate(parentAttach, node, data);
 			}
 
 			// Left Right
-			if (balance > 1 && this.getBalance(node.left) < 0) {
-				node.left = this.leftRotate(node.left as AVLTreeNode, data);
-				const rotated = this.rightRotate(node, data);
-				return rotated;
+			else if (balance > 1 && this.getBalance(node.left) < 0) {
+				this.leftRotate(node, node.left as AVLTreeNode, data);
+				this.rightRotate(parentAttach, node, data);
 			}
 
 			// Right Right
-			if (balance < -1 && this.getBalance(node.right) <= 0) {
-				const rotated = this.leftRotate(node, data);
-				return rotated;
+			else if (balance < -1 && this.getBalance(node.right) <= 0) {
+				this.leftRotate(parentAttach, node, data);
 			}
 
 			// Right Left
-			if (balance < -1 && this.getBalance(node.right) > 0) {
-				node.right = this.rightRotate(node.right as AVLTreeNode, data);
-				const rotated = this.leftRotate(node, data);
-				return rotated;
+			else if (balance < -1 && this.getBalance(node.right) > 0) {
+				this.rightRotate(node, node.right as AVLTreeNode, data);
+				this.leftRotate(parentAttach, node, data);
 			}
+		}
 
-			return node;
-		};
-
-		let tmpData = new OperationData('temp', this.snapshot());
-		const before = this.find(value, tmpData);
-		this.root = removeRec(this.root);
 		const after = this.find(value, tmpData);
-
 		return before !== null && after === null;
 	}
 }
