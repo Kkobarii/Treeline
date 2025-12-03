@@ -44,7 +44,7 @@ async function handleUpdateHeightBalanceBackward(
 	annotator: AVLTreeAnnotator,
 	data: Step.AVLTree.UpdateHeightBalanceData,
 ) {
-	annotator.annotateNode(`Revert height and balance`, data.nodeId);
+	annotator.annotateNode(`Check height and balance`, data.nodeId);
 	annotator.highlightNodeHeightBalance(data.nodeId);
 }
 

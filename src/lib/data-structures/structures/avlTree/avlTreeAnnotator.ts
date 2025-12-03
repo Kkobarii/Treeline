@@ -65,7 +65,7 @@ class HeightBalanceAnnotation extends BaseAnnotation {
 	}
 
 	highlight() {
-		this.color = Colors.Red;
+		this.color = Colors.ValueNodeHighlight;
 	}
 }
 
