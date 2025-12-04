@@ -26,11 +26,12 @@
 </script>
 
 <div
-	class="rounded bg-gray-100 p-4"
+	class="rounded bg-gray-100 p-4 flex flex-col gap-6"
 	style="width: 22em; height: 100%;">
-	<div>
-		<h2 class="mb-2 text-xl font-semibold">Tree Controls</h2>
-		<div>
+	<div class="flex-none flex flex-col gap-2">
+		<h2 class="text-xl font-semibold">Tree Controls</h2>
+
+		<div class="flex gap-2">
 			<button
 				type="button"
 				on:click={() => operationManager.operation(OperationType.Tree.Insert, Math.floor(Math.random() * 1000))}
@@ -44,7 +45,8 @@
 				Reset
 			</button>
 		</div>
-		<div class="mt-4">
+
+		<div class="flex gap-2">
 			<input
 				type="number"
 				class="w-15 rounded border p-2"
@@ -77,5 +79,6 @@
 			</button>
 		</div>
 	</div>
+
 	<OperationControls {operationManager} />
 </div>
