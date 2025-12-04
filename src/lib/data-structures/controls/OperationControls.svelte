@@ -64,39 +64,41 @@
 	}
 </script>
 
-<div class="mt-6">
-	<h2 class="mb-2 text-xl font-semibold">Operation Controls</h2>
-	<button
-		type="button"
-		on:click={() => operationManager.previous()}
-		disabled={!canDoPrevious || locked}>
-		Previous
-	</button>
-	<button
-		type="button"
-		on:click={() => operationManager.next()}
-		disabled={!canDoNext || locked}>
-		Next
-	</button>
-	<input
-		id="steps-checkbox"
-		type="checkbox"
-		class="h-4 w-4"
-		on:change={() => operationManager.toggleShowSteps()}
-		disabled={locked} />
-	<label
-		for="steps-checkbox"
-		class="mr-4">
-		Steps
-	</label>
+<div class="flex-none flex flex-col gap-2">
+	<h2 class="text-xl font-semibold">Operation Controls</h2>
+
+	<div class="flex items-center gap-2">
+		<button
+			type="button"
+			on:click={() => operationManager.previous()}
+			disabled={!canDoPrevious || locked}>
+			Previous
+		</button>
+		<button
+			type="button"
+			on:click={() => operationManager.next()}
+			disabled={!canDoNext || locked}>
+			Next
+		</button>
+		<input
+			id="steps-checkbox"
+			type="checkbox"
+			class="h-4 w-4"
+			on:change={() => operationManager.toggleShowSteps()}
+			disabled={locked} />
+		<label
+			for="steps-checkbox"
+			class="mr-4">
+			Steps
+		</label>
+	</div>
 </div>
 
-<div class="mt-6">
-	<h2 class="mb-2 text-xl font-semibold">Operation Info</h2>
-	<div
-		class="overflow-y-auto"
-		style="max-height: 35vh;">
-		<ul>
+<div class="flex-1 flex flex-col gap-2 min-h-0">
+	<h2 class="text-xl font-semibold flex-none">Operation Info</h2>
+
+	<div class="flex-1 overflow-y-auto">
+		<ul class="flex flex-col gap-2">
 			{#each operations as op}
 				<li class="{operations[currentOperation] === op ? 'bg-gray-300' : 'bg-gray-200'} mb-2 rounded p-2 text-sm">
 					{op.operation}
