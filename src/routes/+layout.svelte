@@ -42,18 +42,24 @@
 		<!-- right actions -->
 		<div class="ml-auto flex items-center gap-3">
 			<button
-				class=""
+				aria-label="Toggle dark mode"
+				class="bg-tertiary-dark hover:bg-tertiary rounded-md p-2"
 				onclick={toggleMode}>
-				<img
-					src="/dark-theme.svg"
-					alt="Theme Icon"
-					class="h-5 w-5" />
+				<span
+					role="img"
+					aria-label="Theme Icon"
+					class="block h-5 w-5"
+					style="
+						background: var(--color-gray-950);
+						-webkit-mask: url('/dark-theme.svg') no-repeat center / contain;
+						mask: url('/dark-theme.svg') no-repeat center / contain;
+					"></span>
 			</button>
 		</div>
 	</div>
 </nav>
 
-<div class="bg-grey-50">
+<div>
 	<main class="container mx-auto mt-6">
 		{@render children?.()}
 	</main>

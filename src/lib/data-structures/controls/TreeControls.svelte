@@ -48,7 +48,7 @@
 			<div>
 				<input
 					type="number"
-					class="w-15 rounded border p-2"
+					class="w-15 rounded border border-gray-300 bg-gray-100 text-center"
 					bind:value={manualValue}
 					max="999"
 					min="0"

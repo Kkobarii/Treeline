@@ -109,13 +109,15 @@
 			console.log('Debug mode toggled:', debugMode);
 		}}>
 		<span class="inline-flex h-6 w-6 items-center justify-center rounded-full">
-			<img
-				src="/bug.svg"
-				alt={debugMode ? 'Disable debug mode' : 'Enable debug mode'}
-				width="18"
-				height="18"
-				class="h-4 w-4"
-				style="background: transparent; filter: {!debugMode ? 'invert(1) brightness(2)' : 'grayscale(1) brightness(0.8)'};" />
+			<span
+				role="img"
+				aria-label={debugMode ? 'Disable debug mode' : 'Enable debug mode'}
+				class="block h-4 w-4"
+				style="
+					background: {debugMode ? 'var(--color-gray-950)' : 'var(--color-gray-50)'};
+					<!-- -webkit-mask: url('/bug.svg') no-repeat center / contain;
+					mask: url('/bug.svg') no-repeat center / contain; -->
+				"></span>
 		</span>
 	</button>
 </div>

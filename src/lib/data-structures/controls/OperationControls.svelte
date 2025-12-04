@@ -70,9 +70,11 @@
 	}
 </script>
 
+<!-- checkbox styles moved to global `src/app.css` -->
+
 <div class="flex flex-none flex-col gap-2">
 	<h2 class="text-xl font-semibold">Operation Controls</h2>
-	<div>
+	<div class="flex items-center gap-1">
 		<button
 			type="button"
 			on:click={() => operationManager.previous()}
@@ -85,16 +87,14 @@
 			disabled={!canDoNext || locked}>
 			Next
 		</button>
-		<input
-			id="steps-checkbox"
-			type="checkbox"
-			class="h-4 w-4"
-			on:change={() => operationManager.toggleShowSteps()}
-			disabled={locked} />
-		<label
-			for="steps-checkbox"
-			class="mr-4">
-			Steps
+		<label class="inline-flex items-center gap-2">
+			<input
+				id="steps-checkbox"
+				type="checkbox"
+				class="styled-checkbox"
+				on:change={() => operationManager.toggleShowSteps()}
+				disabled={locked} />
+			<span>Steps</span>
 		</label>
 	</div>
 </div>
@@ -102,10 +102,12 @@
 <div class="flex min-h-0 flex-1 flex-col gap-2">
 	<h2 class="flex-none text-xl font-semibold">Operation Info</h2>
 
-	<div class="flex-1 overflow-y-auto" id="operation-info">
+	<div
+		class="flex-1 overflow-y-auto"
+		id="operation-info">
 		<ul class="flex flex-col gap-2">
 			{#each operations as op}
-				<li class="{operations[currentOperation] === op ? 'bg-gray-300' : 'bg-gray-200'} rounded p-2 text-sm mr-1">
+				<li class="{operations[currentOperation] === op ? 'bg-gray-300' : 'bg-gray-200'} mr-1 rounded p-2 text-sm">
 					{op.operation}
 					{#if operations[currentOperation] === op}
 						<ul>

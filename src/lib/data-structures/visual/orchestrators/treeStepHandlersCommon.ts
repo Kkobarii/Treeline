@@ -73,7 +73,7 @@ export async function handleCreateRootBackwardCommon(animator: AnyAnimator, anno
 export async function handleCreateLeafForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
 	animator.ensureTree(data.endSnapshot);
-	annotator.annotateNode(info, data.nodeId);
+	annotator.annotateNode(info, data.parentId);
 
 	await Promise.all([
 		animator.animateNodeGrowth(data.nodeId),
@@ -112,12 +112,8 @@ export async function handleCompareBackwardCommon(animator: AnyAnimator, annotat
 }
 
 export async function handleTraverseForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
-	if (data.toId !== -1) {
-		await annotator.moveValueAnnotationTo(data.toId);
-	} else {
-		await annotator.moveValueAnnotationTo(data.fromId);
-	}
 	annotator.annotateNode(`Traverse to ${data.direction} child`, data.fromId);
+	await annotator.moveValueAnnotationTo(data.toId);
 }
 
 export async function handleTraverseBackwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: any) {
