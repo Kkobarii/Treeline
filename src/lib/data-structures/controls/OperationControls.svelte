@@ -102,10 +102,10 @@
 <div class="flex min-h-0 flex-1 flex-col gap-2">
 	<h2 class="flex-none text-xl font-semibold">Operation Info</h2>
 
-	<div class="flex-1 overflow-y-auto">
+	<div class="flex-1 overflow-y-auto" id="operation-info">
 		<ul class="flex flex-col gap-2">
 			{#each operations as op}
-				<li class="{operations[currentOperation] === op ? 'bg-gray-300' : 'bg-gray-200'} mb-2 rounded p-2 text-sm">
+				<li class="{operations[currentOperation] === op ? 'bg-gray-300' : 'bg-gray-200'} rounded p-2 text-sm mr-1">
 					{op.operation}
 					{#if operations[currentOperation] === op}
 						<ul>
