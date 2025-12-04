@@ -9,13 +9,13 @@
 
 <h1 class="mb-4 text-2xl font-bold">Binary Search Tree Simulation</h1>
 <div
-	class="display: mb-4 flex"
+	class="display: mb-4 flex gap-4"
 	style="height: 75vh;">
 	<div style="flex-grow: 1;">
 		<BSTreeVisual {operationManager} />
 	</div>
 
-	<div class="mr-4 ml-4">
+	<div>
 		<TreeControls {operationManager} />
 	</div>
 </div>

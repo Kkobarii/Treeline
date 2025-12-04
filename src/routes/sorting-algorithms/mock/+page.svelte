@@ -1,7 +1,8 @@
 <script>
-	import { bubbleSortPseudocode } from '$lib/sorting-algorithms/samplePseudocode';
 	import { flip } from 'svelte/animate';
 	import { cubicInOut } from 'svelte/easing';
+
+	import { bubbleSortPseudocode } from '$lib/sorting-algorithms/samplePseudocode';
 
 	// Fake unsorted data
 	let numbers = $state([7, 2, 9, 4, 1, 6]);
@@ -20,6 +21,8 @@
 </script>
 
 <h1 class="mb-4 text-2xl font-bold">Sorting Visualization Prototype</h1>
+
+<h2 class="mb-4 text-5xl text-red-600">Just a mock, not functional yet at all</h2>
 
 <div class="flex gap-8">
 	<!-- Visualization -->

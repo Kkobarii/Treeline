@@ -1,7 +1,13 @@
 <script lang="ts">
-	import type { OperationData } from '$lib/data-structures/operation/operationData';
-	import { CurrentOperationChangedEvent, CurrentStepChangedEvent, EventType, OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { onMount } from 'svelte';
+
+	import type { OperationData } from '$lib/data-structures/operation/operationData';
+	import {
+		CurrentOperationChangedEvent,
+		CurrentStepChangedEvent,
+		EventType,
+		OperationManager,
+	} from '$lib/data-structures/operation/operationManager';
 
 	export let operationManager: OperationManager;
 
@@ -64,10 +70,9 @@
 	}
 </script>
 
-<div class="flex-none flex flex-col gap-2">
+<div class="flex flex-none flex-col gap-2">
 	<h2 class="text-xl font-semibold">Operation Controls</h2>
-
-	<div class="flex items-center gap-2">
+	<div>
 		<button
 			type="button"
 			on:click={() => operationManager.previous()}
@@ -94,8 +99,8 @@
 	</div>
 </div>
 
-<div class="flex-1 flex flex-col gap-2 min-h-0">
-	<h2 class="text-xl font-semibold flex-none">Operation Info</h2>
+<div class="flex min-h-0 flex-1 flex-col gap-2">
+	<h2 class="flex-none text-xl font-semibold">Operation Info</h2>
 
 	<div class="flex-1 overflow-y-auto">
 		<ul class="flex flex-col gap-2">
