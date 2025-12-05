@@ -11,6 +11,8 @@ class HeightBalanceAnnotation extends BaseAnnotation {
 	heightText: string;
 	balanceText: string;
 
+	hidden: boolean = false;
+
 	constructor(
 		public annotator: DataStructureAnnotator,
 		public followingNodeId: string | number,
@@ -22,6 +24,9 @@ class HeightBalanceAnnotation extends BaseAnnotation {
 		let nodeData = this.annotator.nodes.get(followingNodeId);
 		if (nodeData && nodeData.title) {
 			let avlData = AVLTreeNodeData.fromNode(nodeData);
+
+			this.hidden = isNaN(avlData.height) || isNaN(avlData.balance);
+
 			this.heightText = `H: ${avlData.height}`;
 			this.balanceText = `B: ${avlData.balance}`;
 		} else {

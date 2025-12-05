@@ -25,6 +25,12 @@ export class OperationData {
 		this.step(Step.End());
 		this.endSnapshot = endSnapshot;
 	}
+
+	static Ignored(): OperationData {
+		let opData = new OperationData('Ignored', new DataStructure());
+		opData.end(new DataStructure());
+		return opData;
+	}
 }
 
 export class StepData {

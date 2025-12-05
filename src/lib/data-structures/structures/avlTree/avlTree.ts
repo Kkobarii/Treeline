@@ -166,9 +166,10 @@ export class AVLTree extends DataStructure {
 		// walk back up the path and rebalance as needed
 		while (path.length > 0) {
 			const node = path.pop()!;
+			let startSnapshot = this.snapshot();
 			this.updateHeight(node);
 			const balance = this.getBalance(node);
-			data.step(Step.AVLTree.UpdateHeightBalance(node.id, node.height, balance, this.snapshot(), this.snapshot()));
+			data.step(Step.AVLTree.UpdateHeightBalance(node.id, node.height, balance, startSnapshot, this.snapshot()));
 
 			// determine parent for potential attachment
 			const parent = path.length > 0 ? path[path.length - 1] : null;
@@ -196,8 +197,7 @@ export class AVLTree extends DataStructure {
 			}
 		}
 
-		let tmpData = new OperationData('temp', this.snapshot());
-		return this.find(value, tmpData);
+		return this.find(value, OperationData.Ignored());
 	}
 
 	find(value: number, data: OperationData): AVLTreeNode | null {
@@ -230,9 +230,7 @@ export class AVLTree extends DataStructure {
 			return false;
 		}
 
-		// create tmpData snapshot-based checks like original
-		let tmpData = new OperationData('temp', this.snapshot());
-		const before = this.find(value, tmpData);
+		const before = this.find(value, OperationData.Ignored());
 
 		// traverse to node to delete
 		let current: AVLTreeNode | null = this.root;
@@ -271,7 +269,6 @@ export class AVLTree extends DataStructure {
 			let startSnapshot = this.snapshot();
 			if (!child) {
 				// no child
-				data.step(Step.Common.Delete(current!.id, value, startSnapshot, this.snapshot()));
 				if (!parent) {
 					this.root = null;
 				} else if (parent.left === current) {
@@ -279,7 +276,15 @@ export class AVLTree extends DataStructure {
 				} else {
 					parent.right = null;
 				}
+				data.step(Step.Common.Delete(current!.id, value, startSnapshot, this.snapshot()));
 			} else {
+				if (!parent) {
+					this.root = child;
+				} else if (parent.left && parent.left.id === current!.id) {
+					parent.left = child;
+				} else {
+					parent.right = child;
+				}
 				data.step(
 					Step.Common.ReplaceWithChild(
 						current!.id,
@@ -290,9 +295,6 @@ export class AVLTree extends DataStructure {
 						this.snapshot(),
 					),
 				);
-				if (!parent) this.root = child;
-				else if (parent.left === current) parent.left = child;
-				else parent.right = child;
 			}
 
 			// rebalance starting from parent upwards
@@ -310,6 +312,7 @@ export class AVLTree extends DataStructure {
 
 			data.step(Step.Common.FoundInorderSuccessor(current!.id, successor.id, successor.value));
 
+			let relinkedChildId = null;
 			if (succParent !== current! && successor.right) {
 				let startSnapshot2 = this.snapshot();
 				succParent.left = successor.right;
@@ -320,10 +323,13 @@ export class AVLTree extends DataStructure {
 						succParent.id,
 						succParent.value,
 						successor.id,
+						successor.value,
 						startSnapshot2,
 						this.snapshot(),
 					),
 				);
+
+				relinkedChildId = successor.right!.id;
 			}
 
 			let startSnapshot = this.snapshot();
@@ -336,12 +342,15 @@ export class AVLTree extends DataStructure {
 			}
 
 			current!.value = successor.value;
+			const prevCurrentId = current!.id;
+			current!.id = successor.id;
 			data.step(
 				Step.Common.ReplaceWithInorderSuccessor(
-					current!.id,
+					prevCurrentId,
 					successor.id,
 					successor.value,
 					succParent.id,
+					relinkedChildId,
 					startSnapshot,
 					this.snapshot(),
 				),
@@ -351,11 +360,10 @@ export class AVLTree extends DataStructure {
 		// rebalance walking up the path
 		while (path.length > 0) {
 			const node = path.pop()!;
+			let startSnapshot = this.snapshot();
 			this.updateHeight(node);
 			const balance = this.getBalance(node);
-			// record balance update
-			data.step(Step.AVLTree.UpdateHeightBalance(node.id, node.height, balance, this.snapshot(), this.snapshot()));
-
+			data.step(Step.AVLTree.UpdateHeightBalance(node.id, node.height, balance, startSnapshot, this.snapshot()));
 			const parentAttach = path.length > 0 ? path[path.length - 1] : null;
 
 			// Left Left
@@ -381,7 +389,7 @@ export class AVLTree extends DataStructure {
 			}
 		}
 
-		const after = this.find(value, tmpData);
+		const after = this.find(value, OperationData.Ignored());
 		return before !== null && after === null;
 	}
 }

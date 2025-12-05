@@ -11,23 +11,23 @@ import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandl
 import type { AVLTreeAnnotator } from './avlTreeAnnotator';
 
 async function handleRotateLeftForward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: Step.AVLTree.RotateLeftData) {
-	annotator.annotateNode(`Rotate left at root ${data.oldRootId}`, data.oldRootId);
+	annotator.annotateNode(`Rotate left at root ${data.oldRootId}`, data.newRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as AVLTree);
 }
 
 async function handleRotateLeftBackward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: Step.AVLTree.RotateLeftData) {
+	annotator.annotateNode(`Rotate left at root ${data.oldRootId}`, data.newRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as AVLTree);
-	annotator.annotateNode(`Rotate left at root ${data.oldRootId}`, data.oldRootId);
 }
 
 async function handleRotateRightForward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: Step.AVLTree.RotateRightData) {
-	annotator.annotateNode(`Rotate right at root ${data.oldRootId}`, data.oldRootId);
+	annotator.annotateNode(`Rotate right at root ${data.oldRootId}`, data.newRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as AVLTree);
 }
 
 async function handleRotateRightBackward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: Step.AVLTree.RotateRightData) {
+	annotator.annotateNode(`Rotate right at root ${data.oldRootId}`, data.newRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as AVLTree);
-	annotator.annotateNode(`Rotate right at root ${data.oldRootId}`, data.oldRootId);
 }
 
 async function handleUpdateHeightBalanceForward(
@@ -37,6 +37,7 @@ async function handleUpdateHeightBalanceForward(
 ) {
 	annotator.annotateNode(`Check height and balance`, data.nodeId);
 	annotator.highlightNodeHeightBalance(data.nodeId);
+	animator.ensureTree(data.endSnapshot);
 }
 
 async function handleUpdateHeightBalanceBackward(
@@ -46,6 +47,7 @@ async function handleUpdateHeightBalanceBackward(
 ) {
 	annotator.annotateNode(`Check height and balance`, data.nodeId);
 	annotator.highlightNodeHeightBalance(data.nodeId);
+	animator.ensureTree(data.startSnapshot);
 }
 
 export class AVLTreeStepHandler extends StepHandlerBase {
@@ -81,10 +83,6 @@ export class AVLTreeStepHandler extends StepHandlerBase {
 	) {
 		let animator = baseAnimator as AVLTreeAnimator;
 		let annotator = baseAnnotator as AVLTreeAnnotator;
-
-		// if (currentStep.type === StepType.AVLTree.Start) {
-		// 	animator.ensureTree(operationManager.getCurrentOperation().endSnapshot as AVLTree);
-		// }
 
 		switch (currentStep.type as StepTypeValue) {
 			case StepType.AVLTree.Start:

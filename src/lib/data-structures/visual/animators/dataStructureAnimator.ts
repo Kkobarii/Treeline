@@ -223,22 +223,8 @@ export class DataStructureAnimator {
 		} catch {}
 	}
 
-	getNodePositions(): Map<string | number, Position> {
-		const result = new Map<string | number, Position>();
-		for (const node of this.nodes.get()) {
-			try {
-				const p = this.network.getPosition(node.id);
-				result.set(node.id as string | number, p);
-			} catch {
-				if (typeof node.x === 'number' && typeof node.y === 'number') {
-					result.set(node.id as string | number, { x: node.x, y: node.y });
-				}
-			}
-		}
-
-		console.debug('getNodePositions', result);
-
-		return result;
+	getPositions(): { [nodeId: string]: Position } {
+		return this.network.getPositions();
 	}
 
 	async animateRelayout(fromPositions: { [nodeId: string]: Position }, newPositions: { [nodeId: string]: Position }) {
@@ -272,9 +258,9 @@ export class DataStructureAnimator {
 	}
 
 	async ensureAndAnimate(tree: any) {
-		const oldPositions = this.network.getPositions();
+		const oldPositions = this.getPositions();
 		this.ensureTree(tree);
-		const newPositions = this.network.getPositions();
+		const newPositions = this.getPositions();
 		return this.animateRelayout(oldPositions, newPositions);
 	}
 }

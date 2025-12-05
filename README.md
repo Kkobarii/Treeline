@@ -1,4 +1,5 @@
 [![Deploy to GitHub Pages](https://github.com/Kkobarii/Treeline/actions/workflows/deploy.yml/badge.svg)](https://github.com/Kkobarii/Treeline/actions/workflows/deploy.yml)
+
 # Treeline
 
 Simple Svelte + TypeScript visualizer for data structures and algorithms.
@@ -16,8 +17,9 @@ npm run dev
 ## Current implementation state
 
 Data Structures:
-- 🟡 Binary Search Tree
-- 🟠 AVL Tree
+
+- 🟢 Binary Search Tree
+- 🟡 AVL Tree
 - 🔴 Red-black tree
 - 🔴 B-tree
 - 🔴 Heap
@@ -26,6 +28,7 @@ Data Structures:
 - 🔴 Queue
 
 Sorting Algorithms:
+
 - 🔴 Bubble Sort
 - 🔴 Insertion Sort
 - 🔴 Selection Sort
@@ -34,6 +37,7 @@ Sorting Algorithms:
 - 🔴 Heap Sort
 
 Legend:
+
 - 🔴 Not started
 - 🟠 In progress
 - 🟡 Needs polish

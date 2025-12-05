@@ -187,6 +187,7 @@ export namespace Step {
 			successorNodeId: number,
 			successorValue: number,
 			successorParentId: number,
+			relinkedChildId: number | null,
 			startSnapshot: DataStructure,
 			endSnapshot: DataStructure,
 		): StepData {
@@ -197,6 +198,7 @@ export namespace Step {
 					successorNodeId,
 					successorValue,
 					successorParentId,
+					relinkedChildId,
 					startSnapshot,
 					endSnapshot,
 				),
@@ -209,6 +211,7 @@ export namespace Step {
 				public successorNodeId: number,
 				public successorValue: number,
 				public successorParentId: number,
+				public relinkedChildId: number | null,
 				public startSnapshot: DataStructure,
 				public endSnapshot: DataStructure,
 			) {
@@ -223,6 +226,7 @@ export namespace Step {
 				public newParentNodeId: number,
 				public newParentValue: number,
 				public successorNodeId: number,
+				public successorValue: number,
 				public startSnapshot: DataStructure,
 				public endSnapshot: DataStructure,
 			) {
@@ -238,6 +242,7 @@ export namespace Step {
 			newParentNodeId: number,
 			newParentValue: number,
 			successorNodeId: number,
+			successorValue: number,
 			startSnapshot: DataStructure,
 			endSnapshot: DataStructure,
 		): StepData {
@@ -249,6 +254,7 @@ export namespace Step {
 					newParentNodeId,
 					newParentValue,
 					successorNodeId,
+					successorValue,
 					startSnapshot,
 					endSnapshot,
 				),
