@@ -69,7 +69,7 @@ export async function handleCreateRootForwardCommon(
 	annotator: DataStructureAnnotator,
 	data: Step.Common.CreateRootData,
 ) {
-	animator.ensureTree(data.endSnapshot);
+	animator.ensure(data.endSnapshot);
 	annotator.annotateNode(`Create root node with value ${data.value}`, data.nodeId);
 
 	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
@@ -91,7 +91,7 @@ export async function handleCreateLeafForwardCommon(
 	data: Step.Common.CreateLeafData,
 ) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
-	animator.ensureTree(data.endSnapshot);
+	animator.ensure(data.endSnapshot);
 	annotator.annotateNode(info, data.parentId);
 
 	await Promise.all([
@@ -256,7 +256,7 @@ export async function handleRelinkSuccessorChildForwardCommon(
 
 	const oldPositions = animator.getPositions();
 
-	animator.ensureTree(data.endSnapshot);
+	animator.ensure(data.endSnapshot);
 
 	animator.addNode(data.successorNodeId, data.successorValue);
 	animator.setNodeColor(data.successorNodeId, Colors.Blue);
@@ -296,7 +296,7 @@ export async function handleReplaceWithInorderSuccessorBackwardCommon(
 	data: Step.Common.ReplaceWithInorderSuccessorData,
 ) {
 	let startPositions = animator.getPositions();
-	animator.ensureTree(data.startSnapshot);
+	animator.ensure(data.startSnapshot);
 	animator.addNode(data.successorNodeId, data.successorValue);
 
 	if (data.relinkedChildId !== null) {

@@ -37,7 +37,7 @@ async function handleUpdateHeightBalanceForward(
 ) {
 	annotator.annotateNode(`Check height and balance`, data.nodeId);
 	annotator.highlightNodeHeightBalance(data.nodeId);
-	animator.ensureTree(data.endSnapshot);
+	animator.ensure(data.endSnapshot);
 }
 
 async function handleUpdateHeightBalanceBackward(
@@ -47,7 +47,7 @@ async function handleUpdateHeightBalanceBackward(
 ) {
 	annotator.annotateNode(`Check height and balance`, data.nodeId);
 	annotator.highlightNodeHeightBalance(data.nodeId);
-	animator.ensureTree(data.startSnapshot);
+	animator.ensure(data.startSnapshot);
 }
 
 export class AVLTreeStepHandler extends StepHandlerBase {

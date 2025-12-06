@@ -252,14 +252,14 @@ export class DataStructureAnimator {
 		console.info('animateRelayout complete');
 	}
 
-	ensureTree(tree: any) {
+	ensure(tree: any) {
 		// to be overridden in subclasses
 		return;
 	}
 
 	async ensureAndAnimate(tree: any) {
 		const oldPositions = this.getPositions();
-		this.ensureTree(tree);
+		this.ensure(tree);
 		const newPositions = this.getPositions();
 		return this.animateRelayout(oldPositions, newPositions);
 	}

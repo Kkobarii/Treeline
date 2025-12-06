@@ -9,71 +9,126 @@ function log(...args: any[]) {
 	// console.log(...args);
 }
 
-export function bsTreeToGraph(
-	root: BSTreeNode | null,
+/**
+ * Generic binary tree to graph converter.
+ * @param root - The root node of the tree
+ * @param getLeftChild - Function to get the left child of a node
+ * @param getRightChild - Function to get the right child of a node
+ * @param createNodeData - Function to create NodeData for a node (receives node, childNumber)
+ * @param nodes - DataSet to accumulate nodes
+ * @param edges - DataSet to accumulate edges
+ * @param successorInfo - Parent link information
+ */
+function binaryTreeToGraph<T extends { id: number; value: number }>(
+	root: T | null,
+	getLeftChild: (node: T) => T | null,
+	getRightChild: (node: T) => T | null,
+	createNodeData: (node: T, childNumber: number) => NodeData,
 	nodes: DataSet<Node> = new DataSet<Node>(),
 	edges: DataSet<Edge> = new DataSet<Edge>(),
 	successorInfo: SuccessorInfo | null = null,
 ) {
 	if (!root) return { nodes, edges };
 
-	log('bsTreeToGraph called with root:', root);
+	log('binaryTreeToGraph called with root:', root);
 	log('SuccessorInfo:', successorInfo);
 
 	const nodeId = root.id;
+	const nodeData = createNodeData(root, 0);
+
 	if (!nodes.get(nodeId)) {
-		nodes.add({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(new NodeData(0)) });
+		nodes.add({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(nodeData) });
 	} else {
-		console.warn('Updating existing node in bsTreeToGraph:', nodeId);
-		nodes.update({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(new NodeData(0)) });
+		console.warn('Updating existing node in binaryTreeToGraph:', nodeId);
+		nodes.update({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(nodeData) });
 	}
 
 	if (successorInfo !== null) {
-		nodes.update({ 
+		const parentNodeData = createNodeData(root, successorInfo.childNumber);
+		nodes.update({
 			id: nodeId,
 			label: root.value.toString(),
-			title: NodeData.toTitle(new NodeData(successorInfo.childNumber))
+			title: NodeData.toTitle(parentNodeData),
 		});
 		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
 		log(`Adding edge ${edgeId} from ${successorInfo.parentId} to ${nodeId}`);
 		edges.add({ id: edgeId, from: successorInfo.parentId, to: nodeId });
 	}
 
-	if (root.left) {
-		const result = bsTreeToGraph(root.left, nodes, edges, new SuccessorInfo(nodeId, 0));
+	// Process left child
+	const leftChild = getLeftChild(root);
+	if (leftChild) {
+		const result = binaryTreeToGraph(
+			leftChild,
+			getLeftChild,
+			getRightChild,
+			createNodeData,
+			nodes,
+			edges,
+			new SuccessorInfo(nodeId, 0),
+		);
 		nodes = result.nodes;
 		edges = result.edges;
 	} else {
 		const dummyId = getDummyNodeId(nodeId, 0);
+		const dummyNodeData = createNodeData(root, 0);
 		nodes.add({
 			id: dummyId,
 			label: '',
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
-			title: NodeData.toTitle(new NodeData(0)),
+			title: NodeData.toTitle(dummyNodeData),
 		});
 		edges.add({ id: getEdgeId(nodeId, 0), from: nodeId, to: dummyId, dashes: true });
 	}
 
-	if (root.right) {
-		const result = bsTreeToGraph(root.right, nodes, edges, new SuccessorInfo(nodeId, 1));
+	// Process right child
+	const rightChild = getRightChild(root);
+	if (rightChild) {
+		const result = binaryTreeToGraph(
+			rightChild,
+			getLeftChild,
+			getRightChild,
+			createNodeData,
+			nodes,
+			edges,
+			new SuccessorInfo(nodeId, 1),
+		);
 		nodes = result.nodes;
 		edges = result.edges;
 	} else {
 		const dummyId = getDummyNodeId(nodeId, 1);
+		const dummyNodeData = createNodeData(root, 1);
 		nodes.add({
 			id: dummyId,
 			label: '',
 			shape: 'point',
 			size: 0.1,
 			color: 'transparent',
-			title: NodeData.toTitle(new NodeData(1)),
+			title: NodeData.toTitle(dummyNodeData),
 		});
 		edges.add({ id: getEdgeId(nodeId, 1), from: nodeId, to: dummyId, dashes: true });
 	}
 
 	return { nodes, edges };
+}
+
+export function bsTreeToGraph(
+	root: BSTreeNode | null,
+	nodes: DataSet<Node> = new DataSet<Node>(),
+	edges: DataSet<Edge> = new DataSet<Edge>(),
+	successorInfo: SuccessorInfo | null = null,
+) {
+	return binaryTreeToGraph(
+		root,
+		node => node.left,
+		node => node.right,
+		(_node, childNumber) => new NodeData(childNumber),
+		nodes,
+		edges,
+		successorInfo,
+	);
 }
 
 export function avlTreeToGraph(
@@ -82,88 +137,29 @@ export function avlTreeToGraph(
 	edges: DataSet<Edge> = new DataSet<Edge>(),
 	successorInfo: SuccessorInfo | null = null,
 ) {
-	if (!root) return { nodes, edges };
-	log('avlTreeToGraph called with root:', root);
-
-	function getBalanceValue(n: any): number {
+	function getBalanceValue(n: AVLTreeNode | null): number {
 		if (!n) return 0;
-
 		const leftH = n.left && typeof n.left.height === 'number' ? n.left.height : 0;
 		const rightH = n.right && typeof n.right.height === 'number' ? n.right.height : 0;
-
 		return rightH - leftH;
 	}
 
-	// add node to graph
-	const nodeId = root.id;
-	const balance = getBalanceValue(root);
-	if (!nodes.get(nodeId)) {
-		nodes.add({
-			id: nodeId, 
-			label: root.value.toString(), 
-			title: NodeData.toTitle(new AVLTreeNodeData(0, root.height ?? 0, balance))
-		});
-	} else {
-		console.warn('Updating existing node in avlTreeToGraph:', nodeId);
-		nodes.update({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(new AVLTreeNodeData(0, root.height ?? 0, balance)) });
-	}
-
-	// link to parent if successorInfo is provided
-	if (successorInfo !== null) {
-		nodes.update({ 
-			id: nodeId, 
-			label: root.value.toString(), 
-			title: NodeData.toTitle(new AVLTreeNodeData(successorInfo.childNumber, root.height ?? 0, getBalanceValue(root)))
-		});
-		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
-		log(`Adding edge ${edgeId} from ${successorInfo.parentId} to ${nodeId}`);
-		edges.add({ id: edgeId, from: successorInfo.parentId, to: nodeId });
-	}
-
-	// recurse left and right
-	if (root.left) {
-		log(`Recursing left from node ${nodeId} to node ${root.left.id}`);
-		const result = avlTreeToGraph(root.left, nodes, edges, new SuccessorInfo(nodeId, 0));
-		nodes = result.nodes;
-		edges = result.edges;
-	} else {
-		log(`Adding dummy left child for node ${nodeId}`);
-		const dummyId = getDummyNodeId(nodeId, 0);
-		nodes.add({
-			id: dummyId,
-			label: '',
-			shape: 'point',
-			size: 0.1,
-			color: 'transparent',
-			title: NodeData.toTitle(new AVLTreeNodeData(0, 0, 0)),
-		});
-		edges.add({ id: getEdgeId(nodeId, 0), from: nodeId, to: dummyId, dashes: true });
-	}
-
-	if (root.right) {
-		log(`Recursing right from node ${nodeId} to node ${root.right.id}`);
-		const result = avlTreeToGraph(root.right, nodes, edges, new SuccessorInfo(nodeId, 1));
-		nodes = result.nodes;
-		edges = result.edges;
-	} else {
-		log(`Adding dummy right child for node ${nodeId}`);
-		const dummyId = getDummyNodeId(nodeId, 1);
-		nodes.add({
-			id: dummyId,
-			label: '',
-			shape: 'point',
-			size: 0.1,
-			color: 'transparent',
-			title: NodeData.toTitle(new AVLTreeNodeData(1, 0, 0)),
-		});
-		edges.add({ id: getEdgeId(nodeId, 1), from: nodeId, to: dummyId, dashes: true });
-	}
-
-	return { nodes, edges };
+	return binaryTreeToGraph(
+		root,
+		node => node.left,
+		node => node.right,
+		(node, childNumber) => new AVLTreeNodeData(childNumber, node.height ?? 0, getBalanceValue(node)),
+		nodes,
+		edges,
+		successorInfo,
+	);
 }
 
 class SuccessorInfo {
-	constructor(public parentId: number, public childNumber: number) {}
+	constructor(
+		public parentId: number,
+		public childNumber: number,
+	) {}
 }
 
 export function getDummyNodeId(parentId: number | string, direction: 'left' | 'right' | number): string {
@@ -215,7 +211,11 @@ export class NodeData {
 }
 
 export class AVLTreeNodeData extends NodeData {
-	constructor(childNumber: number, public height: number, public balance: number) {
+	constructor(
+		childNumber: number,
+		public height: number,
+		public balance: number,
+	) {
 		super(childNumber);
 	}
 
