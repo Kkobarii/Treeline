@@ -238,7 +238,6 @@ export class DataStructureAnimator {
 
 		// animate to newPositions
 		const anims: Promise<void>[] = [];
-		console.info('animateRelayout', { fromPositions, newPositions });
 		for (const [nodeId, newPos] of Object.entries(newPositions)) {
 			const fromPos = fromPositions[nodeId];
 			if (fromPos) {
@@ -249,7 +248,6 @@ export class DataStructureAnimator {
 			}
 		}
 		await Promise.all(anims);
-		console.info('animateRelayout complete');
 	}
 
 	ensure(tree: any) {

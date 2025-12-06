@@ -1,4 +1,4 @@
-import { StructureType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
+import { OperationType, StructureType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
 import { createEmptyStructure, deepCopyStructure } from '$lib/data-structures/structures/dataStructureUtils';
 
 import { OperationData, StepData } from './operationData';
@@ -92,18 +92,47 @@ export class OperationManager {
 
 	private showSteps: boolean = false;
 
-	// ref-counted lock to support nested animations
 	private lockCount: number = 0;
 
-	constructor(structureType: StructureType) {
-		this.structureType = structureType;
-		let emptySnapshot = createEmptyStructure(structureType);
-		let data = new OperationData('Empty', emptySnapshot);
-		data.end(emptySnapshot);
+	constructor(structureType: StructureType, initialNodeCount: number = 10) {
+		console.log(`%cMounting ${structureType} OperationManager`, 'color: orange; font-weight: bold;');
 
-		this.operations.push(data);
+		this.structureType = structureType;
+
+		const data = this.prepareStartData(structureType, initialNodeCount);
+
+		this.operations = [data];
 		this.currentOperation = 0;
 		this.currentStep = 0;
+	}
+
+	private prepareStartData(structureType: StructureType, initialNodeCount: number = 10): OperationData {
+		const structure = createEmptyStructure(structureType);
+		const values = this.generateInitialValues(Math.max(0, initialNodeCount));
+
+		if (values.length > 0) console.log('Initial values:', values.join(', '));
+
+		for (const v of values) {
+			structure.operation(OperationType.Tree.Insert, v);
+		}
+
+		const snapshot = deepCopyStructure(structureType, structure);
+		const data = new OperationData('Empty', snapshot);
+		data.end(snapshot);
+		return data;
+	}
+
+	private generateInitialValues(count: number): number[] {
+		const maxUnique = 1000;
+		const target = Math.min(Math.max(count, 0), maxUnique);
+
+		const chosen = new Set<number>();
+		while (chosen.size < target) {
+			const value = Math.floor(Math.random() * 1000);
+			chosen.add(value);
+		}
+
+		return Array.from(chosen);
 	}
 
 	addEventListener(eventType: EventType, listener: EventListener) {
@@ -153,15 +182,6 @@ export class OperationManager {
 				listener(new CustomEvent(eventType, { detail: data }));
 			});
 		}
-	}
-
-	/**
-	 * Lock/unlock controls while animations are running.
-	 * Deprecated: prefer beginAnimation()/endAnimation() for ref-counted locking.
-	 */
-	setLocked(value: boolean) {
-		if (value) this.beginAnimation();
-		else this.endAnimation();
 	}
 
 	isLocked(): boolean {
@@ -296,11 +316,11 @@ export class OperationManager {
 
 	reset() {
 		console.log('Resetting operation manager');
-		let firstOp = this.operations[0];
-		this.operations = [firstOp];
+
+		const data = this.prepareStartData(this.structureType);
+		this.operations = [data];
 
 		this.setCurrentOperation(0);
-
 		this.emit(EventType.OperationListChanged);
 	}
 

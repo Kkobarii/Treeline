@@ -7,11 +7,14 @@ import {
 	type OperationManager,
 } from '$lib/data-structures/operation/operationManager';
 import { clearAnimations, DEFAULT_ANIMATION_DURATION_MS, FAST_PLAYBACK_DURATION_MS, setGlobalAnimationDuration } from '$lib/utils/animator';
+
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '../annotators/dataStructureAnnotator';
 import type { StepHandlerBase } from './stepHandlerBase';
 
 export class AnimationOrchestrator {
+	lastSnapshot: any = null;
+
 	constructor(
 		public animator: DataStructureAnimator,
 		public annotator: DataStructureAnnotator,
@@ -58,7 +61,12 @@ export class AnimationOrchestrator {
 	}
 
 	public async playOperation(opEvent: CurrentOperationChangedEvent) {
-		this.operationManager.setLocked(true);
+		if (this.lastSnapshot == opEvent.currentOperation.endSnapshot) {
+			return;
+		}
+		this.lastSnapshot = opEvent.currentOperation.endSnapshot;
+
+		this.operationManager.beginAnimation();
 		try {
 			console.log('Play full operation (fast playback)', opEvent);
 
@@ -96,12 +104,12 @@ export class AnimationOrchestrator {
 			console.log('Finished full operation playback');
 		} finally {
 			this.animator.animateFit();
-			this.operationManager.setLocked(false);
+			this.operationManager.endAnimation();
 		}
 	}
 
 	public async playStep(stepEvent: CurrentStepChangedEvent) {
-		this.operationManager.setLocked(true);
+		this.operationManager.beginAnimation();
 		try {
 			const isForward = stepEvent.direction === 'forward' || stepEvent.direction === 'unknown';
 
@@ -112,7 +120,7 @@ export class AnimationOrchestrator {
 
 			await this.animateStep(currentStep, isForward);
 		} finally {
-			this.operationManager.setLocked(false);
+			this.operationManager.endAnimation();
 		}
 	}
 

@@ -94,12 +94,12 @@ export class AVLTreeAnnotator extends DataStructureAnnotator {
 	resetFormatting() {
 		this.highlightedHBAnnotationNodeId = null;
 		this.redrawCanvas();
-		console.log('AVLTreeAnnotator.resetFormatting called');
+		// console.log('AVLTreeAnnotator.resetFormatting called');
 	}
 
 	highlightNodeHeightBalance(nodeId: number) {
 		this.highlightedHBAnnotationNodeId = nodeId;
 		this.redrawCanvas();
-		console.log('AVLTreeAnnotator.highlightNodeHeightBalance called for nodeId:', nodeId);
+		// console.log('AVLTreeAnnotator.highlightNodeHeightBalance called for nodeId:', nodeId);
 	}
 }
