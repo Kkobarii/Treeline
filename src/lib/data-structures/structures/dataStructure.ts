@@ -4,6 +4,7 @@ import { deepCopy } from '$lib/data-structures/utils/utils';
 export enum StructureType {
 	BSTree = 'BSTree',
 	AVLTree = 'AVLTree',
+	RBTree = 'RBTree',
 }
 
 export const OperationType = {
@@ -18,41 +19,48 @@ export const OperationType = {
 	// },
 } as const;
 
-export type OperationTypeValue =
-	| (typeof OperationType.Tree)[keyof typeof OperationType.Tree]
+export type OperationTypeValue = (typeof OperationType.Tree)[keyof typeof OperationType.Tree];
 // | (typeof OperationType.Stack)[keyof typeof OperationType.Stack];
 
 // centralize common tree step names so BST and AVL share the same base values
 const BaseTreeSteps = {
-    Start: 'Start',
-    End: 'End',
-    CreateRoot: 'CreateRoot',
-    CreateLeaf: 'CreateLeaf',
-    Compare: 'Compare',
-    Traverse: 'Traverse',
-    Drop: 'Drop',
-    Found: 'Found',
-    MarkToDelete: 'MarkToDelete',
-    Delete: 'Delete',
-    ReplaceWithChild: 'ReplaceWithChild',
-    FoundInorderSuccessor: 'FoundInorderSuccessor',
-    RelinkSuccessorChild: 'RelinkSuccessorChild',
-    ReplaceWithInorderSuccessor: 'ReplaceWithInorderSuccessor',
+	Start: 'Start',
+	End: 'End',
+	CreateRoot: 'CreateRoot',
+	CreateLeaf: 'CreateLeaf',
+	Compare: 'Compare',
+	Traverse: 'Traverse',
+	Drop: 'Drop',
+	Found: 'Found',
+	MarkToDelete: 'MarkToDelete',
+	Delete: 'Delete',
+	ReplaceWithChild: 'ReplaceWithChild',
+	FoundInorderSuccessor: 'FoundInorderSuccessor',
+	RelinkSuccessorChild: 'RelinkSuccessorChild',
+	ReplaceWithInorderSuccessor: 'ReplaceWithInorderSuccessor',
 } as const;
 
 export const StepType = {
-    BSTree: BaseTreeSteps,
-    AVLTree: {
-        ...BaseTreeSteps,
-        UpdateHeightBalance: 'UpdateHeightBalance',
-        RotateLeft: 'RotateLeft',
-        RotateRight: 'RotateRight',
-    },
+	BSTree: BaseTreeSteps,
+	AVLTree: {
+		...BaseTreeSteps,
+		UpdateHeightBalance: 'UpdateHeightBalance',
+		RotateLeft: 'RotateLeft',
+		RotateRight: 'RotateRight',
+	},
+	RBTree: {
+		...BaseTreeSteps,
+		ColorNode: 'ColorNode',
+		RotateLeft: 'RotateLeft',
+		RotateRight: 'RotateRight',
+		Fixup: 'Fixup',
+	},
 } as const;
 
 export type StepTypeValue =
 	| (typeof StepType.BSTree)[keyof typeof StepType.BSTree]
-	| (typeof StepType.AVLTree)[keyof typeof StepType.AVLTree];
+	| (typeof StepType.AVLTree)[keyof typeof StepType.AVLTree]
+	| (typeof StepType.RBTree)[keyof typeof StepType.RBTree];
 
 export class DataNode {
 	id: number;

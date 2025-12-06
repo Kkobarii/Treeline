@@ -35,8 +35,8 @@
 				href="/data-structures/avl-tree"
 				class="text-foreground text-xl hover:underline">AVL Tree</a>
 			<a
-				href="/sorting-algorithms/mock"
-				class="text-foreground text-xl hover:underline">Sorting</a>
+				href="/data-structures/red-black-tree"
+				class="text-foreground text-xl hover:underline">Red Black Tree</a>
 		</div>
 
 		<!-- right actions -->

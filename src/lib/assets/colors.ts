@@ -1,13 +1,20 @@
 export const Colors = {
+	Black: '#000000',
+	White: '#FFFFFF',
+
 	Green: '#7CFC00',
 	Blue: '#1E90FF',
 	Red: '#FF4500',
 	Yellow: '#FFD700',
 	Node: '#9fd4ff',
+
 	ValueNode: '#ffb347',
 	ValueNodeHighlight: '#ffa500',
 	Info: '#aaaaaa',
 	Id: '#dddddd',
+
+	RBTreeRed: '#ff3333',
+	RBTreeBlack: '#333333',
 };
 
 export function shadeColor(color: string, percent: number) {

@@ -20,7 +20,7 @@ Data Structures:
 
 - 🟢 Binary Search Tree
 - 🟡 AVL Tree
-- 🔴 Red-black tree
+- 🟠 Red-black tree
 - 🔴 B-tree
 - 🔴 Heap
 - 🔴 Linked List

@@ -353,4 +353,90 @@ export namespace Step {
 			);
 		}
 	}
+
+	export namespace RBTree {
+		// Red-Black tree specific step details
+		export class ColorNodeData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public color: 'red' | 'black',
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Color node ${nodeId} ${color}`);
+			}
+		}
+
+		export function ColorNode(
+			nodeId: number,
+			color: 'red' | 'black',
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(StepType.RBTree.ColorNode, new ColorNodeData(nodeId, color, startSnapshot, endSnapshot));
+		}
+
+		export class RotateLeftData extends StepDetail {
+			constructor(
+				public oldRootId: number,
+				public newRootId: number,
+				public adoptedChildId: number | null,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`RB Rotate left at root ${oldRootId}, new root ${newRootId}`);
+			}
+		}
+
+		export function RotateLeft(
+			oldRootId: number,
+			newRootId: number,
+			adoptedChildId: number | null,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.RBTree.RotateLeft,
+				new RotateLeftData(oldRootId, newRootId, adoptedChildId, startSnapshot, endSnapshot),
+			);
+		}
+
+		export class RotateRightData extends StepDetail {
+			constructor(
+				public oldRootId: number,
+				public newRootId: number,
+				public adoptedChildId: number | null,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`RB Rotate right at root ${oldRootId}, new root ${newRootId}`);
+			}
+		}
+
+		export function RotateRight(
+			oldRootId: number,
+			newRootId: number,
+			adoptedChildId: number | null,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.RBTree.RotateRight,
+				new RotateRightData(oldRootId, newRootId, adoptedChildId, startSnapshot, endSnapshot),
+			);
+		}
+
+		export class FixupData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public reason: string,
+			) {
+				super(`Fixup at node ${nodeId}: ${reason}`);
+			}
+		}
+
+		export function Fixup(nodeId: number, reason: string): StepData {
+			return StepData.new(StepType.RBTree.Fixup, new FixupData(nodeId, reason));
+		}
+	}
 }

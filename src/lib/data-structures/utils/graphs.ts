@@ -1,24 +1,16 @@
 import { DataSet } from 'vis-data';
 import { type Edge, type Node } from 'vis-network';
 
+import { Colors, shadeColor } from '$lib/assets/colors';
 import type { AVLTreeNode } from '$lib/data-structures/structures/avlTree/avlTree';
 import type { BSTreeNode } from '$lib/data-structures/structures/bsTree/bsTree';
+import { RBTreeColor, type RBTreeNode } from '$lib/data-structures/structures/rbTree/rbTree';
 
 function log(...args: any[]) {
 	// Uncomment the next line to enable logging
 	// console.log(...args);
 }
 
-/**
- * Generic binary tree to graph converter.
- * @param root - The root node of the tree
- * @param getLeftChild - Function to get the left child of a node
- * @param getRightChild - Function to get the right child of a node
- * @param createNodeData - Function to create NodeData for a node (receives node, childNumber)
- * @param nodes - DataSet to accumulate nodes
- * @param edges - DataSet to accumulate edges
- * @param successorInfo - Parent link information
- */
 function binaryTreeToGraph<T extends { id: number; value: number }>(
 	root: T | null,
 	getLeftChild: (node: T) => T | null,
@@ -27,6 +19,7 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 	nodes: DataSet<Node> = new DataSet<Node>(),
 	edges: DataSet<Edge> = new DataSet<Edge>(),
 	successorInfo: SuccessorInfo | null = null,
+	createNodeOverrides?: (node: T, childNumber: number) => Partial<Node>,
 ) {
 	if (!root) return { nodes, edges };
 
@@ -35,20 +28,18 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 
 	const nodeId = root.id;
 	const nodeData = createNodeData(root, 0);
+	const nodeOverrides = createNodeOverrides ? createNodeOverrides(root, 0) : {};
 
-	if (!nodes.get(nodeId)) {
-		nodes.add({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(nodeData) });
-	} else {
-		console.warn('Updating existing node in binaryTreeToGraph:', nodeId);
-		nodes.update({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(nodeData) });
-	}
+	nodes.add({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(nodeData), ...nodeOverrides });
 
 	if (successorInfo !== null) {
 		const parentNodeData = createNodeData(root, successorInfo.childNumber);
+		const successorOverrides = createNodeOverrides ? createNodeOverrides(root, successorInfo.childNumber) : {};
 		nodes.update({
 			id: nodeId,
 			label: root.value.toString(),
 			title: NodeData.toTitle(parentNodeData),
+			...successorOverrides,
 		});
 		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
 		log(`Adding edge ${edgeId} from ${successorInfo.parentId} to ${nodeId}`);
@@ -66,6 +57,7 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 			nodes,
 			edges,
 			new SuccessorInfo(nodeId, 0),
+			createNodeOverrides,
 		);
 		nodes = result.nodes;
 		edges = result.edges;
@@ -94,6 +86,7 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 			nodes,
 			edges,
 			new SuccessorInfo(nodeId, 1),
+			createNodeOverrides,
 		);
 		nodes = result.nodes;
 		edges = result.edges;
@@ -152,6 +145,38 @@ export function avlTreeToGraph(
 		nodes,
 		edges,
 		successorInfo,
+	);
+}
+
+export function rbTreeToGraph(
+	root: RBTreeNode | null,
+	nodes: DataSet<Node> = new DataSet<Node>(),
+	edges: DataSet<Edge> = new DataSet<Edge>(),
+	successorInfo: SuccessorInfo | null = null,
+) {
+	return binaryTreeToGraph(
+		root,
+		node => node.left,
+		node => node.right,
+		(node, childNumber) => new RBTreeNodeData(childNumber, node.color),
+		nodes,
+		edges,
+		successorInfo,
+		(node, _childNumber) => {
+			const nodeColor = node.color === RBTreeColor.Red ? Colors.RBTreeRed : Colors.RBTreeBlack;
+			const fontColor = node.color === RBTreeColor.Red ? Colors.Black : Colors.White;
+			return {
+				color: {
+					background: nodeColor,
+					border: nodeColor,
+					highlight: {
+						background: shadeColor(nodeColor, 40),
+						border: shadeColor(nodeColor, -20),
+					},
+				},
+				font: { color: fontColor },
+			};
+		},
 	);
 }
 
@@ -237,5 +262,30 @@ export class AVLTreeNodeData extends NodeData {
 			}
 		}
 		return new AVLTreeNodeData(childNumber, height, balance);
+	}
+}
+
+export class RBTreeNodeData extends NodeData {
+	constructor(
+		childNumber: number,
+		public color: RBTreeColor,
+	) {
+		super(childNumber);
+	}
+
+	static fromNode(node: Node): RBTreeNodeData {
+		let childNumber = -1;
+		let color: RBTreeColor = RBTreeColor.Black;
+		if (node.title && typeof node.title === 'string') {
+			let titleObj = JSON.parse(node.title);
+
+			if ('childNumber' in titleObj) {
+				childNumber = titleObj.childNumber;
+			}
+			if ('color' in titleObj) {
+				color = titleObj.color;
+			}
+		}
+		return new RBTreeNodeData(childNumber, color);
 	}
 }
