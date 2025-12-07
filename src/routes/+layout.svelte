@@ -26,7 +26,7 @@
 			<span class="text-foreground ml-1 text-3xl font-semibold">Treeline</span>
 		</a>
 
-		<!-- Links -->
+		<!-- links -->
 		<div class="ml-6 hidden items-center gap-4 md:flex">
 			<a
 				href="/data-structures/binary-search-tree"
@@ -36,7 +36,7 @@
 				class="text-foreground text-xl hover:underline">AVL Tree</a>
 			<a
 				href="/data-structures/red-black-tree"
-				class="text-foreground text-xl hover:underline">Red Black Tree</a>
+				class="text-foreground text-xl hover:underline">Red-Black Tree</a>
 		</div>
 
 		<!-- right actions -->

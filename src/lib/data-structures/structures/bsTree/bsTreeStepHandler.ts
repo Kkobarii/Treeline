@@ -11,9 +11,11 @@ export class BSTreeStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as BSTreeAnimator;
 		if (isForward && currentStep.startSnapshot) {
+			console.log('setup forward');
 			animator.ensure(currentStep.startSnapshot);
 		}
 		if (!isForward && currentStep.endSnapshot) {
+			console.log('setup backward');
 			animator.ensure(currentStep.endSnapshot);
 		}
 	}
@@ -27,9 +29,11 @@ export class BSTreeStepHandler extends StepHandlerBase {
 		let animator = baseAnimator as BSTreeAnimator;
 
 		if (isForward && currentStep.endSnapshot) {
+			console.log('cleanup forward');
 			animator.ensure(currentStep.endSnapshot);
 		}
 		if (!isForward && currentStep.startSnapshot) {
+			console.log('cleanup backward');
 			animator.ensure(currentStep.startSnapshot);
 		}
 	}

@@ -41,14 +41,14 @@ export class AnimationOrchestrator {
 
 		operationManager.addEventListener(
 			EventType.ShowStepsToggled,
-			async () => {
+			() => {
 				clearAnimations();
 
 				if (operationManager.getShowSteps()) {
 					// ensure global duration is reset to default for step-by-step playback
 					this.switchToStepByStepPlayback();
 
-					await this.playStep({
+					this.playStep({
 						currentStepId: operationManager.getCurrentStepIndex(),
 						currentStep: operationManager.getCurrentStep(),
 						direction: ChangeDirection.Forward,
@@ -57,7 +57,7 @@ export class AnimationOrchestrator {
 					// set fast playback duration globally so annotators use same speed
 					this.switchToFastPlayback();
 
-					await this.playOperation({
+					this.playOperation({
 						currentOperationId: operationManager.getCurrentOperationIndex(),
 						currentOperation: operationManager.getCurrentOperation(),
 						direction: ChangeDirection.Forward,
@@ -113,11 +113,10 @@ export class AnimationOrchestrator {
 					}
 				}
 			}
-
-			console.log('Finished full operation playback');
 		} finally {
 			this.animator.animateFit();
 			this.operationManager.endAnimation();
+			console.log('Finished full operation playback');
 		}
 	}
 
@@ -134,6 +133,7 @@ export class AnimationOrchestrator {
 			await this.animateStep(currentStep, isForward);
 		} finally {
 			this.operationManager.endAnimation();
+			console.log('Finished step playback');
 		}
 	}
 
