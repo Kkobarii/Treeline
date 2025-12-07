@@ -13,14 +13,18 @@ import type { DataStructureAnnotator } from '../annotators/dataStructureAnnotato
 import type { StepHandlerBase } from './stepHandlerBase';
 
 export class AnimationOrchestrator {
-	lastSnapshot: any = null;
-
 	constructor(
 		public animator: DataStructureAnimator,
 		public annotator: DataStructureAnnotator,
 		public operationManager: OperationManager,
 		public handlers: StepHandlerBase,
 	) {
+		if (this.operationManager.getShowSteps()) {
+			this.switchToStepByStepPlayback();
+		} else {
+			this.switchToFastPlayback();
+		}
+
 		operationManager.addEventListener(EventType.CurrentOperationChanged, (e: Event) => {
 			const event = e as CustomEvent<CurrentOperationChangedEvent>;
 			if (!operationManager.getShowSteps()) {
@@ -35,37 +39,46 @@ export class AnimationOrchestrator {
 			}
 		});
 
-		operationManager.addEventListener(EventType.ShowStepsToggled, async () => {
-			clearAnimations();
+		operationManager.addEventListener(
+			EventType.ShowStepsToggled,
+			async () => {
+				clearAnimations();
 
-			if (operationManager.getShowSteps()) {
-				// ensure global duration is reset to default for step-by-step playback
-				setGlobalAnimationDuration(DEFAULT_ANIMATION_DURATION_MS);
-				this.annotator.showAnnotationNode();
-				await this.playStep({
-					currentStepId: operationManager.getCurrentStepIndex(),
-					currentStep: operationManager.getCurrentStep(),
-					direction: ChangeDirection.Forward,
-				});
-			} else {
-				// set fast playback duration globally so annotators use same speed
-				setGlobalAnimationDuration(FAST_PLAYBACK_DURATION_MS);
-				this.annotator.hideAnnotationNode();
-				await this.playOperation({
-					currentOperationId: operationManager.getCurrentOperationIndex(),
-					currentOperation: operationManager.getCurrentOperation(),
-					direction: ChangeDirection.Forward,
-				});
-			}
-		});
+				if (operationManager.getShowSteps()) {
+					// ensure global duration is reset to default for step-by-step playback
+					this.switchToStepByStepPlayback();
+
+					await this.playStep({
+						currentStepId: operationManager.getCurrentStepIndex(),
+						currentStep: operationManager.getCurrentStep(),
+						direction: ChangeDirection.Forward,
+					});
+				} else {
+					// set fast playback duration globally so annotators use same speed
+					this.switchToFastPlayback();
+
+					await this.playOperation({
+						currentOperationId: operationManager.getCurrentOperationIndex(),
+						currentOperation: operationManager.getCurrentOperation(),
+						direction: ChangeDirection.Forward,
+					});
+				}
+			},
+			false,
+		);
+	}
+
+	private switchToFastPlayback() {
+		setGlobalAnimationDuration(FAST_PLAYBACK_DURATION_MS);
+		this.annotator.hideAnnotationNode();
+	}
+
+	private switchToStepByStepPlayback() {
+		setGlobalAnimationDuration(DEFAULT_ANIMATION_DURATION_MS);
+		this.annotator.showAnnotationNode();
 	}
 
 	public async playOperation(opEvent: CurrentOperationChangedEvent) {
-		if (this.lastSnapshot == opEvent.currentOperation.endSnapshot) {
-			return;
-		}
-		this.lastSnapshot = opEvent.currentOperation.endSnapshot;
-
 		this.operationManager.beginAnimation();
 		try {
 			console.log('Play full operation (fast playback)', opEvent);
@@ -79,7 +92,7 @@ export class AnimationOrchestrator {
 				const steps = operation.steps;
 				this.handlers.stepSetup(steps[0], this.animator, this.annotator, true);
 
-				for (let i = 0; i < steps.length - 1; i++) {
+				for (let i = 0; i < steps.length; i++) {
 					try {
 						await this.animateStep(steps[i], true);
 						await new Promise(resolve => setTimeout(resolve, 50));
@@ -91,7 +104,7 @@ export class AnimationOrchestrator {
 				const steps = operation.steps;
 				this.handlers.stepSetup(steps[steps.length - 1], this.animator, this.annotator, false);
 
-				for (let i = steps.length - 1; i > 0; i--) {
+				for (let i = steps.length - 1; i >= 0; i--) {
 					try {
 						await this.animateStep(steps[i], false);
 						await new Promise(resolve => setTimeout(resolve, 50));

@@ -218,8 +218,8 @@ export class DataStructureAnimator {
 
 	async animateFit(durationMs: number = 1000) {
 		try {
-			this.network.fit();
-			// this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
+			// this.network.fit();
+			this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
 		} catch {}
 	}
 

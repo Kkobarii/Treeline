@@ -91,13 +91,13 @@ export async function handleCreateLeafForwardCommon(
 	data: Step.Common.CreateLeafData,
 ) {
 	const info = `Create ${data.direction} child with value ${data.value}`;
-	animator.ensure(data.endSnapshot);
 	annotator.annotateNode(info, data.parentId);
 
 	await Promise.all([
-		animator.animateNodeGrowth(data.nodeId),
-		animator.animateLegsGrowth(data.nodeId),
+		animator.ensureAndAnimate(data.endSnapshot),
 		annotator.moveValueAnnotationTo(data.nodeId),
+		// animator.animateNodeGrowth(data.nodeId),
+		// animator.animateLegsGrowth(data.nodeId),
 	]);
 	annotator.clearValueAnnotation();
 }
@@ -112,12 +112,11 @@ export async function handleCreateLeafBackwardCommon(
 	annotator.createValueAnnotation(String(data.value), data.nodeId);
 
 	await Promise.all([
-		animator.animateNodeShrink(data.nodeId),
-		animator.animateLegsShrink(data.nodeId),
+		// animator.animateNodeShrink(data.nodeId),
+		// animator.animateLegsShrink(data.nodeId),
+		animator.ensureAndAnimate(data.startSnapshot),
 		annotator.moveValueAnnotationTo(data.parentId),
 	]);
-
-	animator.ensureAndAnimate(data.startSnapshot);
 }
 
 export async function handleCompareForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, data: Step.Common.CompareData) {

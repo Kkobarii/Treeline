@@ -135,46 +135,21 @@ export class OperationManager {
 		return Array.from(chosen);
 	}
 
-	addEventListener(eventType: EventType, listener: EventListener) {
+	addEventListener(eventType: EventType, listener: EventListener, updateNow: boolean = true) {
 		if (!this.listeners[eventType]) {
 			this.listeners[eventType] = [];
 		}
-		// console.log('Adding listener for', eventType);
 		this.listeners[eventType]!.push(listener);
-		this.emit(eventType); // to make sure the listener is up to date
+
+		if (updateNow) {
+			const data = this.createDefaultEventData(undefined, eventType);
+			listener(new CustomEvent(eventType, { detail: data }));
+		}
 	}
 
 	emit(eventType: EventType, data?: any) {
 		if (!data) {
-			// Mainly for first call when adding listener
-			switch (eventType) {
-				case EventType.CurrentOperationChanged:
-					data = new CurrentOperationChangedEvent(
-						ChangeDirection.Unknown,
-						this.currentOperation,
-						this.operations[this.currentOperation],
-					);
-					break;
-				case EventType.CurrentStepChanged:
-					data = new CurrentStepChangedEvent(
-						ChangeDirection.Unknown,
-						this.currentStep,
-						this.operations[this.currentOperation].steps[this.currentStep],
-					);
-					break;
-				case EventType.ShowStepsToggled:
-					data = this.showSteps;
-					break;
-				case EventType.AnimationLockChanged:
-					data = this.isLocked();
-					break;
-				case EventType.OperationListChanged:
-					data = new OperationListChangedEvent(this.operations);
-					break;
-				case EventType.InputValueChanged:
-					data = new InputValueChangedEvent(0);
-					break;
-			}
+			data = this.createDefaultEventData(data, eventType);
 		}
 
 		if (this.listeners[eventType]) {
@@ -182,6 +157,38 @@ export class OperationManager {
 				listener(new CustomEvent(eventType, { detail: data }));
 			});
 		}
+	}
+
+	private createDefaultEventData(data: any, eventType: EventType) {
+		switch (eventType) {
+			case EventType.CurrentOperationChanged:
+				data = new CurrentOperationChangedEvent(
+					ChangeDirection.Unknown,
+					this.currentOperation,
+					this.operations[this.currentOperation],
+				);
+				break;
+			case EventType.CurrentStepChanged:
+				data = new CurrentStepChangedEvent(
+					ChangeDirection.Unknown,
+					this.currentStep,
+					this.operations[this.currentOperation].steps[this.currentStep],
+				);
+				break;
+			case EventType.ShowStepsToggled:
+				data = this.showSteps;
+				break;
+			case EventType.AnimationLockChanged:
+				data = this.isLocked();
+				break;
+			case EventType.OperationListChanged:
+				data = new OperationListChangedEvent(this.operations);
+				break;
+			case EventType.InputValueChanged:
+				data = new InputValueChangedEvent(0);
+				break;
+		}
+		return data;
 	}
 
 	isLocked(): boolean {
