@@ -59,8 +59,6 @@ export class AVLTreeStepHandler extends StepHandlerBase {
 		if (!isForward && currentStep.endSnapshot) {
 			await animator.ensureAndAnimate(currentStep.endSnapshot);
 		}
-		let annotator = baseAnnotator as AVLTreeAnnotator;
-		annotator.resetFormatting();
 	}
 
 	async stepCleanup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: AVLTreeAnnotator, isForward: boolean) {

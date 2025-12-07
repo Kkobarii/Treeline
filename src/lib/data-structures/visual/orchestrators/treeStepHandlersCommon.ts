@@ -3,10 +3,11 @@ import type { OperationManager } from '$lib/data-structures/operation/operationM
 import type { Step } from '$lib/data-structures/operation/stepData';
 import type { AVLTreeAnimator } from '$lib/data-structures/structures/avlTree/avlTreeAnimator';
 import type { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
+import type { RBTreeAnimator } from '$lib/data-structures/structures/rbTree/rbTreeAnimator';
 import { comparisonValuesToSymbol } from '$lib/data-structures/utils/utils';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
-type AnyAnimator = BSTreeAnimator | AVLTreeAnimator;
+type AnyAnimator = BSTreeAnimator | AVLTreeAnimator | RBTreeAnimator;
 
 export async function handleStartForwardCommon(
 	animator: AnyAnimator,
@@ -15,6 +16,8 @@ export async function handleStartForwardCommon(
 ) {
 	animator.ensureAndAnimate(operationManager.getCurrentOperation().startSnapshot);
 	animator.resetFormatting();
+	annotator.clearAnnotation();
+	annotator.clearValueAnnotation();
 
 	if (operationManager.getCurrentOperation().operation == 'Empty') {
 		const info = `The tree is empty`;
@@ -48,10 +51,11 @@ export async function handleStartBackwardCommon(
 }
 
 export async function handleEndForwardCommon(animator: AnyAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
-	await animator.ensureAndAnimate(operationManager.getCurrentOperation().endSnapshot);
-
 	annotator.clearAnnotation();
 	annotator.clearValueAnnotation();
+	animator.resetFormatting();
+
+	await animator.ensureAndAnimate(operationManager.getCurrentOperation().endSnapshot);
 }
 
 export async function handleEndBackwardCommon(
@@ -61,6 +65,8 @@ export async function handleEndBackwardCommon(
 ) {
 	annotator.clearAnnotation();
 	annotator.clearValueAnnotation();
+	animator.resetFormatting();
+
 	await animator.ensureAndAnimate(operationManager.getCurrentOperation().endSnapshot);
 }
 
