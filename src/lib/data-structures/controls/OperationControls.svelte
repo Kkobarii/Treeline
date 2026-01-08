@@ -61,10 +61,20 @@
 	}
 
 	function scrollToCurrentStep() {
-		const stepElements = document.querySelectorAll('.operation-step');
+		const operationInfo = document.getElementById('operation-info');
+		if (!operationInfo) return;
+
+		const stepElements = operationInfo.querySelectorAll('.operation-step');
 		stepElements.forEach(el => {
 			if (el.classList.contains('text-white')) {
-				el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				const container = operationInfo;
+				const htmlEl = el as HTMLElement;
+				const offset = htmlEl.offsetTop - container.offsetTop;
+
+				container.scrollTo({
+					top: offset - container.clientHeight / 2 + htmlEl.clientHeight / 2,
+					behavior: 'smooth',
+				});
 			}
 		});
 	}
