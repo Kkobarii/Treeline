@@ -30,6 +30,15 @@
 	let showOverlay: boolean = true;
 	let debugMode: boolean = false;
 
+	function toggleDebugMode() {
+		debugMode = !debugMode;
+		if (!debugMode) {
+			showOverlay = true;
+		}
+		annotator.toggleDebugMode();
+		console.log('Debug mode toggled:', debugMode);
+	}
+
 	const options: Options = {
 		layout: {
 			hierarchical: {
@@ -78,46 +87,42 @@
 	});
 </script>
 
-<div class="relative h-full w-full rounded border border-gray-300">
+<div class="treeline-card relative h-full min-h-[400px] w-full overflow-hidden">
 	<div
 		bind:this={container}
-		class="absolute inset-0 rounded border border-gray-300">
+		class="absolute inset-0 rounded">
 	</div>
 	<canvas
 		bind:this={overlayCanvas}
 		class="pointer-events-none absolute inset-0 z-50 rounded"></canvas>
-</div>
 
-<div class="mt-2 flex">
-	<button
-		on:click={() => {
-			showOverlay = !showOverlay;
-			annotator.toggleShown();
-			console.log('Overlay toggled:', showOverlay);
-		}}>
-		{showOverlay ? 'Hide' : 'Show'} Overlay
-	</button>
+	<div class="absolute bottom-4 left-4 z-40 flex gap-2">
+		<button
+			style="padding: 2px!important;"
+			aria-label="Toggle debug mode"
+			on:click={toggleDebugMode}>
+			<span class="inline-flex h-6 w-6 items-center justify-center rounded-full">
+				<span
+					role="img"
+					aria-label={debugMode ? 'Disable debug mode' : 'Enable debug mode'}
+					class="block h-4 w-4"
+					style="
+						background: {debugMode ? 'var(--color-gray-900)' : 'var(--color-gray-50)'};
+						<!-- -webkit-mask: url('/bug.svg') no-repeat center / contain;
+						mask: url('/bug.svg') no-repeat center / contain; -->
+					"></span>
+			</span>
+		</button>
 
-	<button
-		hidden={!showOverlay}
-		class="ml-2"
-		style="padding: 1px!important;"
-		aria-label="Toggle debug mode"
-		on:click={() => {
-			debugMode = !debugMode;
-			annotator.toggleDebugMode();
-			console.log('Debug mode toggled:', debugMode);
-		}}>
-		<span class="inline-flex h-6 w-6 items-center justify-center rounded-full">
-			<span
-				role="img"
-				aria-label={debugMode ? 'Disable debug mode' : 'Enable debug mode'}
-				class="block h-4 w-4"
-				style="
-					background: {debugMode ? 'var(--color-gray-950)' : 'var(--color-gray-50)'};
-					<!-- -webkit-mask: url('/bug.svg') no-repeat center / contain;
-					mask: url('/bug.svg') no-repeat center / contain; -->
-				"></span>
-		</span>
-	</button>
+		<button
+			class="py-2"
+			hidden={!debugMode}
+			on:click={() => {
+				showOverlay = !showOverlay;
+				annotator.toggleShown();
+				console.log('Overlay toggled:', showOverlay);
+			}}>
+			{showOverlay ? 'Hide' : 'Show'} Overlay
+		</button>
+	</div>
 </div>

@@ -6,7 +6,7 @@ export const Colors = {
 	Blue: '#1E90FF',
 	Red: '#FF4500',
 	Yellow: '#FFD700',
-	Node: '#9fd4ff',
+	Node: '#a0c56a',
 
 	ValueNode: '#ffb347',
 	ValueNodeHighlight: '#ffa500',

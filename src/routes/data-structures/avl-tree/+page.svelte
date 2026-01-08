@@ -8,11 +8,9 @@
 	let operationManager: OperationManager = new OperationManager(StructureType.AVLTree);
 </script>
 
-<h1 class="mb-4 text-2xl font-bold">AVL Tree Simulation</h1>
-<div
-	class="display: mb-4 flex gap-4"
-	style="height: 75vh;">
-	<div style="flex-grow: 1;">
+<h1 class="page-title">AVL Tree Simulation</h1>
+<div class="page-layout">
+	<div>
 		<AVLTreeVisual {operationManager} />
 	</div>
 

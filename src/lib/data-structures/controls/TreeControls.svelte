@@ -25,13 +25,11 @@
 	});
 </script>
 
-<div
-	class="flex flex-col gap-6 rounded bg-gray-100 p-4"
-	style="width: 22em; height: 100%;">
-	<div class="flex flex-col gap-2">
-		<h2 class="text-xl font-semibold">Tree Controls</h2>
+<div class="tree-controls-container treeline-card flex flex-col gap-6">
+	<div class="flex flex-col gap-4">
+		<h2 class="text-primary text-lg font-bold">Tree Controls</h2>
 		<div class="flex flex-col gap-4">
-			<div>
+			<div class="flex flex-col gap-2">
 				<button
 					type="button"
 					on:click={() => operationManager.operation(OperationType.Tree.Insert, Math.floor(Math.random() * 1000))}
@@ -45,7 +43,7 @@
 					Reset
 				</button>
 			</div>
-			<div>
+			<div class="flex items-center gap-2">
 				<input
 					type="number"
 					class="w-15 rounded border border-gray-300 bg-gray-100 text-center"

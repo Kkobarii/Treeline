@@ -63,66 +63,70 @@
 	function scrollToCurrentStep() {
 		const stepElements = document.querySelectorAll('.operation-step');
 		stepElements.forEach(el => {
-			if (el.classList.contains('bg-gray-400')) {
+			if (el.classList.contains('text-white')) {
 				el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 			}
 		});
 	}
 </script>
 
-<!-- checkbox styles moved to global `src/app.css` -->
-
-<div class="flex flex-none flex-col gap-2">
-	<h2 class="text-xl font-semibold">Operation Controls</h2>
-	<div class="flex items-center gap-1">
-		<button
-			type="button"
-			on:click={() => operationManager.previous()}
-			disabled={!canDoPrevious || locked}>
-			Previous
-		</button>
-		<button
-			type="button"
-			on:click={() => operationManager.next()}
-			disabled={!canDoNext || locked}>
-			Next
-		</button>
-		<label class="inline-flex items-center gap-2">
-			<input
-				id="steps-checkbox"
-				type="checkbox"
-				class="styled-checkbox"
-				on:change={() => operationManager.toggleShowSteps()}
-				disabled={locked} />
-			<span>Steps</span>
-		</label>
+<div class="flex h-[13em] flex-row gap-6 md:h-[26em] md:flex-col">
+	<div class="flex flex-none flex-col gap-3">
+		<h2 class="text-primary text-lg font-bold">Operation Controls</h2>
+		<div class="flex flex-col items-start gap-2 md:flex-row md:items-center">
+			<button
+				type="button"
+				on:click={() => operationManager.previous()}
+				disabled={!canDoPrevious || locked}>
+				Previous
+			</button>
+			<button
+				type="button"
+				on:click={() => operationManager.next()}
+				disabled={!canDoNext || locked}>
+				Next
+			</button>
+			<label class="inline-flex items-center gap-2">
+				<input
+					id="steps-checkbox"
+					type="checkbox"
+					class="styled-checkbox"
+					on:change={() => operationManager.toggleShowSteps()}
+					disabled={locked} />
+				<span>Steps</span>
+			</label>
+		</div>
 	</div>
-</div>
 
-<div class="flex min-h-0 flex-1 flex-col gap-2">
-	<h2 class="flex-none text-xl font-semibold">Operation Info</h2>
+	<div class="flex min-h-0 flex-1 flex-col gap-3">
+		<h2 class="text-primary flex-none text-lg font-bold">Operation Info</h2>
 
-	<div
-		class="flex-1 overflow-y-auto"
-		id="operation-info">
-		<ul class="flex flex-col gap-2">
-			{#each operations as op}
-				<li class="{operations[currentOperation] === op ? 'bg-gray-300' : 'bg-gray-200'} mr-1 rounded p-2 text-sm">
-					{op.operation}
-					{#if operations[currentOperation] === op}
-						<ul>
-							{#each op.steps as step}
-								<li
-									class="{operations[currentOperation].steps[currentStep] === step && operations[currentOperation] === op
-										? 'bg-gray-400'
-										: 'text-gray-700'} operation-step rounded p-1 text-sm">
-									{step.id + 1}: {(step.data as any).action}
-								</li>
-							{/each}
-						</ul>
-					{/if}
-				</li>
-			{/each}
-		</ul>
+		<div
+			class="flex-1 overflow-y-auto"
+			id="operation-info">
+			<ul class="flex flex-col gap-2">
+				{#each operations as op}
+					<li
+						class="{operations[currentOperation] === op
+							? 'bg-primary-light'
+							: 'bg-gray-200'} mr-1 rounded p-2 text-sm transition-colors">
+						{op.operation}
+						{#if operations[currentOperation] === op}
+							<ul class="mt-2 flex flex-col gap-1">
+								{#each op.steps as step}
+									<li
+										class="{operations[currentOperation].steps[currentStep] === step &&
+										operations[currentOperation] === op
+											? 'bg-primary text-white'
+											: 'text-gray-700'} operation-step rounded p-1 text-sm transition-colors">
+										{step.id + 1}: {(step.data as any).action}
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		</div>
 	</div>
 </div>

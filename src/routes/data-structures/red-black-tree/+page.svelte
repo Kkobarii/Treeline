@@ -8,11 +8,9 @@
 	let operationManager: OperationManager = new OperationManager(StructureType.RBTree);
 </script>
 
-<h1 class="mb-4 text-2xl font-bold">Red-Black Tree Simulation</h1>
-<div
-	class="display: mb-4 flex gap-4"
-	style="height: 75vh;">
-	<div style="flex-grow: 1;">
+<h1 class="page-title">Red-Black Tree Simulation</h1>
+<div class="page-layout">
+	<div>
 		<RBTreeVisual {operationManager} />
 	</div>
 

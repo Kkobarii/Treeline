@@ -49,7 +49,7 @@
 	};
 </script>
 
-<div class="data-structure-description treeline-card mt-20 mb-5">
+<div class="treeline-card">
 	{#if loadError}
 		<p class="text-sm text-red-500">{loadError}</p>
 	{:else if html}
