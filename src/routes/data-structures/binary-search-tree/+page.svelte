@@ -1,5 +1,6 @@
 <script lang="ts">
 	import TreeControls from '$lib/data-structures/controls/TreeControls.svelte';
+	import DataStructureDescription from '$lib/data-structures/DataStructureDescription.svelte';
 	import { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import BSTreeVisual from '$lib/data-structures/structures/bsTree/BSTreeVisual.svelte';
 	import { StructureType } from '$lib/data-structures/structures/dataStructure';
@@ -19,3 +20,5 @@
 		<TreeControls {operationManager} />
 	</div>
 </div>
+
+<DataStructureDescription filename="bs_tree.md" />

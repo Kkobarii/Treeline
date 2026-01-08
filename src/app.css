@@ -190,3 +190,83 @@ label {
 #operation-info::-webkit-scrollbar-track {
 	background: rgba(0, 0, 0, 0.2);
 }
+
+.treeline-card {
+	background-color: var(--color-gray-50);
+	border: 1px solid var(--color-gray-200);
+	border-radius: 1rem;
+	padding: 2rem;
+}
+
+.data-structure-description .prose h1,
+.data-structure-description .prose h2,
+.data-structure-description .prose h3 {
+	color: var(--color-primary);
+	font-weight: 700;
+	margin-top: 1.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.data-structure-description .prose h1 {
+	font-size: 2rem;
+	margin-top: 0;
+}
+
+.data-structure-description .prose h2 {
+	font-size: 1.5rem;
+	border-bottom: 2px solid var(--color-primary-light);
+	padding-bottom: 0.5rem;
+}
+
+.data-structure-description .prose h3 {
+	font-size: 1.25rem;
+}
+
+.data-structure-description .prose p {
+	line-height: 1.6;
+	margin-bottom: 1rem;
+}
+
+.data-structure-description .prose ul,
+.data-structure-description .prose ol {
+	margin-bottom: 1rem;
+	margin-left: 1.5rem;
+	list-style: revert;
+}
+
+.data-structure-description .prose li {
+	margin-bottom: 0.25rem;
+	line-height: 1.6;
+}
+
+.data-structure-description .prose li p {
+	display: inline;
+	margin-bottom: 0;
+}
+
+.data-structure-description .prose table {
+	width: auto;
+	border-collapse: collapse;
+	margin: 1rem 0;
+	border: 1px solid var(--color-gray-300);
+	border-radius: 0.5rem;
+	overflow: hidden;
+}
+
+.data-structure-description .prose th {
+	background-color: var(--color-primary);
+	color: white;
+	font-weight: 600;
+	padding: 0.75rem 1rem;
+	text-align: left;
+}
+
+.data-structure-description .prose td {
+	padding: 0.75rem 1rem;
+	border-top: 1px solid var(--color-gray-300);
+}
+
+.data-structure-description .prose tbody tr:hover {
+	background-color: var(--color-gray-100);
+}
+
