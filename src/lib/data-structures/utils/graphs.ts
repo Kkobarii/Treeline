@@ -4,6 +4,7 @@ import { type Edge, type Node } from 'vis-network';
 import { Colors, shadeColor } from '$lib/assets/colors';
 import type { AVLTreeNode } from '$lib/data-structures/structures/avlTree/avlTree';
 import type { BSTreeNode } from '$lib/data-structures/structures/bsTree/bsTree';
+import type { BTreeNode } from '$lib/data-structures/structures/bTree/bTree';
 import { RBTreeColor, type RBTreeNode } from '$lib/data-structures/structures/rbTree/rbTree';
 
 function log(...args: any[]) {
@@ -288,4 +289,49 @@ export class RBTreeNodeData extends NodeData {
 		}
 		return new RBTreeNodeData(childNumber, color);
 	}
+}
+
+// B-Tree specific graph conversion
+export function bTreeToGraph(
+	root: BTreeNode | null,
+	nodes: DataSet<Node> = new DataSet<Node>(),
+	edges: DataSet<Edge> = new DataSet<Edge>(),
+	successorInfo: SuccessorInfo | null = null,
+): { nodes: DataSet<Node>; edges: DataSet<Edge> } {
+	if (!root) return { nodes, edges };
+
+	const nodeId = root.id;
+	// Display all values in the node, joined by commas
+	const label = root.values.join('  ') || '';
+	const nodeData = new NodeData(successorInfo?.childNumber ?? -1);
+
+	nodes.add({
+		id: nodeId,
+		label: label,
+		title: NodeData.toTitle(nodeData),
+		shape: 'box',
+		color: Colors.Node,
+		font: { color: 'black', size: 20 },
+		widthConstraint: { minimum: 60 },
+	});
+
+	// Add edge from parent if we have successor info
+	if (successorInfo !== null) {
+		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
+		edges.add({ id: edgeId, from: successorInfo.parentId, to: nodeId });
+	}
+
+	// Process all children
+	if (!root.isLeaf) {
+		for (let i = 0; i < root.children.length; i++) {
+			const child = root.children[i];
+			if (child) {
+				const result = bTreeToGraph(child, nodes, edges, new SuccessorInfo(nodeId, i));
+				nodes = result.nodes;
+				edges = result.edges;
+			}
+		}
+	}
+
+	return { nodes, edges };
 }

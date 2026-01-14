@@ -16,6 +16,7 @@
 		color: Colors.Node,
 		font: { color: 'black', size: 30 },
 	};
+	export let layout: any = null;
 
 	let container: HTMLElement | null = null;
 	let nodes: DataSet<Node> = new DataSet<Node>();
@@ -39,16 +40,18 @@
 		console.log('Debug mode toggled:', debugMode);
 	}
 
-	const options: Options = {
-		layout: {
-			hierarchical: {
-				direction: 'UD',
-				sortMethod: 'directed',
-				shakeTowards: 'roots',
-				levelSeparation: 100,
-				treeSpacing: 0,
-			},
+	const defaultLayout = {
+		hierarchical: {
+			direction: 'UD',
+			sortMethod: 'directed',
+			shakeTowards: 'roots',
+			levelSeparation: 100,
+			treeSpacing: 0,
 		},
+	};
+
+	const options: Options = {
+		layout: layout || defaultLayout,
 		physics: false,
 		interaction: { dragNodes: false },
 		nodes: nodeOptions,

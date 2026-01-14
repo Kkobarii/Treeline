@@ -453,4 +453,32 @@ export namespace Step {
 			return StepData.new(StepType.RBTree.Fixup, new FixupData(nodeId, reason));
 		}
 	}
+
+	export namespace BTree {
+		// B-Tree specific step details
+		export class MarkOverfullData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public currentCount: number,
+				public maxCount: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Node ${nodeId} is overfull: ${currentCount} values (max ${maxCount})`);
+			}
+		}
+
+		export function MarkOverfull(
+			nodeId: number,
+			currentCount: number,
+			maxCount: number,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.BTree.MarkOverfull,
+				new MarkOverfullData(nodeId, currentCount, maxCount, startSnapshot, endSnapshot),
+			);
+		}
+	}
 }

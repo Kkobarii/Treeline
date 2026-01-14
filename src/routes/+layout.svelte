@@ -32,6 +32,9 @@
 			<a
 				href="/data-structures/red-black-tree"
 				class="header-link">Red-Black Tree</a>
+			<a
+				href="/data-structures/b-tree"
+				class="header-link">B-Tree</a>
 		</div>
 
 		<!-- right actions -->

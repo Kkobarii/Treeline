@@ -5,6 +5,7 @@ export enum StructureType {
 	BSTree = 'BSTree',
 	AVLTree = 'AVLTree',
 	RBTree = 'RBTree',
+	BTree = 'BTree',
 }
 
 export const OperationType = {
@@ -56,11 +57,16 @@ export const StepType = {
 		RotateRight: 'RotateRight',
 		Fixup: 'Fixup',
 	},
+	BTree: {
+		...BaseTreeSteps,
+		MarkOverfull: 'MarkOverfull',
+	},
 } as const;
 
 export type StepTypeValue =
 	| (typeof StepType.BSTree)[keyof typeof StepType.BSTree]
 	| (typeof StepType.AVLTree)[keyof typeof StepType.AVLTree]
+	| (typeof StepType.BTree)[keyof typeof StepType.BTree]
 	| (typeof StepType.RBTree)[keyof typeof StepType.RBTree];
 
 export class DataNode {
