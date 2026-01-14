@@ -313,3 +313,19 @@ export async function handleReplaceWithInorderSuccessorBackwardCommon(
 
 	annotator.annotateNode(`Replace node with inorder successor`, data.successorNodeId);
 }
+
+export async function handleCaseAnalysisForwardCommon(
+	animator: AnyAnimator,
+	annotator: DataStructureAnnotator,
+	data: Step.Common.CaseAnalysisData,
+) {
+	annotator.annotateNode(`${data.action}`, data.nodeId || null);
+}
+
+export async function handleCaseAnalysisBackwardCommon(
+	animator: AnyAnimator,
+	annotator: DataStructureAnnotator,
+	data: Step.Common.CaseAnalysisData,
+) {
+	annotator.annotateNode(`${data.action}`, data.nodeId || null);
+}

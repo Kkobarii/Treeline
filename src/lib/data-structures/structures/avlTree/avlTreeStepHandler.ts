@@ -151,6 +151,12 @@ export class AVLTreeStepHandler extends StepHandlerBase {
 				if (isForward) await handleUpdateHeightBalanceForward(animator, annotator, currentStep.data as any);
 				else await handleUpdateHeightBalanceBackward(animator, annotator, currentStep.data as any);
 				break;
+			case StepType.AVLTree.CaseAnalysis:
+				if (isForward) await Common.handleCaseAnalysisForwardCommon(animator, annotator, currentStep.data as any);
+				else await Common.handleCaseAnalysisBackwardCommon(animator, annotator, currentStep.data as any);
+				break;
+			default:
+				console.warn('Unhandled AVL Tree step type:', currentStep.type);
 		}
 	}
 }

@@ -38,6 +38,7 @@ const BaseTreeSteps = {
 	FoundInorderSuccessor: 'FoundInorderSuccessor',
 	RelinkSuccessorChild: 'RelinkSuccessorChild',
 	ReplaceWithInorderSuccessor: 'ReplaceWithInorderSuccessor',
+	CaseAnalysis: 'CaseAnalysis',
 } as const;
 
 export const StepType = {

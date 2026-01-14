@@ -142,6 +142,10 @@ export class RBTreeStepHandler extends StepHandlerBase {
 				if (isForward) await Common.handleReplaceWithInorderSuccessorForwardCommon(animator, annotator, currentStep.data as any);
 				else await Common.handleReplaceWithInorderSuccessorBackwardCommon(animator, annotator, currentStep.data as any);
 				break;
+			case StepType.RBTree.CaseAnalysis:
+				if (isForward) await Common.handleCaseAnalysisForwardCommon(animator, annotator, currentStep.data as any);
+				else await Common.handleCaseAnalysisBackwardCommon(animator, annotator, currentStep.data as any);
+				break;
 			// RBTree-specific steps
 			case StepType.RBTree.ColorNode:
 				if (isForward) await handleColorNodeForward(animator, annotator, currentStep.data as any);
@@ -159,6 +163,8 @@ export class RBTreeStepHandler extends StepHandlerBase {
 				if (isForward) await handleFixupForward(animator, annotator, currentStep.data as any);
 				else await handleFixupBackward(animator, annotator, currentStep.data as any);
 				break;
+			default:
+				console.warn('Unhandled RB Tree step type:', currentStep.type);
 		}
 	}
 }

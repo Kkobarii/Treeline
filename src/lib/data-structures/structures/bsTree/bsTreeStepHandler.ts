@@ -105,6 +105,12 @@ export class BSTreeStepHandler extends StepHandlerBase {
 				if (isForward) await Common.handleReplaceWithInorderSuccessorForwardCommon(animator, annotator, currentStep.data as any);
 				else await Common.handleReplaceWithInorderSuccessorBackwardCommon(animator, annotator, currentStep.data as any);
 				break;
+			case StepType.BSTree.CaseAnalysis:
+				if (isForward) await Common.handleCaseAnalysisForwardCommon(animator, annotator, currentStep.data as any);
+				else await Common.handleCaseAnalysisBackwardCommon(animator, annotator, currentStep.data as any);
+				break;
+			default:
+				console.warn('Unhandled BSTree step type:', currentStep.type);
 		}
 	}
 }

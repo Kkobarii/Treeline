@@ -176,22 +176,26 @@ export class AVLTree extends DataStructure {
 
 			// Left Left
 			if (balance > 1 && value < (node.left as AVLTreeNode).value) {
+				data.step(Step.Common.CaseAnalysis(1, 'Left Left Case: Right Rotate', node.id));
 				this.rightRotate(parent, node, data);
 			}
 
 			// Right Right
 			else if (balance < -1 && value > (node.right as AVLTreeNode).value) {
+				data.step(Step.Common.CaseAnalysis(2, 'Right Right Case: Left Rotate', node.id));
 				this.leftRotate(parent, node, data);
 			}
 
 			// Left Right
 			else if (balance > 1 && value > (node.left as AVLTreeNode).value) {
+				data.step(Step.Common.CaseAnalysis(3, 'Left Right Case: Left Rotate then Right Rotate', node.id));
 				this.leftRotate(node, node.left as AVLTreeNode, data);
 				this.rightRotate(parent, node, data);
 			}
 
 			// Right Left
 			else if (balance < -1 && value < (node.right as AVLTreeNode).value) {
+				data.step(Step.Common.CaseAnalysis(4, 'Right Left Case: Right Rotate then Left Rotate', node.id));
 				this.rightRotate(node, node.right as AVLTreeNode, data);
 				this.leftRotate(parent, node, data);
 			}
@@ -265,6 +269,11 @@ export class AVLTree extends DataStructure {
 
 		// case: node with at most one child
 		if (!current!.left || !current!.right) {
+			if (!current!.left && !current!.right) {
+				data.step(Step.Common.CaseAnalysis(1, 'Leaf node', current!.id));
+			} else {
+				data.step(Step.Common.CaseAnalysis(2, 'Single child', current!.id));
+			}
 			const child = current!.left ? current!.left : current!.right;
 			let startSnapshot = this.snapshot();
 			if (!child) {
@@ -300,6 +309,7 @@ export class AVLTree extends DataStructure {
 			// rebalance starting from parent upwards
 		} else {
 			// node with two children: find inorder successor
+			data.step(Step.Common.CaseAnalysis(3, 'Two children', current!.id));
 			let succParent = current!;
 			let successor = current!.right as AVLTreeNode;
 			// push current for rebalance path
@@ -368,22 +378,26 @@ export class AVLTree extends DataStructure {
 
 			// Left Left
 			if (balance > 1 && this.getBalance(node.left) >= 0) {
+				data.step(Step.Common.CaseAnalysis(1, 'Left Left Case: Right Rotate', node.id));
 				this.rightRotate(parentAttach, node, data);
 			}
 
 			// Left Right
 			else if (balance > 1 && this.getBalance(node.left) < 0) {
+				data.step(Step.Common.CaseAnalysis(2, 'Left Right Case: Left Rotate then Right Rotate', node.id));
 				this.leftRotate(node, node.left as AVLTreeNode, data);
 				this.rightRotate(parentAttach, node, data);
 			}
 
 			// Right Right
 			else if (balance < -1 && this.getBalance(node.right) <= 0) {
+				data.step(Step.Common.CaseAnalysis(3, 'Right Right Case: Left Rotate', node.id));
 				this.leftRotate(parentAttach, node, data);
 			}
 
 			// Right Left
 			else if (balance < -1 && this.getBalance(node.right) > 0) {
+				data.step(Step.Common.CaseAnalysis(4, 'Right Left Case: Right Rotate then Left Rotate', node.id));
 				this.rightRotate(node, node.right as AVLTreeNode, data);
 				this.leftRotate(parentAttach, node, data);
 			}

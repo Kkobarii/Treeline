@@ -143,6 +143,8 @@ export class BSTree extends DataStructure {
 
 		// Case 1: leaf
 		if (!current.left && !current.right) {
+			data.step(Step.Common.CaseAnalysis(1, 'Leaf node', current.id));
+
 			let startSnapshot = this.snapshot();
 			if (!parent) {
 				this.root = null;
@@ -157,6 +159,8 @@ export class BSTree extends DataStructure {
 
 		// Case 2: single child -> replace with child
 		if (!current.left || !current.right) {
+			data.step(Step.Common.CaseAnalysis(2, 'Single child', current.id));
+
 			const child = current.left ? current.left : current.right!;
 			let startSnapshot = this.snapshot();
 			if (!parent) {
@@ -180,6 +184,8 @@ export class BSTree extends DataStructure {
 		}
 
 		// Case 3: two children -> find inorder successor iteratively
+		data.step(Step.Common.CaseAnalysis(3, 'Two children', current.id));
+
 		let succParent: BSTreeNode = current;
 		let successor: BSTreeNode = current.right!;
 		while (successor.left) {

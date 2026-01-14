@@ -188,8 +188,6 @@ export class RBTree extends DataStructure {
 			const parent = this.getParent(current)!;
 			if (parent.color !== RBTreeColor.Red) break;
 
-			data.step(Step.RBTree.Fixup(current.id, 'parent is red, fixing violations'));
-
 			const grandparent = this.getGrandparent(current);
 			if (!grandparent) break;
 
@@ -198,8 +196,8 @@ export class RBTree extends DataStructure {
 				const uncle = grandparent.right;
 
 				if (uncle && uncle.color === RBTreeColor.Red) {
-					// Case 1: uncle is red - recolor
-					data.step(Step.RBTree.Fixup(current.id, 'uncle is red, recoloring'));
+					// Insert Case 1: uncle is red
+					data.step(Step.Common.CaseAnalysis(1, 'Uncle is red. Recolor parent, uncle, and grandparent.', grandparent.id));
 					this.setColor(parent, RBTreeColor.Black, data);
 					this.setColor(uncle, RBTreeColor.Black, data);
 					this.setColor(grandparent, RBTreeColor.Red, data);
@@ -207,15 +205,17 @@ export class RBTree extends DataStructure {
 				} else {
 					// Case 2: uncle is black
 					if (current === parent.right) {
-						// current is right child - left rotate at parent
-						data.step(Step.RBTree.Fixup(current.id, 'uncle is black, current is right child, left rotate'));
+						// Insert Case 2: uncle is black, triangle case
+						data.step(Step.Common.CaseAnalysis(2, 'Uncle is black, triangle case. Rotate parent.', grandparent.id));
 						current = parent;
 						this.leftRotate(current, data);
 					}
-					// Case 3: current is left child - right rotate at grandparent
+					// Insert Case 3: uncle is black, line case
 					const currentParent = this.getParent(current)!;
 					const currentGrandparent = this.getGrandparent(current)!;
-					data.step(Step.RBTree.Fixup(current.id, 'uncle is black, current is left child, right rotate'));
+					data.step(
+						Step.Common.CaseAnalysis(3, 'Uncle is black, line case. Recolor and rotate grandparent.', currentGrandparent.id),
+					);
 					this.setColor(currentParent, RBTreeColor.Black, data);
 					this.setColor(currentGrandparent, RBTreeColor.Red, data);
 					this.rightRotate(currentGrandparent, data);
@@ -225,8 +225,10 @@ export class RBTree extends DataStructure {
 				const uncle = grandparent.left;
 
 				if (uncle && uncle.color === RBTreeColor.Red) {
-					// Case 1: uncle is red - recolor
-					data.step(Step.RBTree.Fixup(current.id, 'uncle is red, recoloring (symmetric)'));
+					// Insert Case 1 (symmetric): uncle is red
+					data.step(
+						Step.Common.CaseAnalysis(1, 'Uncle is red. Recolor parent, uncle, and grandparent. (symmetric)', grandparent.id),
+					);
 					this.setColor(parent, RBTreeColor.Black, data);
 					this.setColor(uncle, RBTreeColor.Black, data);
 					this.setColor(grandparent, RBTreeColor.Red, data);
@@ -234,15 +236,21 @@ export class RBTree extends DataStructure {
 				} else {
 					// Case 2: uncle is black
 					if (current === parent.left) {
-						// current is left child - right rotate at parent
-						data.step(Step.RBTree.Fixup(current.id, 'uncle is black, current is left child, right rotate (symmetric)'));
+						// Insert Case 2 (symmetric): uncle is black, triangle case
+						data.step(Step.Common.CaseAnalysis(2, 'Uncle is black, triangle case. Rotate parent. (symmetric)', grandparent.id));
 						current = parent;
 						this.rightRotate(current, data);
 					}
-					// Case 3: current is right child - left rotate at grandparent
+					// Insert Case 3 (symmetric): uncle is black, line case
 					const currentParent = this.getParent(current)!;
 					const currentGrandparent = this.getGrandparent(current)!;
-					data.step(Step.RBTree.Fixup(current.id, 'uncle is black, current is right child, left rotate (symmetric)'));
+					data.step(
+						Step.Common.CaseAnalysis(
+							3,
+							'Uncle is black, line case. Recolor and rotate grandparent. (symmetric)',
+							currentGrandparent.id,
+						),
+					);
 					this.setColor(currentParent, RBTreeColor.Black, data);
 					this.setColor(currentGrandparent, RBTreeColor.Red, data);
 					this.leftRotate(currentGrandparent, data);
@@ -316,22 +324,29 @@ export class RBTree extends DataStructure {
 		let nodeToFixParentId: number | null = null;
 		const originalColor = current.color;
 
-		// Case 1: node has at most one child
 		if (!current.left) {
+			// Node has at most one child (right)
+			if (!current.right) {
+				data.step(Step.Common.CaseAnalysis(1, 'Leaf node', current.id));
+			} else {
+				data.step(Step.Common.CaseAnalysis(2, 'Single child', current.id));
+			}
 			nodeToFixId = current.right?.id ?? null;
 			nodeToFixParentId = current.parentId;
 			this.transplant(current, current.right, data);
 		} else if (!current.right) {
+			// Node has one child (left)
+			data.step(Step.Common.CaseAnalysis(2, 'Single child', current.id));
 			nodeToFixId = current.left.id;
 			nodeToFixParentId = current.parentId;
 			this.transplant(current, current.left, data);
 		} else {
-			// Case 2: node has two children - find successor
+			// Node has two children
+			data.step(Step.Common.CaseAnalysis(3, 'Two children', current.id));
 			let successor = current.right;
 			while (successor.left) {
 				successor = successor.left;
 			}
-
 			data.step(Step.Common.FoundInorderSuccessor(current.id, successor.id, successor.value));
 
 			const successorOriginalColor = successor.color;
@@ -435,8 +450,6 @@ export class RBTree extends DataStructure {
 		let current = node;
 
 		while (current !== this.root && current.color === 'black') {
-			data.step(Step.RBTree.Fixup(current.id, 'fixing double-black violation'));
-
 			const parent = this.getParent(current);
 			if (!parent) break;
 
@@ -444,8 +457,8 @@ export class RBTree extends DataStructure {
 				let sibling = parent.right;
 
 				// Case 1: sibling is red
-				if (sibling && sibling.color === RBTreeColor.Red) {
-					data.step(Step.RBTree.Fixup(current.id, 'sibling is red, rotate and recolor'));
+				if (sibling?.color === RBTreeColor.Red) {
+					data.step(Step.Common.CaseAnalysis(1, 'Sibling is red.', parent.id));
 					this.setColor(sibling, RBTreeColor.Black, data);
 					this.setColor(parent, RBTreeColor.Red, data);
 					this.leftRotate(parent, data);
@@ -458,13 +471,13 @@ export class RBTree extends DataStructure {
 					(!sibling.left || sibling.left.color === RBTreeColor.Black) &&
 					(!sibling.right || sibling.right.color === RBTreeColor.Black)
 				) {
-					data.step(Step.RBTree.Fixup(current.id, 'sibling and children are black, recolor sibling'));
+					data.step(Step.Common.CaseAnalysis(2, 'Sibling is black with two black children.', parent.id));
 					this.setColor(sibling, RBTreeColor.Red, data);
 					current = parent;
 				} else if (sibling) {
 					// Case 3: sibling's right child is black
 					if (!sibling.right || sibling.right.color === RBTreeColor.Black) {
-						data.step(Step.RBTree.Fixup(current.id, 'sibling right child is black, rotate sibling'));
+						data.step(Step.Common.CaseAnalysis(3, 'Sibling is black, near child is red.', parent.id));
 						if (sibling.left) this.setColor(sibling.left, RBTreeColor.Black, data);
 						this.setColor(sibling, RBTreeColor.Red, data);
 						this.rightRotate(sibling, data);
@@ -474,7 +487,7 @@ export class RBTree extends DataStructure {
 					if (sibling) {
 						const currentParent = this.getParent(current);
 						if (currentParent) {
-							data.step(Step.RBTree.Fixup(current.id, 'sibling right child is red, final fixup'));
+							data.step(Step.Common.CaseAnalysis(4, 'Sibling is black, far child is red.', currentParent.id));
 							this.setColor(sibling, currentParent.color, data);
 							this.setColor(currentParent, RBTreeColor.Black, data);
 							if (sibling.right) this.setColor(sibling.right, RBTreeColor.Black, data);
@@ -487,8 +500,8 @@ export class RBTree extends DataStructure {
 				// symmetric case (current is right child)
 				let sibling = parent.left;
 
-				if (sibling && sibling.color === RBTreeColor.Red) {
-					data.step(Step.RBTree.Fixup(current.id, 'sibling is red, rotate and recolor (symmetric)'));
+				if (sibling?.color === RBTreeColor.Red) {
+					data.step(Step.Common.CaseAnalysis(1, 'Sibling is red. (symmetric)', parent.id));
 					this.setColor(sibling, RBTreeColor.Black, data);
 					this.setColor(parent, RBTreeColor.Red, data);
 					this.rightRotate(parent, data);
@@ -500,12 +513,12 @@ export class RBTree extends DataStructure {
 					(!sibling.left || sibling.left.color === RBTreeColor.Black) &&
 					(!sibling.right || sibling.right.color === RBTreeColor.Black)
 				) {
-					data.step(Step.RBTree.Fixup(current.id, 'sibling and children are black, recolor (symmetric)'));
+					data.step(Step.Common.CaseAnalysis(2, 'Sibling is black with two black children. (symmetric)', parent.id));
 					this.setColor(sibling, RBTreeColor.Red, data);
 					current = parent;
 				} else if (sibling) {
 					if (!sibling.left || sibling.left.color === RBTreeColor.Black) {
-						data.step(Step.RBTree.Fixup(current.id, 'sibling left child is black, rotate (symmetric)'));
+						data.step(Step.Common.CaseAnalysis(3, 'Sibling is black, near child is red. (symmetric)', parent.id));
 						if (sibling.right) this.setColor(sibling.right, RBTreeColor.Black, data);
 						this.setColor(sibling, RBTreeColor.Red, data);
 						this.leftRotate(sibling, data);
@@ -514,7 +527,7 @@ export class RBTree extends DataStructure {
 					if (sibling) {
 						const currentParent = this.getParent(current);
 						if (currentParent) {
-							data.step(Step.RBTree.Fixup(current.id, 'sibling left child is red, final fixup (symmetric)'));
+							data.step(Step.Common.CaseAnalysis(4, 'Sibling is black, far child is red. (symmetric)', currentParent.id));
 							this.setColor(sibling, currentParent.color, data);
 							this.setColor(currentParent, RBTreeColor.Black, data);
 							if (sibling.left) this.setColor(sibling.left, RBTreeColor.Black, data);
@@ -532,12 +545,11 @@ export class RBTree extends DataStructure {
 	}
 
 	private removeFixupNull(parent: RBTreeNode, isLeftChild: boolean, data: OperationData): void {
-		// handle fixup when the node to fix is null
-		// this is a simplified version that just ensures the tree stays valid
-		data.step(Step.RBTree.Fixup(parent.id, 'fixing null node double-black'));
+		// This handles a double-black violation on a conceptual null node.
+		data.step(Step.Common.CaseAnalysis(0, 'Fixing double-black on a null leaf.', parent.id));
 
 		let sibling = isLeftChild ? parent.right : parent.left;
-		if (sibling && sibling.color === RBTreeColor.Red) {
+		if (sibling?.color === RBTreeColor.Red) {
 			this.setColor(sibling, RBTreeColor.Black, data);
 			this.setColor(parent, RBTreeColor.Red, data);
 			if (isLeftChild) {

@@ -274,6 +274,20 @@ export namespace Step {
 		export function FoundInorderSuccessor(nodeId: number, successorId: number, successorValue: number): StepData {
 			return StepData.new(StepType.BSTree.FoundInorderSuccessor, new FoundInorderSuccessorData(nodeId, successorId, successorValue));
 		}
+
+		export class CaseAnalysisData extends StepDetail {
+			constructor(
+				public caseNumber: number,
+				public description: string,
+				public nodeId?: number,
+			) {
+				super(`Case ${caseNumber}: ${description}`);
+			}
+		}
+
+		export function CaseAnalysis(caseNumber: number, description: string, nodeId?: number): StepData {
+			return StepData.new(StepType.BSTree.CaseAnalysis, new CaseAnalysisData(caseNumber, description, nodeId));
+		}
 	}
 
 	export namespace AVLTree {

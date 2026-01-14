@@ -1,12 +1,10 @@
-# AVL Tree
+# AVL Tree (Self-Balancing Binary Search Tree)
 
-## Overview
+An **AVL Tree** (named after inventors Adelson-Velsky and Landis) is a self-balancing version of a Binary Search Tree. While a standard BST can become unbalanced and slow, an AVL Tree ensures that the height of the left and right subtrees of any node differs by at most **one**. This balance is maintained through a property called the **Balance Factor** and various **Rotations**.
 
-An **AVL tree** is a self-balancing binary search tree that maintains a strictly limited height to guarantee efficient operations. It extends the Binary Search Tree by enforcing an additional **balance condition** on every node.
+## Complexity Analysis
 
-An AVL tree requires that the **balance factor** of every node is **−1, 0, or 1**. If an insertion or deletion violates this condition, the tree is rebalanced using **rotations**, which are local restructuring operations that preserve the binary search tree property.
-
-## General Properties and Complexity
+Because the tree automatically rebalances itself after every insertion and deletion, the height is guaranteed to remain logarithmic. This ensures that operations remain efficient even in the worst-case scenarios.
 
 | Operation | Worst Case |
 | --------- | ---------- |
@@ -14,149 +12,64 @@ An AVL tree requires that the **balance factor** of every node is **−1, 0, or 
 | Insert    | O(log n)   |
 | Delete    | O(log n)   |
 
-Because the height of an AVL tree is always logarithmic, all fundamental operations execute in logarithmic time.
+## Key Concepts
 
-## Find (Search) Operation
+- **Height**: The length of the longest path from a node to a leaf.
+- **Balance Factor**: Calculated as `Height(Left Subtree) - Height(Right Subtree)`. A node is considered balanced if its factor is **-1, 0, or 1**.
+- **Rotations**: Specific movements used to restructure the tree when a node becomes unbalanced (factor > 1 or < -1). The four types of rotations are:
+    - **Left-Left (LL) Rotation**
+    - **Right-Right (RR) Rotation**
+    - **Left-Right (LR) Rotation**
+    - **Right-Left (RL) Rotation**
 
-The **find** operation in an AVL tree is identical to the find operation in a standard Binary Search Tree.
+## Search (Find)
 
-### Algorithm Description
+Searching in an AVL tree is identical to a standard Binary Search Tree.
 
-1. Start at the root node.
-2. Compare the searched key with the key of the current node.
-3. Continue to the left subtree if the key is smaller, or to the right subtree if the key is larger.
-4. Repeat until the key is found or a null reference is reached.
+1. **Compare**: Start at the root and compare the target value to the current node.
+2. **Match**: If they are equal, the value is found.
+3. **Traverse**:
+    - If the target is **smaller**, move to the **left child**.
+    - If the target is **larger**, move to the **right child**.
 
-Balancing does not affect the logic of the search; it only guarantees that the number of visited nodes is limited.
+4. **Drop**: If you reach an empty spot, the value does not exist in the tree.
 
-## Insert Operation
+## Insertion
 
-Insertion into an AVL tree consists of two phases: **standard BST insertion** and **rebalancing**.
+Insertion is a two-phase process: finding the spot to insert and then "fixing" the tree as you walk back up to the root.
 
-### Algorithm Description
+**Phase 1: Standard BST Insertion**
 
-1. Insert the new key using the standard Binary Search Tree insertion procedure.
-2. Traverse upward from the inserted node toward the root.
-3. At each visited node:
-    - Update its height.
-    - Compute its balance factor.
+- Navigate the tree using comparisons until an empty spot is found.
+- **Create Leaf**: A new node is created at that position.
+- **Handle Duplicates**: If the value already exists, the operation is dropped.
 
-4. If a node becomes unbalanced, identify the imbalance type based on the structure of its subtrees.
-5. Apply the appropriate rotation to restore balance.
+**Phase 2: Rebalancing**:
+The algorithm walks back up the path taken during insertion:
 
-During insertion, only the **lowest unbalanced node** requires rebalancing.
+1. **Update Height & Balance**: For every node in the path, the height is updated, and the balance factor is recalculated.
+2. **Check Balance**: If a node's balance factor is greater than 1 or less than -1, a rotation is performed based on the "shape" of the imbalance:
+    - **Left-Left (LL)**: Right Rotation.
+    - **Right-Right (RR)**: Left Rotation.
+    - **Left-Right (LR)**: Left Rotate the child, then Right Rotate the node.
+    - **Right-Left (RL)**: Right Rotate the child, then Left Rotate the node.
 
-## Rotations in AVL Trees
+## Deletion (Remove)
 
-Rotations are local operations that rearrange a small number of nodes to restore balance while preserving the in-order traversal of the tree.
+Deletion is the most rigorous operation, as it combines BST deletion logic with a potential series of rebalancing rotations.
 
-### 1. Right Rotation (LL Case)
+**Phase 1: Search and Mark**
 
-This rotation is used when a node becomes unbalanced due to insertion in the **left subtree of its left child**.
+- The tree is traversed to find the target node, keeping track of the path taken.
+- Once found, the node is **marked for deletion**.
 
-**Condition:**
+**Phase 2: Remove Node**
 
-- balance factor > 1
-- left child has balance factor ≥ 0
+- **No Child / Single Child**: The node is removed, and its child (if any) is promoted to take its place.
+- **Two Children**: The algorithm finds the **Inorder Successor** (the smallest node in the right subtree). The successor's value and identity are moved into the target node's position, and the original successor node is removed from the bottom of the tree.
 
-**Transformation:**
+**Phase 3: Rebalancing**:
+Just like insertion, the algorithm walks back up the stored path to the root:
 
-```
-    z                y
-   /                / \
-  y       →        x   z
- /
-x
-```
-
-The right rotation moves node `y` up and node `z` down to the right.
-
-### 2. Left Rotation (RR Case)
-
-This rotation is symmetric to the right rotation and is used when insertion occurs in the **right subtree of the right child**.
-
-**Condition:**
-
-- balance factor < −1
-- right child has balance factor ≤ 0
-
-**Transformation:**
-
-```
-z                     y
- \                   / \
-  y        →        z   x
-   \
-    x
-```
-
-The left rotation moves node `y` up and node `z` down to the left.
-
-### 3. Left-Right Rotation (LR Case)
-
-This rotation is used when insertion occurs in the **right subtree of the left child**.
-
-**Condition:**
-
-- balance factor > 1
-- left child has balance factor < 0
-
-**Transformation:**
-
-```
-    z               z               x
-   /               /               / \
-  y       →       x       →       y   z
-   \             /
-    x           y
-```
-
-This operation consists of:
-
-1. A **left rotation** on the left child
-2. A **right rotation** on the unbalanced node
-
-### 4. Right-Left Rotation (RL Case)
-
-This rotation is symmetric to the Left-Right case and is used when insertion occurs in the **left subtree of the right child**.
-
-**Condition:**
-
-- balance factor < −1
-- right child has balance factor > 0
-
-**Transformation:**
-
-```
-z                 z                   x
- \                 \                 / \
-  y       →         x       →       z   y
- /                   \
-x                     y
-```
-
-This operation consists of:
-
-1. A **right rotation** on the right child
-2. A **left rotation** on the unbalanced node
-
-## Delete Operation
-
-Deletion in an AVL tree follows the same logic as in a Binary Search Tree but requires additional rebalancing.
-
-### Algorithm Description
-
-1. Remove the node using standard BST deletion:
-    - Remove leaf nodes directly.
-    - Replace nodes with one child by their child.
-    - Replace nodes with two children by their in-order successor.
-
-2. Starting from the parent of the removed node, traverse upward toward the root.
-3. At each visited node:
-    - Update its height.
-    - Compute its balance factor.
-
-4. If a node becomes unbalanced, apply the appropriate rotation.
-5. Continue until the root is reached.
-
-Unlike insertion, deletion may cause multiple nodes to become unbalanced, requiring several rotations.
+1. **Update Height & Balance**: At each step, heights are recalculated.
+2. **Check Balance**: If a node becomes unbalanced due to the removal, the appropriate rotation (LL, RR, LR, or RL) is applied to restore the AVL property. Unlike insertion, a single deletion might require multiple rotations as you move up the tree.
