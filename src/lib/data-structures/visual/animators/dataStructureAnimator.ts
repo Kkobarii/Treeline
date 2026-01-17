@@ -46,7 +46,7 @@ export class DataStructureAnimator {
 	}
 
 	protected updateNodeRaw(node: Node) {
-		console.debug('updateNodeRaw', node);
+		// console.debug('updateNodeRaw', node);
 		try {
 			this.nodes.update(node);
 		} catch {
@@ -60,41 +60,6 @@ export class DataStructureAnimator {
 			this.nodes.remove(id);
 		} catch {
 			console.warn('Failed to remove node', id);
-		}
-	}
-
-	protected addEdgeRaw(edge: Edge) {
-		console.debug('addEdgeRaw', edge);
-		try {
-			this.edges.add(edge);
-		} catch {
-			console.warn('Failed to add edge', edge);
-		}
-	}
-
-	protected removeEdgeRaw(id: string | number) {
-		console.debug('removeEdgeRaw', id);
-		try {
-			this.edges.remove(id);
-		} catch {
-			console.warn('Failed to remove edge', id);
-		}
-	}
-
-	protected updateEdgeRaw(edge: Edge) {
-		console.debug('updateEdgeRaw', edge);
-		try {
-			this.edges.update(edge);
-		} catch {
-			console.warn('Failed to update edge', edge);
-		}
-	}
-
-	nodeExists(nodeId: string | number): boolean {
-		try {
-			return this.nodes.get(nodeId as any) !== null;
-		} catch {
-			return false;
 		}
 	}
 
@@ -113,15 +78,6 @@ export class DataStructureAnimator {
 		} catch {
 			const node = this.nodes.get(nodeId as any) as any;
 			return { x: node?.x ?? 0, y: node?.y ?? 0 };
-		}
-	}
-
-	areNodesConnected(nodeId1: string | number, nodeId2: string | number): boolean {
-		try {
-			const connected = this.network.getConnectedNodes(nodeId1);
-			return connected.includes(nodeId2 as any);
-		} catch {
-			return false;
 		}
 	}
 
@@ -204,6 +160,26 @@ export class DataStructureAnimator {
 	resetNodeColor(nodeId: string | number) {
 		try {
 			this.nodes.update({ id: nodeId, color: (this.nodeOptions as any).color } as any);
+		} catch {}
+	}
+
+	setEdgeStyle(fromId: string | number, toId: string | number, color: string, width: number = 3) {
+		try {
+			const edges = this.edges.get();
+			const edge = edges.find((e: any) => e.from === fromId && e.to === toId);
+			if (edge) {
+				this.edges.update({ id: edge.id, color: { color, highlight: color }, width } as any);
+			}
+		} catch {}
+	}
+
+	resetEdgeStyle(fromId: string | number, toId: string | number) {
+		try {
+			const edges = this.edges.get();
+			const edge = edges.find((e: any) => e.from === fromId && e.to === toId);
+			if (edge) {
+				this.edges.update({ id: edge.id, color: undefined, width: undefined } as any);
+			}
 		} catch {}
 	}
 

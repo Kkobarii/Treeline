@@ -32,22 +32,52 @@ export class BTreeAnimator extends DataStructureAnimator {
 			const newData = toGraphFn(tree.root ?? null);
 			timer.checkpoint('graph');
 
-			// update existing nodes or add new ones
-			for (const n of newData.nodes.get()) {
-				if (this.nodes.get(n.id!)) {
-					this.updateNodeRaw(n);
-				} else {
+			// // update existing nodes or add new ones
+			// for (const n of newData.nodes.get()) {
+			// 	if (this.nodes.get(n.id!)) {
+			// 		this.updateNodeRaw(n);
+			// 	} else {
+			// 		this.addNodeRaw(n);
+			// 	}
+			// }
+
+			// // remove nodes that are no longer present
+			// const newNodeIds = new Set(newData.nodes.get().map((n: any) => n.id));
+			// for (const existingNode of this.nodes.get()) {
+			// 	if (!newNodeIds.has(existingNode.id)) {
+			// 		this.removeNodeRaw(existingNode.id!);
+			// 	}
+			// }
+			// timer.checkpoint('nodes');
+
+			// // for all new nodes, make sure they have correct order
+			// // check all parent children and reorder nodes if necessary
+			// // (vis-network does not guarantee order of nodes when multiple nodes are added at once)
+			// for (const n of newData.nodes.get()) {
+			//     const node = this.nodes.get(n.id!);
+			//     if (!node) continue;
+
+			//     const nodeData = NodeData.fromNode(n);
+			//     if (nodeData.childNumber >= 0 && tree.root) {
+			//         const parent = tree.findParentOfNode(tree.root, n.id);
+			//         if (parent) {
+			//             const correctIndex = parent.children.findIndex((child: any) => child.id === n.id);
+			//             if (correctIndex >= 0 && correctIndex !== nodeData.childNumber) {
+			//                 // reorder node by removing and re-adding with correct childNumber
+			//                 const updatedNode = { ...node };
+			//                 updatedNode.title = NodeData.toTitle(new NodeData(correctIndex));
+			//                 this.updateNodeRaw(updatedNode);
+			//             }
+			//         }
+			//     }
+			// }
+
+			try {
+				this.nodes.clear();
+				for (const n of newData.nodes.get()) {
 					this.addNodeRaw(n);
 				}
-			}
-
-			// remove nodes that are no longer present
-			const newNodeIds = new Set(newData.nodes.get().map((n: any) => n.id));
-			for (const existingNode of this.nodes.get()) {
-				if (!newNodeIds.has(existingNode.id)) {
-					this.removeNodeRaw(existingNode.id!);
-				}
-			}
+			} catch {}
 			timer.checkpoint('nodes');
 
 			// rebuild edges from authoritative graph
@@ -58,6 +88,11 @@ export class BTreeAnimator extends DataStructureAnimator {
 			timer.checkpoint('edges');
 
 			// timer.printReport('BTreeAnimator.ensureTree: ');
+
+			console.log('BTreeAnimator.ensureWithFn completed');
+			console.log('Tree:', tree);
+			console.log('Nodes:', this.nodes.get());
+			console.log('Edges:', this.edges.get());
 		} catch (err) {
 			console.warn('BTreeAnimator.ensureTree error', err);
 		}

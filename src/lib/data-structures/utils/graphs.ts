@@ -301,7 +301,7 @@ export function bTreeToGraph(
 	if (!root) return { nodes, edges };
 
 	const nodeId = root.id;
-	// Display all values in the node, joined by commas
+	// Display all values in the node
 	const label = root.values.join('  ') || '';
 	const nodeData = new NodeData(successorInfo?.childNumber ?? -1);
 
@@ -331,6 +331,20 @@ export function bTreeToGraph(
 				edges = result.edges;
 			}
 		}
+	} else {
+		// For leaf nodes, add dummy children to show they have no children
+		// for (let i = 0; i < root.values.length + 1; i++) {
+		// 	const dummyId = getDummyNodeId(nodeId, i);
+		// 	nodes.add({
+		// 		id: dummyId,
+		// 		label: '',
+		// 		shape: 'point',
+		// 		size: 0.1,
+		// 		color: 'transparent',
+		// 		title: NodeData.toTitle(new NodeData(i)),
+		// 	});
+		// 	edges.add({ id: getEdgeId(nodeId, i), from: nodeId, to: dummyId, dashes: true });
+		// }
 	}
 
 	return { nodes, edges };

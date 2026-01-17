@@ -480,5 +480,257 @@ export namespace Step {
 				new MarkOverfullData(nodeId, currentCount, maxCount, startSnapshot, endSnapshot),
 			);
 		}
+
+		export class SplitData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public middleValue: number,
+				public leftNodeId: number,
+				public rightNodeId: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Split node ${nodeId}: move ${middleValue} up (left: ${leftNodeId}, right: ${rightNodeId})`);
+			}
+		}
+
+		export function Split(
+			nodeId: number,
+			middleValue: number,
+			leftNodeId: number,
+			rightNodeId: number,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.BTree.Split,
+				new SplitData(nodeId, middleValue, leftNodeId, rightNodeId, startSnapshot, endSnapshot),
+			);
+		}
+
+		export class PromoteMiddleData extends StepDetail {
+			constructor(
+				public middleValue: number,
+				public targetNodeId: number,
+				public isNewRoot: boolean,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				const msg = isNewRoot ? `Promote ${middleValue} as new root` : `Promote ${middleValue} into parent (${targetNodeId})`;
+				super(msg);
+			}
+		}
+
+		export function PromoteMiddle(
+			middleValue: number,
+			targetNodeId: number,
+			isNewRoot: boolean,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.BTree.PromoteMiddle,
+				new PromoteMiddleData(middleValue, targetNodeId, isNewRoot, startSnapshot, endSnapshot),
+			);
+		}
+
+		export class ChooseBranchData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public childIndex: number,
+				public childId: number,
+				public lowerBound: number | null,
+				public upperBound: number | null,
+			) {
+				let msg = `Choose child ${childIndex} (node ${childId}) for value ${value}`;
+				if (lowerBound !== null && upperBound !== null) {
+					msg += ` (between ${lowerBound} and ${upperBound})`;
+				} else if (lowerBound !== null) {
+					msg += ` (greater than ${lowerBound})`;
+				} else if (upperBound !== null) {
+					msg += ` (less than ${upperBound})`;
+				}
+				super(msg);
+			}
+		}
+
+		export function ChooseBranch(
+			nodeId: number,
+			value: number,
+			childIndex: number,
+			childId: number,
+			lowerBound: number | null,
+			upperBound: number | null,
+		): StepData {
+			return StepData.new(
+				StepType.BTree.ChooseBranch,
+				new ChooseBranchData(nodeId, value, childIndex, childId, lowerBound, upperBound),
+			);
+		}
+
+		export class InsertValueData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Insert value ${value} into node ${nodeId}`);
+			}
+		}
+
+		export function InsertValue(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.BTree.InsertValue, new InsertValueData(nodeId, value, startSnapshot, endSnapshot));
+		}
+
+		export class RemoveValueData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Remove value ${value} from node ${nodeId}`);
+			}
+		}
+
+		export function RemoveValue(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.BTree.RemoveValue, new RemoveValueData(nodeId, value, startSnapshot, endSnapshot));
+		}
+
+		export class ReplaceValueData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public oldValue: number,
+				public newValue: number,
+				public replacementSource: string,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Replace value ${oldValue} with ${newValue} (${replacementSource}) in node ${nodeId}`);
+			}
+		}
+
+		export function ReplaceValue(
+			nodeId: number,
+			oldValue: number,
+			newValue: number,
+			replacementSource: string,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.BTree.ReplaceValue,
+				new ReplaceValueData(nodeId, oldValue, newValue, replacementSource, startSnapshot, endSnapshot),
+			);
+		}
+
+		export class BorrowFromLeftData extends StepDetail {
+			constructor(
+				public childId: number,
+				public siblingId: number,
+				public borrowedValue: number,
+				public parentValue: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(
+					`Borrow value ${borrowedValue} from left sibling ${siblingId} through parent value ${parentValue} to node ${childId}`,
+				);
+			}
+		}
+
+		export function BorrowFromLeft(
+			childId: number,
+			siblingId: number,
+			borrowedValue: number,
+			parentValue: number,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.BTree.BorrowFromLeft,
+				new BorrowFromLeftData(childId, siblingId, borrowedValue, parentValue, startSnapshot, endSnapshot),
+			);
+		}
+
+		export class BorrowFromRightData extends StepDetail {
+			constructor(
+				public childId: number,
+				public siblingId: number,
+				public borrowedValue: number,
+				public parentValue: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(
+					`Borrow value ${borrowedValue} from right sibling ${siblingId} through parent value ${parentValue} to node ${childId}`,
+				);
+			}
+		}
+
+		export function BorrowFromRight(
+			childId: number,
+			siblingId: number,
+			borrowedValue: number,
+			parentValue: number,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.BTree.BorrowFromRight,
+				new BorrowFromRightData(childId, siblingId, borrowedValue, parentValue, startSnapshot, endSnapshot),
+			);
+		}
+
+		export class MergeChildrenData extends StepDetail {
+			constructor(
+				public leftChildId: number,
+				public rightChildId: number,
+				public parentValue: number | null,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Merge node ${leftChildId} and node ${rightChildId} with parent value ${parentValue}`);
+			}
+		}
+
+		export function MergeChildren(
+			leftChildId: number,
+			rightChildId: number,
+			parentValue: number | null,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.BTree.MergeChildren,
+				new MergeChildrenData(leftChildId, rightChildId, parentValue, startSnapshot, endSnapshot),
+			);
+		}
+
+		export class FindInorderReplacementData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public childId: number,
+				public replacementValue: number,
+				public replacementType: 'predecessor' | 'successor',
+			) {
+				const typeText = replacementType === 'predecessor' ? 'predecessor' : 'successor';
+				super(`Found ${typeText} value ${replacementValue} in node ${childId} for node ${nodeId}`);
+			}
+		}
+
+		export function FindInorderReplacement(
+			nodeId: number,
+			childId: number,
+			replacementValue: number,
+			replacementType: 'predecessor' | 'successor',
+		): StepData {
+			return StepData.new(
+				StepType.BTree.FindInorderReplacement,
+				new FindInorderReplacementData(nodeId, childId, replacementValue, replacementType),
+			);
+		}
 	}
 }

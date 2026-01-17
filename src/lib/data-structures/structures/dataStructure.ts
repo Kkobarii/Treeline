@@ -60,6 +60,16 @@ export const StepType = {
 	BTree: {
 		...BaseTreeSteps,
 		MarkOverfull: 'MarkOverfull',
+		Split: 'Split',
+		PromoteMiddle: 'PromoteMiddle',
+		ChooseBranch: 'ChooseBranch',
+		InsertValue: 'InsertValue',
+		RemoveValue: 'RemoveValue',
+		ReplaceValue: 'ReplaceValue',
+		BorrowFromLeft: 'BorrowFromLeft',
+		BorrowFromRight: 'BorrowFromRight',
+		MergeChildren: 'MergeChildren',
+		FindInorderReplacement: 'FindInorderReplacement',
 	},
 } as const;
 

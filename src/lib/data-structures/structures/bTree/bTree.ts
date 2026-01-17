@@ -63,7 +63,6 @@ export class BTree extends DataStructure {
 			let i = 0;
 			// Search within the current node
 			while (i < current.values.length) {
-				data.step(Step.Common.Compare(value, current.id, current.values[i]));
 				if (value === current.values[i]) {
 					data.step(Step.Common.Found(current.id, value));
 					return current;
@@ -81,7 +80,9 @@ export class BTree extends DataStructure {
 
 			// Move to appropriate child
 			const childId = current.children[i] ? current.children[i].id : -1;
-			data.step(Step.Common.Traverse(current.id, childId, i === 0 ? 'left' : 'right'));
+			const lowerBound = i > 0 ? current.values[i - 1] : null;
+			const upperBound = i < current.values.length ? current.values[i] : null;
+			data.step(Step.BTree.ChooseBranch(current.id, value, i, childId, lowerBound, upperBound));
 			current = current.children[i] || null;
 		}
 
@@ -114,22 +115,28 @@ export class BTree extends DataStructure {
 			newNode.children = node.children.splice(t);
 		}
 
-		// If no parent, create a new root
+		// If no parent, we'll record split after creating root structure
 		if (!parent) {
 			const newRoot = new BTreeNode(this.generateId(), false);
-			newRoot.values.push(middleValue);
 			newRoot.children.push(node, newNode);
 			this.root = newRoot;
-			data.step(Step.Common.CreateRoot(newRoot.id, middleValue, startSnapshot, this.snapshot()));
+
+			const splitSnapshot = this.snapshot();
+			data.step(Step.BTree.Split(node.id, middleValue, node.id, newNode.id, startSnapshot, splitSnapshot));
+
+			newRoot.values.push(middleValue);
+			data.step(Step.BTree.PromoteMiddle(middleValue, newRoot.id, true, splitSnapshot, this.snapshot()));
 			return newRoot;
 		} else {
-			// Insert middle value into parent
-			insertNonFull(parent, middleValue);
-			// Insert new node as sibling
+			// Insert new node as sibling first (without the middle value yet)
 			const parentChildIndex = parent.children.indexOf(node);
 			insertChild(parent, parentChildIndex + 1, newNode);
-			data.step(Step.Common.CaseAnalysis(0, `Split complete: moved ${middleValue} to parent`, node.id));
-			data.step(Step.Common.CreateLeaf(newNode.id, newNode.values[0], parent.id, 'right', startSnapshot, this.snapshot()));
+
+			const splitSnapshot = this.snapshot();
+			data.step(Step.BTree.Split(node.id, middleValue, node.id, newNode.id, startSnapshot, splitSnapshot));
+
+			insertNonFull(parent, middleValue);
+			data.step(Step.BTree.PromoteMiddle(middleValue, parent.id, false, splitSnapshot, this.snapshot()));
 			return parent;
 		}
 	}
@@ -162,7 +169,7 @@ export class BTree extends DataStructure {
 			// Insert into leaf node
 			const startSnapshot = this.snapshot();
 			insertNonFull(node, value);
-			data.step(Step.Common.CreateLeaf(node.id, value, node.id, 'left', startSnapshot, this.snapshot()));
+			data.step(Step.BTree.InsertValue(node.id, value, startSnapshot, this.snapshot()));
 
 			// Check if node is now overfull
 			if (node.values.length > 2 * this.order - 1) {
@@ -176,16 +183,13 @@ export class BTree extends DataStructure {
 			// Find child to insert into
 			let i = 0;
 			while (i < node.values.length && value > node.values[i]) {
-				data.step(Step.Common.Compare(value, node.id, node.values[i]));
 				i++;
 			}
 
-			if (i > 0 && i <= node.values.length) {
-				data.step(Step.Common.Compare(value, node.id, node.values[i - 1]));
-			}
-
 			const childId = node.children[i] ? node.children[i].id : -1;
-			data.step(Step.Common.Traverse(node.id, childId, i === 0 ? 'left' : 'right'));
+			const lowerBound = i > 0 ? node.values[i - 1] : null;
+			const upperBound = i < node.values.length ? node.values[i] : null;
+			data.step(Step.BTree.ChooseBranch(node.id, value, i, childId, lowerBound, upperBound));
 
 			// Recursively insert into child
 			this.insertAndSplit(node.children[i], node, value, data);
@@ -216,13 +220,11 @@ export class BTree extends DataStructure {
 
 		// If root is empty after deletion, make its only child the new root
 		if (this.root.values.length === 0) {
-			const startSnapshot = this.snapshot();
 			if (!this.root.isLeaf && this.root.children.length > 0) {
 				this.root = this.root.children[0];
 			} else {
 				this.root = null;
 			}
-			data.step(Step.Common.Delete(existing.id, value, startSnapshot, this.snapshot()));
 		}
 
 		return true;
@@ -242,7 +244,7 @@ export class BTree extends DataStructure {
 			data.step(Step.Common.CaseAnalysis(1, 'Value in leaf node', node.id));
 			const startSnapshot = this.snapshot();
 			removeAt(node, idx);
-			data.step(Step.Common.Delete(node.id, value, startSnapshot, this.snapshot()));
+			data.step(Step.BTree.RemoveValue(node.id, value, startSnapshot, this.snapshot()));
 			return;
 		}
 
@@ -281,46 +283,26 @@ export class BTree extends DataStructure {
 		if (node.children[idx].values.length >= t) {
 			data.step(Step.Common.CaseAnalysis(21, 'Get predecessor', node.children[idx].id));
 			const predecessor = this.getPredecessor(node.children[idx]);
-			data.step(Step.Common.FoundInorderSuccessor(node.id, node.children[idx].id, predecessor));
+			data.step(Step.BTree.FindInorderReplacement(node.id, node.children[idx].id, predecessor, 'predecessor'));
 			const startSnapshot = this.snapshot();
 			node.values[idx] = predecessor;
-			data.step(
-				Step.Common.ReplaceWithInorderSuccessor(
-					node.id,
-					node.id,
-					predecessor,
-					node.children[idx].id,
-					null,
-					startSnapshot,
-					this.snapshot(),
-				),
-			);
-			this.removeFromNode(node.children[idx], predecessor, data);
+			data.step(Step.BTree.ReplaceValue(node.id, value, predecessor, 'predecessor', startSnapshot, this.snapshot()));
+			this.removeFromNode(node.children[idx], predecessor, OperationData.Ignored());
 		}
 		// Case 2b: Right child has at least t keys
 		else if (node.children[idx + 1].values.length >= t) {
 			data.step(Step.Common.CaseAnalysis(22, 'Get successor', node.children[idx + 1].id));
 			const successor = this.getSuccessor(node.children[idx + 1]);
-			data.step(Step.Common.FoundInorderSuccessor(node.id, node.children[idx + 1].id, successor));
+			data.step(Step.BTree.FindInorderReplacement(node.id, node.children[idx + 1].id, successor, 'successor'));
 			const startSnapshot = this.snapshot();
 			node.values[idx] = successor;
-			data.step(
-				Step.Common.ReplaceWithInorderSuccessor(
-					node.id,
-					node.id,
-					successor,
-					node.children[idx + 1].id,
-					null,
-					startSnapshot,
-					this.snapshot(),
-				),
-			);
-			this.removeFromNode(node.children[idx + 1], successor, data);
+			data.step(Step.BTree.ReplaceValue(node.id, value, successor, 'successor', startSnapshot, this.snapshot()));
+			this.removeFromNode(node.children[idx + 1], successor, OperationData.Ignored());
 		}
 		// Case 2c: Both children have t-1 keys, merge
 		else {
 			data.step(Step.Common.CaseAnalysis(23, 'Merge children', node.id));
-			this.mergeChildren(node, idx, data);
+			this.mergeChildren(node, idx, data, false);
 			this.removeFromNode(node.children[idx], value, data);
 		}
 	}
@@ -366,9 +348,11 @@ export class BTree extends DataStructure {
 	}
 
 	private borrowFromLeft(node: BTreeNode, childIdx: number, data: OperationData): void {
-		const startSnapshot = this.snapshot();
 		const child = node.children[childIdx];
 		const sibling = node.children[childIdx - 1];
+		const borrowedValue = sibling.values[sibling.values.length - 1];
+		const parentValue = node.values[childIdx - 1];
+		const startSnapshot = this.snapshot();
 
 		// Move a value from parent to child
 		child.values.unshift(node.values[childIdx - 1]);
@@ -381,22 +365,15 @@ export class BTree extends DataStructure {
 			child.children.unshift(sibling.children.pop()!);
 		}
 
-		data.step(
-			Step.Common.ReplaceWithChild(
-				child.id,
-				sibling.id,
-				sibling.values[sibling.values.length - 1] || 0,
-				'left',
-				startSnapshot,
-				this.snapshot(),
-			),
-		);
+		data.step(Step.BTree.BorrowFromLeft(child.id, sibling.id, borrowedValue, parentValue, startSnapshot, this.snapshot()));
 	}
 
 	private borrowFromRight(node: BTreeNode, childIdx: number, data: OperationData): void {
-		const startSnapshot = this.snapshot();
 		const child = node.children[childIdx];
 		const sibling = node.children[childIdx + 1];
+		const borrowedValue = sibling.values[0];
+		const parentValue = node.values[childIdx];
+		const startSnapshot = this.snapshot();
 
 		// Move a value from parent to child
 		child.values.push(node.values[childIdx]);
@@ -409,16 +386,23 @@ export class BTree extends DataStructure {
 			child.children.push(sibling.children.shift()!);
 		}
 
-		data.step(Step.Common.ReplaceWithChild(child.id, sibling.id, 0, 'right', startSnapshot, this.snapshot()));
+		data.step(Step.BTree.BorrowFromRight(child.id, sibling.id, borrowedValue, parentValue, startSnapshot, this.snapshot()));
 	}
 
-	private mergeChildren(node: BTreeNode, idx: number, data: OperationData): void {
-		const startSnapshot = this.snapshot();
+	private mergeChildren(node: BTreeNode, idx: number, data: OperationData, keepParent: boolean = true): void {
 		const child = node.children[idx];
 		const sibling = node.children[idx + 1];
+		const parentValue = node.values[idx];
+		let startSnapshot = this.snapshot();
 
 		// Pull value from parent and merge with right sibling
-		child.values.push(node.values[idx]);
+		if (keepParent) {
+			child.values.push(parentValue);
+		} else {
+			removeAt(node, idx);
+			data.step(Step.BTree.RemoveValue(node.id, parentValue, startSnapshot, this.snapshot()));
+			startSnapshot = this.snapshot();
+		}
 		child.values.push(...sibling.values);
 
 		// Copy child pointers
@@ -427,11 +411,13 @@ export class BTree extends DataStructure {
 		}
 
 		// Remove the value from parent
-		removeAt(node, idx);
+		if (keepParent) {
+			removeAt(node, idx);
+		}
 
 		// Remove the sibling
 		removeChild(node, idx + 1);
 
-		data.step(Step.Common.ReplaceWithChild(child.id, sibling.id, 0, 'right', startSnapshot, this.snapshot()));
+		data.step(Step.BTree.MergeChildren(child.id, sibling.id, keepParent ? parentValue : null, startSnapshot, this.snapshot()));
 	}
 }
