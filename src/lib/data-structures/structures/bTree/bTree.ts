@@ -20,12 +20,12 @@ export class BTreeNode extends DataNode {
 
 export class BTree extends DataStructure {
 	root: BTreeNode | null = null;
-	order: number; // minimum degree (t), each node can have at most 2t-1 keys
+	order: number; // maximum number of children, each node can have at most order-1 keys
 
-	constructor(order: number = 3) {
+	constructor(order: number = 5) {
 		super();
-		if (order < 2) {
-			throw new Error('B-Tree order must be at least 2');
+		if (order < 3) {
+			throw new Error('B-Tree order must be at least 3');
 		}
 		this.order = order;
 	}
@@ -92,12 +92,12 @@ export class BTree extends DataStructure {
 
 	// Split an overfull node (after insertion)
 	private splitNode(node: BTreeNode, parent: BTreeNode | null, data: OperationData): BTreeNode {
-		const t = this.order;
+		const t = Math.ceil(this.order / 2);
 		const midIndex = t - 1;
 
 		// Mark the node as invalid (overfull)
 		const markSnapshot = this.snapshot();
-		data.step(Step.BTree.MarkOverfull(node.id, node.values.length, 2 * t - 1, markSnapshot, markSnapshot));
+		data.step(Step.BTree.MarkOverfull(node.id, node.values.length, this.order - 1, markSnapshot, markSnapshot));
 
 		const startSnapshot = this.snapshot();
 
@@ -112,7 +112,7 @@ export class BTree extends DataStructure {
 
 		// Move the second half of children if not a leaf
 		if (!node.isLeaf) {
-			newNode.children = node.children.splice(t);
+			newNode.children = node.children.splice(t + 1);
 		}
 
 		// If no parent, we'll record split after creating root structure
@@ -172,10 +172,10 @@ export class BTree extends DataStructure {
 			data.step(Step.BTree.InsertValue(node.id, value, startSnapshot, this.snapshot()));
 
 			// Check if node is now overfull
-			if (node.values.length > 2 * this.order - 1) {
+			if (node.values.length > this.order - 1) {
 				this.splitNode(node, parent, data);
 				// If parent is now overfull, it will be handled by the caller
-				if (parent && parent.values.length > 2 * this.order - 1) {
+				if (parent && parent.values.length > this.order - 1) {
 					// This will be handled as we return up the recursion
 				}
 			}
@@ -195,7 +195,7 @@ export class BTree extends DataStructure {
 			this.insertAndSplit(node.children[i], node, value, data);
 
 			// After insertion, check if current node is overfull
-			if (node.values.length > 2 * this.order - 1) {
+			if (node.values.length > this.order - 1) {
 				this.splitNode(node, parent, data);
 			}
 		}
@@ -231,7 +231,7 @@ export class BTree extends DataStructure {
 	}
 
 	private removeFromNode(node: BTreeNode, value: number, data: OperationData): void {
-		const t = this.order;
+		const t = Math.ceil(this.order / 2);
 		let idx = 0;
 
 		// Find the index of the value or the child where it might be
@@ -276,7 +276,7 @@ export class BTree extends DataStructure {
 	}
 
 	private removeFromNonLeaf(node: BTreeNode, idx: number, data: OperationData): void {
-		const t = this.order;
+		const t = Math.ceil(this.order / 2);
 		const value = node.values[idx];
 
 		// Case 2a: Left child has at least t keys
@@ -324,7 +324,7 @@ export class BTree extends DataStructure {
 	}
 
 	private fillChild(node: BTreeNode, idx: number, data: OperationData): void {
-		const t = this.order;
+		const t = Math.ceil(this.order / 2);
 
 		// Borrow from left sibling
 		if (idx !== 0 && node.children[idx - 1].values.length >= t) {

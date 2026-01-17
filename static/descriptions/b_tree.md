@@ -4,11 +4,11 @@ A **B-Tree** is a self-balancing tree data structure that maintains sorted data 
 
 ### Key Properties
 
-Every B-Tree is defined by a minimum degree **t** (also called the order), which determines:
+Every B-Tree is defined by an **order** value, which determines the maximum number of children a node can have:
 
-- Each node can contain at most **2t - 1** keys
-- Each node (except root) must contain at least **t - 1** keys
-- Each internal node (except root) has at least **t** children
+- Each node can contain at most **order - 1** keys
+- Each node (except root) must contain at least **⌈order/2⌉ - 1** keys
+- Each internal node (except root) has at least **⌈order/2⌉** children
 - All leaf nodes appear at the same level
 
 This structure ensures the tree remains balanced, with all paths from root to leaf having the same length.
@@ -17,8 +17,8 @@ This structure ensures the tree remains balanced, with all paths from root to le
 
 Unlike binary trees, B-Tree nodes contain:
 
-- **Multiple values**: An array of sorted keys (up to 2t - 1)
-- **Multiple children**: An array of child pointers (up to 2t)
+- **Multiple values**: An array of sorted keys (up to order - 1)
+- **Multiple children**: An array of child pointers (up to order)
 - **Leaf flag**: Indicates whether the node is a leaf or internal node
 
 Internal nodes have one more child than they have keys, with keys acting as separators between child subtrees.
@@ -33,7 +33,7 @@ B-Trees maintain excellent performance by keeping the tree height minimal throug
 | Insert    | O(log n)   |
 | Delete    | O(log n)   |
 
-The logarithm base is the minimum degree t, making B-Trees with larger t values shorter and wider.
+The logarithm base is determined by the order value, making B-Trees with larger order values shorter and wider.
 
 ## Search (Find)
 
@@ -53,16 +53,16 @@ Insertion maintains the B-Tree properties by splitting full nodes proactively:
 ### Phase 1: Navigate to insertion point
 
 - Traverse from root to the appropriate leaf node
-- If a full node (2t - 1 keys) is encountered, **split it** before descending
+- If a full node (order - 1 keys) is encountered, **split it** before descending
 
 ### Phase 2: Node splitting
 
 When a node is full:
 
-1. **Find median**: Identify the middle key (at index t - 1)
+1. **Find median**: Identify the middle key (at index ⌈order/2⌉ - 1)
 2. **Create sibling**: Create a new node for the upper half of keys
 3. **Promote median**: Move the median key up to the parent
-4. **Distribute keys**: Left node keeps keys 0 to t-2, right node gets keys t to 2t-2
+4. **Distribute keys**: Left node keeps lower half, right node gets upper half
 5. **Distribute children**: If not a leaf, split children accordingly
 
 ### Phase 3: Insert into non-full node
@@ -78,7 +78,7 @@ Deletion is the most complex operation, maintaining balance through borrowing an
 
 ### Case 1: Key in leaf node
 
-Simply remove the key. If this makes the node too small (< t - 1 keys), proceed to fix-up.
+Simply remove the key. If this makes the node too small (< ⌈order/2⌉ - 1 keys), proceed to fix-up.
 
 ### Case 2: Key in internal node
 
@@ -89,17 +89,17 @@ Replace with either:
 
 Then recursively delete the predecessor/successor from its original location.
 
-### Case 3: Child has minimum keys (t - 1)
+### Case 3: Child has minimum keys (⌈order/2⌉ - 1)
 
-Before descending to a child with only t - 1 keys, ensure it has at least t keys:
+Before descending to a child with only ⌈order/2⌉ - 1 keys, ensure it has at least ⌈order/2⌉ keys:
 
-**Borrow from sibling** if a neighboring sibling has ≥ t keys:
+**Borrow from sibling** if a neighboring sibling has ≥ ⌈order/2⌉ keys:
 
 - Move a key from parent down to the child
 - Move a key from the sibling up to the parent
 - Move a child pointer if necessary
 
-**Merge with sibling** if both siblings have exactly t - 1 keys:
+**Merge with sibling** if both siblings have exactly ⌈order/2⌉ - 1 keys:
 
 - Bring a key down from the parent
 - Combine the child, parent key, and sibling into one node
