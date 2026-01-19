@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { NodeOptions } from 'vis-network';
-
 	import { Colors } from '$lib/assets/colors';
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import StructureVisual from '$lib/data-structures/visual/StructureVisual.svelte';
@@ -19,16 +17,13 @@
 			top: 10,
 			bottom: 10,
 		},
-	} as NodeOptions;
+	};
 
 	const layoutOptions = {
-		hierarchical: {
-			direction: 'UD',
-			sortMethod: 'directed',
-			shakeTowards: 'roots',
-			levelSeparation: 100,
-			nodeSpacing: 250,
-		},
+		name: 'breadthfirst',
+		directed: true,
+		roots: '[indegree = 0]',
+		spacingFactor: 1.5,
 	};
 </script>
 

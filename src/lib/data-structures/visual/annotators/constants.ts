@@ -1,2 +1,2 @@
 // Shared constants for annotators
-export const VIS_NETWORK_TOP_BB_OFFSET = 6.2;
+export const CYTOSCAPE_NODE_BBOX_OFFSET = 6.2;

@@ -1,5 +1,3 @@
-import type { Node } from 'vis-network';
-
 import { getDummyNodeId, NodeData } from '$lib/data-structures/utils/graphs';
 import { Timer } from '$lib/utils/timer';
 
@@ -18,19 +16,23 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 		const right = getDummyNodeId(nodeId, 1);
 
 		if (grow) {
-			if (this.nodes.get(left)) {
+			const leftNode = this.cy.getElementById(left);
+			if (leftNode && leftNode.isNode()) {
 				const leftFinal = this.getPosition(left);
 				await this.snapNodeTo(left, parentPos.x, parentPos.y);
 				promises.push(this.animateNodeMovement(left, parentPos, leftFinal));
 			}
-			if (this.nodes.get(right)) {
+			const rightNode = this.cy.getElementById(right);
+			if (rightNode && rightNode.isNode()) {
 				const rightFinal = this.getPosition(right);
 				await this.snapNodeTo(right, parentPos.x, parentPos.y);
 				promises.push(this.animateNodeMovement(right, parentPos, rightFinal));
 			}
 		} else {
-			if (this.nodes.get(left)) promises.push(this.animateNodeMovement(left, this.getPosition(left), parentPos));
-			if (this.nodes.get(right)) promises.push(this.animateNodeMovement(right, this.getPosition(right), parentPos));
+			const leftNode = this.cy.getElementById(left);
+			if (leftNode && leftNode.isNode()) promises.push(this.animateNodeMovement(left, this.getPosition(left), parentPos));
+			const rightNode = this.cy.getElementById(right);
+			if (rightNode && rightNode.isNode()) promises.push(this.animateNodeMovement(right, this.getPosition(right), parentPos));
 		}
 
 		await Promise.all(promises);
@@ -45,53 +47,78 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 	}
 
 	addNode(nodeId: number, value: number | string) {
-		this.addNodeRaw({ id: nodeId, title: NodeData.toTitle(new NodeData(0)), label: value.toString() });
+		this.addNodeRaw({
+			data: {
+				id: nodeId,
+				label: value.toString(),
+				title: NodeData.toTitle(new NodeData(0)),
+			},
+		});
 	}
 
 	clearDisconnectedDummyNodes() {
 		const toRemove: string[] = [];
-		for (const node of this.nodes.get()) {
-			if (typeof node.id === 'string' && node.id.startsWith('dummy-')) {
-				const connected = (this.network as any).getConnectedNodes(node.id);
-				if (connected.length === 0) toRemove.push(node.id as string);
+		for (const node of this.cy.nodes()) {
+			if (node.id().startsWith('dummy-')) {
+				const connected = node.connectedEdges().length > 0;
+				if (!connected) toRemove.push(node.id());
 			}
 		}
-		if (toRemove.length) this.removeNodeRaw(toRemove as any);
+		if (toRemove.length) {
+			for (const id of toRemove) {
+				this.removeNodeRaw(id);
+			}
+		}
 	}
 
-	protected ensureWithFn(tree: any, toGraphFn: (root: any) => { nodes: any; edges: any }) {
+	protected ensureWithFn(tree: any, toGraphFn: (root: any) => { nodes: any[]; edges: any[] }) {
 		try {
 			const timer = new Timer();
 			const newData = toGraphFn(tree.root ?? null);
 			timer.checkpoint('graph');
 
 			// update existing nodes or add new ones
-			for (const n of newData.nodes.get()) {
-				if (this.nodes.get(n.id!)) {
-					this.updateNodeRaw(n);
+			for (const n of newData.nodes) {
+				const nodeId = String(n.data.id);
+				const existingNode = this.cy.getElementById(nodeId);
+				if (existingNode && existingNode.isNode()) {
+					existingNode.data({ ...n.data, id: nodeId });
 				} else {
-					this.addNodeRaw(n);
+					this.addNodeRaw({ ...n, data: { ...n.data, id: nodeId } });
 				}
 			}
 
 			// remove nodes that are no longer present
-			const newNodeIds = new Set(newData.nodes.get().map((n: any) => n.id));
-			for (const existingNode of this.nodes.get()) {
-				if (!newNodeIds.has(existingNode.id)) {
-					this.removeNodeRaw(existingNode.id!);
+			const newNodeIds = new Set(newData.nodes.map((n: any) => String(n.data.id)));
+			for (const existingNode of this.cy.nodes()) {
+				if (!newNodeIds.has(existingNode.id())) {
+					this.removeNodeRaw(existingNode.id());
 				}
 			}
 			timer.checkpoint('nodes');
 
 			// rebuild edges from authoritative graph
 			try {
-				this.edges.clear();
-				this.edges.add(newData.edges.get());
+				this.cy.remove(this.cy.edges());
+				for (const e of newData.edges) {
+					this.cy.add({
+						...e,
+						data: {
+							...e.data,
+							id: String(e.data.id),
+							source: String(e.data.source),
+							target: String(e.data.target),
+						},
+					});
+				}
 			} catch {}
 			timer.checkpoint('edges');
 
 			this.clearDisconnectedDummyNodes();
 			timer.checkpoint('cleanup');
+
+			// Run layout to position nodes properly and fit viewport
+			this.runTreeLayout();
 
 			// timer.printReport('BinaryTreeAnimator.ensureTree: ');
 		} catch (err) {

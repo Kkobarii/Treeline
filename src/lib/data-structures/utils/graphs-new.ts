@@ -4,26 +4,30 @@ import type { BSTreeNode } from '$lib/data-structures/structures/bsTree/bsTree';
 import type { BTreeNode } from '$lib/data-structures/structures/bTree/bTree';
 import { RBTreeColor, type RBTreeNode } from '$lib/data-structures/structures/rbTree/rbTree';
 
-// Cytoscape-compatible types
+// Cytoscape node and edge type definitions
 export interface CytoscapeNode {
 	data: {
-		id: string | number;
-		label?: string;
+		id: string;
+		label: string;
 		title?: string;
 		[key: string]: any;
 	};
-	position?: { x: number; y: number };
-	style?: { [key: string]: any };
+	[key: string]: any;
 }
 
 export interface CytoscapeEdge {
 	data: {
-		id: string | number;
+		id: string;
 		source: string | number;
 		target: string | number;
 		[key: string]: any;
 	};
-	style?: { [key: string]: any };
+	[key: string]: any;
+}
+
+export interface GraphData {
+	nodes: CytoscapeNode[];
+	edges: CytoscapeEdge[];
 }
 
 function log(...args: any[]) {
@@ -40,7 +44,7 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 	edges: CytoscapeEdge[] = [],
 	successorInfo: SuccessorInfo | null = null,
 	createNodeOverrides?: (node: T, childNumber: number) => Record<string, any>,
-) {
+): { nodes: CytoscapeNode[]; edges: CytoscapeEdge[] } {
 	if (!root) return { nodes, edges };
 
 	log('binaryTreeToGraph called with root:', root);
@@ -50,37 +54,24 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 	const nodeData = createNodeData(root, 0);
 	const nodeOverrides = createNodeOverrides ? createNodeOverrides(root, 0) : {};
 
-	const nodeObj: CytoscapeNode = {
+	nodes.push({
 		data: {
-			id: nodeId,
+			id: nodeId.toString(),
 			label: root.value.toString(),
 			title: NodeData.toTitle(nodeData),
-			...nodeOverrides,
+			...(nodeOverrides.data || {}),
 		},
-	};
-	nodes.push(nodeObj);
+		...nodeOverrides,
+	});
 
 	if (successorInfo !== null) {
-		const parentNodeData = createNodeData(root, successorInfo.childNumber);
-		const successorOverrides = createNodeOverrides ? createNodeOverrides(root, successorInfo.childNumber) : {};
-
-		// Update the node we just added
-		const idx = nodes.findIndex(n => n.data.id === nodeId);
-		if (idx !== -1) {
-			nodes[idx].data = {
-				...nodes[idx].data,
-				title: NodeData.toTitle(parentNodeData),
-				...successorOverrides,
-			};
-		}
-
 		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
 		log(`Adding edge ${edgeId} from ${successorInfo.parentId} to ${nodeId}`);
 		edges.push({
 			data: {
 				id: edgeId,
-				source: successorInfo.parentId,
-				target: nodeId,
+				source: successorInfo.parentId.toString(),
+				target: nodeId.toString(),
 			},
 		});
 	}
@@ -108,15 +99,15 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 				id: dummyId,
 				label: '',
 				title: NodeData.toTitle(dummyNodeData),
-				isPlaceholder: true,
+				isDummy: true,
 			},
 		});
 		edges.push({
 			data: {
 				id: getEdgeId(nodeId, 0),
-				source: nodeId,
+				source: nodeId.toString(),
 				target: dummyId,
-				dashed: true,
+				isDashed: true,
 			},
 		});
 	}
@@ -144,15 +135,15 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 				id: dummyId,
 				label: '',
 				title: NodeData.toTitle(dummyNodeData),
-				isPlaceholder: true,
+				isDummy: true,
 			},
 		});
 		edges.push({
 			data: {
 				id: getEdgeId(nodeId, 1),
-				source: nodeId,
+				source: nodeId.toString(),
 				target: dummyId,
-				dashed: true,
+				isDashed: true,
 			},
 		});
 	}
@@ -219,9 +210,15 @@ export function rbTreeToGraph(
 			const nodeColor = node.color === RBTreeColor.Red ? Colors.RBTreeRed : Colors.RBTreeBlack;
 			const fontColor = node.color === RBTreeColor.Red ? Colors.Black : Colors.White;
 			return {
-				backgroundColor: nodeColor,
-				borderColor: nodeColor,
-				color: fontColor,
+				data: {
+					bgColor: nodeColor,
+					fontColor: fontColor,
+				},
+				style: {
+					backgroundColor: nodeColor,
+					color: fontColor,
+					borderColor: nodeColor,
+				},
 			};
 		},
 	);
@@ -249,11 +246,10 @@ export function getEdgeId(parentId: number | string, direction: 'left' | 'right'
 export class NodeData {
 	constructor(public childNumber: number) {}
 
-	static fromNode(node: CytoscapeNode | any): NodeData {
+	static fromNode(nodeData: any): NodeData {
 		let childNumber = -1;
-		const title = node.data?.title || node.title;
-		if (title && typeof title === 'string') {
-			let titleObj = JSON.parse(title);
+		if (nodeData.title && typeof nodeData.title === 'string') {
+			let titleObj = JSON.parse(nodeData.title);
 			if ('childNumber' in titleObj) {
 				childNumber = titleObj.childNumber;
 			}
@@ -292,13 +288,12 @@ export class AVLTreeNodeData extends NodeData {
 		super(childNumber);
 	}
 
-	static fromNode(node: CytoscapeNode | any): AVLTreeNodeData {
+	static fromNode(nodeData: any): AVLTreeNodeData {
 		let childNumber = -1;
 		let height = NaN;
 		let balance = NaN;
-		const title = node.data?.title || node.title;
-		if (title && typeof title === 'string') {
-			let titleObj = JSON.parse(title);
+		if (nodeData.title && typeof nodeData.title === 'string') {
+			let titleObj = JSON.parse(nodeData.title);
 
 			if ('childNumber' in titleObj) {
 				childNumber = titleObj.childNumber;
@@ -322,12 +317,11 @@ export class RBTreeNodeData extends NodeData {
 		super(childNumber);
 	}
 
-	static fromNode(node: CytoscapeNode | any): RBTreeNodeData {
+	static fromNode(nodeData: any): RBTreeNodeData {
 		let childNumber = -1;
 		let color: RBTreeColor = RBTreeColor.Black;
-		const title = node.data?.title || node.title;
-		if (title && typeof title === 'string') {
-			let titleObj = JSON.parse(title);
+		if (nodeData.title && typeof nodeData.title === 'string') {
+			let titleObj = JSON.parse(nodeData.title);
 
 			if ('childNumber' in titleObj) {
 				childNumber = titleObj.childNumber;
@@ -356,10 +350,16 @@ export function bTreeToGraph(
 
 	nodes.push({
 		data: {
-			id: nodeId,
+			id: nodeId.toString(),
 			label: label,
 			title: NodeData.toTitle(nodeData),
-			isBTreeNode: true,
+			shape: 'box',
+		},
+		style: {
+			backgroundColor: Colors.Node,
+			color: 'black',
+			fontSize: 20,
+			minWidth: 60,
 		},
 	});
 
@@ -369,8 +369,8 @@ export function bTreeToGraph(
 		edges.push({
 			data: {
 				id: edgeId,
-				source: successorInfo.parentId,
-				target: nodeId,
+				source: successorInfo.parentId.toString(),
+				target: nodeId.toString(),
 			},
 		});
 	}

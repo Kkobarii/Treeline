@@ -1,7 +1,7 @@
 <script lang="ts">
+	import type { Core } from 'cytoscape';
+	import cytoscape from 'cytoscape';
 	import { onMount } from 'svelte';
-	import { DataSet } from 'vis-data';
-	import { Network, type Edge, type Node, type Options } from 'vis-network';
 
 	import { Colors } from '$lib/assets/colors';
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
@@ -19,9 +19,7 @@
 	export let layout: any = null;
 
 	let container: HTMLElement | null = null;
-	let nodes: DataSet<Node> = new DataSet<Node>();
-	let edges: DataSet<Edge> = new DataSet<Edge>();
-	let network: Network;
+	let cy: Core | null = null;
 
 	let orchestrator: AnimationOrchestrator;
 	let animator: any;
@@ -41,52 +39,119 @@
 	}
 
 	const defaultLayout = {
-		hierarchical: {
-			direction: 'UD',
-			sortMethod: 'directed',
-			shakeTowards: 'roots',
-			levelSeparation: 100,
-			treeSpacing: 0,
-		},
-	};
-
-	const options: Options = {
-		layout: layout || defaultLayout,
-		physics: false,
-		interaction: { dragNodes: false },
-		nodes: nodeOptions,
-		edges: { chosen: false },
+		name: 'breadthfirst',
+		directed: true,
+		roots: '[indegree = 0]',
+		spacingFactor: 2,
+		padding: 20,
 	};
 
 	onMount(() => {
-		network = new Network(container!, { nodes, edges }, options);
+		// Ensure container has dimensions
+		if (container) {
+			container.style.width = '100%';
+			container.style.height = '100%';
+		}
 
-		animator = new Animator({ network, nodes, edges, nodeOptions });
-		annotator = new Annotator({ canvas: overlayCanvas!, network, nodes, edges });
+		// Initialize cytoscape
+		cy = cytoscape({
+			container: container!,
+			elements: [],
+			style: [
+				{
+					selector: 'node',
+					style: {
+						'background-color': Colors.Node,
+						'text-valign': 'center',
+						'text-halign': 'center',
+						label: 'data(label)',
+						'font-size': 30,
+						'border-width': 2,
+						'border-color': '#333',
+						padding: '10px',
+					},
+				},
+				{
+					selector: 'node[isPlaceholder]',
+					style: {
+						'background-color': 'transparent',
+						'border-color': 'transparent',
+						width: 1,
+						height: 1,
+						opacity: 0.1,
+					},
+				},
+				{
+					selector: 'node[isBTreeNode]',
+					style: {
+						'font-size': 20,
+						'min-width': '60px',
+						color: 'black',
+					},
+				},
+				{
+					selector: 'edge',
+					style: {
+						'target-arrow-shape': 'triangle',
+						'line-color': '#333',
+						'target-arrow-color': '#333',
+						width: 2,
+					},
+				},
+				{
+					selector: 'edge[?dashed]',
+					style: {
+						'line-style': 'dashed',
+						opacity: 0.3,
+					},
+				},
+			],
+			layout: layout || defaultLayout,
+			wheelSensitivity: 0.1,
+			panningEnabled: true,
+			userPanningEnabled: true,
+		});
+
+		animator = new Animator({ cy, nodeOptions });
+		annotator = new Annotator({ canvas: overlayCanvas!, cy, nodeOptions });
 		debugMode = annotator.debugMode;
 
 		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new StepHandler());
 
-		network.on('selectNode', params => {
-			if (params.nodes.length === 1) {
-				const node = nodes.get(params.nodes[0]) as Node;
-				console.log('Node selected:', node);
-				operationManager.updateCurrentValue(parseInt(node.label!));
-
-				setTimeout(() => {
-					network.unselectAll();
-				}, 200);
+		cy.on('tap', 'node', (event: any) => {
+			const node = event.target;
+			if (node.data('id').toString().startsWith('dummy-')) {
+				return; // Don't select dummy nodes
 			}
+			console.log('Node selected:', node.data());
+			const label = node.data('label');
+			if (label && !isNaN(parseInt(label))) {
+				operationManager.updateCurrentValue(parseInt(label));
+			}
+			cy!.elements().unselect();
 		});
 
-		network.on('afterDrawing', () => {
-			if (showOverlay) {
-				overlayCanvas!.height = container!.clientHeight;
-				overlayCanvas!.width = container!.clientWidth;
-
+		// Redraw overlay on pan/zoom
+		cy.on('viewport', () => {
+			if (showOverlay && overlayCanvas && annotator) {
+				overlayCanvas.height = container!.clientHeight;
+				overlayCanvas.width = container!.clientWidth;
 				annotator.redrawCanvas();
 			}
 		});
+
+		// Keep cy sized to container changes
+		if (container) {
+			const resizeObserver = new ResizeObserver(() => {
+				cy?.resize();
+				if (overlayCanvas && container) {
+					overlayCanvas.height = container.clientHeight;
+					overlayCanvas.width = container.clientWidth;
+					annotator?.redrawCanvas();
+				}
+			});
+			resizeObserver.observe(container);
+		}
 	});
 </script>
 

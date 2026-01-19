@@ -1,32 +1,64 @@
-import type { DataSet } from 'vis-data';
-import type { Edge, Font, Network, Node, NodeOptions, Position } from 'vis-network';
+import type { Core } from 'cytoscape';
 
+import type { CytoscapeNode } from '$lib/data-structures/utils/graphs';
 import { addAnimation, DEFAULT_ANIMATION_DURATION_MS, getGlobalAnimationDuration, setGlobalAnimationDuration } from '$lib/utils/animator';
 
+export interface Position {
+	x: number;
+	y: number;
+}
+
 export interface DataStructureAnimatorOpts {
-	network: Network;
-	nodes: DataSet<Node>;
-	edges: DataSet<Edge>;
-	nodeOptions: NodeOptions;
+	cy: Core;
+	nodeOptions: Record<string, any>;
 }
 
 export class DataStructureAnimator {
-	network: Network;
-	nodes: DataSet<Node>;
-	edges: DataSet<Edge>;
-	nodeOptions: NodeOptions;
-	// instance-level duration kept for API compatibility, but actual timing uses the global duration
+	cy: Core;
+	nodeOptions: Record<string, any>;
 	animationDurationMs: number = getGlobalAnimationDuration();
+	private hasFitOnce = false;
+
+	protected runTreeLayout() {
+		try {
+			const prevZoom = this.cy.zoom();
+			const prevPan = this.cy.pan();
+
+			const realNodes = this.cy.nodes('[!isPlaceholder]');
+			const rootIds = realNodes.filter(n => n.incomers('edge[!dashed]').length === 0).map(n => n.id());
+			// include placeholders so dummy leaves are placed, but compute roots from real nodes only
+			const elements = this.cy.elements();
+			elements
+				.layout({
+					name: 'breadthfirst',
+					directed: true,
+					roots: rootIds.length ? rootIds : undefined,
+					spacingFactor: 2,
+					padding: 60,
+					avoidOverlap: true,
+					nodeDimensionsIncludeLabels: true,
+					animate: false,
+				})
+				.run();
+
+			if (!this.hasFitOnce) {
+				this.cy.fit(elements, 40);
+				this.hasFitOnce = true;
+			} else {
+				this.cy.fit(elements, 40);
+				this.cy.zoom(prevZoom);
+			}
+		} catch (err) {
+			console.warn('runTreeLayout failed', err);
+		}
+	}
 
 	constructor(opts: DataStructureAnimatorOpts) {
-		this.network = opts.network;
-		this.nodes = opts.nodes;
-		this.edges = opts.edges;
+		this.cy = opts.cy;
 		this.nodeOptions = opts.nodeOptions;
 	}
 
 	public setAnimationDuration(durationMs: number) {
-		// keep instance value in sync, and update global duration so annotators pick it up
 		this.animationDurationMs = durationMs;
 		setGlobalAnimationDuration(durationMs);
 	}
@@ -35,29 +67,38 @@ export class DataStructureAnimator {
 		this.setAnimationDuration(DEFAULT_ANIMATION_DURATION_MS);
 	}
 
-	// --- low-level dataset/network ops ---
-	protected async addNodeRaw(node: Node) {
+	// --- low-level node/edge ops ---
+	protected async addNodeRaw(node: CytoscapeNode) {
 		console.debug('addNodeRaw', node);
 		try {
-			this.nodes.add(node);
+			this.cy.add({
+				...node,
+				data: {
+					...node.data,
+					id: String(node.data.id),
+				},
+			});
 		} catch {
 			console.warn('Failed to add node', node);
 		}
 	}
 
-	protected updateNodeRaw(node: Node) {
-		// console.debug('updateNodeRaw', node);
+	protected updateNodeRaw(id: string | number, data: Record<string, any>) {
+		console.debug('updateNodeRaw', id, data);
 		try {
-			this.nodes.update(node);
+			const node = this.cy.getElementById(String(id));
+			if (node && node.isNode()) {
+				node.data(data);
+			}
 		} catch {
-			console.warn('Failed to update node', node);
+			console.warn('Failed to update node', id, data);
 		}
 	}
 
 	protected removeNodeRaw(id: string | number) {
 		console.debug('removeNodeRaw', id);
 		try {
-			this.nodes.remove(id);
+			this.cy.remove(`#${String(id)}`);
 		} catch {
 			console.warn('Failed to remove node', id);
 		}
@@ -65,7 +106,7 @@ export class DataStructureAnimator {
 
 	hasNodes(): boolean {
 		try {
-			return this.nodes.length > 0;
+			return this.cy.nodes().length > 0;
 		} catch {
 			return false;
 		}
@@ -74,21 +115,24 @@ export class DataStructureAnimator {
 	// --- positioning and movement ---
 	getPosition(nodeId: string | number): Position {
 		try {
-			return this.network.getPosition(nodeId);
+			const node = this.cy.getElementById(String(nodeId));
+			if (node && node.isNode()) {
+				const pos = node.position();
+				return { x: pos.x, y: pos.y };
+			}
+			return { x: 0, y: 0 };
 		} catch {
-			const node = this.nodes.get(nodeId as any) as any;
-			return { x: node?.x ?? 0, y: node?.y ?? 0 };
+			return { x: 0, y: 0 };
 		}
 	}
 
 	protected async moveNode(nodeId: string | number, x: number, y: number) {
 		try {
-			await (this.network as any).moveNode(nodeId, x, y);
-		} catch {
-			try {
-				this.nodes.update({ id: nodeId, x, y } as any);
-			} catch {}
-		}
+			const node = this.cy.getElementById(String(nodeId));
+			if (node && node.isNode()) {
+				node.position({ x, y });
+			}
+		} catch {}
 	}
 
 	public async snapNodeTo(nodeId: string | number, x: number, y: number) {
@@ -102,11 +146,12 @@ export class DataStructureAnimator {
 				const x = from.x + (to.x - from.x) * t;
 				const y = from.y + (to.y - from.y) * t;
 				try {
-					(this.network as any).moveNode(nodeId, x, y);
+					const node = this.cy.getElementById(String(nodeId));
+					if (node && node.isNode()) {
+						node.position({ x, y });
+					}
 				} catch {
-					try {
-						this.nodes.update({ id: nodeId, x, y } as any);
-					} catch {}
+					console.warn('Failed to animate node movement', nodeId);
 				}
 				if (t >= 1) {
 					cancel();
@@ -120,7 +165,7 @@ export class DataStructureAnimator {
 
 	// --- visual helpers ---
 	protected getNodeFontSize(): number {
-		return (this.nodeOptions.font as Font)?.size ?? 14;
+		return this.nodeOptions.font?.size ?? 14;
 	}
 
 	animateNodeGrowth(nodeId: string | number): Promise<void> {
@@ -139,7 +184,7 @@ export class DataStructureAnimator {
 				const t = Math.min(1, elapsed / getGlobalAnimationDuration());
 				const size = Math.max(0, startSize + (endSize - startSize) * t);
 				try {
-					this.nodes.update({ id: nodeId, font: { size } } as any);
+					this.updateNodeRaw(nodeId, { 'font-size': size });
 				} catch {}
 				if (t >= 1) {
 					cancel();
@@ -153,54 +198,74 @@ export class DataStructureAnimator {
 
 	setNodeColor(nodeId: string | number, color: string) {
 		try {
-			this.nodes.update({ id: nodeId, color } as any);
+			const node = this.cy.getElementById(String(nodeId));
+			if (node && node.isNode()) {
+				node.style({ 'background-color': color });
+			}
 		} catch {}
 	}
 
 	resetNodeColor(nodeId: string | number) {
 		try {
-			this.nodes.update({ id: nodeId, color: (this.nodeOptions as any).color } as any);
+			const node = this.cy.getElementById(String(nodeId));
+			if (node && node.isNode()) {
+				node.style({ 'background-color': this.nodeOptions.color || '#555' });
+			}
 		} catch {}
 	}
 
 	setEdgeStyle(fromId: string | number, toId: string | number, color: string, width: number = 3) {
 		try {
-			const edges = this.edges.get();
-			const edge = edges.find((e: any) => e.from === fromId && e.to === toId);
-			if (edge) {
-				this.edges.update({ id: edge.id, color: { color, highlight: color }, width } as any);
+			const edge = this.cy
+				.edges()
+				.filter(e => e.source().id() === String(fromId) && e.target().id() === String(toId))
+				.first();
+			if (edge && edge.nonempty()) {
+				edge.style({ 'line-color': color, 'target-arrow-color': color, width });
 			}
 		} catch {}
 	}
 
 	resetEdgeStyle(fromId: string | number, toId: string | number) {
 		try {
-			const edges = this.edges.get();
-			const edge = edges.find((e: any) => e.from === fromId && e.to === toId);
-			if (edge) {
-				this.edges.update({ id: edge.id, color: undefined, width: undefined } as any);
+			const edge = this.cy
+				.edges()
+				.filter(e => e.source().id() === String(fromId) && e.target().id() === String(toId))
+				.first();
+			if (edge && edge.nonempty()) {
+				edge.style({ 'line-color': '#333', 'target-arrow-color': '#333', width: 2 });
 			}
 		} catch {}
 	}
 
 	resetFormatting() {
-		for (const node of this.nodes.get()) {
+		for (const node of this.cy.nodes()) {
 			try {
-				if (node.id.toString().startsWith('dummy-')) continue;
-				this.updateNodeRaw({ id: node.id, color: this.nodeOptions?.color, font: this.nodeOptions?.font } as any);
+				if (node.id().toString().startsWith('dummy-')) continue;
+				node.style({
+					'background-color': this.nodeOptions.color || '#555',
+					'font-size': this.nodeOptions.font?.size ?? 14,
+				});
 			} catch {}
 		}
 	}
 
 	async animateFit(durationMs: number = 1000) {
 		try {
-			// this.network.fit();
-			this.network.fit({ animation: { duration: durationMs, easingFunction: 'easeInOutQuad' } });
+			if (!this.hasFitOnce) {
+				this.cy.fit();
+				this.hasFitOnce = true;
+			}
 		} catch {}
 	}
 
 	getPositions(): { [nodeId: string]: Position } {
-		return this.network.getPositions();
+		const positions: { [nodeId: string]: Position } = {};
+		for (const node of this.cy.nodes()) {
+			const pos = node.position();
+			positions[node.id()] = { x: pos.x, y: pos.y };
+		}
+		return positions;
 	}
 
 	async animateRelayout(fromPositions: { [nodeId: string]: Position }, newPositions: { [nodeId: string]: Position }) {
