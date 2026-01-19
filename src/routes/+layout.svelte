@@ -35,6 +35,9 @@
 			<a
 				href="/data-structures/b-tree"
 				class="header-link">B-Tree</a>
+			<a
+				href="/data-structures/heap"
+				class="header-link">Heap</a>
 		</div>
 
 		<!-- right actions -->

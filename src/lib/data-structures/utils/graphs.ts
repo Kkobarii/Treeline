@@ -5,6 +5,7 @@ import { Colors, shadeColor } from '$lib/assets/colors';
 import type { AVLTreeNode } from '$lib/data-structures/structures/avlTree/avlTree';
 import type { BSTreeNode } from '$lib/data-structures/structures/bsTree/bsTree';
 import type { BTreeNode } from '$lib/data-structures/structures/bTree/bTree';
+import type { HeapNode } from '$lib/data-structures/structures/heap/heap';
 import { RBTreeColor, type RBTreeNode } from '$lib/data-structures/structures/rbTree/rbTree';
 
 function log(...args: any[]) {
@@ -143,6 +144,23 @@ export function avlTreeToGraph(
 		node => node.left,
 		node => node.right,
 		(node, childNumber) => new AVLTreeNodeData(childNumber, node.height ?? 0, getBalanceValue(node)),
+		nodes,
+		edges,
+		successorInfo,
+	);
+}
+
+export function heapToGraph(
+	root: HeapNode | null,
+	nodes: DataSet<Node> = new DataSet<Node>(),
+	edges: DataSet<Edge> = new DataSet<Edge>(),
+	successorInfo: SuccessorInfo | null = null,
+) {
+	return binaryTreeToGraph(
+		root,
+		node => node.left,
+		node => node.right,
+		(_node, childNumber) => new NodeData(childNumber),
 		nodes,
 		edges,
 		successorInfo,

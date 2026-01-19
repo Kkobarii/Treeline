@@ -32,8 +32,11 @@ export async function handleStartForwardCommon(
 	annotator.annotateNode(info, null);
 
 	if (animator.hasNodes()) {
-		const value = operationManager.getCurrentOperation().operation.split(' ')[1];
-		annotator.createValueAnnotation(value, null);
+		const parts = operationManager.getCurrentOperation().operation.split(' ');
+		const value = parts.length > 1 ? parts[1] : null;
+		if (value !== null && value !== undefined && value !== '') {
+			annotator.createValueAnnotation(value, null);
+		}
 	}
 	const endPositions = animator.getPositions();
 	await animator.animateRelayout(startPositions, endPositions);

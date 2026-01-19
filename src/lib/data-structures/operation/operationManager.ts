@@ -112,8 +112,9 @@ export class OperationManager {
 
 		if (values.length > 0) console.log('Initial values:', values.join(', '));
 
+		const insertOp = structureType === StructureType.Heap ? OperationType.Heap.Insert : OperationType.Tree.Insert;
 		for (const v of values) {
-			structure.operation(OperationType.Tree.Insert, v);
+			structure.operation(insertOp, v);
 		}
 
 		const snapshot = deepCopyStructure(structureType, structure);
@@ -210,7 +211,7 @@ export class OperationManager {
 		}
 	}
 
-	operation(type: OperationTypeValue, value: number) {
+	operation(type: OperationTypeValue, value: number | null = null) {
 		console.log('Performing:', type, value);
 
 		let initialState = deepCopyStructure(this.structureType, this.operations[this.currentOperation].endSnapshot!);

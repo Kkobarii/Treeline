@@ -6,6 +6,7 @@ export enum StructureType {
 	AVLTree = 'AVLTree',
 	RBTree = 'RBTree',
 	BTree = 'BTree',
+	Heap = 'Heap',
 }
 
 export const OperationType = {
@@ -14,13 +15,19 @@ export const OperationType = {
 		Find: 'Tree.Find',
 		Remove: 'Tree.Remove',
 	},
+	Heap: {
+		Insert: 'Heap.Insert',
+		ExtractRoot: 'Heap.ExtractRoot',
+	},
 	// Stack: {
 	// 	Push: 'Stack.Push',
 	// 	Pop: 'Stack.Pop',
 	// },
 } as const;
 
-export type OperationTypeValue = (typeof OperationType.Tree)[keyof typeof OperationType.Tree];
+export type OperationTypeValue =
+	| (typeof OperationType.Tree)[keyof typeof OperationType.Tree]
+	| (typeof OperationType.Heap)[keyof typeof OperationType.Heap];
 // | (typeof OperationType.Stack)[keyof typeof OperationType.Stack];
 
 // centralize common tree step names so BST and AVL share the same base values
@@ -50,6 +57,11 @@ export const StepType = {
 		RotateLeft: 'RotateLeft',
 		RotateRight: 'RotateRight',
 	},
+	Heap: {
+		...BaseTreeSteps,
+		Swap: 'HeapSwap',
+		FindLargestChild: 'FindLargestChild',
+	},
 	RBTree: {
 		...BaseTreeSteps,
 		ColorNode: 'ColorNode',
@@ -76,6 +88,7 @@ export const StepType = {
 export type StepTypeValue =
 	| (typeof StepType.BSTree)[keyof typeof StepType.BSTree]
 	| (typeof StepType.AVLTree)[keyof typeof StepType.AVLTree]
+	| (typeof StepType.Heap)[keyof typeof StepType.Heap]
 	| (typeof StepType.BTree)[keyof typeof StepType.BTree]
 	| (typeof StepType.RBTree)[keyof typeof StepType.RBTree];
 
@@ -99,7 +112,9 @@ export class DataStructure {
 	}
 
 	operation(type: OperationTypeValue, value: number | null): OperationData {
-		const data: OperationData = new OperationData(type.split('.')[1] + ' ' + value, this.snapshot());
+		const name = type.split('.')[1];
+		const label = value === null || value === undefined ? name : `${name} ${value}`;
+		const data: OperationData = new OperationData(label, this.snapshot());
 		this.doOperation(type, value, data);
 		data.end(this.snapshot());
 		return data;

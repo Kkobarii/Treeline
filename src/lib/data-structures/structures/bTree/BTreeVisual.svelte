@@ -32,6 +32,8 @@
 	};
 </script>
 
+<p style="color: red; font-weight: bold;">This is very much broken and I know it. Will fix later.</p>
+
 <StructureVisual
 	{operationManager}
 	Animator={BTreeAnimator}

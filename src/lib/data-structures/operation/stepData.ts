@@ -733,4 +733,50 @@ export namespace Step {
 			);
 		}
 	}
+
+	// Heap-specific step details
+	export namespace Heap {
+		export class FindLargestChildData extends StepDetail {
+			constructor(
+				public parentId: number,
+				public largestChildId: number,
+				public largestChildValue: number,
+			) {
+				super(`Found largest child: node ${largestChildId} with value ${largestChildValue}`);
+			}
+		}
+
+		export function FindLargestChild(parentId: number, largestChildId: number, largestChildValue: number): StepData {
+			return StepData.new(StepType.Heap.FindLargestChild, new FindLargestChildData(parentId, largestChildId, largestChildValue));
+		}
+
+		export class SwapData extends StepDetail {
+			constructor(
+				public fromId: number,
+				public toId: number,
+				public fromValue: number,
+				public toValue: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Swap node ${fromId} (value ${fromValue}) with node ${toId} (value ${toValue})`);
+			}
+		}
+
+		export function Swap(
+			fromId: number,
+			toId: number,
+			fromValue: number,
+			toValue: number,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.Heap.Swap,
+				new SwapData(fromId, toId, fromValue, toValue, startSnapshot, endSnapshot),
+				startSnapshot,
+				endSnapshot,
+			);
+		}
+	}
 }

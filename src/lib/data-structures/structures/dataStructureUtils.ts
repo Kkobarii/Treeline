@@ -2,6 +2,7 @@ import { AVLTree } from '$lib/data-structures/structures/avlTree/avlTree';
 import { BSTree } from '$lib/data-structures/structures/bsTree/bsTree';
 import { BTree } from '$lib/data-structures/structures/bTree/bTree';
 import { StructureType, type DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { Heap } from '$lib/data-structures/structures/heap/heap';
 import { RBTree } from '$lib/data-structures/structures/rbTree/rbTree';
 
 import { deepCopy } from '../utils/utils';
@@ -12,6 +13,7 @@ export function createEmptyStructure(type: StructureType): DataStructure {
 		[StructureType.AVLTree]: new AVLTree(),
 		[StructureType.RBTree]: new RBTree(),
 		[StructureType.BTree]: new BTree(),
+		[StructureType.Heap]: new Heap(),
 	};
 
 	return x[type];
@@ -23,6 +25,7 @@ export function deepCopyStructure(type: StructureType, struct: DataStructure): D
 		[StructureType.AVLTree]: (tree: DataStructure) => Object.assign(new AVLTree(), deepCopy(tree)),
 		[StructureType.BTree]: (tree: DataStructure) => Object.assign(new BTree(), deepCopy(tree)),
 		[StructureType.RBTree]: (tree: DataStructure) => Object.assign(new RBTree(), deepCopy(tree)),
+		[StructureType.Heap]: (tree: DataStructure) => Object.assign(new Heap(), deepCopy(tree)),
 	};
 
 	return x[type](struct);
