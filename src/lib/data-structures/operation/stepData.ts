@@ -736,6 +736,89 @@ export namespace Step {
 
 	// Heap-specific step details
 	export namespace Heap {
+		export class AppendData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public parentId: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Append value ${value} to end of heap`);
+			}
+		}
+
+		export function Append(
+			nodeId: number,
+			value: number,
+			parentId: number,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(StepType.Heap.Append, new AppendData(nodeId, value, parentId, startSnapshot, endSnapshot));
+		}
+
+		export class CompareWithParentData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public parentId: number,
+				public needsSwap: boolean,
+			) {
+				const msg = needsSwap
+					? `Comparing node ${nodeId} with parent ${parentId} - needs swap`
+					: `Comparing node ${nodeId} with parent ${parentId} - in correct position`;
+				super(msg);
+			}
+		}
+
+		export function CompareWithParent(nodeId: number, parentId: number, needsSwap: boolean): StepData {
+			return StepData.new(StepType.Heap.CompareWithParent, new CompareWithParentData(nodeId, parentId, needsSwap));
+		}
+
+		export class ReplaceRootWithLastData extends StepDetail {
+			constructor(
+				public rootId: number,
+				public lastId: number,
+				public rootValue: number,
+				public lastValue: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Replace root ${rootValue} with last node ${lastValue}`);
+			}
+		}
+
+		export function ReplaceRootWithLast(
+			rootId: number,
+			lastId: number,
+			rootValue: number,
+			lastValue: number,
+			startSnapshot: DataStructure,
+			endSnapshot: DataStructure,
+		): StepData {
+			return StepData.new(
+				StepType.Heap.ReplaceRootWithLast,
+				new ReplaceRootWithLastData(rootId, lastId, rootValue, lastValue, startSnapshot, endSnapshot),
+			);
+		}
+
+		export class CompareWithChildrenData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public largestChildId: number | null,
+			) {
+				const msg =
+					largestChildId !== null
+						? `Comparing node ${nodeId} with children, largest is ${largestChildId}`
+						: `Node ${nodeId} is already in correct position`;
+				super(msg);
+			}
+		}
+
+		export function CompareWithChildren(nodeId: number, largestChildId: number | null): StepData {
+			return StepData.new(StepType.Heap.CompareWithChildren, new CompareWithChildrenData(nodeId, largestChildId));
+		}
+
 		export class FindLargestChildData extends StepDetail {
 			constructor(
 				public parentId: number,
@@ -771,12 +854,7 @@ export namespace Step {
 			startSnapshot: DataStructure,
 			endSnapshot: DataStructure,
 		): StepData {
-			return StepData.new(
-				StepType.Heap.Swap,
-				new SwapData(fromId, toId, fromValue, toValue, startSnapshot, endSnapshot),
-				startSnapshot,
-				endSnapshot,
-			);
+			return StepData.new(StepType.Heap.Swap, new SwapData(fromId, toId, fromValue, toValue, startSnapshot, endSnapshot));
 		}
 	}
 }

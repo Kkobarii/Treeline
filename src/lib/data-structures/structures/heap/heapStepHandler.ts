@@ -1,3 +1,4 @@
+import { Colors } from '$lib/assets/colors';
 import type { StepData } from '$lib/data-structures/operation/operationData';
 import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 import { Step } from '$lib/data-structures/operation/stepData';
@@ -9,17 +10,18 @@ import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepH
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
 
 async function handleSwapForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: Step.Heap.SwapData) {
-	annotator.annotateNode(data.action, data.fromId);
-	if (data.endSnapshot) {
-		await animator.ensureAndAnimate(data.endSnapshot);
-	}
+	const info = `Swapped nodes`;
+	annotator.annotateNode(info, data.fromId);
+	animator.setNodeColor(data.toId, Colors.HeapAffectedNode);
+	animator.setNodeColor(data.fromId, Colors.HeapCurrentNode);
+	await animator.ensureAndAnimate(data.endSnapshot);
 }
 
 async function handleSwapBackward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: Step.Heap.SwapData) {
-	annotator.annotateNode(data.action, data.toId);
-	if (data.startSnapshot) {
-		await animator.ensureAndAnimate(data.startSnapshot);
-	}
+	const info = `Swapped nodes`;
+	annotator.annotateNode(info, data.fromId);
+	animator.resetNodeColor(data.toId);
+	await animator.ensureAndAnimate(data.startSnapshot);
 }
 
 async function handleFindLargestChildForward(
@@ -27,7 +29,10 @@ async function handleFindLargestChildForward(
 	annotator: DataStructureAnnotator,
 	data: Step.Heap.FindLargestChildData,
 ) {
-	annotator.annotateNode(data.action, data.largestChildId);
+	const info = data.largestChildId !== null ? `Found largest child` : `Node is in correct position`;
+	annotator.annotateNode(info, data.parentId);
+
+	animator.setNodeColor(data.largestChildId, Colors.HeapAffectedNode);
 }
 
 async function handleFindLargestChildBackward(
@@ -35,7 +40,89 @@ async function handleFindLargestChildBackward(
 	annotator: DataStructureAnnotator,
 	data: Step.Heap.FindLargestChildData,
 ) {
-	annotator.annotateNode(data.action, data.largestChildId);
+	const info = data.largestChildId !== null ? `Found largest child` : `Node is in correct position`;
+	annotator.annotateNode(info, data.parentId);
+
+	animator.resetNodeColor(data.largestChildId);
+}
+
+async function handleAppendForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: Step.Heap.AppendData) {
+	const info = `Append value ${data.value} to end of heap`;
+	annotator.annotateNode(info, data.parentId);
+
+	annotator.clearValueAnnotation();
+	await animator.ensureAndAnimate(data.endSnapshot);
+
+	animator.setNodeColor(data.nodeId, Colors.HeapCurrentNode);
+}
+
+async function handleAppendBackward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: Step.Heap.AppendData) {
+	const info = `Append value ${data.value} to end of heap`;
+	annotator.annotateNode(info, data.parentId);
+	animator.resetNodeColor(data.nodeId);
+
+	await animator.ensureAndAnimate(data.startSnapshot);
+	annotator.createValueAnnotation(String(data.value), data.parentId);
+}
+
+async function handleCompareWithChildrenForward(
+	animator: HeapAnimator,
+	annotator: DataStructureAnnotator,
+	data: Step.Heap.CompareWithChildrenData,
+) {
+	const info = data.largestChildId !== null ? `Comparing node and children` : `Node is in correct position`;
+	annotator.annotateNode(info, data.nodeId);
+}
+
+async function handleCompareWithChildrenBackward(
+	animator: HeapAnimator,
+	annotator: DataStructureAnnotator,
+	data: Step.Heap.CompareWithChildrenData,
+) {
+	const info = data.largestChildId !== null ? `Comparing node and children` : `Node is in correct position`;
+	annotator.annotateNode(info, data.nodeId);
+}
+
+async function handleCompareWithParentForward(
+	animator: HeapAnimator,
+	annotator: DataStructureAnnotator,
+	data: Step.Heap.CompareWithParentData,
+) {
+	const info = data.needsSwap ? `Comparing with parent - needs swap` : `Comparing with parent - correct position`;
+	annotator.annotateNode(info, data.nodeId);
+}
+
+async function handleCompareWithParentBackward(
+	animator: HeapAnimator,
+	annotator: DataStructureAnnotator,
+	data: Step.Heap.CompareWithParentData,
+) {
+	const info = data.needsSwap ? `Comparing with parent - needs swap` : `Comparing with parent - correct position`;
+	annotator.annotateNode(info, data.nodeId);
+}
+
+async function handleReplaceRootWithLastForward(
+	animator: HeapAnimator,
+	annotator: DataStructureAnnotator,
+	data: Step.Heap.ReplaceRootWithLastData,
+) {
+	const info = `Replaced root ${data.rootValue} with last ${data.lastValue}`;
+	annotator.annotateNode(info, data.rootId);
+	animator.setNodeColor(data.lastId, Colors.HeapCurrentNode);
+	animator.setNodeColor(data.rootId, Colors.Red);
+	await animator.ensureAndAnimate(data.endSnapshot);
+}
+
+async function handleReplaceRootWithLastBackward(
+	animator: HeapAnimator,
+	annotator: DataStructureAnnotator,
+	data: Step.Heap.ReplaceRootWithLastData,
+) {
+	const info = `Replaced root ${data.rootValue} with last ${data.lastValue}`;
+	annotator.annotateNode(info, data.rootId);
+	animator.resetNodeColor(data.lastId);
+	animator.resetNodeColor(data.rootId);
+	await animator.ensureAndAnimate(data.startSnapshot);
 }
 
 export class HeapStepHandler extends StepHandlerBase {
@@ -46,6 +133,7 @@ export class HeapStepHandler extends StepHandlerBase {
 		isForward: boolean,
 	) {
 		const animator = baseAnimator as HeapAnimator;
+
 		if (isForward && currentStep.startSnapshot) {
 			animator.ensure(currentStep.startSnapshot);
 		}
@@ -96,6 +184,25 @@ export class HeapStepHandler extends StepHandlerBase {
 			case StepType.BSTree.CreateLeaf:
 				if (isForward) await Common.handleCreateLeafForwardCommon(animator, annotator, currentStep.data as any);
 				else await Common.handleCreateLeafBackwardCommon(animator, annotator, currentStep.data as any);
+				break;
+			case StepType.Heap.Append:
+				if (isForward) await handleAppendForward(animator, annotator, currentStep.data as Step.Heap.AppendData);
+				else await handleAppendBackward(animator, annotator, currentStep.data as Step.Heap.AppendData);
+				break;
+			case StepType.Heap.CompareWithChildren:
+				if (isForward)
+					await handleCompareWithChildrenForward(animator, annotator, currentStep.data as Step.Heap.CompareWithChildrenData);
+				else await handleCompareWithChildrenBackward(animator, annotator, currentStep.data as Step.Heap.CompareWithChildrenData);
+				break;
+			case StepType.Heap.CompareWithParent:
+				if (isForward)
+					await handleCompareWithParentForward(animator, annotator, currentStep.data as Step.Heap.CompareWithParentData);
+				else await handleCompareWithParentBackward(animator, annotator, currentStep.data as Step.Heap.CompareWithParentData);
+				break;
+			case StepType.Heap.ReplaceRootWithLast:
+				if (isForward)
+					await handleReplaceRootWithLastForward(animator, annotator, currentStep.data as Step.Heap.ReplaceRootWithLastData);
+				else await handleReplaceRootWithLastBackward(animator, annotator, currentStep.data as Step.Heap.ReplaceRootWithLastData);
 				break;
 			case StepType.BSTree.Compare:
 				if (isForward) await Common.handleCompareForwardCommon(animator, annotator, currentStep.data as any);

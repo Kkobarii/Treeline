@@ -6,12 +6,14 @@ import { DataNode, DataStructure, OperationType, type OperationTypeValue } from 
 
 export class HeapNode extends DataNode {
 	value: number;
+	arrayIndex: number;
 	left: HeapNode | null = null;
 	right: HeapNode | null = null;
 
-	constructor(id: number, value: number) {
+	constructor(id: number, value: number, arrayIndex: number) {
 		super(id);
 		this.value = value;
+		this.arrayIndex = arrayIndex;
 	}
 }
 
@@ -37,7 +39,8 @@ export class Heap extends DataStructure {
 	}
 
 	insert(value: number, data: OperationData): HeapNode {
-		const newNode = new HeapNode(this.generateId(), value);
+		const index = this.nodes.length;
+		const newNode = new HeapNode(this.generateId(), value, index);
 
 		if (this.nodes.length === 0) {
 			const startSnapshot = this.snapshot();
@@ -47,15 +50,13 @@ export class Heap extends DataStructure {
 			return newNode;
 		}
 
-		const index = this.nodes.length;
 		const parentIndex = Math.floor((index - 1) / 2);
 		const parent = this.nodes[parentIndex];
-		const direction = index % 2 === 1 ? 'left' : 'right';
 
 		const startSnapshot = this.snapshot();
 		this.nodes.push(newNode);
 		this.rebuildPointers();
-		data.step(Step.Common.CreateLeaf(newNode.id, value, parent.id, direction as 'left' | 'right', startSnapshot, this.snapshot()));
+		data.step(Step.Heap.Append(newNode.id, value, parent.id, startSnapshot, this.snapshot()));
 
 		this.bubbleUp(index, data);
 		return newNode;
@@ -84,9 +85,9 @@ export class Heap extends DataStructure {
 		data.step(Step.Common.MarkToDelete(root.id, root.value));
 
 		const swapStart = this.snapshot();
-		this.swapValues(0, lastIndex);
+		this.swapNodes(0, lastIndex);
 		this.rebuildPointers();
-		data.step(Step.Heap.Swap(root.id, lastNode.id, rootValue, lastValue, swapStart, this.snapshot()));
+		data.step(Step.Heap.ReplaceRootWithLast(root.id, lastNode.id, rootValue, lastValue, swapStart, this.snapshot()));
 
 		const deleteStart = this.snapshot();
 		const removed = this.nodes.pop()!;
@@ -106,11 +107,12 @@ export class Heap extends DataStructure {
 			const childValue = child.value;
 			const parentValue = parent.value;
 
-			data.step(Step.Common.Compare(child.value, parent.id, parent.value));
-			if (child.value <= parent.value) break;
+			const needsSwap = child.value > parent.value;
+			data.step(Step.Heap.CompareWithParent(child.id, parent.id, needsSwap));
+			if (!needsSwap) break;
 
 			const startSnapshot = this.snapshot();
-			this.swapValues(currentIndex, parentIndex);
+			this.swapNodes(currentIndex, parentIndex);
 			this.rebuildPointers();
 			const endSnapshot = this.snapshot();
 			data.step(Step.Heap.Swap(child.id, parent.id, childValue, parentValue, startSnapshot, endSnapshot));
@@ -141,6 +143,13 @@ export class Heap extends DataStructure {
 				}
 			}
 
+			data.step(
+				Step.Heap.CompareWithChildren(
+					this.nodes[currentIndex].id,
+					largestIndex !== currentIndex ? this.nodes[largestIndex].id : null,
+				),
+			);
+
 			if (largestIndex !== currentIndex) {
 				data.step(
 					Step.Heap.FindLargestChild(this.nodes[currentIndex].id, this.nodes[largestIndex].id, this.nodes[largestIndex].value),
@@ -152,7 +161,7 @@ export class Heap extends DataStructure {
 				const targetValue = targetNode.value;
 
 				const startSnapshot = this.snapshot();
-				this.swapValues(currentIndex, largestIndex);
+				this.swapNodes(currentIndex, largestIndex);
 				this.rebuildPointers();
 				const endSnapshot = this.snapshot();
 				data.step(Step.Heap.Swap(currentNode.id, targetNode.id, currentValue, targetValue, startSnapshot, endSnapshot));
@@ -164,10 +173,14 @@ export class Heap extends DataStructure {
 		}
 	}
 
-	private swapValues(i: number, j: number) {
-		const temp = this.nodes[i].value;
-		this.nodes[i].value = this.nodes[j].value;
-		this.nodes[j].value = temp;
+	private swapNodes(i: number, j: number) {
+		const temp = this.nodes[i];
+		this.nodes[i] = this.nodes[j];
+		this.nodes[j] = temp;
+
+		// Update arrayIndex to reflect new positions
+		this.nodes[i].arrayIndex = i;
+		this.nodes[j].arrayIndex = j;
 	}
 
 	private rebuildPointers() {

@@ -11,14 +11,13 @@ The simulation visualizes a Max-Heap, but the principles apply similarly to Min-
 
 ## Complexity Analysis
 
-Because a heap is always a complete tree, its height is guaranteed to be logarithmic (). This ensures that the elements can be rearranged quickly after any change.
+Because a heap is always a complete tree, its height is guaranteed to be logarithmic. This ensures that the elements can be rearranged quickly after any change.
 
 | Operation        | Time Complexity |
 | ---------------- | --------------- |
 | **Peek (Root)**  | O(1)            |
 | **Insert**       | O(log n)        |
 | **Extract Root** | O(log n)        |
-| **Space**        | O(n)            |
 
 ## Insertion
 
@@ -41,4 +40,4 @@ Extracting the root is the process of removing the highest-priority element. Bec
     - **Identify Priority Child**: In a Max-Heap, the algorithm looks for the larger of the two children. In a Min-Heap, it looks for the smaller.
 
 3. **The Swap**: If the child has a higher priority than the current node, they are swapped.
-4. **Path Traversal**: The node continues to "sift down" the tree, swapping with its priority child at each level until it is correctly positioned (i.e., it is smaller/larger than its children or it has reached the bottom).
+4. **Path Traversal**: The node continues to "sift down" the tree, swapping with its priority child at each level until it is correctly positioned (i.e., it is larger than its children or it has reached the bottom).

@@ -61,6 +61,10 @@ export const StepType = {
 		...BaseTreeSteps,
 		Swap: 'HeapSwap',
 		FindLargestChild: 'FindLargestChild',
+		Append: 'HeapAppend',
+		CompareWithChildren: 'CompareWithChildren',
+		CompareWithParent: 'CompareWithParent',
+		ReplaceRootWithLast: 'ReplaceRootWithLast',
 	},
 	RBTree: {
 		...BaseTreeSteps,

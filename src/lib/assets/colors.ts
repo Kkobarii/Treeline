@@ -15,6 +15,9 @@ export const Colors = {
 
 	RBTreeRed: '#ff3333',
 	RBTreeBlack: '#333333',
+
+	HeapCurrentNode: '#27ae60',
+	HeapAffectedNode: '#f39c12',
 };
 
 export function shadeColor(color: string, percent: number) {

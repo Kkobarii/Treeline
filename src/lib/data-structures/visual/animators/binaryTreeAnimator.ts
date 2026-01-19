@@ -1,5 +1,3 @@
-import type { Node } from 'vis-network';
-
 import { getDummyNodeId, NodeData } from '$lib/data-structures/utils/graphs';
 import { Timer } from '$lib/utils/timer';
 
