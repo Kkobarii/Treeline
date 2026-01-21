@@ -857,4 +857,163 @@ export namespace Step {
 			return StepData.new(StepType.Heap.Swap, new SwapData(fromId, toId, fromValue, toValue, startSnapshot, endSnapshot));
 		}
 	}
+
+	export namespace LinkedList {
+		export class CreateHeadData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Create head node ${nodeId} with value ${value}`);
+			}
+		}
+
+		export function CreateHead(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.LinkedList.CreateHead, new CreateHeadData(nodeId, value, startSnapshot, endSnapshot));
+		}
+
+		export class InsertAtHeadData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Insert node ${nodeId} with value ${value} at head`);
+			}
+		}
+
+		export function InsertAtHead(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.LinkedList.InsertAtHead, new InsertAtHeadData(nodeId, value, startSnapshot, endSnapshot));
+		}
+
+		export class InsertAtTailData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Insert node ${nodeId} with value ${value} at tail`);
+			}
+		}
+
+		export function InsertAtTail(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.LinkedList.InsertAtTail, new InsertAtTailData(nodeId, value, startSnapshot, endSnapshot));
+		}
+
+		export class CompareData extends StepDetail {
+			constructor(
+				public searchValue: number,
+				public currentId: number,
+				public currentValue: number,
+				public position: number,
+			) {
+				super(`Compare search value ${searchValue} with node ${currentId}'s value ${currentValue} at position ${position}`);
+			}
+		}
+
+		export function Compare(searchValue: number, currentId: number, currentValue: number, position: number): StepData {
+			return StepData.new(StepType.LinkedList.Compare, new CompareData(searchValue, currentId, currentValue, position));
+		}
+
+		export class TraverseNextData extends StepDetail {
+			constructor(
+				public fromId: number,
+				public toId: number,
+			) {
+				super(`Traverse from node ${fromId} to next node ${toId}`);
+			}
+		}
+
+		export function TraverseNext(fromId: number, toId: number): StepData {
+			return StepData.new(StepType.LinkedList.TraverseNext, new TraverseNextData(fromId, toId));
+		}
+
+		export class TraverseToTailData extends StepDetail {
+			constructor(public fromId: number) {
+				super(`Traverse to tail starting from node ${fromId}`);
+			}
+		}
+
+		export function TraverseToTail(fromId: number): StepData {
+			return StepData.new(StepType.LinkedList.TraverseToTail, new TraverseToTailData(fromId));
+		}
+
+		export class FoundData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public position: number,
+			) {
+				super(`Found value ${value} at node ${nodeId} at position ${position}`);
+			}
+		}
+
+		export function Found(nodeId: number, value: number, position: number): StepData {
+			return StepData.new(StepType.LinkedList.Found, new FoundData(nodeId, value, position));
+		}
+
+		export class NotFoundData extends StepDetail {
+			constructor(public value: number) {
+				super(`Value ${value} not found in list`);
+			}
+		}
+
+		export function NotFound(value: number): StepData {
+			return StepData.new(StepType.LinkedList.NotFound, new NotFoundData(value));
+		}
+
+		export class MarkToDeleteData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+			) {
+				super(`Mark node ${nodeId} with value ${value} for deletion`);
+			}
+		}
+
+		export function MarkToDelete(nodeId: number, value: number): StepData {
+			return StepData.new(StepType.LinkedList.MarkToDelete, new MarkToDeleteData(nodeId, value));
+		}
+
+		export class RemoveHeadData extends StepDetail {
+			constructor(
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Remove head node`);
+			}
+		}
+
+		export function RemoveHead(startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.LinkedList.RemoveHead, new RemoveHeadData(startSnapshot, endSnapshot));
+		}
+
+		export class RemoveNodeData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Remove node ${nodeId}`);
+			}
+		}
+
+		export function RemoveNode(nodeId: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.LinkedList.RemoveNode, new RemoveNodeData(nodeId, startSnapshot, endSnapshot));
+		}
+
+		export class EmptyListData extends StepDetail {
+			constructor() {
+				super(`List is empty`);
+			}
+		}
+
+		export function EmptyList(): StepData {
+			return StepData.new(StepType.LinkedList.EmptyList, new EmptyListData());
+		}
+	}
 }

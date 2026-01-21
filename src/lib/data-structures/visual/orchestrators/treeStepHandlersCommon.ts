@@ -4,11 +4,12 @@ import type { Step } from '$lib/data-structures/operation/stepData';
 import type { AVLTreeAnimator } from '$lib/data-structures/structures/avlTree/avlTreeAnimator';
 import type { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
 import type { BTreeAnimator } from '$lib/data-structures/structures/bTree/bTreeAnimator';
+import type { LinkedListAnimator } from '$lib/data-structures/structures/linkedList/linkedListAnimator';
 import type { RBTreeAnimator } from '$lib/data-structures/structures/rbTree/rbTreeAnimator';
 import { comparisonValuesToSymbol } from '$lib/data-structures/utils/utils';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 
-type AnyAnimator = BSTreeAnimator | AVLTreeAnimator | RBTreeAnimator | BTreeAnimator;
+type AnyAnimator = BSTreeAnimator | AVLTreeAnimator | RBTreeAnimator | BTreeAnimator | LinkedListAnimator;
 
 export async function handleStartForwardCommon(
 	animator: AnyAnimator,

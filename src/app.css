@@ -307,6 +307,10 @@ label {
 	flex-grow: 1;
 }
 
+.page-layout > div:nth-child(2) {
+	width: 22em;
+}
+
 .header-nav {
 	position: fixed;
 	top: 1rem;

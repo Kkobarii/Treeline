@@ -3,6 +3,7 @@ import { BSTree } from '$lib/data-structures/structures/bsTree/bsTree';
 import { BTree } from '$lib/data-structures/structures/bTree/bTree';
 import { StructureType, type DataStructure } from '$lib/data-structures/structures/dataStructure';
 import { Heap } from '$lib/data-structures/structures/heap/heap';
+import { LinkedList } from '$lib/data-structures/structures/linkedList/linkedList';
 import { RBTree } from '$lib/data-structures/structures/rbTree/rbTree';
 
 import { deepCopy } from '../utils/utils';
@@ -14,6 +15,7 @@ export function createEmptyStructure(type: StructureType): DataStructure {
 		[StructureType.RBTree]: new RBTree(),
 		[StructureType.BTree]: new BTree(),
 		[StructureType.Heap]: new Heap(),
+		[StructureType.LinkedList]: new LinkedList(),
 	};
 
 	return x[type];
@@ -26,6 +28,7 @@ export function deepCopyStructure(type: StructureType, struct: DataStructure): D
 		[StructureType.BTree]: (tree: DataStructure) => Object.assign(new BTree(), deepCopy(tree)),
 		[StructureType.RBTree]: (tree: DataStructure) => Object.assign(new RBTree(), deepCopy(tree)),
 		[StructureType.Heap]: (tree: DataStructure) => Object.assign(new Heap(), deepCopy(tree)),
+		[StructureType.LinkedList]: (tree: DataStructure) => Object.assign(new LinkedList(), deepCopy(tree)),
 	};
 
 	return x[type](struct);

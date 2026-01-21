@@ -367,3 +367,39 @@ export function bTreeToGraph(
 
 	return { nodes, edges };
 }
+
+export function linkedListToGraph(list: any, nodes: DataSet<Node> = new DataSet<Node>(), edges: DataSet<Edge> = new DataSet<Edge>()) {
+	if (!list || !list.head) return { nodes, edges };
+
+	let current = list.head;
+	let position = 0;
+
+	while (current) {
+		const nodeId = current.id;
+		const nodeData = new NodeData(position);
+
+		nodes.add({
+			id: nodeId,
+			label: current.value.toString(),
+			title: NodeData.toTitle(nodeData),
+			x: position * 150, // Arrange horizontally
+			y: 0,
+		});
+
+		if (current.next) {
+			const edgeId = `${nodeId}->${current.next.id}`;
+			edges.add({
+				id: edgeId,
+				from: nodeId,
+				to: current.next.id,
+				arrows: 'to',
+			});
+			current = current.next;
+			position++;
+		} else {
+			break;
+		}
+	}
+
+	return { nodes, edges };
+}

@@ -1,4 +1,4 @@
-import { OperationType, StructureType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
+import { getInitOperation, StructureType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
 import { createEmptyStructure, deepCopyStructure } from '$lib/data-structures/structures/dataStructureUtils';
 
 import { OperationData, StepData } from './operationData';
@@ -83,6 +83,7 @@ export class OperationListChangedEvent {
 
 export class OperationManager {
 	private structureType: StructureType;
+	private initialNodeCount: number = 10;
 
 	private operations: OperationData[] = [];
 	private currentOperation: number = 0;
@@ -98,21 +99,22 @@ export class OperationManager {
 		console.log(`%cMounting ${structureType} OperationManager`, 'color: orange; font-weight: bold;');
 
 		this.structureType = structureType;
+		this.initialNodeCount = initialNodeCount;
 
-		const data = this.prepareStartData(structureType, initialNodeCount);
+		const data = this.prepareStartData(structureType);
 
 		this.operations = [data];
 		this.currentOperation = 0;
 		this.currentStep = 0;
 	}
 
-	private prepareStartData(structureType: StructureType, initialNodeCount: number = 10): OperationData {
+	private prepareStartData(structureType: StructureType): OperationData {
 		const structure = createEmptyStructure(structureType);
-		const values = this.generateInitialValues(Math.max(0, initialNodeCount));
+		const values = this.generateInitialValues(Math.max(0, this.initialNodeCount));
 
 		if (values.length > 0) console.log('Initial values:', values.join(', '));
 
-		const insertOp = structureType === StructureType.Heap ? OperationType.Heap.Insert : OperationType.Tree.Insert;
+		const insertOp = getInitOperation(structureType);
 		for (const v of values) {
 			structure.operation(insertOp, v);
 		}

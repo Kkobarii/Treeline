@@ -7,6 +7,7 @@ export enum StructureType {
 	RBTree = 'RBTree',
 	BTree = 'BTree',
 	Heap = 'Heap',
+	LinkedList = 'LinkedList',
 }
 
 export const OperationType = {
@@ -19,6 +20,12 @@ export const OperationType = {
 		Insert: 'Heap.Insert',
 		ExtractRoot: 'Heap.ExtractRoot',
 	},
+	LinkedList: {
+		InsertHead: 'LinkedList.InsertHead',
+		InsertTail: 'LinkedList.InsertTail',
+		Find: 'LinkedList.Find',
+		Remove: 'LinkedList.Remove',
+	},
 	// Stack: {
 	// 	Push: 'Stack.Push',
 	// 	Pop: 'Stack.Pop',
@@ -27,7 +34,8 @@ export const OperationType = {
 
 export type OperationTypeValue =
 	| (typeof OperationType.Tree)[keyof typeof OperationType.Tree]
-	| (typeof OperationType.Heap)[keyof typeof OperationType.Heap];
+	| (typeof OperationType.Heap)[keyof typeof OperationType.Heap]
+	| (typeof OperationType.LinkedList)[keyof typeof OperationType.LinkedList];
 // | (typeof OperationType.Stack)[keyof typeof OperationType.Stack];
 
 // centralize common tree step names so BST and AVL share the same base values
@@ -87,6 +95,22 @@ export const StepType = {
 		MergeChildren: 'MergeChildren',
 		FindInorderReplacement: 'FindInorderReplacement',
 	},
+	LinkedList: {
+		Start: 'Start',
+		End: 'End',
+		CreateHead: 'CreateHead',
+		InsertAtHead: 'InsertAtHead',
+		InsertAtTail: 'InsertAtTail',
+		Compare: 'Compare',
+		TraverseNext: 'TraverseNext',
+		TraverseToTail: 'TraverseToTail',
+		Found: 'Found',
+		NotFound: 'NotFound',
+		MarkToDelete: 'MarkToDelete',
+		RemoveHead: 'RemoveHead',
+		RemoveNode: 'RemoveNode',
+		EmptyList: 'EmptyList',
+	},
 } as const;
 
 export type StepTypeValue =
@@ -94,7 +118,8 @@ export type StepTypeValue =
 	| (typeof StepType.AVLTree)[keyof typeof StepType.AVLTree]
 	| (typeof StepType.Heap)[keyof typeof StepType.Heap]
 	| (typeof StepType.BTree)[keyof typeof StepType.BTree]
-	| (typeof StepType.RBTree)[keyof typeof StepType.RBTree];
+	| (typeof StepType.RBTree)[keyof typeof StepType.RBTree]
+	| (typeof StepType.LinkedList)[keyof typeof StepType.LinkedList];
 
 export class DataNode {
 	id: number;
@@ -126,5 +151,22 @@ export class DataStructure {
 
 	protected doOperation(type: OperationTypeValue, value: number | null, data: OperationData): void {
 		throw new Error('doOperation not implemented in base DataStructure class');
+	}
+}
+
+export function getInitOperation(structureType: StructureType): OperationTypeValue {
+	switch (structureType) {
+		case StructureType.BSTree:
+		case StructureType.AVLTree:
+		case StructureType.RBTree:
+			return OperationType.Tree.Insert;
+		case StructureType.BTree:
+			return OperationType.Tree.Insert;
+		case StructureType.Heap:
+			return OperationType.Heap.Insert;
+		case StructureType.LinkedList:
+			return OperationType.LinkedList.InsertHead;
+		default:
+			throw new Error(`Unsupported structure type: ${structureType}`);
 	}
 }

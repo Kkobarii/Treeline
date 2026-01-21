@@ -38,6 +38,9 @@
 			<a
 				href="/data-structures/heap"
 				class="header-link">Heap</a>
+			<a
+				href="/data-structures/linked-list"
+				class="header-link">Linked List</a>
 		</div>
 
 		<!-- right actions -->
