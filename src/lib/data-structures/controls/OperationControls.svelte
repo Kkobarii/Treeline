@@ -80,7 +80,7 @@
 	}
 </script>
 
-<div class="flex h-[13em] flex-row gap-6 md:h-[26em] md:flex-col">
+<div class="flex flex-1 h-[13em] flex-row gap-6 md:h-[26em] md:flex-col">
 	<div class="flex flex-none flex-col gap-3">
 		<h2 class="text-primary text-lg font-bold">Operation Controls</h2>
 		<div class="flex flex-col items-start gap-2 md:flex-row md:items-center">
