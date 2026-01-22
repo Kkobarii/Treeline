@@ -145,6 +145,7 @@ async function handleEmptyListBackward(animator: LinkedListAnimator, annotator: 
 export class LinkedListStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as LinkedListAnimator;
+
 		if (isForward && currentStep.startSnapshot) {
 			await animator.ensureAndAnimate(currentStep.startSnapshot);
 		}

@@ -309,6 +309,33 @@ export class RBTreeNodeData extends NodeData {
 	}
 }
 
+export class LinkedListNodeData extends NodeData {
+	constructor(isHead: boolean, isTail: boolean) {
+		super(-1);
+		this.isHead = isHead;
+		this.isTail = isTail;
+	}
+
+	isHead: boolean;
+	isTail: boolean;
+
+	static fromNode(node: Node): LinkedListNodeData {
+		let isHead = false;
+		let isTail = false;
+		if (node.title && typeof node.title === 'string') {
+			let titleObj = JSON.parse(node.title);
+
+			if ('isHead' in titleObj) {
+				isHead = titleObj.isHead;
+			}
+			if ('isTail' in titleObj) {
+				isTail = titleObj.isTail;
+			}
+		}
+		return new LinkedListNodeData(isHead, isTail);
+	}
+}
+
 // B-Tree specific graph conversion
 export function bTreeToGraph(
 	root: BTreeNode | null,
@@ -376,7 +403,15 @@ export function linkedListToGraph(list: any, nodes: DataSet<Node> = new DataSet<
 
 	while (current) {
 		const nodeId = current.id;
-		const nodeData = new NodeData(position);
+		let isHead = false;
+		if (list.head && list.head.id === nodeId) {
+			isHead = true;
+		}
+		let isTail = false;
+		if (list.tail && list.tail.id === nodeId) {
+			isTail = true;
+		}
+		const nodeData = new LinkedListNodeData(isHead, isTail);
 
 		nodes.add({
 			id: nodeId,

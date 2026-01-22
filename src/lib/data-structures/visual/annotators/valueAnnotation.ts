@@ -1,131 +1,111 @@
-import { Colors } from "$lib/assets/colors";
+import { Colors } from '$lib/assets/colors';
 import { addAnimation, getGlobalAnimationDuration } from '$lib/utils/animator';
+
 import { BaseAnnotation } from './baseAnnotation';
 import type { DataStructureAnnotator } from './dataStructureAnnotator';
 
 export class ValueAnnotation extends BaseAnnotation {
-    aboveOffset: number = 40;
-    color: string = Colors.ValueNode;
-    hidden: boolean = false;
+	aboveOffset: number = 40;
+	color: string = Colors.ValueNode;
+	hidden: boolean = false;
 
-    // when followingNodeId is set, position is derived from that node
-    public followingNodeId: string | number | null = null;
+	public followingNodeId: string | number | null = null;
 
-    // explicit position used during animations when not following a node
-    private animPos: { x: number; y: number } = { x: 0, y: 0 };
+	private animPos: { x: number; y: number } = { x: 0, y: 0 };
 
-    constructor(public annotator: DataStructureAnnotator, public text: string, public startFollowingNodeId: string | number | null = null) {
-        super(annotator);
-        this.fontSize = 16;
-        this.followingNodeId = startFollowingNodeId;
-        
-        if (this.followingNodeId === null) {
-            this.followingNodeId = annotator.findRootNodeId();
-        }
+	constructor(
+		public annotator: DataStructureAnnotator,
+		public text: string,
+		public startFollowingNodeId: string | number | null = null,
+	) {
+		super(annotator);
+		this.fontSize = 16;
+		this.followingNodeId = startFollowingNodeId;
 
-        if (this.followingNodeId !== null) {
-            try {
-                const p = this.annotator.network.getPosition(this.followingNodeId as any);
-                this.animPos = { x: p.x, y: p.y - this.aboveOffset };
-            } catch {
-                this.animPos = { x: 0, y: 0 };
-            }
-        }
-    }
+		if (this.followingNodeId === null) {
+			this.followingNodeId = annotator.findRootNodeId();
+		}
 
-    getPosition(): { x: number; y: number } {
-        if (this.followingNodeId !== null) {
-            try {
-                const nodePos = this.annotator.network.getPosition(this.followingNodeId as any);
-                return { x: nodePos.x, y: nodePos.y - this.aboveOffset };
-            } catch {
-                // fallthrough to animPos
-            }
-        }
-        return this.animPos;
-    }
+		if (this.followingNodeId !== null) {
+			try {
+				const p = this.annotator.network.getPosition(this.followingNodeId as any);
+				this.animPos = { x: p.x, y: p.y - this.aboveOffset };
+			} catch {
+				this.animPos = { x: 0, y: 0 };
+			}
+		}
+	}
 
-    draw() {
-        if (!this.hidden) {
-        const pos = this.getPosition();
-        this.renderBoxedText(pos, this.text, this.fontSize, this.padding, this.color, 'center', 'middle');
-        }
-    }
+	getPosition(): { x: number; y: number } {
+		if (this.followingNodeId !== null) {
+			try {
+				const nodePos = this.annotator.network.getPosition(this.followingNodeId as any);
+				return { x: nodePos.x, y: nodePos.y - this.aboveOffset };
+			} catch {
+				// fallthrough to animPos
+			}
+		}
+		return this.animPos;
+	}
 
-    clear() {
-        const pos = this.getPosition();
-        const { width: textWidth, height: textHeight } = this.measure(this.text, this.fontSize);
-        const box = this.computeBox(pos, textWidth, textHeight, this.padding, 'center', 'middle');
-        const scale = this.annotator.getScale();
-        const domTopLeft = this.annotator.network.canvasToDOM({ x: box.x, y: box.y });
-        this.annotator.clearRectangle(domTopLeft.x, domTopLeft.y, box.width * scale, box.height * scale);
-    }
+	draw() {
+		if (!this.hidden) {
+			const pos = this.getPosition();
+			this.renderBoxedText(pos, this.text, this.fontSize, this.padding, this.color, 'center', 'middle');
+		}
+	}
 
-    /**
-     * Animate moving the value annotation to be above `nodeId`.
-     * Resolves when animation completes and the annotation is set to follow the target node.
-     */
-    async moveToNode(nodeId: string | number): Promise<void> {
-        // compute start and target positions in network units
-        const start = this.getPosition();
-        let targetPos = { x: 0, y: 0 };
-        try {
-            const p = this.annotator.network.getPosition(nodeId as any);
-            targetPos = { x: p.x, y: p.y - this.aboveOffset };
-        } catch {
-            // if node not found, just set to start
-            targetPos = start;
-        }
+	clear() {
+		const pos = this.getPosition();
+		const { width: textWidth, height: textHeight } = this.measure(this.text, this.fontSize);
+		const box = this.computeBox(pos, textWidth, textHeight, this.padding, 'center', 'middle');
+		const scale = this.annotator.getScale();
+		const domTopLeft = this.annotator.network.canvasToDOM({ x: box.x, y: box.y });
+		this.annotator.clearRectangle(domTopLeft.x, domTopLeft.y, box.width * scale, box.height * scale);
+	}
 
-        // Use global duration when not specified
+	async moveToNode(nodeId: string | number): Promise<void> {
+		const start = this.getPosition();
+		let targetPos = { x: 0, y: 0 };
+		try {
+			const p = this.annotator.network.getPosition(nodeId as any);
+			targetPos = { x: p.x, y: p.y - this.aboveOffset };
+		} catch {
+			targetPos = start;
+		}
 
-        // Temporarily stop following any node so getPosition() returns animPos during the animation
-        const previousFollowing = this.followingNodeId;
-        this.followingNodeId = null;
+		const previousFollowing = this.followingNodeId;
+		this.followingNodeId = null;
 
-        try {
-            await new Promise<void>((resolve) => {
-                const cancel = addAnimation((dt, elapsed) => {
-                    const tNorm = Math.min(1, Math.max(0, elapsed / getGlobalAnimationDuration()));
-                    // ease in-out (smoothstep-like)
-                    const ease = tNorm < 0.5 ? 2 * tNorm * tNorm : -1 + (4 - 2 * tNorm) * tNorm;
-                    this.animPos = {
-                        x: start.x + (targetPos.x - start.x) * ease,
-                        y: start.y + (targetPos.y - start.y) * ease,
-                    };
+		try {
+			await new Promise<void>(resolve => {
+				const cancel = addAnimation((dt, elapsed) => {
+					const tNorm = Math.min(1, Math.max(0, elapsed / getGlobalAnimationDuration()));
+					const ease = tNorm < 0.5 ? 2 * tNorm * tNorm : -1 + (4 - 2 * tNorm) * tNorm;
+					this.animPos = {
+						x: start.x + (targetPos.x - start.x) * ease,
+						y: start.y + (targetPos.y - start.y) * ease,
+					};
 
-                    // trigger redraw
-                    this.annotator.redrawCanvas();
+					this.annotator.redrawCanvas();
 
-                    if (tNorm >= 1) {
-                        // snap to exact target and start following the node
-                        this.animPos = targetPos;
-                        this.followingNodeId = nodeId;
-                        this.annotator.redrawCanvas();
-                        cancel();
-                        resolve();
-                        return false;
-                    }
+					if (tNorm >= 1) {
+						this.animPos = targetPos;
+						this.followingNodeId = nodeId;
+						this.annotator.redrawCanvas();
+						cancel();
+						resolve();
+						return false;
+					}
 
-                    return true;
-                });
-            });
-        } finally {
-            // If animation was interrupted, restore previous following state
-            if (this.followingNodeId === null) this.followingNodeId = previousFollowing;
-        }
-        return;
-    }
-
-    hide() {
-        this.hidden = true;
-        this.clear();
-    }
-
-    show() {
-        this.hidden = false;
-        this.draw();
-    }
+					return true;
+				});
+			});
+		} finally {
+			if (this.followingNodeId === null) this.followingNodeId = previousFollowing;
+		}
+		return;
+	}
 }
 
 export default ValueAnnotation;
