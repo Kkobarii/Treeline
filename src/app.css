@@ -97,7 +97,7 @@ main button {
 	background-color: var(--color-tertiary-light);
 	border-radius: 0.5rem;
 	font-size: 0.8rem;
-	padding: 0.6rem 1.0rem;
+	padding: 0.6rem 0.9rem;
 	font-weight: 500;
 	outline: none;
 }
@@ -301,13 +301,13 @@ label {
 	}
 }
 
-.tree-controls-container {
+.controls-container {
 	min-width: 370px;
 	height: 100%;
 }
 
 @media (max-width: 768px) {
-	.tree-controls-container {
+	.controls-container {
 		min-width: 0;
 		width: 100%;
 		min-height: 30em;

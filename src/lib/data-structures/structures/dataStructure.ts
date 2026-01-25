@@ -165,7 +165,7 @@ export function getInitOperation(structureType: StructureType): OperationTypeVal
 		case StructureType.Heap:
 			return OperationType.Heap.Insert;
 		case StructureType.LinkedList:
-			return OperationType.LinkedList.InsertHead;
+			return OperationType.LinkedList.InsertTail;
 		default:
 			throw new Error(`Unsupported structure type: ${structureType}`);
 	}
