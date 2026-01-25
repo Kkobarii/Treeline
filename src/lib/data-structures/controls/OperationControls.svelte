@@ -80,17 +80,19 @@
 	}
 </script>
 
-<div class="flex flex-1 h-[13em] flex-row gap-6 md:h-[26em] md:flex-col">
+<div class="flex min-h-0 flex-1 flex-row gap-2 md:flex-col md:gap-6">
 	<div class="flex flex-none flex-col gap-3">
-		<h2 class="text-primary text-lg font-bold">Operation Controls</h2>
+		<h2 class="text-primary flex-none text-lg font-bold break-words">Controls</h2>
 		<div class="flex flex-col items-start gap-2 md:flex-row md:items-center">
 			<button
+				class="w-full"
 				type="button"
 				on:click={() => operationManager.previous()}
 				disabled={!canDoPrevious || locked}>
 				Previous
 			</button>
 			<button
+				class="w-full"
 				type="button"
 				on:click={() => operationManager.next()}
 				disabled={!canDoNext || locked}>
@@ -109,17 +111,17 @@
 	</div>
 
 	<div class="flex min-h-0 flex-1 flex-col gap-3">
-		<h2 class="text-primary flex-none text-lg font-bold">Operation Info</h2>
+		<h2 class="text-primary flex-none text-lg font-bold break-words">Info</h2>
 
 		<div
-			class="flex-1 overflow-y-auto"
+			class="min-h-0 flex-1 overflow-y-auto"
 			id="operation-info">
 			<ul class="flex flex-col gap-2">
 				{#each operations as op}
 					<li
 						class="{operations[currentOperation] === op
 							? 'bg-primary-light'
-							: 'bg-gray-200'} mr-1 rounded p-2 text-sm transition-colors">
+							: 'bg-gray-200'} mr-1 rounded p-2 text-sm break-words transition-colors">
 						{op.operation}
 						{#if operations[currentOperation] === op}
 							<ul class="mt-2 flex flex-col gap-1">

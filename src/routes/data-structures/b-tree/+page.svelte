@@ -11,13 +11,8 @@
 <h1 class="page-title">B-Tree Simulation</h1>
 <p style="color: red; font-weight: bold;">This is very much broken and I know it. Will fix later.</p>
 <div class="page-layout">
-	<div>
-		<BTreeVisual {operationManager} />
-	</div>
-
-	<div>
-		<TreeControls {operationManager} />
-	</div>
+	<BTreeVisual {operationManager} />
+	<TreeControls {operationManager} />
 </div>
 
 <DataStructureDescription filename="b_tree.md" />

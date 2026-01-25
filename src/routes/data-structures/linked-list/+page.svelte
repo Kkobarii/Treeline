@@ -10,13 +10,8 @@
 
 <h1 class="page-title">Linked List Simulation</h1>
 <div class="page-layout">
-	<div>
-		<LinkedListVisual {operationManager} />
-	</div>
-
-	<div>
-		<LinkedListControls {operationManager} />
-	</div>
+	<LinkedListVisual {operationManager} />
+	<LinkedListControls {operationManager} />
 </div>
 
 <DataStructureDescription filename="linked_list.md" />

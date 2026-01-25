@@ -10,13 +10,8 @@
 
 <h1 class="page-title">Heap Simulation</h1>
 <div class="page-layout">
-	<div>
-		<HeapVisual {operationManager} />
-	</div>
-
-	<div>
-		<HeapControls {operationManager} />
-	</div>
+	<HeapVisual {operationManager} />
+	<HeapControls {operationManager} />
 </div>
 
 <DataStructureDescription filename="heap.md" />
