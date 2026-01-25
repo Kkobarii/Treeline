@@ -20,10 +20,10 @@ Data Structures:
 
 - 🟢 Binary Search Tree
 - 🟡 AVL Tree
-- 🟠 Red-black tree
-- 🔴 B-tree
-- 🔴 Heap
-- 🔴 Linked List
+- 🟡 Red-black tree
+- 🟠 B-tree
+- 🟡 Heap
+- 🟠 Linked List
 - 🔴 Stack
 - 🔴 Queue
 
