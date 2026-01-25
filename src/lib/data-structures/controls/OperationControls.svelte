@@ -81,18 +81,18 @@
 </script>
 
 <div class="flex min-h-0 flex-1 flex-row gap-2 md:flex-col md:gap-6">
-	<div class="flex flex-none flex-col gap-3">
-		<h2 class="text-primary flex-none text-lg font-bold break-words">Controls</h2>
+	<div class="flex flex-col gap-3">
+		<h2 class="text-primary text-lg font-bold break-words">Operation Controls</h2>
 		<div class="flex flex-col items-start gap-2 md:flex-row md:items-center">
 			<button
-				class="w-full"
+				class="w-full md:w-auto"
 				type="button"
 				on:click={() => operationManager.previous()}
 				disabled={!canDoPrevious || locked}>
 				Previous
 			</button>
 			<button
-				class="w-full"
+				class="w-full md:w-auto"
 				type="button"
 				on:click={() => operationManager.next()}
 				disabled={!canDoNext || locked}>
@@ -111,7 +111,7 @@
 	</div>
 
 	<div class="flex min-h-0 flex-1 flex-col gap-3">
-		<h2 class="text-primary flex-none text-lg font-bold break-words">Info</h2>
+		<h2 class="text-primary text-lg font-bold break-words">Operation Info</h2>
 
 		<div
 			class="min-h-0 flex-1 overflow-y-auto"
