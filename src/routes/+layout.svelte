@@ -70,8 +70,8 @@
 </main>
 
 <footer class="footer-nav">
-	<div class="container mx-auto flex items-center justify-between px-6 py-4">
-		<div class="flex items-center gap-3">
+	<div class="container mx-auto flex flex-col items-center justify-between gap-4 px-6 py-4 md:flex-row">
+		<div class="flex flex-col items-center gap-3 md:flex-row">
 			<img
 				src="/branch.svg"
 				alt="Treeline logo"

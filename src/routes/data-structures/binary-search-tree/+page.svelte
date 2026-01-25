@@ -10,13 +10,8 @@
 
 <h1 class="page-title">Binary Search Tree Simulation</h1>
 <div class="page-layout">
-	<div>
-		<BSTreeVisual {operationManager} />
-	</div>
-
-	<div>
-		<TreeControls {operationManager} />
-	</div>
+	<BSTreeVisual {operationManager} />
+	<TreeControls {operationManager} />
 </div>
 
 <DataStructureDescription filename="bs_tree.md" />

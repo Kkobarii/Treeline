@@ -90,7 +90,7 @@
 	});
 </script>
 
-<div class="treeline-card relative h-full min-h-[400px] w-full overflow-hidden">
+<div class="structure-visual-container treeline-card relative h-full min-h-[400px] w-full overflow-hidden">
 	<div
 		bind:this={container}
 		class="absolute inset-0 rounded">

@@ -29,21 +29,23 @@
 	<div class="flex flex-col gap-4">
 		<h2 class="text-primary text-lg font-bold">Tree Controls</h2>
 		<div class="flex flex-col gap-4">
-			<div class="flex flex-col gap-2">
+			<div class="flex w-full flex-col gap-2">
 				<button
+					class="w-full"
 					type="button"
 					on:click={() => operationManager.operation(OperationType.Tree.Insert, Math.floor(Math.random() * 1000))}
 					disabled={locked}>
 					Insert Random Node
 				</button>
 				<button
+					class="w-full"
 					type="button"
 					on:click={() => operationManager.reset()}
 					disabled={locked}>
 					Reset
 				</button>
 			</div>
-			<div class="flex items-center gap-2">
+			<div class="flex w-full flex-wrap items-center gap-2">
 				<input
 					type="number"
 					class="w-15 rounded border border-gray-300 bg-gray-100 text-center"
@@ -57,18 +59,21 @@
 					}}
 					disabled={locked} />
 				<button
+					class="flex-1"
 					type="button"
 					on:click={() => operationManager.operation(OperationType.Tree.Insert, manualValue)}
 					disabled={locked}>
 					Insert
 				</button>
 				<button
+					class="flex-1"
 					type="button"
 					on:click={() => operationManager.operation(OperationType.Tree.Remove, manualValue)}
 					disabled={locked}>
 					Remove
 				</button>
 				<button
+					class="flex-1"
 					type="button"
 					on:click={() => operationManager.operation(OperationType.Tree.Find, manualValue)}
 					disabled={locked}>

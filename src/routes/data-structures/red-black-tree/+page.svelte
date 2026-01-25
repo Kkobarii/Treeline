@@ -10,13 +10,8 @@
 
 <h1 class="page-title">Red-Black Tree Simulation</h1>
 <div class="page-layout">
-	<div>
-		<RBTreeVisual {operationManager} />
-	</div>
-
-	<div>
-		<TreeControls {operationManager} />
-	</div>
+	<RBTreeVisual {operationManager} />
+	<TreeControls {operationManager} />
 </div>
 
 <DataStructureDescription filename="rb_tree.md" />

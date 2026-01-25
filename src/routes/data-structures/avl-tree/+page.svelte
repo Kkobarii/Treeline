@@ -10,13 +10,8 @@
 
 <h1 class="page-title">AVL Tree Simulation</h1>
 <div class="page-layout">
-	<div>
-		<AVLTreeVisual {operationManager} />
-	</div>
-
-	<div>
-		<TreeControls {operationManager} />
-	</div>
+	<AVLTreeVisual {operationManager} />
+	<TreeControls {operationManager} />
 </div>
 
 <DataStructureDescription filename="avl_tree.md" />
