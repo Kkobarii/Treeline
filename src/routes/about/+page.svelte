@@ -5,7 +5,7 @@
 
 <div class="treeline-card">
 	<div class="prose dark:prose-invert max-w-none">
-		<h2>What is Treeline?</h2>
+		<h2 class="mt-0!">What is Treeline?</h2>
 		<p>
 			Treeline is an interactive learning platform designed to help students understand and visualize data structures and sorting
 			algorithms in real-time. It offers step-by-step animations and interactive simulations to make complex concepts easier to
@@ -34,8 +34,9 @@
 
 		<h2>Technologies</h2>
 		<p>
-			Treeline is built using modern web technologies including Svelte, TypeScript, Tailwind CSS, and D3.js for visualizations. The
-			entire project is open-source and available on GitHub, though it's private for now as I'm scared of judgement.
+			Treeline is built using modern web technologies including Svelte, TypeScript, Tailwind CSS, and vis.js network for
+			visualizations. The entire project is open-source and available on GitHub, though it's private for now as I'm scared of
+			judgement.
 		</p>
 
 		<h2>Why am I doing this?</h2>
