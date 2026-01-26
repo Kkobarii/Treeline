@@ -31,7 +31,6 @@
 
 <ModeWatcher />
 
-<!-- Mobile Menu Overlay -->
 {#if mobileMenuOpen}
 	<div
 		class="mobile-menu-overlay"
@@ -56,9 +55,7 @@
 			<span class="header-title">Treeline</span>
 		</a>
 
-		<!-- links -->
 		<div class="ml-4 hidden items-center gap-6 md:flex">
-			<!-- Data Structures Dropdown -->
 			<div
 				class="relative"
 				role="menuitem"
@@ -115,6 +112,18 @@
 							onclick={() => (structuresDropdownOpen = false)}>
 							Linked List
 						</a>
+						<a
+							href="/data-structures/stack"
+							class="dropdown-link"
+							onclick={() => (structuresDropdownOpen = false)}>
+							Stack
+						</a>
+						<a
+							href="/data-structures/queue"
+							class="dropdown-link"
+							onclick={() => (structuresDropdownOpen = false)}>
+							Queue
+						</a>
 					</div>
 				{/if}
 			</div>
@@ -145,9 +154,7 @@
 			</div>
 		</div>
 
-		<!-- right actions -->
 		<div class="ml-auto flex items-center gap-3">
-			<!-- Burger Menu Button (Mobile) -->
 			<button
 				aria-label="Toggle menu"
 				class="header-burger-button"
@@ -174,10 +181,8 @@
 		</div>
 	</div>
 
-	<!-- Mobile Menu -->
 	{#if mobileMenuOpen}
 		<div class="mobile-menu">
-			<!-- Data Structures Mobile -->
 			<div class="mobile-menu-section">
 				<button
 					class="mobile-menu-button"
@@ -227,11 +232,22 @@
 							onclick={() => closeMobileMenu()}>
 							Linked List
 						</a>
+						<a
+							href="/data-structures/stack"
+							class="mobile-submenu-link"
+							onclick={() => closeMobileMenu()}>
+							Stack
+						</a>
+						<a
+							href="/data-structures/queue"
+							class="mobile-submenu-link"
+							onclick={() => closeMobileMenu()}>
+							Queue
+						</a>
 					</div>
 				{/if}
 			</div>
 
-			<!-- Sorting Algorithms Mobile -->
 			<div class="mobile-menu-section">
 				<button
 					class="mobile-menu-button"

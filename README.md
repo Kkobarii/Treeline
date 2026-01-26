@@ -21,11 +21,11 @@ Data Structures:
 - 🟢 Binary Search Tree
 - 🟡 AVL Tree
 - 🟡 Red-black tree
-- 🟠 B-tree
+- 🟣 B-tree
 - 🟡 Heap
 - 🟠 Linked List
-- 🔴 Stack
-- 🔴 Queue
+- 🟠 Stack
+- 🟠 Queue
 
 Sorting Algorithms:
 
@@ -42,6 +42,7 @@ Legend:
 - 🟠 In progress
 - 🟡 Needs polish
 - 🟢 Done (as much as it can be)
+- 🟣 Biblically accurate tree (not touching this one unless completely necessary)
 
 ## Color palettes used
 

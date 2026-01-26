@@ -8,6 +8,8 @@ export enum StructureType {
 	BTree = 'BTree',
 	Heap = 'Heap',
 	LinkedList = 'LinkedList',
+	Stack = 'Stack',
+	Queue = 'Queue',
 }
 
 export const OperationType = {
@@ -26,17 +28,24 @@ export const OperationType = {
 		Find: 'LinkedList.Find',
 		Remove: 'LinkedList.Remove',
 	},
-	// Stack: {
-	// 	Push: 'Stack.Push',
-	// 	Pop: 'Stack.Pop',
-	// },
+	Stack: {
+		Push: 'Stack.Push',
+		Pop: 'Stack.Pop',
+		Peek: 'Stack.Peek',
+	},
+	Queue: {
+		Enqueue: 'Queue.Enqueue',
+		Dequeue: 'Queue.Dequeue',
+		Peek: 'Queue.Peek',
+	},
 } as const;
 
 export type OperationTypeValue =
 	| (typeof OperationType.Tree)[keyof typeof OperationType.Tree]
 	| (typeof OperationType.Heap)[keyof typeof OperationType.Heap]
-	| (typeof OperationType.LinkedList)[keyof typeof OperationType.LinkedList];
-// | (typeof OperationType.Stack)[keyof typeof OperationType.Stack];
+	| (typeof OperationType.LinkedList)[keyof typeof OperationType.LinkedList]
+	| (typeof OperationType.Stack)[keyof typeof OperationType.Stack]
+	| (typeof OperationType.Queue)[keyof typeof OperationType.Queue];
 
 // centralize common tree step names so BST and AVL share the same base values
 const BaseTreeSteps = {
@@ -111,6 +120,22 @@ export const StepType = {
 		RemoveNode: 'RemoveNode',
 		EmptyList: 'EmptyList',
 	},
+	Stack: {
+		Start: 'Start',
+		End: 'End',
+		Push: 'Push',
+		Pop: 'Pop',
+		Peek: 'Peek',
+		Empty: 'Empty',
+	},
+	Queue: {
+		Start: 'Start',
+		End: 'End',
+		Enqueue: 'Enqueue',
+		Dequeue: 'Dequeue',
+		Peek: 'Peek',
+		Empty: 'Empty',
+	},
 } as const;
 
 export type StepTypeValue =
@@ -119,7 +144,9 @@ export type StepTypeValue =
 	| (typeof StepType.Heap)[keyof typeof StepType.Heap]
 	| (typeof StepType.BTree)[keyof typeof StepType.BTree]
 	| (typeof StepType.RBTree)[keyof typeof StepType.RBTree]
-	| (typeof StepType.LinkedList)[keyof typeof StepType.LinkedList];
+	| (typeof StepType.LinkedList)[keyof typeof StepType.LinkedList]
+	| (typeof StepType.Stack)[keyof typeof StepType.Stack]
+	| (typeof StepType.Queue)[keyof typeof StepType.Queue];
 
 export class DataNode {
 	id: number;
@@ -166,6 +193,10 @@ export function getInitOperation(structureType: StructureType): OperationTypeVal
 			return OperationType.Heap.Insert;
 		case StructureType.LinkedList:
 			return OperationType.LinkedList.InsertTail;
+		case StructureType.Stack:
+			return OperationType.Stack.Push;
+		case StructureType.Queue:
+			return OperationType.Queue.Enqueue;
 		default:
 			throw new Error(`Unsupported structure type: ${structureType}`);
 	}

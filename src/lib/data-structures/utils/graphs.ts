@@ -438,3 +438,80 @@ export function linkedListToGraph(list: any, nodes: DataSet<Node> = new DataSet<
 
 	return { nodes, edges };
 }
+
+export function stackToGraph(stack: any, nodes: DataSet<Node> = new DataSet<Node>(), edges: DataSet<Edge> = new DataSet<Edge>()) {
+	if (!stack || !stack.top) return { nodes, edges };
+
+	let current = stack.top;
+	let position = 0;
+
+	while (current) {
+		const nodeId = current.id;
+		const isTop = stack.top && stack.top.id === nodeId;
+		const nodeData = new LinkedListNodeData(isTop, false);
+
+		nodes.add({
+			id: nodeId,
+			label: current.value.toString(),
+			title: NodeData.toTitle(nodeData),
+		});
+
+		if (current.next) {
+			const edgeId = `${nodeId}->${current.next.id}`;
+			edges.add({
+				id: edgeId,
+				from: nodeId,
+				to: current.next.id,
+				arrows: 'to',
+			});
+			current = current.next;
+			position++;
+		} else {
+			break;
+		}
+	}
+
+	return { nodes, edges };
+}
+
+export function queueToGraph(queue: any, nodes: DataSet<Node> = new DataSet<Node>(), edges: DataSet<Edge> = new DataSet<Edge>()) {
+	if (!queue || !queue.front) return { nodes, edges };
+
+	let current = queue.front;
+	let position = 0;
+
+	while (current) {
+		const nodeId = current.id;
+		let isFront = false;
+		if (queue.front && queue.front.id === nodeId) {
+			isFront = true;
+		}
+		let isRear = false;
+		if (queue.rear && queue.rear.id === nodeId) {
+			isRear = true;
+		}
+		const nodeData = new LinkedListNodeData(isFront, isRear);
+
+		nodes.add({
+			id: nodeId,
+			label: current.value.toString(),
+			title: NodeData.toTitle(nodeData),
+		});
+
+		if (current.next) {
+			const edgeId = `${nodeId}->${current.next.id}`;
+			edges.add({
+				id: edgeId,
+				from: nodeId,
+				to: current.next.id,
+				arrows: 'to',
+			});
+			current = current.next;
+			position++;
+		} else {
+			break;
+		}
+	}
+
+	return { nodes, edges };
+}

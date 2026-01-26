@@ -1016,4 +1016,114 @@ export namespace Step {
 			return StepData.new(StepType.LinkedList.EmptyList, new EmptyListData());
 		}
 	}
+
+	export namespace Stack {
+		export class PushData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Push value ${value} onto stack`);
+			}
+		}
+
+		export function Push(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.Stack.Push, new PushData(nodeId, value, startSnapshot, endSnapshot));
+		}
+
+		export class PopData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Pop value ${value} from stack`);
+			}
+		}
+
+		export function Pop(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.Stack.Pop, new PopData(nodeId, value, startSnapshot, endSnapshot));
+		}
+
+		export class PeekData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+			) {
+				super(`Peek top value ${value}`);
+			}
+		}
+
+		export function Peek(nodeId: number, value: number): StepData {
+			return StepData.new(StepType.Stack.Peek, new PeekData(nodeId, value));
+		}
+
+		export class EmptyData extends StepDetail {
+			constructor() {
+				super(`Stack is empty`);
+			}
+		}
+
+		export function Empty(): StepData {
+			return StepData.new(StepType.Stack.Empty, new EmptyData());
+		}
+	}
+
+	export namespace Queue {
+		export class EnqueueData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Enqueue value ${value} to queue`);
+			}
+		}
+
+		export function Enqueue(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.Queue.Enqueue, new EnqueueData(nodeId, value, startSnapshot, endSnapshot));
+		}
+
+		export class DequeueData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+				public startSnapshot: DataStructure,
+				public endSnapshot: DataStructure,
+			) {
+				super(`Dequeue value ${value} from queue`);
+			}
+		}
+
+		export function Dequeue(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
+			return StepData.new(StepType.Queue.Dequeue, new DequeueData(nodeId, value, startSnapshot, endSnapshot));
+		}
+
+		export class PeekData extends StepDetail {
+			constructor(
+				public nodeId: number,
+				public value: number,
+			) {
+				super(`Peek front value ${value}`);
+			}
+		}
+
+		export function Peek(nodeId: number, value: number): StepData {
+			return StepData.new(StepType.Queue.Peek, new PeekData(nodeId, value));
+		}
+
+		export class EmptyData extends StepDetail {
+			constructor() {
+				super(`Queue is empty`);
+			}
+		}
+
+		export function Empty(): StepData {
+			return StepData.new(StepType.Queue.Empty, new EmptyData());
+		}
+	}
 }
