@@ -148,7 +148,42 @@
 
 				{#if sortingDropdownOpen}
 					<div class="dropdown-menu">
-						<span class="dropdown-text">Coming Soon</span>
+						<a
+							href="/sorting-algorithms/bubble"
+							class="dropdown-link"
+							onclick={() => (sortingDropdownOpen = false)}>
+							Bubble Sort
+						</a>
+						<a
+							href="/sorting-algorithms/selection"
+							class="dropdown-link"
+							onclick={() => (sortingDropdownOpen = false)}>
+							Selection Sort
+						</a>
+						<a
+							href="/sorting-algorithms/insertion"
+							class="dropdown-link"
+							onclick={() => (sortingDropdownOpen = false)}>
+							Insertion Sort
+						</a>
+						<a
+							href="/sorting-algorithms/merge"
+							class="dropdown-link"
+							onclick={() => (sortingDropdownOpen = false)}>
+							Merge Sort
+						</a>
+						<a
+							href="/sorting-algorithms/quick"
+							class="dropdown-link"
+							onclick={() => (sortingDropdownOpen = false)}>
+							Quick Sort
+						</a>
+						<a
+							href="/sorting-algorithms/heap"
+							class="dropdown-link"
+							onclick={() => (sortingDropdownOpen = false)}>
+							Heap Sort
+						</a>
 					</div>
 				{/if}
 			</div>
@@ -261,7 +296,42 @@
 				</button>
 				{#if mobileSortingOpen}
 					<div class="mobile-submenu">
-						<span class="mobile-submenu-text">Coming Soon</span>
+						<a
+							href="/sorting-algorithms/bubble"
+							class="mobile-submenu-link"
+							onclick={() => closeMobileMenu()}>
+							Bubble Sort
+						</a>
+						<a
+							href="/sorting-algorithms/selection"
+							class="mobile-submenu-link"
+							onclick={() => closeMobileMenu()}>
+							Selection Sort
+						</a>
+						<a
+							href="/sorting-algorithms/insertion"
+							class="mobile-submenu-link"
+							onclick={() => closeMobileMenu()}>
+							Insertion Sort
+						</a>
+						<a
+							href="/sorting-algorithms/merge"
+							class="mobile-submenu-link"
+							onclick={() => closeMobileMenu()}>
+							Merge Sort
+						</a>
+						<a
+							href="/sorting-algorithms/quick"
+							class="mobile-submenu-link"
+							onclick={() => closeMobileMenu()}>
+							Quick Sort
+						</a>
+						<a
+							href="/sorting-algorithms/heap"
+							class="mobile-submenu-link"
+							onclick={() => closeMobileMenu()}>
+							Heap Sort
+						</a>
 					</div>
 				{/if}
 			</div>
