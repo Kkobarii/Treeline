@@ -4,8 +4,7 @@ import { insertionSortDetailedSteps, insertionSortSteps } from '$lib/sorting-alg
 import { mergeSortDetailedSteps, mergeSortSteps } from '$lib/sorting-algorithms/algorithms/merge.js';
 import { quickSortDetailedSteps, quickSortSteps } from '$lib/sorting-algorithms/algorithms/quick.js';
 import { selectionSortDetailedSteps, selectionSortSteps } from '$lib/sorting-algorithms/algorithms/selection.js';
-
-import type { SortingAlgorithm, SortingAlgorithmId } from '../misc/types';
+import type { SortingAlgorithm, SortingAlgorithmId } from '$lib/sorting-algorithms/misc/types';
 
 export const sortingAlgorithms: SortingAlgorithm[] = [
 	{

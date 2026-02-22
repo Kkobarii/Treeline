@@ -1,13 +1,9 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-
-	import {
-		createShuffledArray,
-		getSortingAlgorithm,
-		sortingAlgorithms,
-		type SortingAlgorithmId,
-		type SortStep,
-	} from '$lib/sorting-algorithms/backend';
+	import type { SortingAlgorithmId } from '../misc/types';
+	import { getSortingAlgorithm } from '../misc/registry';
+	import { createShuffledArray } from '../misc/utils';
+	import type { SortStep } from '../steps/stepTypes';
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -109,14 +105,28 @@
 
 <h1 class="page-title">{algorithm.name} — Big picture</h1>
 
+<div class="mb-3 flex flex-wrap gap-2">
+	<span
+		class="rounded px-3 py-2 text-sm font-semibold text-white"
+		style="background-color: var(--color-primary);">
+		Big Picture
+	</span>
+	<a
+		href={`/sorting-algorithms/${algorithmId}/detailed`}
+		class="rounded px-3 py-2 text-sm font-semibold no-underline"
+		style="background-color: var(--color-tertiary-ultra-light); color: var(--color-text); border: 1px solid var(--color-tertiary);">
+		Detailed
+	</a>
+</div>
+
 <p
 	class="mb-3 text-sm"
 	style="color: var(--color-text);">
 	{algorithm.description}
 </p>
 
-<div class="treeline-card sorting-card">
-	<div class="sorting-controls">
+<div class="treeline-card flex flex-col gap-4">
+	<div class="flex flex-wrap items-center gap-2">
 		<button onclick={regenerateArray}>Shuffle 100 Keys</button>
 		<button onclick={generateSteps}>Generate Steps</button>
 		<button onclick={runOrPause}>{isPlaying ? 'Pause' : 'Run'}</button>
@@ -130,7 +140,7 @@
 			onclick={resetPlayback}
 			disabled={!steps.length}>Reset</button>
 		<label
-			class="speed-label"
+			class="ml-2"
 			for="speed-slider">Speed</label>
 		<input
 			id="speed-slider"
@@ -142,7 +152,9 @@
 		<span class="text-xs">{stepDelayMs}ms</span>
 	</div>
 
-	<div class="step-meta">
+	<div
+		class="flex flex-col gap-[0.4rem] text-[0.85rem]"
+		style="color: var(--color-text);">
 		<span>Step {steps.length ? currentStepIndex + 1 : 0}/{steps.length}</span>
 		<span>{stepLabel}</span>
 	</div>
@@ -160,34 +172,18 @@
 	</div>
 </div>
 
-<style>
-	.sorting-card {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.sorting-controls {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		align-items: center;
-	}
+<style lang="postcss">
+	@reference "../../../app.css";
 
 	.bars-wrapper {
-		height: 26rem;
-		display: grid;
+		@apply grid h-[26rem] items-end gap-[2px] rounded-xl border p-3;
 		grid-template-columns: repeat(100, minmax(0, 1fr));
-		align-items: end;
-		gap: 2px;
-		padding: 0.75rem;
-		border-radius: 0.75rem;
 		background-color: var(--color-tertiary-ultra-light);
 		border: 1px solid var(--color-tertiary);
 	}
 
 	.sort-bar {
-		border-radius: 0.125rem;
+		@apply rounded-sm;
 		background-color: var(--color-primary-light);
 		transition:
 			height 120ms linear,
@@ -206,22 +202,9 @@
 		background-color: var(--color-green-700);
 	}
 
-	.step-meta {
-		display: flex;
-		flex-direction: column;
-		gap: 0.4rem;
-		font-size: 0.85rem;
-		color: var(--color-text);
-	}
-
-	.speed-label {
-		margin-left: 0.5rem;
-	}
-
 	@media (max-width: 768px) {
 		.bars-wrapper {
-			height: 18rem;
-			gap: 1px;
+			@apply h-72 gap-px;
 		}
 	}
 </style>

@@ -20,3 +20,30 @@ export function range(start: number, endInclusive: number): number[] {
 export function uniqueSorted(values: Iterable<number>): number[] {
 	return [...new Set(values)].sort((left, right) => left - right);
 }
+
+export function swap<T>(array: T[], leftIndex: number, rightIndex: number): void {
+	if (leftIndex === rightIndex) {
+		return;
+	}
+
+	[array[leftIndex], array[rightIndex]] = [array[rightIndex], array[leftIndex]];
+}
+
+
+export function shift<T>(array: T[], fromIndex: number, toIndex: number): void {
+	if (fromIndex === toIndex) {
+		return;
+	}
+
+	if (fromIndex < toIndex) {
+		// Moving right: repeatedly swap right
+		for (let i = fromIndex; i < toIndex; i += 1) {
+			swap(array, i, i + 1);
+		}
+	} else {
+		// Moving left: repeatedly swap left
+		for (let i = fromIndex; i > toIndex; i -= 1) {
+			swap(array, i, i - 1);
+		}
+	}
+}
