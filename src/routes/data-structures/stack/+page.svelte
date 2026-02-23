@@ -1,6 +1,6 @@
 <script lang="ts">
+	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
 	import StackControls from '$lib/data-structures/controls/specific/StackControls.svelte';
-	import DataStructureDescription from '$lib/data-structures/DataStructureDescription.svelte';
 	import { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { StructureType } from '$lib/data-structures/structures/dataStructure';
 	import StackVisual from '$lib/data-structures/structures/stack/StackVisual.svelte';
@@ -14,4 +14,4 @@
 	<StackControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="data-structures/stack" />
+<DescriptionCard filename="data-structures/stack" />

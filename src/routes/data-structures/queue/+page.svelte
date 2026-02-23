@@ -1,6 +1,6 @@
 <script lang="ts">
+	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
 	import QueueControls from '$lib/data-structures/controls/specific/QueueControls.svelte';
-	import DataStructureDescription from '$lib/data-structures/DataStructureDescription.svelte';
 	import { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { StructureType } from '$lib/data-structures/structures/dataStructure';
 	import QueueVisual from '$lib/data-structures/structures/queue/QueueVisual.svelte';
@@ -14,4 +14,4 @@
 	<QueueControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="data-structures/queue" />
+<DescriptionCard filename="data-structures/queue" />

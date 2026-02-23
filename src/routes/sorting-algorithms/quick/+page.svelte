@@ -1,8 +1,5 @@
 <script lang="ts">
-	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
-	import SortingFirstView from '$lib/sorting-algorithms/visuals/SortingFirstView.svelte';
+	import SortingVisual from '$lib/sorting-algorithms/visuals/SortingVisual.svelte';
 </script>
 
-<SortingFirstView algorithmId="quick" />
-
-<DescriptionCard filename="sorting-algorithms/quick_sort" />
+<SortingVisual algorithmId="quick" />

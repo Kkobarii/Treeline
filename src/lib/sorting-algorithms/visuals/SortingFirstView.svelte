@@ -5,7 +5,6 @@
 	import type { SortingAlgorithmId } from '../misc/types';
 	import { createShuffledArray } from '../misc/utils';
 	import type { SortStep } from '../steps/stepTypes';
-	import ViewSwitcher from './ViewSwitcher.svelte';
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -104,10 +103,6 @@
 		clearTimer();
 	});
 </script>
-
-<ViewSwitcher
-	{algorithmId}
-	view="big-picture" />
 
 <p
 	class="mb-3 text-sm"

@@ -1,6 +1,6 @@
 <script lang="ts">
+	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
 	import HeapControls from '$lib/data-structures/controls/specific/HeapControls.svelte';
-	import DataStructureDescription from '$lib/data-structures/DataStructureDescription.svelte';
 	import { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { StructureType } from '$lib/data-structures/structures/dataStructure';
 	import HeapVisual from '$lib/data-structures/structures/heap/HeapVisual.svelte';
@@ -14,4 +14,4 @@
 	<HeapControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="data-structures/heap" />
+<DescriptionCard filename="data-structures/heap" />

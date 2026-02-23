@@ -1,6 +1,6 @@
 <script lang="ts">
+	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
 	import TreeControls from '$lib/data-structures/controls/specific/TreeControls.svelte';
-	import DataStructureDescription from '$lib/data-structures/DataStructureDescription.svelte';
 	import { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import BTreeVisual from '$lib/data-structures/structures/bTree/BTreeVisual.svelte';
 	import { StructureType } from '$lib/data-structures/structures/dataStructure';
@@ -15,4 +15,4 @@
 	<TreeControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="data-structures/b_tree" />
+<DescriptionCard filename="data-structures/b_tree" />

@@ -7,7 +7,6 @@
 	import type { SortingAlgorithmId } from '../misc/types';
 	import { createShuffledArray } from '../misc/utils';
 	import type { CodeLanguage, DetailedSortStep } from '../steps/stepTypes';
-	import ViewSwitcher from './ViewSwitcher.svelte';
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -124,10 +123,6 @@
 	onDestroy(() => clearTimer());
 </script>
 
-<ViewSwitcher
-	{algorithmId}
-	view="detailed" />
-
 <div class="detailed-layout">
 	<div class="treeline-card flex flex-col gap-[0.85rem]">
 		<div class="controls-row">
@@ -200,6 +195,7 @@
 		</div>
 
 		<div class="flex flex-col gap-[0.4rem]">
+			<p class="text-sm font-bold text-red-500">Temporary testing code</p>
 			{#each codeTemplate.parts as part}
 				<div
 					class="code-line"
