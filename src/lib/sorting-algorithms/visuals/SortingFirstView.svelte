@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import type { SortingAlgorithmId } from '../misc/types';
+
 	import { getSortingAlgorithm } from '../misc/registry';
+	import type { SortingAlgorithmId } from '../misc/types';
 	import { createShuffledArray } from '../misc/utils';
 	import type { SortStep } from '../steps/stepTypes';
+	import ViewSwitcher from './ViewSwitcher.svelte';
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -103,21 +105,9 @@
 	});
 </script>
 
-<h1 class="page-title">{algorithm.name} — Big picture</h1>
-
-<div class="mb-3 flex flex-wrap gap-2">
-	<span
-		class="rounded px-3 py-2 text-sm font-semibold text-white"
-		style="background-color: var(--color-primary);">
-		Big Picture
-	</span>
-	<a
-		href={`/sorting-algorithms/${algorithmId}/detailed`}
-		class="rounded px-3 py-2 text-sm font-semibold no-underline"
-		style="background-color: var(--color-tertiary-ultra-light); color: var(--color-text); border: 1px solid var(--color-tertiary);">
-		Detailed
-	</a>
-</div>
+<ViewSwitcher
+	{algorithmId}
+	view="big-picture" />
 
 <p
 	class="mb-3 text-sm"

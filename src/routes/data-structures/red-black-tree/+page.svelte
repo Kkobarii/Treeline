@@ -14,4 +14,4 @@
 	<TreeControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="rb_tree.md" />
+<DataStructureDescription filename="data-structures/rb_tree" />

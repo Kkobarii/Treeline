@@ -20,7 +20,7 @@ Similar to a Stack, a Queue is highly optimized for its specific entry and exit 
 The enqueue operation adds an element to the "Rear" of the queue.
 
 1. **Create**: A new node or entry is created for the value.
-2. **Link to Rear**: The current "Rear" element’s next pointer is updated to point to the new node.
+2. **Link to Rear**: The current "Rear" element's next pointer is updated to point to the new node.
 3. **Update Rear**: The queue's internal reference for the **Rear** is moved to this new node. If the queue was previously empty, this node also becomes the **Front**.
 
 ## Dequeue (Extract)
@@ -29,7 +29,7 @@ The dequeue operation removes the element currently at the "Front" of the queue.
 
 1. **Check for Empty**: If the queue is empty, the operation is dropped.
 2. **Identify Front**: The current **Front** element is targeted for removal.
-3. **Shift Front**: The queue’s internal reference for the **Front** is moved to the next element in line.
+3. **Shift Front**: The queue's internal reference for the **Front** is moved to the next element in line.
 4. **Finalize**: The old front node is disconnected. If the queue becomes empty after this, the **Rear** is also set to null.
 
 ## Peek (Front)

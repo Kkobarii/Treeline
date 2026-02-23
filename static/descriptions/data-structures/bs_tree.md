@@ -4,8 +4,8 @@ A **Binary Search Tree (BST)** is a fundamental hierarchical data structure used
 
 The defining characteristic of a BST is its ordering principle:
 
-- The **Left Subtree** of a node contains only values strictly less than the node’s value.
-- The **Right Subtree** of a node contains only values strictly greater than the node’s value.
+- The **Left Subtree** of a node contains only values strictly less than the node's value.
+- The **Right Subtree** of a node contains only values strictly greater than the node's value.
 - Duplicate values are generally not permitted.
 
 This organizational structure allows the tree to act like a sorted list while maintaining the hierarchical advantages of a tree, significantly narrowing the search space during operations.

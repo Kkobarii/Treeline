@@ -14,4 +14,4 @@
 	<QueueControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="queue.md" />
+<DataStructureDescription filename="data-structures/queue" />

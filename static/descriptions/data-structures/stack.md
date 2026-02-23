@@ -21,7 +21,7 @@ The push operation adds a new element to the collection. In a stack, this new el
 
 1. **Create**: A new node or entry is created for the value.
 2. **Link**: The new element is placed "above" the current top element.
-3. **Update Top**: The stack’s internal reference is updated to point to this new element as the current **Top**.
+3. **Update Top**: The stack's internal reference is updated to point to this new element as the current **Top**.
 
 ## Pop
 
@@ -29,7 +29,7 @@ The pop operation removes the element that is currently at the top of the stack.
 
 1. **Check for Empty**: If the stack has no elements, the operation is dropped as there is nothing to remove.
 2. **Identify Top**: The current **Top** element is targeted for removal.
-3. **Update Top**: The stack’s internal reference is moved "down" to the element immediately below the current top.
+3. **Update Top**: The stack's internal reference is moved "down" to the element immediately below the current top.
 4. **Result**: The removed element is returned, and the stack is now one element smaller.
 
 ## Peek (Top)

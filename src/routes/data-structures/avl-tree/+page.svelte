@@ -14,4 +14,4 @@
 	<TreeControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="avl_tree.md" />
+<DataStructureDescription filename="data-structures/avl_tree" />

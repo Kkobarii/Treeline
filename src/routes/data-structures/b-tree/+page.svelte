@@ -15,4 +15,4 @@
 	<TreeControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="b_tree.md" />
+<DataStructureDescription filename="data-structures/b_tree" />

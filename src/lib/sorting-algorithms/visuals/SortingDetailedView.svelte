@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import type { SortingAlgorithmId } from '../misc/types';
-	import { getSortingAlgorithm } from '../misc/registry';
+	import { cubicInOut } from 'svelte/easing';
+
 	import { getCodeTemplate } from '../misc/codeTemplates';
-	import type { CodeLanguage, DetailedSortStep } from '../steps/stepTypes';
+	import { getSortingAlgorithm } from '../misc/registry';
+	import type { SortingAlgorithmId } from '../misc/types';
 	import { createShuffledArray } from '../misc/utils';
+	import type { CodeLanguage, DetailedSortStep } from '../steps/stepTypes';
+	import ViewSwitcher from './ViewSwitcher.svelte';
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -26,6 +29,34 @@
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
 	let stepLabel = $derived(currentStep ? currentStep.label : 'Generate steps to start the detailed simulation.');
 	let variables = $derived(currentStep ? currentStep.variables : {});
+	let flipDurationMs = $derived(Math.max(100, Math.floor(delayMs * 0.85)));
+	let arcHeightFactor = $state(0.1);
+
+	function curvedFlip(
+		_: Element,
+		{ from, to }: { from: DOMRect; to: DOMRect },
+		{
+			duration,
+			easing,
+		}: {
+			duration: number;
+			easing: (t: number) => number;
+		},
+	) {
+		const dx = from.left - to.left;
+		const dy = from.top - to.top;
+		const direction = dx === 0 ? 0 : dx > 0 ? -1 : 1;
+		const arcHeight = direction === 0 ? 0 : Math.min(36, Math.max(10, Math.abs(dx) * arcHeightFactor));
+
+		return {
+			duration,
+			easing,
+			css: (t: number, u: number) => {
+				const curvedOffsetY = direction * arcHeight * Math.sin(Math.PI * t);
+				return `transform: translate(${u * dx}px, ${u * dy + curvedOffsetY}px);`;
+			},
+		};
+	}
 
 	function clearTimer() {
 		if (timer) {
@@ -93,21 +124,9 @@
 	onDestroy(() => clearTimer());
 </script>
 
-<h1 class="page-title">{algorithm.name} — Detailed View</h1>
-
-<div class="mb-3 flex flex-wrap gap-2">
-	<a
-		href={`/sorting-algorithms/${algorithmId}`}
-		class="rounded px-3 py-2 text-sm font-semibold no-underline"
-		style="background-color: var(--color-tertiary-ultra-light); color: var(--color-text); border: 1px solid var(--color-tertiary);">
-		Big Picture
-	</a>
-	<span
-		class="rounded px-3 py-2 text-sm font-semibold text-white"
-		style="background-color: var(--color-primary);">
-		Detailed
-	</span>
-</div>
+<ViewSwitcher
+	{algorithmId}
+	view="detailed" />
 
 <div class="detailed-layout">
 	<div class="treeline-card flex flex-col gap-[0.85rem]">
@@ -144,12 +163,16 @@
 		</div>
 
 		<div class="array-row">
-			{#each currentArray as value, index}
+			{#each currentArray as value, index (value)}
 				<div
 					class="array-item"
 					class:item-active={indicesHighlighted.includes(index)}
 					class:item-moved={movedIndices.includes(index)}
-					class:item-sorted={sortedIndices.includes(index)}>
+					class:item-sorted={sortedIndices.includes(index)}
+					animate:curvedFlip={{
+						duration: flipDurationMs,
+						easing: cubicInOut,
+					}}>
 					<div class="value-marker-track">
 						<div
 							class="value-marker-fill"
@@ -186,7 +209,7 @@
 			{/each}
 		</div>
 
-		<div class="pt-[0.3rem]">
+		<!-- <div class="pt-[0.3rem]">
 			<h3>Variables</h3>
 			{#if Object.keys(variables).length === 0}
 				<div class="text-sm">No tracked variables for this step.</div>
@@ -200,7 +223,7 @@
 					{/each}
 				</div>
 			{/if}
-		</div>
+		</div> -->
 	</div>
 </div>
 
@@ -258,15 +281,6 @@
 	.code-line-active {
 		background: var(--color-primary-light);
 		border-color: var(--color-primary);
-	}
-
-	.variable-entry {
-		@apply flex justify-between gap-[0.4rem] rounded-[0.45rem] p-[0.45rem];
-		background: var(--color-tertiary-ultra-light);
-	}
-
-	.variable-key {
-		@apply font-semibold;
 	}
 
 	@media (max-width: 1040px) {

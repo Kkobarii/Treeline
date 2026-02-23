@@ -14,4 +14,4 @@
 	<LinkedListControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="linked_list.md" />
+<DataStructureDescription filename="data-structures/linked_list" />

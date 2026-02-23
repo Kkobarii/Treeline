@@ -14,4 +14,4 @@
 	<StackControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="stack.md" />
+<DataStructureDescription filename="data-structures/stack" />

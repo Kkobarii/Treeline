@@ -14,4 +14,4 @@
 	<HeapControls {operationManager} />
 </div>
 
-<DataStructureDescription filename="heap.md" />
+<DataStructureDescription filename="data-structures/heap" />
