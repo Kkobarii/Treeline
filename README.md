@@ -23,18 +23,18 @@ Data Structures:
 - 🟡 Red-black tree
 - 🟣 B-tree
 - 🟡 Heap
-- 🟠 Linked List
-- 🟠 Stack
-- 🟠 Queue
+- 🟡 Linked List
+- 🟡 Stack
+- 🟡 Queue
 
 Sorting Algorithms:
 
-- 🔴 Bubble Sort
-- 🔴 Insertion Sort
-- 🔴 Selection Sort
-- 🔴 Merge Sort
-- 🔴 Quick Sort
-- 🔴 Heap Sort
+- 🟠 Bubble Sort
+- 🟠 Insertion Sort
+- 🟠 Selection Sort
+- 🟠 Merge Sort
+- 🟠 Quick Sort
+- 🟠 Heap Sort
 
 Legend:
 
