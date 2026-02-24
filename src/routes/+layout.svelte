@@ -352,7 +352,7 @@
 				src="/branch.svg"
 				alt="Treeline logo"
 				class="h-6 w-6" />
-			<span class="footer-text">© 2026 Treeline. Visual tool for learning data structures and (soon) sorting algorithms.</span>
+			<span class="footer-text">© 2026 Treeline. Visual tool for learning data structures and sorting algorithms.</span>
 		</div>
 		<div class="flex items-center gap-4">
 			<a
