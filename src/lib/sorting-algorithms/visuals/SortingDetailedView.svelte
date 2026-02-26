@@ -1,4 +1,5 @@
 <script lang="ts">
+	import hljs from 'highlight.js';
 	import { onDestroy } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 
@@ -13,6 +14,14 @@
 	const codeTemplate = getCodeTemplate(algorithmId);
 
 	let language = $state<CodeLanguage>('python');
+	let codeLines = $derived(codeTemplate[language]);
+	let highlightedCodeLines = $derived(
+		codeLines.map(line => ({
+			...line,
+			highlightedText: hljs.highlight(line.text, { language }).value,
+		})),
+	);
+
 	let baseArray = $state(createShuffledArray(16));
 	let steps = $state<DetailedSortStep[]>([]);
 	let currentStepIndex = $state(0);
@@ -26,6 +35,7 @@
 	let movedIndices = $derived(currentStep ? currentStep.movedIndices : []);
 	let sortedIndices = $derived(currentStep ? currentStep.sortedIndices : []);
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
+	let isCompareStep = $derived(currentCodePartId.includes('compare'));
 	let stepLabel = $derived(currentStep ? currentStep.label : 'Generate steps to start the detailed simulation.');
 	let variables = $derived(currentStep ? currentStep.variables : {});
 	let flipDurationMs = $derived(Math.max(100, Math.floor(delayMs * 0.85)));
@@ -123,6 +133,13 @@
 	onDestroy(() => clearTimer());
 </script>
 
+<!-- <link
+	rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css" /> -->
+<link
+	rel="stylesheet"
+	href="//unpkg.com/@catppuccin/highlightjs@1.0.1/css/catppuccin-latte.css" />
+
 <div class="detailed-layout">
 	<div class="treeline-card flex flex-col gap-[0.85rem]">
 		<div class="controls-row">
@@ -161,7 +178,8 @@
 			{#each currentArray as value, index (value)}
 				<div
 					class="array-item"
-					class:item-active={indicesHighlighted.includes(index)}
+					class:item-active={indicesHighlighted.includes(index) && !isCompareStep}
+					class:item-compared={indicesHighlighted.includes(index) && isCompareStep}
 					class:item-moved={movedIndices.includes(index)}
 					class:item-sorted={sortedIndices.includes(index)}
 					animate:curvedFlip={{
@@ -191,16 +209,18 @@
 			<select bind:value={language}>
 				<option value="python">Python</option>
 				<option value="javascript">JavaScript</option>
+				<option value="c">C</option>
 			</select>
 		</div>
 
-		<div class="flex flex-col gap-[0.4rem]">
-			<p class="text-sm font-bold text-red-500">Temporary testing code</p>
-			{#each codeTemplate.parts as part}
+		<div class="flex flex-col">
+			{#each highlightedCodeLines as line, index (`${language}-${index}`)}
 				<div
 					class="code-line"
-					class:code-line-active={part.id === currentCodePartId}>
-					<code>{language === 'python' ? part.python : part.javascript}</code>
+					class:code-line-active={line.codePartId === currentCodePartId}>
+					<code
+						class={`language-${language}`}
+						style={`padding-left: ${line.indent * 12}px`}>{@html line.highlightedText}</code>
 				</div>
 			{/each}
 		</div>
@@ -258,11 +278,15 @@
 	}
 
 	.item-active {
+		background: var(--color-primary-ultra-light);
+	}
+
+	.item-compared {
 		background: var(--color-primary-light);
 	}
 
 	.item-moved {
-		background: var(--color-secondary-dark);
+		background: var(--color-secondary);
 	}
 
 	.item-sorted {
@@ -270,13 +294,21 @@
 	}
 
 	.code-line {
-		@apply rounded-lg border border-transparent p-[0.55rem];
+		@apply pr-1 pl-1 text-sm;
 		background: var(--color-tertiary-ultra-light);
+		min-height: 24px;
+		display: flex;
+		align-items: center;
+	}
+
+	.code-line code {
+		display: block;
+		width: 100%;
+		white-space: pre-wrap;
 	}
 
 	.code-line-active {
-		background: var(--color-primary-light);
-		border-color: var(--color-primary);
+		background: oklch(from var(--color-primary-light) l c h / 0.5);
 	}
 
 	@media (max-width: 1040px) {

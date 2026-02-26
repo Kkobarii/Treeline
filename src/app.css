@@ -40,8 +40,9 @@
 	--color-primary: var(--color-green-500);
 	--color-primary-light: var(--color-green-300);
 	--color-primary-dark: var(--color-green-700);
+	--color-primary-ultra-light: var(--color-green-100);
 
-	--color-secondary: var(--color-pink-300);
+	--color-secondary: var(--color-pink-400);
 	--color-secondary-light: var(--color-pink-100);
 	--color-secondary-dark: var(--color-pink-500);
 

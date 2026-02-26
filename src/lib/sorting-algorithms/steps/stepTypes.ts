@@ -1,4 +1,4 @@
-import type { SortingAlgorithmId } from "../misc/types";
+import type { SortingAlgorithmId } from '../misc/types';
 
 // basic steps
 export interface SortStep {
@@ -11,7 +11,7 @@ export interface SortStep {
 
 // detailed steps
 
-export type CodeLanguage = 'python' | 'javascript';
+export type CodeLanguage = 'python' | 'javascript' | 'c';
 
 export interface DetailedSortStep {
 	array: number[];
@@ -23,13 +23,15 @@ export interface DetailedSortStep {
 	variables: Record<string, number | string>;
 }
 
-export interface CodePart {
-	id: string;
-	python: string;
-	javascript: string;
+export interface CodeLine {
+	indent: number;
+	text: string;
+	codePartId: string | null;
 }
 
 export interface DetailedCodeTemplate {
 	algorithmId: SortingAlgorithmId;
-	parts: CodePart[];
+	python: CodeLine[];
+	javascript: CodeLine[];
+	c: CodeLine[];
 }

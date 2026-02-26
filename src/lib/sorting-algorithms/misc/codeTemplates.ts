@@ -1,17 +1,10 @@
 import type { SortingAlgorithmId } from '$lib/sorting-algorithms/misc/types';
 
+import { bubbleSortTemplate } from '../algorithms/bubble';
 import type { DetailedCodeTemplate } from '../steps/stepTypes';
 
 const templates: Record<SortingAlgorithmId, DetailedCodeTemplate> = {
-	bubble: {
-		algorithmId: 'bubble',
-		parts: [
-			{ id: 'outer-loop', python: 'for i in range(n - 1):', javascript: 'for (let i = 0; i < n - 1; i += 1) {' },
-			{ id: 'inner-loop', python: 'for j in range(n - i - 1):', javascript: 'for (let j = 0; j < n - i - 1; j += 1) {' },
-			{ id: 'compare', python: 'if arr[j] > arr[j + 1]:', javascript: 'if (arr[j] > arr[j + 1]) {' },
-			{ id: 'swap', python: 'arr[j], arr[j + 1] = arr[j + 1], arr[j]', javascript: '[arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];' },
-		],
-	},
+	bubble: bubbleSortTemplate,
 	selection: {
 		algorithmId: 'selection',
 		parts: [
