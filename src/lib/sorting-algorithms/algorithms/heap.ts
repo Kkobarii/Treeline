@@ -33,6 +33,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: 'heapify',
 				indicesHighlighted: [root, largest],
+				comparedIndices: [],
 				movedIndices: [root, largest],
 				sortedIndices: sortedIndices(),
 				label: `Heapify swap ${root} ↔ ${largest}`,
@@ -46,6 +47,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'build-heap',
 			indicesHighlighted: [i],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices: sortedIndices(),
 			label: `Build heap from root ${i}`,
@@ -60,6 +62,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'swap-root',
 			indicesHighlighted: [0, end],
+			comparedIndices: [],
 			movedIndices: [0, end],
 			sortedIndices: sortedIndices(),
 			label: `Move max value to index ${end}`,
@@ -69,6 +72,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'heapify',
 			indicesHighlighted: [0],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices: sortedIndices(),
 			label: 'Restore heap property',
@@ -80,6 +84,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	trace.record({
 		codePartId: 'extract-loop',
 		indicesHighlighted: [],
+		comparedIndices: [],
 		movedIndices: [],
 		sortedIndices: range(0, n - 1),
 		label: 'Heap sort finished',

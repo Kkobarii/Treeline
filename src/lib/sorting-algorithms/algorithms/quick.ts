@@ -22,6 +22,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'partition',
 			indicesHighlighted: [high],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices: sortedIndices(),
 			label: `Choose pivot at index ${high}`,
@@ -32,6 +33,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: 'compare',
 				indicesHighlighted: [j, high],
+				comparedIndices: [j, high],
 				movedIndices: [],
 				sortedIndices: sortedIndices(),
 				label: `Compare arr[${j}] with pivot`,
@@ -44,6 +46,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.record({
 					codePartId: 'swap',
 					indicesHighlighted: [i, j],
+					comparedIndices: [],
 					movedIndices: [i, j],
 					sortedIndices: sortedIndices(),
 					label: `Move arr[${j}] into left partition`,
@@ -56,6 +59,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'pivot-place',
 			indicesHighlighted: [i + 1, high],
+			comparedIndices: [],
 			movedIndices: [i + 1, high],
 			sortedIndices: sortedIndices(),
 			label: `Place pivot at index ${i + 1}`,
@@ -75,6 +79,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: 'recurse',
 				indicesHighlighted: [low],
+				comparedIndices: [],
 				movedIndices: [],
 				sortedIndices: sortedIndices(),
 				label: `Single element at index ${low}`,
@@ -88,6 +93,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'recurse',
 			indicesHighlighted: [pivotIndex],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices: sortedIndices(),
 			label: `Recurse around pivot ${pivotIndex}`,
@@ -102,6 +108,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	trace.record({
 		codePartId: 'recurse',
 		indicesHighlighted: [],
+		comparedIndices: [],
 		movedIndices: [],
 		sortedIndices: range(0, n - 1),
 		label: 'Quick sort finished',

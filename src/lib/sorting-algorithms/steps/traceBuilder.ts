@@ -15,8 +15,9 @@ export class DetailedTraceBuilder {
 	}
 
 	record(
-		step: Omit<DetailedSortStep, 'array' | 'indicesHighlighted' | 'movedIndices' | 'sortedIndices'> & {
+		step: Omit<DetailedSortStep, 'array' | 'indicesHighlighted' | 'comparedIndices' | 'movedIndices' | 'sortedIndices'> & {
 			indicesHighlighted: number[];
+			comparedIndices: number[];
 			movedIndices: number[];
 			sortedIndices: number[];
 		},
@@ -24,6 +25,7 @@ export class DetailedTraceBuilder {
 		this.steps.push({
 			array: [...this.array],
 			indicesHighlighted: uniqueSorted(step.indicesHighlighted),
+			comparedIndices: uniqueSorted(step.comparedIndices),
 			movedIndices: uniqueSorted(step.movedIndices),
 			sortedIndices: uniqueSorted(step.sortedIndices),
 			codePartId: step.codePartId,

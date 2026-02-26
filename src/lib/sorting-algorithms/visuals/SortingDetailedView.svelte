@@ -32,10 +32,10 @@
 	let currentStep = $derived(steps[currentStepIndex]);
 	let currentArray = $derived(currentStep ? currentStep.array : baseArray);
 	let indicesHighlighted = $derived(currentStep ? currentStep.indicesHighlighted : []);
+	let comparedIndices = $derived(currentStep ? currentStep.comparedIndices : []);
 	let movedIndices = $derived(currentStep ? currentStep.movedIndices : []);
 	let sortedIndices = $derived(currentStep ? currentStep.sortedIndices : []);
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
-	let isCompareStep = $derived(currentCodePartId.includes('compare'));
 	let stepLabel = $derived(currentStep ? currentStep.label : 'Generate steps to start the detailed simulation.');
 	let variables = $derived(currentStep ? currentStep.variables : {});
 	let flipDurationMs = $derived(Math.max(100, Math.floor(delayMs * 0.85)));
@@ -178,8 +178,8 @@
 			{#each currentArray as value, index (value)}
 				<div
 					class="array-item"
-					class:item-active={indicesHighlighted.includes(index) && !isCompareStep}
-					class:item-compared={indicesHighlighted.includes(index) && isCompareStep}
+					class:item-active={indicesHighlighted.includes(index)}
+					class:item-compared={comparedIndices.includes(index)}
 					class:item-moved={movedIndices.includes(index)}
 					class:item-sorted={sortedIndices.includes(index)}
 					animate:curvedFlip={{

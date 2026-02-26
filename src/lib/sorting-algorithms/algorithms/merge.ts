@@ -20,6 +20,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'merge',
 			indicesHighlighted: [left, mid, right],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices: [],
 			label: `Merge segments [${left}..${mid}] and [${mid + 1}..${right}]`,
@@ -30,6 +31,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: 'merge',
 				indicesHighlighted: [leftEnd, rightStart],
+				comparedIndices: [leftEnd, rightStart],
 				movedIndices: [],
 				sortedIndices: [],
 				label: 'Segments already in order',
@@ -44,6 +46,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: 'write',
 				indicesHighlighted: [leftPos, rightStart],
+				comparedIndices: [leftPos, rightStart],
 				movedIndices: [],
 				sortedIndices: [],
 				label: `Compare arr[${leftPos}] and arr[${rightStart}]`,
@@ -57,6 +60,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.record({
 					codePartId: 'write',
 					indicesHighlighted: [leftPos, rightStart],
+					comparedIndices: [],
 					movedIndices: [leftPos],
 					sortedIndices: [],
 					label: `Shift element from ${rightStart} to ${leftPos}`,
@@ -74,6 +78,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: 'split',
 				indicesHighlighted: [left],
+				comparedIndices: [],
 				movedIndices: [],
 				sortedIndices: [left],
 				label: `Base case at index ${left}`,
@@ -86,6 +91,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'split',
 			indicesHighlighted: [left, mid, right],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices: [],
 			label: `Split [${left}..${right}] at mid=${mid}`,
@@ -95,6 +101,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'recurse-left',
 			indicesHighlighted: [left, mid],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices: [],
 			label: `Recurse left [${left}..${mid}]`,
@@ -105,6 +112,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'recurse-right',
 			indicesHighlighted: [mid + 1, right],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices: [],
 			label: `Recurse right [${mid + 1}..${right}]`,
@@ -119,6 +127,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	trace.record({
 		codePartId: 'merge',
 		indicesHighlighted: [],
+		comparedIndices: [],
 		movedIndices: [],
 		sortedIndices: range(0, n - 1),
 		label: 'Merge sort finished',

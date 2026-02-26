@@ -54,6 +54,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	trace.record({
 		codePartId: 'outer-loop',
 		indicesHighlighted: [],
+		comparedIndices: [],
 		movedIndices: [],
 		sortedIndices,
 		label: 'Bubble sort simulation started',
@@ -64,6 +65,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'outer-loop',
 			indicesHighlighted: [i],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices,
 			label: `Outer iteration i=${i}`,
@@ -74,6 +76,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: 'inner-loop',
 				indicesHighlighted: [j],
+				comparedIndices: [],
 				movedIndices: [],
 				sortedIndices,
 				label: `Inner iteration j=${j}`,
@@ -83,6 +86,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: 'compare',
 				indicesHighlighted: [j, j + 1],
+				comparedIndices: [j, j + 1],
 				movedIndices: [],
 				sortedIndices,
 				label: `Compare arr[${j}] and arr[${j + 1}]`,
@@ -94,6 +98,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.record({
 					codePartId: 'swap',
 					indicesHighlighted: [j, j + 1],
+					comparedIndices: [],
 					movedIndices: [j, j + 1],
 					sortedIndices,
 					label: `Swap indices ${j} and ${j + 1}`,
@@ -106,6 +111,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: 'inner-loop',
 			indicesHighlighted: [n - i - 1],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices,
 			label: `Index ${n - i - 1} fixed in final place`,
@@ -116,6 +122,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	trace.record({
 		codePartId: 'outer-loop',
 		indicesHighlighted: [],
+		comparedIndices: [],
 		movedIndices: [],
 		sortedIndices: range(0, n - 1),
 		label: 'Bubble sort finished',

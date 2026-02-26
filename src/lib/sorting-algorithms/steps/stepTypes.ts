@@ -16,6 +16,7 @@ export type CodeLanguage = 'python' | 'javascript' | 'c';
 export interface DetailedSortStep {
 	array: number[];
 	indicesHighlighted: number[];
+	comparedIndices: number[];
 	movedIndices: number[];
 	sortedIndices: number[];
 	codePartId: string;

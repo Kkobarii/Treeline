@@ -1,8 +1,52 @@
 import { range, swap } from '$lib/sorting-algorithms/misc/utils';
 import { detailedStepsToSortSteps } from '$lib/sorting-algorithms/steps/stepAdapters';
 
-import type { DetailedSortStep, SortStep } from '../steps/stepTypes';
+import type { DetailedCodeTemplate, DetailedSortStep, SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
+
+export enum SelectionSortPartId {
+	OuterLoop = 'outer-loop',
+	ScanLoop = 'scan-loop',
+	Compare = 'compare',
+	NewMin = 'new-min',
+	Swap = 'swap',
+}
+
+export const selectionSortTemplate: DetailedCodeTemplate = {
+	algorithmId: 'selection',
+	python: [
+		{ indent: 0, text: 'for i in range(n - 1):', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 1, text: 'min_idx = i', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 1, text: 'for j in range(i + 1, n):', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 2, text: 'if arr[j] < arr[min_idx]:', codePartId: SelectionSortPartId.Compare },
+		{ indent: 3, text: 'min_idx = j', codePartId: SelectionSortPartId.NewMin },
+		{ indent: 1, text: 'arr[i], arr[min_idx] = arr[min_idx], arr[i]', codePartId: SelectionSortPartId.Swap },
+	],
+	javascript: [
+		{ indent: 0, text: 'for (let i = 0; i < n - 1; i += 1) {', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 1, text: 'let minIndex = i;', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 1, text: 'for (let j = i + 1; j < n; j += 1) {', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 2, text: 'if (arr[j] < arr[minIndex]) {', codePartId: SelectionSortPartId.Compare },
+		{ indent: 3, text: 'minIndex = j;', codePartId: SelectionSortPartId.NewMin },
+		{ indent: 2, text: '}', codePartId: SelectionSortPartId.NewMin },
+		{ indent: 1, text: '}', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 1, text: '[arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];', codePartId: SelectionSortPartId.Swap },
+		{ indent: 0, text: '}', codePartId: SelectionSortPartId.OuterLoop },
+	],
+	c: [
+		{ indent: 0, text: 'for (int i = 0; i < n - 1; i++) {', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 1, text: 'int min_idx = i;', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 1, text: 'for (int j = i + 1; j < n; j++) {', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 2, text: 'if (arr[j] < arr[min_idx]) {', codePartId: SelectionSortPartId.Compare },
+		{ indent: 3, text: 'min_idx = j;', codePartId: SelectionSortPartId.NewMin },
+		{ indent: 2, text: '}', codePartId: SelectionSortPartId.NewMin },
+		{ indent: 1, text: '}', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 1, text: 'int tmp = arr[i];', codePartId: SelectionSortPartId.Swap },
+		{ indent: 1, text: 'arr[i] = arr[min_idx];', codePartId: SelectionSortPartId.Swap },
+		{ indent: 1, text: 'arr[min_idx] = tmp;', codePartId: SelectionSortPartId.Swap },
+		{ indent: 0, text: '}', codePartId: SelectionSortPartId.OuterLoop },
+	],
+};
 
 export function selectionSortSteps(input: number[]): SortStep[] {
 	return detailedStepsToSortSteps(selectionSortDetailedSteps(input));
@@ -19,6 +63,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 		trace.record({
 			codePartId: 'outer-loop',
 			indicesHighlighted: [i],
+			comparedIndices: [],
 			movedIndices: [],
 			sortedIndices,
 			label: `Start searching minimum for position ${i}`,
@@ -28,10 +73,21 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 		for (let j = i + 1; j < n; j += 1) {
 			trace.record({
 				codePartId: 'scan-loop',
-				indicesHighlighted: [minIndex, j],
+				indicesHighlighted: [j, minIndex],
+				comparedIndices: [],
 				movedIndices: [],
 				sortedIndices,
 				label: `Scan j=${j} against current minimum`,
+				variables: { i, j, minIndex },
+			});
+
+			trace.record({
+				codePartId: 'compare',
+				indicesHighlighted: [],
+				comparedIndices: [j, minIndex],
+				movedIndices: [],
+				sortedIndices,
+				label: `Compare arr[${j}] with current minimum arr[${minIndex}]`,
 				variables: { i, j, minIndex },
 			});
 
@@ -40,6 +96,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 				trace.record({
 					codePartId: 'new-min',
 					indicesHighlighted: [minIndex],
+					comparedIndices: [],
 					movedIndices: [],
 					sortedIndices,
 					label: `New minimum found at index ${minIndex}`,
@@ -53,6 +110,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 			trace.record({
 				codePartId: 'swap',
 				indicesHighlighted: [i, minIndex],
+				comparedIndices: [],
 				movedIndices: [i, minIndex],
 				sortedIndices,
 				label: `Swap index ${i} with minimum index ${minIndex}`,
@@ -66,6 +124,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 	trace.record({
 		codePartId: 'outer-loop',
 		indicesHighlighted: [],
+		comparedIndices: [],
 		movedIndices: [],
 		sortedIndices: range(0, n - 1),
 		label: 'Selection sort finished',
