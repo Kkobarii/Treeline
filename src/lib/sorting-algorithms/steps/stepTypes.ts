@@ -4,6 +4,7 @@ import type { SortingAlgorithmId } from '../misc/types';
 export interface SortStep {
 	array: number[];
 	activeIndices: number[];
+	comparedIndices: number[];
 	movedIndices: number[];
 	sortedIndices: number[];
 	label: string;

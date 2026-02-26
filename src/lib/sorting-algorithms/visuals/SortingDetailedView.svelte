@@ -1,6 +1,6 @@
 <script lang="ts">
 	import hljs from 'highlight.js';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 
 	import { getCodeTemplate } from '../misc/codeTemplates';
@@ -22,12 +22,16 @@
 		})),
 	);
 
-	let baseArray = $state(createShuffledArray(16));
-	let steps = $state<DetailedSortStep[]>([]);
+	const initialArray = createShuffledArray(16);
+	let baseArray = $state(initialArray);
+	let steps = $state<DetailedSortStep[]>(algorithm.generateDetailedSteps(initialArray));
 	let currentStepIndex = $state(0);
 	let isPlaying = $state(false);
 	let delayMs = $state(450);
-	let timer: ReturnType<typeof setInterval> | null = null;
+	let timer: number | null = null;
+	let nextRunAt = $state(0);
+	let lastStepAdvanceAt = $state(0);
+	let fastAnimation = $state(false);
 
 	let currentStep = $derived(steps[currentStepIndex]);
 	let currentArray = $derived(currentStep ? currentStep.array : baseArray);
@@ -36,9 +40,10 @@
 	let movedIndices = $derived(currentStep ? currentStep.movedIndices : []);
 	let sortedIndices = $derived(currentStep ? currentStep.sortedIndices : []);
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
-	let stepLabel = $derived(currentStep ? currentStep.label : 'Generate steps to start the detailed simulation.');
+	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
 	let variables = $derived(currentStep ? currentStep.variables : {});
-	let flipDurationMs = $derived(Math.max(100, Math.floor(delayMs * 0.85)));
+	let normalFlipDurationMs = $derived(isPlaying ? Math.max(100, Math.floor(delayMs * 0.85)) : 300);
+	let activeFlipDurationMs = $derived(fastAnimation ? Math.max(35, Math.floor(normalFlipDurationMs * 0.22)) : normalFlipDurationMs);
 	let arcHeightFactor = $state(0.1);
 
 	function curvedFlip(
@@ -68,8 +73,8 @@
 	}
 
 	function clearTimer() {
-		if (timer) {
-			clearInterval(timer);
+		if (timer !== null) {
+			cancelAnimationFrame(timer);
 			timer = null;
 		}
 	}
@@ -77,28 +82,33 @@
 	function shuffleArray() {
 		clearTimer();
 		isPlaying = false;
-		baseArray = createShuffledArray(16);
-		steps = [];
+		const nextArray = createShuffledArray(16);
+		baseArray = nextArray;
+		steps = algorithm.generateDetailedSteps(nextArray);
 		currentStepIndex = 0;
 	}
 
-	function generateDetailedSteps() {
-		clearTimer();
-		isPlaying = false;
-		steps = algorithm.generateDetailedSteps(baseArray);
-		currentStepIndex = 0;
-	}
-
-	function stepForward() {
+	async function stepForward(isManualStep = false) {
 		if (!steps.length) {
 			return;
 		}
 		if (currentStepIndex < steps.length - 1) {
+			const now = performance.now();
+			fastAnimation = isManualStep && now - lastStepAdvanceAt < normalFlipDurationMs;
 			currentStepIndex += 1;
+			lastStepAdvanceAt = now;
+			if (fastAnimation) {
+				await tick();
+				fastAnimation = false;
+			}
 		} else {
 			isPlaying = false;
 			clearTimer();
 		}
+	}
+
+	function stepForwardManual() {
+		void stepForward(true);
 	}
 
 	function stepBack() {
@@ -108,16 +118,7 @@
 	}
 
 	function runOrPause() {
-		if (!steps.length) {
-			generateDetailedSteps();
-		}
 		isPlaying = !isPlaying;
-	}
-
-	function reset() {
-		clearTimer();
-		isPlaying = false;
-		currentStepIndex = 0;
 	}
 
 	$effect(() => {
@@ -126,7 +127,20 @@
 			return;
 		}
 		clearTimer();
-		timer = setInterval(stepForward, delayMs);
+		nextRunAt = performance.now() + delayMs;
+
+		const runLoop = (now: number) => {
+			if (!isPlaying) {
+				return;
+			}
+			if (now >= nextRunAt) {
+				void stepForward(false);
+				nextRunAt = now + delayMs;
+			}
+			timer = requestAnimationFrame(runLoop);
+		};
+
+		timer = requestAnimationFrame(runLoop);
 		return () => clearTimer();
 	});
 
@@ -144,17 +158,13 @@
 	<div class="treeline-card flex flex-col gap-[0.85rem]">
 		<div class="controls-row">
 			<button onclick={shuffleArray}>Shuffle 16</button>
-			<button onclick={generateDetailedSteps}>Generate</button>
 			<button onclick={runOrPause}>{isPlaying ? 'Pause' : 'Run'}</button>
 			<button
 				onclick={stepBack}
-				disabled={!steps.length || currentStepIndex === 0}>Back</button>
+				disabled={isPlaying || !steps.length || currentStepIndex === 0}>Back</button>
 			<button
-				onclick={stepForward}
-				disabled={!steps.length || currentStepIndex >= steps.length - 1}>Next</button>
-			<button
-				onclick={reset}
-				disabled={!steps.length}>Reset</button>
+				onclick={stepForwardManual}
+				disabled={isPlaying || !steps.length || currentStepIndex >= steps.length - 1}>Next</button>
 		</div>
 
 		<div class="controls-row">
@@ -162,7 +172,7 @@
 			<input
 				id="delay"
 				type="range"
-				min="180"
+				min="200"
 				max="1200"
 				step="20"
 				bind:value={delayMs} />
@@ -183,13 +193,13 @@
 					class:item-moved={movedIndices.includes(index)}
 					class:item-sorted={sortedIndices.includes(index)}
 					animate:curvedFlip={{
-						duration: flipDurationMs,
+						duration: activeFlipDurationMs,
 						easing: cubicInOut,
 					}}>
 					<div class="value-marker-track">
 						<div
 							class="value-marker-fill"
-							style={`height: ${(value / 16) * 100}%;`}>
+							style={`height: ${(value / currentArray.length) * 100}%;`}>
 						</div>
 					</div>
 					<div class="flex min-w-0 flex-1 flex-col p-[0.45rem] pl-[0.55rem]">
@@ -258,6 +268,7 @@
 	.array-row {
 		@apply grid w-full gap-[0.35rem];
 		grid-template-columns: repeat(16, minmax(0, 1fr));
+		contain: layout paint;
 	}
 
 	.array-item {
@@ -265,6 +276,9 @@
 		background: var(--color-tertiary-ultra-light);
 		border: 1px solid var(--color-tertiary);
 		transition: background-color 140ms ease;
+		will-change: transform;
+		transform: translateZ(0);
+		backface-visibility: hidden;
 	}
 
 	.value-marker-track {

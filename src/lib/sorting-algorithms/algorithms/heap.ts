@@ -60,7 +60,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		swap(array, 0, end);
 		sortedStart = end;
 		trace.record({
-			codePartId: 'swap-root',
+			codePartId: 'swap',
 			indicesHighlighted: [0, end],
 			comparedIndices: [],
 			movedIndices: [0, end],

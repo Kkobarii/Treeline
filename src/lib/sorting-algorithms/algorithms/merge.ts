@@ -58,7 +58,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			} else {
 				shift(array, rightStart, leftPos);
 				trace.record({
-					codePartId: 'write',
+					codePartId: 'swap',
 					indicesHighlighted: [leftPos, rightStart],
 					comparedIndices: [],
 					movedIndices: [leftPos],

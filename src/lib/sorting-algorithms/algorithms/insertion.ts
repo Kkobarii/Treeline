@@ -6,7 +6,7 @@ import { DetailedTraceBuilder } from '../steps/traceBuilder';
 
 export enum InsertionSortPartId {
 	OuterLoop = 'outer-loop',
-	Compare = 'compare-loop',
+	Compare = 'compare',
 	Swap = 'swap',
 }
 

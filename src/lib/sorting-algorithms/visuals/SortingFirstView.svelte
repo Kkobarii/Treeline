@@ -9,8 +9,9 @@
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
 
-	let baseArray = $state(createShuffledArray(100));
-	let steps = $state<SortStep[]>([]);
+	const initialArray = createShuffledArray(100);
+	let baseArray = $state(initialArray);
+	let steps = $state<SortStep[]>(algorithm.generateSteps(initialArray));
 	let currentStepIndex = $state(0);
 	let isPlaying = $state(false);
 	let stepDelayMs = $state(40);
@@ -19,9 +20,10 @@
 	let currentStep = $derived(steps[currentStepIndex]);
 	let displayedArray = $derived(currentStep ? currentStep.array : baseArray);
 	let activeIndices = $derived(currentStep ? currentStep.activeIndices : []);
+	let comparedIndices = $derived(currentStep ? currentStep.comparedIndices : []);
 	let movedIndices = $derived(currentStep ? currentStep.movedIndices : []);
 	let sortedIndices = $derived(currentStep ? currentStep.sortedIndices : []);
-	let stepLabel = $derived(currentStep ? currentStep.label : 'Press "Generate Steps" or "Run" to start.');
+	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
 
 	function clearTimer() {
 		if (timer) {
@@ -33,15 +35,9 @@
 	function regenerateArray() {
 		clearTimer();
 		isPlaying = false;
-		baseArray = createShuffledArray(100);
-		steps = [];
-		currentStepIndex = 0;
-	}
-
-	function generateSteps() {
-		clearTimer();
-		isPlaying = false;
-		steps = algorithm.generateSteps(baseArray);
+		const nextArray = createShuffledArray(100);
+		baseArray = nextArray;
+		steps = algorithm.generateSteps(nextArray);
 		currentStepIndex = 0;
 	}
 
@@ -60,10 +56,6 @@
 	}
 
 	function runOrPause() {
-		if (!steps.length) {
-			generateSteps();
-		}
-
 		isPlaying = !isPlaying;
 	}
 
@@ -77,12 +69,6 @@
 		clearTimer();
 		isPlaying = false;
 		currentStepIndex = Math.max(0, currentStepIndex - 1);
-	}
-
-	function resetPlayback() {
-		clearTimer();
-		isPlaying = false;
-		currentStepIndex = 0;
 	}
 
 	$effect(() => {
@@ -113,7 +99,6 @@
 <div class="treeline-card flex flex-col gap-4">
 	<div class="flex flex-wrap items-center gap-2">
 		<button onclick={regenerateArray}>Shuffle 100 Keys</button>
-		<button onclick={generateSteps}>Generate Steps</button>
 		<button onclick={runOrPause}>{isPlaying ? 'Pause' : 'Run'}</button>
 		<button
 			onclick={stepBackward}
@@ -121,9 +106,6 @@
 		<button
 			onclick={stepForward}
 			disabled={!steps.length || currentStepIndex >= steps.length - 1}>Step Forward</button>
-		<button
-			onclick={resetPlayback}
-			disabled={!steps.length}>Reset</button>
 		<label
 			class="ml-2"
 			for="speed-slider">Speed</label>
@@ -149,6 +131,7 @@
 			<div
 				class="sort-bar"
 				class:bar-active={activeIndices.includes(index)}
+				class:bar-compared={comparedIndices.includes(index)}
 				class:bar-moved={movedIndices.includes(index)}
 				class:bar-sorted={sortedIndices.includes(index)}
 				style={`height: ${Math.max(value, 1)}%;`}>
@@ -176,6 +159,10 @@
 	}
 
 	.bar-active {
+		background-color: var(--color-primary);
+	}
+
+	.bar-compared {
 		background-color: var(--color-primary);
 	}
 
