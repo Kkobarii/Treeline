@@ -8,6 +8,7 @@
 	import type { SortingAlgorithmId } from '../misc/types';
 	import { createShuffledArray } from '../misc/utils';
 	import type { CodeLanguage, DetailedSortStep } from '../steps/stepTypes';
+	import { ItemHighlightType } from '../steps/traceBuilder';
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -34,11 +35,7 @@
 	let fastAnimation = $state(false);
 
 	let currentStep = $derived(steps[currentStepIndex]);
-	let currentArray = $derived(currentStep ? currentStep.array : baseArray);
-	let indicesHighlighted = $derived(currentStep ? currentStep.indicesHighlighted : []);
-	let comparedIndices = $derived(currentStep ? currentStep.comparedIndices : []);
-	let movedIndices = $derived(currentStep ? currentStep.movedIndices : []);
-	let sortedIndices = $derived(currentStep ? currentStep.sortedIndices : []);
+	let currentArray = $derived(currentStep ? currentStep.array : []);
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
 	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
 	let variables = $derived(currentStep ? currentStep.variables : {});
@@ -185,13 +182,13 @@
 		</div>
 
 		<div class="array-row">
-			{#each currentArray as value, index (value)}
+			{#each currentArray as item, index (item.value)}
 				<div
 					class="array-item"
-					class:item-active={indicesHighlighted.includes(index)}
-					class:item-compared={comparedIndices.includes(index)}
-					class:item-moved={movedIndices.includes(index)}
-					class:item-sorted={sortedIndices.includes(index)}
+					class:item-compared={item.highlightType === ItemHighlightType.Compare}
+					class:item-moved={item.highlightType === ItemHighlightType.Move}
+					class:item-sorted={item.highlightType === ItemHighlightType.Sorted}
+					data-depth={item.depth ?? 0}
 					animate:curvedFlip={{
 						duration: activeFlipDurationMs,
 						easing: cubicInOut,
@@ -199,13 +196,13 @@
 					<div class="value-marker-track">
 						<div
 							class="value-marker-fill"
-							style={`height: ${(value / currentArray.length) * 100}%;`}>
+							style={`height: ${(item.value / currentArray.length) * 100}%;`}>
 						</div>
 					</div>
 					<div class="flex min-w-0 flex-1 flex-col p-[0.45rem] pl-[0.55rem]">
 						<div class="flex items-center justify-center text-[0.78rem] opacity-90">[{index}]</div>
 						<div class="flex w-full flex-1 items-center justify-center">
-							<div class="text-base font-bold">{value}</div>
+							<div class="text-base font-bold">{item.value}</div>
 						</div>
 					</div>
 				</div>
@@ -291,10 +288,6 @@
 		background: var(--color-primary);
 	}
 
-	.item-active {
-		background: var(--color-primary-ultra-light);
-	}
-
 	.item-compared {
 		background: var(--color-primary-light);
 	}
@@ -304,7 +297,7 @@
 	}
 
 	.item-sorted {
-		border-color: var(--color-primary);
+		background: var(--color-primary-ultra-light);
 	}
 
 	.code-line {

@@ -14,41 +14,42 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	const n = array.length;
 	const sortedSet = new Set<number>();
 	const sortedIndices = () => uniqueSorted(sortedSet);
+	const setSegmentDepth = (left: number, right: number, depth: number) => {
+		if (left > right) {
+			return;
+		}
+
+		trace.setDepth(range(left, right), depth);
+	};
 
 	const partition = (low: number, high: number, depth: number): number => {
-		const pivot = array[high];
+		const pivot = array[high].value;
 		let i = low - 1;
 
+		setSegmentDepth(low, high, depth);
+		trace.paint({ compared: [high], sorted: sortedIndices() });
 		trace.record({
 			codePartId: 'partition',
-			indicesHighlighted: [high],
-			comparedIndices: [],
-			movedIndices: [],
-			sortedIndices: sortedIndices(),
 			label: `Choose pivot at index ${high}`,
 			variables: { low, high, pivot, depth },
 		});
 
 		for (let j = low; j < high; j += 1) {
+			setSegmentDepth(low, high, depth);
+			trace.paint({ compared: [j, high], sorted: sortedIndices() });
 			trace.record({
 				codePartId: 'compare',
-				indicesHighlighted: [j, high],
-				comparedIndices: [j, high],
-				movedIndices: [],
-				sortedIndices: sortedIndices(),
 				label: `Compare arr[${j}] with pivot`,
 				variables: { j, pivot, low, high },
 			});
 
-			if (array[j] <= pivot) {
+			if (array[j].value <= pivot) {
 				i += 1;
 				swap(array, i, j);
+				setSegmentDepth(low, high, depth);
+				trace.paint({ moved: [i, j], sorted: sortedIndices() });
 				trace.record({
 					codePartId: 'swap',
-					indicesHighlighted: [i, j],
-					comparedIndices: [],
-					movedIndices: [i, j],
-					sortedIndices: sortedIndices(),
 					label: `Move arr[${j}] into left partition`,
 					variables: { i, j, pivot },
 				});
@@ -56,12 +57,10 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		}
 
 		swap(array, i + 1, high);
+		setSegmentDepth(low, high, depth);
+		trace.paint({ moved: [i + 1, high], sorted: sortedIndices() });
 		trace.record({
 			codePartId: 'pivot-place',
-			indicesHighlighted: [i + 1, high],
-			comparedIndices: [],
-			movedIndices: [i + 1, high],
-			sortedIndices: sortedIndices(),
 			label: `Place pivot at index ${i + 1}`,
 			variables: { pivotIndex: i + 1 },
 		});
@@ -76,12 +75,10 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 
 		if (low === high) {
 			sortedSet.add(low);
+			trace.setDepth([low], depth);
+			trace.paint({ sorted: sortedIndices() });
 			trace.record({
 				codePartId: 'recurse',
-				indicesHighlighted: [low],
-				comparedIndices: [],
-				movedIndices: [],
-				sortedIndices: sortedIndices(),
 				label: `Single element at index ${low}`,
 				variables: { low, high, depth },
 			});
@@ -90,12 +87,10 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 
 		const pivotIndex = partition(low, high, depth);
 		sortedSet.add(pivotIndex);
+		setSegmentDepth(low, high, depth);
+		trace.paint({ sorted: sortedIndices() });
 		trace.record({
 			codePartId: 'recurse',
-			indicesHighlighted: [pivotIndex],
-			comparedIndices: [],
-			movedIndices: [],
-			sortedIndices: sortedIndices(),
 			label: `Recurse around pivot ${pivotIndex}`,
 			variables: { low, high, pivotIndex, depth },
 		});
@@ -105,15 +100,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	};
 
 	quickSort(0, n - 1, 0);
-	trace.record({
-		codePartId: 'recurse',
-		indicesHighlighted: [],
-		comparedIndices: [],
-		movedIndices: [],
-		sortedIndices: range(0, n - 1),
-		label: 'Quick sort finished',
-		variables: {},
-	});
+	setSegmentDepth(0, n - 1, 0);
 
 	return trace.build();
 }

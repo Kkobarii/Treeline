@@ -50,37 +50,35 @@ export function insertionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 	const array = trace.workingArray;
 	const n = array.length;
 
+	trace.paint({ sorted: [0] });
+	trace.record({
+		codePartId: 'initial',
+		label: 'First element is considered sorted',
+		variables: { n },
+	});
+
 	for (let i = 1; i < n; i += 1) {
 		let j = i;
+		trace.paint({ compared: [i], sorted: range(0, i - 1) });
 		trace.record({
 			codePartId: InsertionSortPartId.OuterLoop,
-			indicesHighlighted: [i],
-			comparedIndices: [],
-			movedIndices: [],
-			sortedIndices: range(0, i - 1),
 			label: `Start sorting element at index ${i}`,
 			variables: { i, j },
 		});
 
 		while (j > 0) {
+			trace.paint({ compared: [j, j - 1], sorted: range(0, i) });
 			trace.record({
 				codePartId: InsertionSortPartId.Compare,
-				indicesHighlighted: [j, j - 1],
-				comparedIndices: [j, j - 1],
-				movedIndices: [],
-				sortedIndices: range(0, i - 1),
 				label: `Compare element at index ${j} with previous element`,
 				variables: { i, j },
 			});
 
-			if (array[j - 1] > array[j]) {
+			if (array[j - 1].value > array[j].value) {
 				swap(array, j - 1, j);
+				trace.paint({ moved: [j, j - 1], sorted: range(0, i) });
 				trace.record({
 					codePartId: InsertionSortPartId.Swap,
-					indicesHighlighted: [j, j - 1],
-					comparedIndices: [],
-					movedIndices: [j, j - 1],
-					sortedIndices: range(0, i - 1),
 					label: `Swap elements at indices ${j} and ${j - 1}`,
 					variables: { i, j },
 				});
@@ -90,16 +88,6 @@ export function insertionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 			}
 		}
 	}
-
-	trace.record({
-		codePartId: InsertionSortPartId.OuterLoop,
-		indicesHighlighted: [],
-		comparedIndices: [],
-		movedIndices: [],
-		sortedIndices: range(0, n - 1),
-		label: 'Insertion sort finished',
-		variables: {},
-	});
 
 	return trace.build();
 }

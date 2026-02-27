@@ -60,45 +60,33 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 
 	for (let i = 0; i < n - 1; i += 1) {
 		let minIndex = i;
+		trace.paint({ compared: [i], sorted: sortedIndices });
 		trace.record({
 			codePartId: 'outer-loop',
-			indicesHighlighted: [i],
-			comparedIndices: [],
-			movedIndices: [],
-			sortedIndices,
 			label: `Start searching minimum for position ${i}`,
 			variables: { i, minIndex },
 		});
 
 		for (let j = i + 1; j < n; j += 1) {
+			trace.paint({ compared: [j, minIndex], sorted: sortedIndices });
 			trace.record({
 				codePartId: 'scan-loop',
-				indicesHighlighted: [j, minIndex],
-				comparedIndices: [],
-				movedIndices: [],
-				sortedIndices,
 				label: `Scan j=${j} against current minimum`,
 				variables: { i, j, minIndex },
 			});
 
+			trace.paint({ compared: [j, minIndex], sorted: sortedIndices });
 			trace.record({
 				codePartId: 'compare',
-				indicesHighlighted: [],
-				comparedIndices: [j, minIndex],
-				movedIndices: [],
-				sortedIndices,
 				label: `Compare arr[${j}] with current minimum arr[${minIndex}]`,
 				variables: { i, j, minIndex },
 			});
 
-			if (array[j] < array[minIndex]) {
+			if (array[j].value < array[minIndex].value) {
 				minIndex = j;
+				trace.paint({ compared: [minIndex], sorted: sortedIndices });
 				trace.record({
 					codePartId: 'new-min',
-					indicesHighlighted: [minIndex],
-					comparedIndices: [],
-					movedIndices: [],
-					sortedIndices,
 					label: `New minimum found at index ${minIndex}`,
 					variables: { i, j, minIndex },
 				});
@@ -107,12 +95,9 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 
 		if (minIndex !== i) {
 			swap(array, i, minIndex);
+			trace.paint({ moved: [i, minIndex], sorted: sortedIndices });
 			trace.record({
 				codePartId: 'swap',
-				indicesHighlighted: [i, minIndex],
-				comparedIndices: [],
-				movedIndices: [i, minIndex],
-				sortedIndices,
 				label: `Swap index ${i} with minimum index ${minIndex}`,
 				variables: { i, minIndex },
 			});
@@ -120,16 +105,6 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 
 		sortedIndices = range(0, i);
 	}
-
-	trace.record({
-		codePartId: 'outer-loop',
-		indicesHighlighted: [],
-		comparedIndices: [],
-		movedIndices: [],
-		sortedIndices: range(0, n - 1),
-		label: 'Selection sort finished',
-		variables: {},
-	});
 
 	return trace.build();
 }

@@ -1,12 +1,9 @@
 import type { SortingAlgorithmId } from '../misc/types';
+import type { Item } from './traceBuilder';
 
 // basic steps
 export interface SortStep {
-	array: number[];
-	activeIndices: number[];
-	comparedIndices: number[];
-	movedIndices: number[];
-	sortedIndices: number[];
+	array: Item[];
 	label: string;
 }
 
@@ -15,11 +12,7 @@ export interface SortStep {
 export type CodeLanguage = 'python' | 'javascript' | 'c';
 
 export interface DetailedSortStep {
-	array: number[];
-	indicesHighlighted: number[];
-	comparedIndices: number[];
-	movedIndices: number[];
-	sortedIndices: number[];
+	array: Item[];
 	codePartId: string;
 	label: string;
 	variables: Record<string, number | string>;

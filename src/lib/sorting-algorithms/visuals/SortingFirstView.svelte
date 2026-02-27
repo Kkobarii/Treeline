@@ -5,6 +5,7 @@
 	import type { SortingAlgorithmId } from '../misc/types';
 	import { createShuffledArray } from '../misc/utils';
 	import type { SortStep } from '../steps/stepTypes';
+	import { ItemHighlightType } from '../steps/traceBuilder';
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -18,11 +19,7 @@
 	let timer: ReturnType<typeof setInterval> | null = null;
 
 	let currentStep = $derived(steps[currentStepIndex]);
-	let displayedArray = $derived(currentStep ? currentStep.array : baseArray);
-	let activeIndices = $derived(currentStep ? currentStep.activeIndices : []);
-	let comparedIndices = $derived(currentStep ? currentStep.comparedIndices : []);
-	let movedIndices = $derived(currentStep ? currentStep.movedIndices : []);
-	let sortedIndices = $derived(currentStep ? currentStep.sortedIndices : []);
+	let displayedArray = $derived(currentStep ? currentStep.array : []);
 	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
 
 	function clearTimer() {
@@ -127,14 +124,13 @@
 	</div>
 
 	<div class="bars-wrapper">
-		{#each displayedArray as value, index}
+		{#each displayedArray as item}
 			<div
 				class="sort-bar"
-				class:bar-active={activeIndices.includes(index)}
-				class:bar-compared={comparedIndices.includes(index)}
-				class:bar-moved={movedIndices.includes(index)}
-				class:bar-sorted={sortedIndices.includes(index)}
-				style={`height: ${Math.max(value, 1)}%;`}>
+				class:bar-compared={item.highlightType === ItemHighlightType.Compare}
+				class:bar-moved={item.highlightType === ItemHighlightType.Move}
+				class:bar-sorted={item.highlightType === ItemHighlightType.Sorted}
+				style={`height: ${Math.max(item.value, 1)}%;`}>
 			</div>
 		{/each}
 	</div>
@@ -156,10 +152,6 @@
 		transition:
 			height 120ms linear,
 			background-color 120ms ease;
-	}
-
-	.bar-active {
-		background-color: var(--color-primary);
 	}
 
 	.bar-compared {

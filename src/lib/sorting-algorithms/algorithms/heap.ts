@@ -21,21 +21,18 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		const left = 2 * root + 1;
 		const right = 2 * root + 2;
 
-		if (left < heapSize && array[left] > array[largest]) {
+		if (left < heapSize && array[left].value > array[largest].value) {
 			largest = left;
 		}
-		if (right < heapSize && array[right] > array[largest]) {
+		if (right < heapSize && array[right].value > array[largest].value) {
 			largest = right;
 		}
 
 		if (largest !== root) {
 			swap(array, root, largest);
+			trace.paint({ moved: [root, largest], sorted: sortedIndices() });
 			trace.record({
 				codePartId: 'heapify',
-				indicesHighlighted: [root, largest],
-				comparedIndices: [],
-				movedIndices: [root, largest],
-				sortedIndices: sortedIndices(),
 				label: `Heapify swap ${root} ↔ ${largest}`,
 				variables: { heapSize, root, largest },
 			});
@@ -44,12 +41,9 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	};
 
 	for (let i = Math.floor(n / 2) - 1; i >= 0; i -= 1) {
+		trace.paint({ compared: [i], sorted: sortedIndices() });
 		trace.record({
 			codePartId: 'build-heap',
-			indicesHighlighted: [i],
-			comparedIndices: [],
-			movedIndices: [],
-			sortedIndices: sortedIndices(),
 			label: `Build heap from root ${i}`,
 			variables: { i },
 		});
@@ -59,37 +53,21 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	for (let end = n - 1; end > 0; end -= 1) {
 		swap(array, 0, end);
 		sortedStart = end;
+		trace.paint({ moved: [0, end], sorted: sortedIndices() });
 		trace.record({
 			codePartId: 'swap',
-			indicesHighlighted: [0, end],
-			comparedIndices: [],
-			movedIndices: [0, end],
-			sortedIndices: sortedIndices(),
 			label: `Move max value to index ${end}`,
 			variables: { end },
 		});
 
+		trace.paint({ compared: [0], sorted: sortedIndices() });
 		trace.record({
 			codePartId: 'heapify',
-			indicesHighlighted: [0],
-			comparedIndices: [],
-			movedIndices: [],
-			sortedIndices: sortedIndices(),
 			label: 'Restore heap property',
 			variables: { heapSize: end },
 		});
 		heapify(end, 0);
 	}
-
-	trace.record({
-		codePartId: 'extract-loop',
-		indicesHighlighted: [],
-		comparedIndices: [],
-		movedIndices: [],
-		sortedIndices: range(0, n - 1),
-		label: 'Heap sort finished',
-		variables: {},
-	});
 
 	return trace.build();
 }
