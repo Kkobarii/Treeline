@@ -148,14 +148,14 @@
 
 	.sort-bar {
 		@apply rounded-sm;
-		background-color: var(--color-primary-light);
+		background-color: var(--color-green-300);
 		transition:
 			height 120ms linear,
 			background-color 120ms ease;
 	}
 
 	.bar-compared {
-		background-color: var(--color-primary);
+		background-color: var(--color-green-600);
 	}
 
 	.bar-moved {
@@ -163,7 +163,7 @@
 	}
 
 	.bar-sorted {
-		background-color: var(--color-green-700);
+		background-color: var(--color-green-400);
 	}
 
 	@media (max-width: 768px) {

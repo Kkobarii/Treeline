@@ -13,6 +13,7 @@ export type CodeLanguage = 'python' | 'javascript' | 'c';
 
 export interface DetailedSortStep {
 	array: Item[];
+	rows?: Array<Array<Item | null>>;
 	codePartId: string;
 	label: string;
 	variables: Record<string, number | string>;

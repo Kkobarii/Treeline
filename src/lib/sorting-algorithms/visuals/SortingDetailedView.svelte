@@ -36,9 +36,21 @@
 
 	let currentStep = $derived(steps[currentStepIndex]);
 	let currentArray = $derived(currentStep ? currentStep.array : []);
+	let currentRows = $derived(currentStep?.rows?.length ? currentStep.rows : currentArray.length ? [currentArray] : []);
+	let gridColumns = $derived(currentArray.length);
+	let gridCells = $derived(
+		currentRows.flatMap((row, rowIndex) =>
+			row.map((item, colIndex) => ({
+				item,
+				key: item ? `item-${item.id}` : `slot-${rowIndex}-${colIndex}`,
+				indexLabel: item ? currentArray.findIndex(candidate => candidate.id === item.id) : -1,
+			})),
+		),
+	);
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
 	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
 	let variables = $derived(currentStep ? currentStep.variables : {});
+	let useExpandedAnimationArea = $derived(algorithmId === 'merge' || algorithmId === 'quick');
 	let normalFlipDurationMs = $derived(isPlaying ? Math.max(100, Math.floor(delayMs * 0.85)) : 300);
 	let activeFlipDurationMs = $derived(fastAnimation ? Math.max(35, Math.floor(normalFlipDurationMs * 0.22)) : normalFlipDurationMs);
 	let arcHeightFactor = $state(0.1);
@@ -108,10 +120,23 @@
 		void stepForward(true);
 	}
 
-	function stepBack() {
+	async function stepBack(isManualStep = false) {
 		clearTimer();
 		isPlaying = false;
-		currentStepIndex = Math.max(0, currentStepIndex - 1);
+		if (currentStepIndex > 0) {
+			const now = performance.now();
+			fastAnimation = isManualStep && now - lastStepAdvanceAt < normalFlipDurationMs;
+			currentStepIndex -= 1;
+			lastStepAdvanceAt = now;
+			if (fastAnimation) {
+				await tick();
+				fastAnimation = false;
+			}
+		}
+	}
+
+	function stepBackManual() {
+		void stepBack(true);
 	}
 
 	function runOrPause() {
@@ -157,7 +182,7 @@
 			<button onclick={shuffleArray}>Shuffle 16</button>
 			<button onclick={runOrPause}>{isPlaying ? 'Pause' : 'Run'}</button>
 			<button
-				onclick={stepBack}
+				onclick={stepBackManual}
 				disabled={isPlaying || !steps.length || currentStepIndex === 0}>Back</button>
 			<button
 				onclick={stepForwardManual}
@@ -181,30 +206,38 @@
 			<div>{stepLabel}</div>
 		</div>
 
-		<div class="array-row">
-			{#each currentArray as item, index (item.value)}
+		<div
+			class="array-grid"
+			class:array-grid-expanded={useExpandedAnimationArea}
+			style={`grid-template-columns: repeat(${gridColumns || 1}, minmax(0, 1fr));`}>
+			{#each gridCells as cell (cell.key)}
 				<div
-					class="array-item"
-					class:item-compared={item.highlightType === ItemHighlightType.Compare}
-					class:item-moved={item.highlightType === ItemHighlightType.Move}
-					class:item-sorted={item.highlightType === ItemHighlightType.Sorted}
-					data-depth={item.depth ?? 0}
+					class={cell.item ? 'array-item' : 'array-slot'}
+					class:item-compared={cell.item?.highlightType === ItemHighlightType.Compare}
+					class:item-moved={cell.item?.highlightType === ItemHighlightType.Move}
+					class:item-sorted={cell.item?.highlightType === ItemHighlightType.Sorted}
+					class:item-left={cell.item?.highlightType === ItemHighlightType.Left}
+					class:item-right={cell.item?.highlightType === ItemHighlightType.Right}
 					animate:curvedFlip={{
 						duration: activeFlipDurationMs,
 						easing: cubicInOut,
 					}}>
-					<div class="value-marker-track">
-						<div
-							class="value-marker-fill"
-							style={`height: ${(item.value / currentArray.length) * 100}%;`}>
+					{#if cell.item}
+						<div class="value-marker-track">
+							<div
+								class="value-marker-fill"
+								style={`height: ${(cell.item.value / currentArray.length) * 100}%;`}>
+							</div>
 						</div>
-					</div>
-					<div class="flex min-w-0 flex-1 flex-col p-[0.45rem] pl-[0.55rem]">
-						<div class="flex items-center justify-center text-[0.78rem] opacity-90">[{index}]</div>
-						<div class="flex w-full flex-1 items-center justify-center">
-							<div class="text-base font-bold">{item.value}</div>
+						<div class="flex min-w-0 flex-1 flex-col p-[0.45rem] pl-[0.55rem]">
+							<div class="flex items-center justify-center text-[0.78rem] opacity-90">
+								[{cell.indexLabel}]
+							</div>
+							<div class="flex w-full flex-1 items-center justify-center">
+								<div class="text-base font-bold">{cell.item.value}</div>
+							</div>
 						</div>
-					</div>
+					{/if}
 				</div>
 			{/each}
 		</div>
@@ -262,10 +295,18 @@
 		@apply flex flex-wrap items-center gap-[0.45rem];
 	}
 
-	.array-row {
+	.array-grid {
 		@apply grid w-full gap-[0.35rem];
-		grid-template-columns: repeat(16, minmax(0, 1fr));
 		contain: layout paint;
+		align-content: start;
+	}
+
+	.array-grid-expanded {
+		min-height: calc(92px * 5 + 0.35rem * 4);
+	}
+
+	.array-slot {
+		@apply h-[92px] min-w-0;
 	}
 
 	.array-item {
@@ -298,6 +339,14 @@
 
 	.item-sorted {
 		background: var(--color-primary-ultra-light);
+	}
+
+	.item-left {
+		background: var(--color-gray-200);
+	}
+
+	.item-right {
+		background: var(--color-gray-400);
 	}
 
 	.code-line {
