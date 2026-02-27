@@ -9,12 +9,10 @@ export enum ItemHighlightType {
 }
 
 export class Item {
-	readonly id: number;
 	private readonly rawValue: number;
 	highlightType: ItemHighlightType | null = null;
 
-	constructor(id: number, value: number) {
-		this.id = id;
+	constructor(value: number) {
 		this.rawValue = value;
 	}
 
@@ -42,15 +40,15 @@ interface DetailedTraceBuilderOptions {
 export class DetailedTraceBuilder {
 	private readonly array: Item[];
 	private readonly steps: DetailedSortStep[] = [];
-	private readonly rowByItemId = new Map<number, number>();
-	private readonly columnByItemId = new Map<number, number>();
+	private readonly rowByValue = new Map<number, number>();
+	private readonly columnByValue = new Map<number, number>();
 	private readonly useRows: boolean;
 
 	constructor(initialArray: number[], options: DetailedTraceBuilderOptions = {}) {
 		this.useRows = options.useRows ?? false;
-		this.array = initialArray.map((value, index) => {
-			const item = new Item(index, value);
-			this.rowByItemId.set(item.id, 0);
+		this.array = initialArray.map(value => {
+			const item = new Item(value);
+			this.rowByValue.set(item.value, 0);
 
 			return item;
 		});
@@ -103,7 +101,7 @@ export class DetailedTraceBuilder {
 		for (const index of indices) {
 			const item = this.array[index];
 			if (item) {
-				this.rowByItemId.set(item.id, Math.max(0, row));
+				this.rowByValue.set(item.value, Math.max(0, row));
 			}
 		}
 	}
@@ -115,8 +113,8 @@ export class DetailedTraceBuilder {
 				continue;
 			}
 
-			const currentRow = this.rowByItemId.get(item.id) ?? 0;
-			this.rowByItemId.set(item.id, currentRow + amount);
+			const currentRow = this.rowByValue.get(item.value) ?? 0;
+			this.rowByValue.set(item.value, currentRow + amount);
 		}
 	}
 
@@ -127,8 +125,8 @@ export class DetailedTraceBuilder {
 				continue;
 			}
 
-			const currentRow = this.rowByItemId.get(item.id) ?? 0;
-			this.rowByItemId.set(item.id, Math.max(0, currentRow - amount));
+			const currentRow = this.rowByValue.get(item.value) ?? 0;
+			this.rowByValue.set(item.value, Math.max(0, currentRow - amount));
 		}
 	}
 
@@ -136,7 +134,7 @@ export class DetailedTraceBuilder {
 		for (const index of indices) {
 			const item = this.array[index];
 			if (item) {
-				this.columnByItemId.set(item.id, Math.max(0, column));
+				this.columnByValue.set(item.value, Math.max(0, column));
 			}
 		}
 	}
@@ -144,7 +142,7 @@ export class DetailedTraceBuilder {
 	getColumn(index: number): number | undefined {
 		const item = this.array[index];
 		if (item) {
-			return this.columnByItemId.get(item.id);
+			return this.columnByValue.get(item.value);
 		}
 		return undefined;
 	}
@@ -153,7 +151,7 @@ export class DetailedTraceBuilder {
 		for (const index of indices) {
 			const item = this.array[index];
 			if (item) {
-				this.columnByItemId.delete(item.id);
+				this.columnByValue.delete(item.value);
 			}
 		}
 	}
@@ -161,8 +159,8 @@ export class DetailedTraceBuilder {
 	setCoords(index: number, row: number, column: number): void {
 		const item = this.array[index];
 		if (item) {
-			this.rowByItemId.set(item.id, Math.max(0, row));
-			this.columnByItemId.set(item.id, Math.max(0, column));
+			this.rowByValue.set(item.value, Math.max(0, row));
+			this.columnByValue.set(item.value, Math.max(0, column));
 		}
 	}
 
@@ -173,8 +171,8 @@ export class DetailedTraceBuilder {
 
 		const positionedItems = snapshotArray.map((item, defaultCol) => ({
 			item,
-			row: this.rowByItemId.get(item.id) ?? 0,
-			col: this.columnByItemId.get(item.id) ?? defaultCol,
+			row: this.rowByValue.get(item.value) ?? 0,
+			col: this.columnByValue.get(item.value) ?? defaultCol,
 		}));
 		const maxRow = Math.max(...positionedItems.map(({ row }) => row));
 		const rowCount = maxRow + 1;
@@ -210,7 +208,7 @@ export class DetailedTraceBuilder {
 
 	record(step: Omit<DetailedSortStep, 'array'>): void {
 		const snapshotArray = this.array.map(item => {
-			const snapshotItem = new Item(item.id, item.value);
+			const snapshotItem = new Item(item.value);
 			snapshotItem.highlightType = item.highlightType;
 
 			return snapshotItem;

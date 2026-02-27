@@ -42,8 +42,8 @@
 		currentRows.flatMap((row, rowIndex) =>
 			row.map((item, colIndex) => ({
 				item,
-				key: item ? `item-${item.id}` : `slot-${rowIndex}-${colIndex}`,
-				indexLabel: item ? currentArray.findIndex(candidate => candidate.id === item.id) : -1,
+				key: item ? `item-${item.value}` : `slot-${rowIndex}-${colIndex}`,
+				indexLabel: item ? currentArray.findIndex(candidate => candidate.value === item.value) : -1,
 			})),
 		),
 	);
