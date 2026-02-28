@@ -1,7 +1,59 @@
 import { range, shift } from '$lib/sorting-algorithms/misc/utils';
 
-import type { DetailedSortStep, SortStep } from '../steps/stepTypes';
+import type { DetailedCodeTemplate, DetailedSortStep, SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
+
+export enum MergeSortPartId {
+	MergeSort = 'merge-sort',
+	Divide = 'divide',
+	CallLeft = 'call-left',
+	CallRight = 'call-right',
+	Merge = 'merge',
+	MergeDone = 'merge-done',
+
+	Compare = 'compare',
+	Shift = 'shift',
+	TakeLeft = 'take-left',
+	TakeRight = 'take-right',
+	AppendLeft = 'append-left',
+	AppendRight = 'append-right',
+}
+
+export const mergeSortTemplate: DetailedCodeTemplate = {
+	algorithmId: 'merge',
+	python: [
+		{ indent: 0, text: 'def merge_sort(arr, left, right):', codePartId: MergeSortPartId.MergeSort },
+		{ indent: 1, text: 'if left < right:', codePartId: MergeSortPartId.Divide },
+		{ indent: 2, text: 'mid = (left + right) // 2', codePartId: MergeSortPartId.Divide },
+		{ indent: 2, text: 'merge_sort(arr, left, mid)', codePartId: MergeSortPartId.CallLeft },
+		{ indent: 2, text: 'merge_sort(arr, mid + 1, right)', codePartId: MergeSortPartId.CallRight },
+		{ indent: 2, text: 'merge(arr, left, mid, right)', codePartId: MergeSortPartId.Merge },
+		{ indent: 1, text: '# merge done', codePartId: MergeSortPartId.MergeDone },
+		{ indent: 0, text: '', codePartId: '' },
+		{ indent: 0, text: 'def merge(arr, left, mid, right):', codePartId: MergeSortPartId.Merge },
+		{ indent: 1, text: 'i = left', codePartId: MergeSortPartId.Merge },
+		{ indent: 1, text: 'leftPos = left', codePartId: MergeSortPartId.Merge },
+		{ indent: 1, text: 'rightPos = mid + 1', codePartId: MergeSortPartId.Merge },
+		{ indent: 1, text: 'while leftPos <= mid and rightPos <= right:', codePartId: MergeSortPartId.Merge },
+		{ indent: 2, text: 'if arr[leftPos] <= arr[rightPos]:', codePartId: MergeSortPartId.Compare },
+		{ indent: 3, text: 'arr[i] = arr[leftPos]', codePartId: MergeSortPartId.TakeLeft },
+		{ indent: 3, text: 'leftPos += 1', codePartId: MergeSortPartId.TakeLeft },
+		{ indent: 2, text: 'else:', codePartId: MergeSortPartId.Compare },
+		{ indent: 3, text: 'arr[i] = arr[rightPos]', codePartId: MergeSortPartId.TakeRight },
+		{ indent: 3, text: 'rightPos += 1', codePartId: MergeSortPartId.TakeRight },
+		{ indent: 2, text: 'i += 1', codePartId: MergeSortPartId.Merge },
+		{ indent: 1, text: 'while leftPos <= mid:', codePartId: MergeSortPartId.AppendLeft },
+		{ indent: 2, text: 'arr[i] = arr[leftPos]', codePartId: MergeSortPartId.AppendLeft },
+		{ indent: 2, text: 'leftPos += 1', codePartId: MergeSortPartId.AppendLeft },
+		{ indent: 2, text: 'i += 1', codePartId: MergeSortPartId.AppendLeft },
+		{ indent: 1, text: 'while rightPos <= right:', codePartId: MergeSortPartId.AppendRight },
+		{ indent: 2, text: 'arr[i] = arr[rightPos]', codePartId: MergeSortPartId.AppendRight },
+		{ indent: 2, text: 'rightPos += 1', codePartId: MergeSortPartId.AppendRight },
+		{ indent: 2, text: 'i += 1', codePartId: MergeSortPartId.AppendRight },
+	],
+	javascript: [],
+	c: [],
+};
 
 export function mergeSortSteps(input: number[]): SortStep[] {
 	const trace = new DetailedTraceBuilder(input);
@@ -21,7 +73,7 @@ export function mergeSortSteps(input: number[]): SortStep[] {
 		while (leftPos <= leftEnd && rightStart <= right) {
 			trace.paint({ compared: [leftPos, rightStart] });
 			trace.record({
-				codePartId: 'compare',
+				codePartId: MergeSortPartId.Compare,
 				label: `Compare arr[${leftPos}] and arr[${rightStart}]`,
 				variables: {},
 			});
@@ -33,7 +85,7 @@ export function mergeSortSteps(input: number[]): SortStep[] {
 
 				trace.paint({ moved: [leftPos, rightStart] });
 				trace.record({
-					codePartId: 'shift',
+					codePartId: MergeSortPartId.Shift,
 					label: `Shift element from ${rightStart} to ${leftPos}`,
 					variables: {},
 				});
@@ -69,23 +121,29 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	const merge = (left: number, mid: number, right: number, level: number) => {
 		let leftPos = left;
 		let leftEnd = mid;
-		let rightStart = mid + 1;
-		let rightPos = rightStart;
+		let rightPos = mid + 1;
 
-		trace.paint({ left: range(leftPos, leftEnd), right: range(rightStart, right), compared: [] });
+		trace.paint({ left: range(leftPos, leftEnd), right: range(rightPos, right), compared: [] });
 		trace.record({
-			codePartId: 'merge',
+			codePartId: MergeSortPartId.Merge,
 			label: `Start merging arr[${left}..${mid}] and arr[${mid + 1}..${right}]`,
 			variables: { left, mid, right, i: leftPos },
 		});
 
 		let i = leftPos;
 		while (leftPos <= leftEnd && rightPos <= right) {
+			trace.paint({ compared: [leftPos, rightPos], left: range(leftPos, leftEnd), right: range(rightPos, right) });
+			trace.record({
+				codePartId: MergeSortPartId.Compare,
+				label: `Compare arr[${leftPos}] and arr[${rightPos}]`,
+				variables: { leftPos, rightPos },
+			});
+
 			if (array[leftPos].value <= array[rightPos].value) {
 				trace.setCoords(leftPos, level - 1, i);
 				trace.paint({ moved: [leftPos], left: range(leftPos, leftEnd), right: range(rightPos, right) });
 				trace.record({
-					codePartId: 'take-left',
+					codePartId: MergeSortPartId.TakeLeft,
 					label: `Move arr[${leftPos}] to output position ${i}`,
 					variables: { i, leftPos },
 				});
@@ -107,7 +165,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 
 				trace.paint({ moved: [leftPos], left: range(leftPos, leftEnd + 1), right: range(rightPos + 1, right) });
 				trace.record({
-					codePartId: 'take-right',
+					codePartId: MergeSortPartId.TakeRight,
 					label: `Move arr[${rightPos}] to output position ${i}`,
 					variables: { i, rightPos },
 				});
@@ -123,7 +181,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.setCoords(leftPos, level - 1, leftPos);
 			trace.paint({ moved: [leftPos], left: range(leftPos + 1, leftEnd) });
 			trace.record({
-				codePartId: 'append-left',
+				codePartId: MergeSortPartId.AppendLeft,
 				label: `Insert remaining left item at position ${leftPos}`,
 				variables: { i: leftPos },
 			});
@@ -134,7 +192,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.setCoords(rightPos, level - 1, i);
 			trace.paint({ moved: [rightPos], right: range(rightPos + 1, right) });
 			trace.record({
-				codePartId: 'append-right',
+				codePartId: MergeSortPartId.AppendRight,
 				label: `Insert remaining right item at position ${i}`,
 				variables: { i, rightPos },
 			});
@@ -142,22 +200,36 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			i += 1;
 		}
 
-		trace.paint({ sorted: range(left, right) });
-		trace.record({
-			codePartId: 'merge-done',
-			label: `Merged segment arr[${left}..${right}]`,
-			variables: { left, right },
-		});
+		// trace.paint({ sorted: range(left, right) });
+		// trace.record({
+		// 	codePartId: MergeSortPartId.MergeDone,
+		// 	label: `Merged segment arr[${left}..${right}]`,
+		// 	variables: { left, right },
+		// });
 	};
 
 	const mergeSort = (left: number, right: number, level: number) => {
+		trace.paint({ left: range(left, right) });
+		trace.record({
+			codePartId: MergeSortPartId.MergeSort,
+			label: `Start merge_sort on arr[${left}..${right}]`,
+			variables: { left, right },
+		});
+
 		if (left < right) {
 			const mid = Math.floor((left + right) / 2);
+			trace.paint({ left: range(left, mid), right: range(mid + 1, right) });
+			trace.record({
+				codePartId: MergeSortPartId.Divide,
+				label: `Divide arr[${left}..${right}] into arr[${left}..${mid}] and arr[${mid + 1}..${right}]`,
+				variables: { left, mid, right },
+			});
 
 			// move left part to the next row
 			trace.setRow(range(left, mid), level);
+			trace.paint({ left: range(left, mid) });
 			trace.record({
-				codePartId: 'divide',
+				codePartId: MergeSortPartId.CallLeft,
 				label: `Merge sort arr[${left}..${mid}]`,
 				variables: {},
 			});
@@ -165,8 +237,9 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 
 			// move right part to the next row
 			trace.setRow(range(mid + 1, right), level);
+			trace.paint({ right: range(mid + 1, right) });
 			trace.record({
-				codePartId: 'divide',
+				codePartId: MergeSortPartId.CallRight,
 				label: `Merge sort arr[${mid + 1}..${right}]`,
 				variables: {},
 			});
@@ -174,6 +247,13 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 
 			merge(left, mid, right, level);
 		}
+
+		trace.paint({ sorted: range(left, right) });
+		trace.record({
+			codePartId: MergeSortPartId.MergeDone,
+			label: `Finished merge_sort on arr[${left}..${right}]`,
+			variables: { left, right },
+		});
 	};
 
 	mergeSort(0, n - 1, 1);
