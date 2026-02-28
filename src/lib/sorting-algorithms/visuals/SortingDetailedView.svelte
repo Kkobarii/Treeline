@@ -50,6 +50,37 @@
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
 	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
 	let variables = $derived(currentStep ? currentStep.variables : {});
+	let isMergeFunctionWorking = $derived(algorithmId === 'merge');
+	let mergeTargetArea = $derived.by(() => {
+		if (!isMergeFunctionWorking || gridColumns <= 0) {
+			return null;
+		}
+
+		const mergeTargetLeft = Number((variables as Record<string, unknown>).mergeTargetLeft);
+		const mergeTargetRight = Number((variables as Record<string, unknown>).mergeTargetRight);
+		const mergeTargetRow = Number((variables as Record<string, unknown>).mergeTargetRow);
+
+		if (!Number.isFinite(mergeTargetLeft) || !Number.isFinite(mergeTargetRight) || !Number.isFinite(mergeTargetRow)) {
+			return null;
+		}
+
+		const leftColumn = Math.max(0, Math.min(gridColumns - 1, Math.floor(mergeTargetLeft)));
+		const rightColumn = Math.max(leftColumn, Math.min(gridColumns - 1, Math.floor(mergeTargetRight)));
+		const targetRow = Math.max(0, Math.floor(mergeTargetRow));
+		const spanColumns = rightColumn - leftColumn + 1;
+		const totalGapRem = (gridColumns - 1) * 0.35;
+		const spanGapRem = (spanColumns - 1) * 0.35;
+		const leftOffsetGapsRem = leftColumn * 0.35;
+		const trackWidthExpression = `(100% - ${totalGapRem}rem) / ${gridColumns}`;
+		const mergeTargetExpandPx = 3;
+
+		return {
+			left: `calc(${leftColumn} * (${trackWidthExpression}) + ${leftOffsetGapsRem}rem - ${mergeTargetExpandPx}px)`,
+			width: `calc(${spanColumns} * (${trackWidthExpression}) + ${spanGapRem}rem + ${mergeTargetExpandPx * 2}px)`,
+			top: `calc(${targetRow} * (92px + 0.35rem) - ${mergeTargetExpandPx}px)`,
+			height: `calc(92px + ${mergeTargetExpandPx * 2}px)`,
+		};
+	});
 	let useExpandedAnimationArea = $derived(algorithmId === 'merge' || algorithmId === 'quick');
 	let normalFlipDurationMs = $derived(isPlaying ? Math.max(100, Math.floor(delayMs * 0.85)) : 300);
 	let activeFlipDurationMs = $derived(fastAnimation ? Math.max(35, Math.floor(normalFlipDurationMs * 0.22)) : normalFlipDurationMs);
@@ -210,6 +241,12 @@
 			class="array-grid"
 			class:array-grid-expanded={useExpandedAnimationArea}
 			style={`grid-template-columns: repeat(${gridColumns || 1}, minmax(0, 1fr));`}>
+			{#if mergeTargetArea}
+				<div
+					class="merge-target-area"
+					style={`left: ${mergeTargetArea.left}; width: ${mergeTargetArea.width}; top: ${mergeTargetArea.top}; height: ${mergeTargetArea.height};`}>
+				</div>
+			{/if}
 			{#each gridCells as cell (cell.key)}
 				<div
 					class={cell.item ? 'array-item' : 'array-slot'}
@@ -288,7 +325,7 @@
 
 	.detailed-layout {
 		@apply grid gap-4;
-		grid-template-columns: minmax(0, 70%) minmax(0, 30%);
+		grid-template-columns: minmax(0, 60%) minmax(0, 40%);
 	}
 
 	.controls-row {
@@ -297,8 +334,20 @@
 
 	.array-grid {
 		@apply grid w-full gap-[0.35rem];
-		contain: layout paint;
+		contain: layout;
+		overflow: visible;
 		align-content: start;
+		position: relative;
+		margin: 0.35rem;
+	}
+
+	.merge-target-area {
+		@apply pointer-events-none;
+		position: absolute;
+		height: 92px;
+		background: oklch(from var(--color-primary-light) l c h / 0.4);
+		border: 1px solid oklch(from var(--color-primary) l c h / 0.6);
+		z-index: 0;
 	}
 
 	.array-grid-expanded {
@@ -307,6 +356,8 @@
 
 	.array-slot {
 		@apply h-[92px] min-w-0;
+		position: relative;
+		z-index: 1;
 	}
 
 	.array-item {
@@ -317,6 +368,8 @@
 		will-change: transform;
 		transform: translateZ(0);
 		backface-visibility: hidden;
+		position: relative;
+		z-index: 1;
 	}
 
 	.value-marker-track {

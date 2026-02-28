@@ -31,23 +31,24 @@ export const mergeSortTemplate: DetailedCodeTemplate = {
 		{ indent: 1, text: '# merge done', codePartId: MergeSortPartId.MergeDone },
 		{ indent: 0, text: '', codePartId: '' },
 		{ indent: 0, text: 'def merge(arr, left, mid, right):', codePartId: MergeSortPartId.Merge },
+		{ indent: 1, text: 'leftArr = arr[left:mid + 1]', codePartId: MergeSortPartId.Merge },
+		{ indent: 1, text: 'rightArr = arr[mid + 1:right + 1]', codePartId: MergeSortPartId.Merge },
+		{ indent: 1, text: 'leftPos, rightPos = 0, 0', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'i = left', codePartId: MergeSortPartId.Merge },
-		{ indent: 1, text: 'leftPos = left', codePartId: MergeSortPartId.Merge },
-		{ indent: 1, text: 'rightPos = mid + 1', codePartId: MergeSortPartId.Merge },
-		{ indent: 1, text: 'while leftPos <= mid and rightPos <= right:', codePartId: MergeSortPartId.Merge },
-		{ indent: 2, text: 'if arr[leftPos] <= arr[rightPos]:', codePartId: MergeSortPartId.Compare },
-		{ indent: 3, text: 'arr[i] = arr[leftPos]', codePartId: MergeSortPartId.TakeLeft },
+		{ indent: 1, text: 'while leftPos < len(leftArr) and rightPos < len(rightArr):', codePartId: MergeSortPartId.Merge },
+		{ indent: 2, text: 'if leftArr[leftPos] <= rightArr[rightPos]:', codePartId: MergeSortPartId.Compare },
+		{ indent: 3, text: 'arr[i] = leftArr[leftPos]', codePartId: MergeSortPartId.TakeLeft },
 		{ indent: 3, text: 'leftPos += 1', codePartId: MergeSortPartId.TakeLeft },
 		{ indent: 2, text: 'else:', codePartId: MergeSortPartId.Compare },
-		{ indent: 3, text: 'arr[i] = arr[rightPos]', codePartId: MergeSortPartId.TakeRight },
+		{ indent: 3, text: 'arr[i] = rightArr[rightPos]', codePartId: MergeSortPartId.TakeRight },
 		{ indent: 3, text: 'rightPos += 1', codePartId: MergeSortPartId.TakeRight },
-		{ indent: 2, text: 'i += 1', codePartId: MergeSortPartId.Merge },
-		{ indent: 1, text: 'while leftPos <= mid:', codePartId: MergeSortPartId.AppendLeft },
-		{ indent: 2, text: 'arr[i] = arr[leftPos]', codePartId: MergeSortPartId.AppendLeft },
+		{ indent: 2, text: 'i += 1', codePartId: '' },
+		{ indent: 1, text: 'while leftPos < len(leftArr):', codePartId: MergeSortPartId.AppendLeft },
+		{ indent: 2, text: 'arr[i] = leftArr[leftPos]', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'leftPos += 1', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'i += 1', codePartId: MergeSortPartId.AppendLeft },
-		{ indent: 1, text: 'while rightPos <= right:', codePartId: MergeSortPartId.AppendRight },
-		{ indent: 2, text: 'arr[i] = arr[rightPos]', codePartId: MergeSortPartId.AppendRight },
+		{ indent: 1, text: 'while rightPos < len(rightArr):', codePartId: MergeSortPartId.AppendRight },
+		{ indent: 2, text: 'arr[i] = rightArr[rightPos]', codePartId: MergeSortPartId.AppendRight },
 		{ indent: 2, text: 'rightPos += 1', codePartId: MergeSortPartId.AppendRight },
 		{ indent: 2, text: 'i += 1', codePartId: MergeSortPartId.AppendRight },
 	],
@@ -122,12 +123,21 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		let leftPos = left;
 		let leftEnd = mid;
 		let rightPos = mid + 1;
+		const mergeTargetRow = level - 1;
 
 		trace.paint({ left: range(leftPos, leftEnd), right: range(rightPos, right), compared: [] });
 		trace.record({
 			codePartId: MergeSortPartId.Merge,
 			label: `Start merging arr[${left}..${mid}] and arr[${mid + 1}..${right}]`,
-			variables: { left, mid, right, i: leftPos },
+			variables: {
+				left,
+				mid,
+				right,
+				i: leftPos,
+				mergeTargetLeft: left,
+				mergeTargetRight: right,
+				mergeTargetRow,
+			},
 		});
 
 		let i = leftPos;
@@ -136,7 +146,15 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: MergeSortPartId.Compare,
 				label: `Compare arr[${leftPos}] and arr[${rightPos}]`,
-				variables: { leftPos, rightPos },
+				variables: {
+					left,
+					right,
+					leftPos,
+					rightPos,
+					mergeTargetLeft: left,
+					mergeTargetRight: right,
+					mergeTargetRow,
+				},
 			});
 
 			if (array[leftPos].value <= array[rightPos].value) {
@@ -145,7 +163,13 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.record({
 					codePartId: MergeSortPartId.TakeLeft,
 					label: `Move arr[${leftPos}] to output position ${i}`,
-					variables: { i, leftPos },
+					variables: {
+						i,
+						leftPos,
+						mergeTargetLeft: left,
+						mergeTargetRight: right,
+						mergeTargetRow,
+					},
 				});
 				leftPos += 1;
 				i += 1;
@@ -167,7 +191,13 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.record({
 					codePartId: MergeSortPartId.TakeRight,
 					label: `Move arr[${rightPos}] to output position ${i}`,
-					variables: { i, rightPos },
+					variables: {
+						i,
+						rightPos,
+						mergeTargetLeft: left,
+						mergeTargetRight: right,
+						mergeTargetRow,
+					},
 				});
 
 				leftPos += 1;
@@ -183,7 +213,12 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: MergeSortPartId.AppendLeft,
 				label: `Insert remaining left item at position ${leftPos}`,
-				variables: { i: leftPos },
+				variables: {
+					i: leftPos,
+					mergeTargetLeft: left,
+					mergeTargetRight: right,
+					mergeTargetRow,
+				},
 			});
 			leftPos += 1;
 		}
@@ -194,7 +229,13 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: MergeSortPartId.AppendRight,
 				label: `Insert remaining right item at position ${i}`,
-				variables: { i, rightPos },
+				variables: {
+					i,
+					rightPos,
+					mergeTargetLeft: left,
+					mergeTargetRight: right,
+					mergeTargetRow,
+				},
 			});
 			rightPos += 1;
 			i += 1;
@@ -209,11 +250,18 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	};
 
 	const mergeSort = (left: number, right: number, level: number) => {
+		const currentWorkingRow = level - 1;
 		trace.paint({ left: range(left, right) });
 		trace.record({
 			codePartId: MergeSortPartId.MergeSort,
 			label: `Start merge_sort on arr[${left}..${right}]`,
-			variables: { left, right },
+			variables: {
+				left,
+				right,
+				mergeTargetLeft: left,
+				mergeTargetRight: right,
+				mergeTargetRow: currentWorkingRow,
+			},
 		});
 
 		if (left < right) {
@@ -222,7 +270,14 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: MergeSortPartId.Divide,
 				label: `Divide arr[${left}..${right}] into arr[${left}..${mid}] and arr[${mid + 1}..${right}]`,
-				variables: { left, mid, right },
+				variables: {
+					left,
+					mid,
+					right,
+					mergeTargetLeft: left,
+					mergeTargetRight: right,
+					mergeTargetRow: currentWorkingRow,
+				},
 			});
 
 			// move left part to the next row
@@ -231,7 +286,11 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: MergeSortPartId.CallLeft,
 				label: `Merge sort arr[${left}..${mid}]`,
-				variables: {},
+				variables: {
+					mergeTargetLeft: left,
+					mergeTargetRight: right,
+					mergeTargetRow: currentWorkingRow,
+				},
 			});
 			mergeSort(left, mid, level + 1);
 
@@ -241,7 +300,11 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.record({
 				codePartId: MergeSortPartId.CallRight,
 				label: `Merge sort arr[${mid + 1}..${right}]`,
-				variables: {},
+				variables: {
+					mergeTargetLeft: left,
+					mergeTargetRight: right,
+					mergeTargetRow: currentWorkingRow,
+				},
 			});
 			mergeSort(mid + 1, right, level + 1);
 
@@ -252,7 +315,13 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.record({
 			codePartId: MergeSortPartId.MergeDone,
 			label: `Finished merge_sort on arr[${left}..${right}]`,
-			variables: { left, right },
+			variables: {
+				left,
+				right,
+				mergeTargetLeft: left,
+				mergeTargetRight: right,
+				mergeTargetRow: currentWorkingRow,
+			},
 		});
 	};
 
