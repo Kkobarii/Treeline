@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
@@ -17,6 +17,8 @@
 	let isPlaying = $state(false);
 	let stepDelayMs = $state(40);
 	let timer: ReturnType<typeof setInterval> | null = null;
+	const stepDelayStorageKey = 'sortingFirstViewStepDelayMs';
+	let hasHydratedPreferences = $state(false);
 
 	let currentStep = $derived(steps[currentStepIndex]);
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
@@ -28,6 +30,14 @@
 			timer = null;
 		}
 	}
+
+	onMount(() => {
+		const storedDelay = Number(sessionStorage.getItem(stepDelayStorageKey));
+		if (Number.isFinite(storedDelay) && storedDelay >= 10 && storedDelay <= 120) {
+			stepDelayMs = storedDelay;
+		}
+		hasHydratedPreferences = true;
+	});
 
 	function regenerateArray() {
 		clearTimer();
@@ -80,6 +90,14 @@
 		}, stepDelayMs);
 
 		return () => clearTimer();
+	});
+
+	$effect(() => {
+		if (!hasHydratedPreferences || typeof window === 'undefined') {
+			return;
+		}
+
+		sessionStorage.setItem(stepDelayStorageKey, String(stepDelayMs));
 	});
 
 	onDestroy(() => {
@@ -150,7 +168,7 @@
 		@apply rounded-sm;
 		background-color: var(--color-green-300);
 		transition:
-			height 120ms linear,
+			height 60ms linear,
 			background-color 120ms ease;
 	}
 

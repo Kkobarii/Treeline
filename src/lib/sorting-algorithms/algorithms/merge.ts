@@ -1,9 +1,10 @@
 import { range, shift } from '$lib/sorting-algorithms/misc/utils';
 
-import type { DetailedCodeTemplate, DetailedSortStep, SortStep } from '../steps/stepTypes';
+import { LineBreak, type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
 
 export enum MergeSortPartId {
+	// merge sort function
 	MergeSort = 'merge-sort',
 	Divide = 'divide',
 	CallLeft = 'call-left',
@@ -11,6 +12,7 @@ export enum MergeSortPartId {
 	Merge = 'merge',
 	MergeDone = 'merge-done',
 
+	// merge function
 	Compare = 'compare',
 	Shift = 'shift',
 	TakeLeft = 'take-left',
@@ -28,13 +30,14 @@ export const mergeSortTemplate: DetailedCodeTemplate = {
 		{ indent: 2, text: 'merge_sort(arr, left, mid)', codePartId: MergeSortPartId.CallLeft },
 		{ indent: 2, text: 'merge_sort(arr, mid + 1, right)', codePartId: MergeSortPartId.CallRight },
 		{ indent: 2, text: 'merge(arr, left, mid, right)', codePartId: MergeSortPartId.Merge },
-		{ indent: 1, text: '# merge done', codePartId: MergeSortPartId.MergeDone },
-		{ indent: 0, text: '', codePartId: '' },
+		{ indent: 1, text: '# merge sort done', codePartId: MergeSortPartId.MergeDone },
+		LineBreak,
 		{ indent: 0, text: 'def merge(arr, left, mid, right):', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'leftArr = arr[left:mid + 1]', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'rightArr = arr[mid + 1:right + 1]', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'leftPos, rightPos = 0, 0', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'i = left', codePartId: MergeSortPartId.Merge },
+		LineBreak,
 		{ indent: 1, text: 'while leftPos < len(leftArr) and rightPos < len(rightArr):', codePartId: MergeSortPartId.Merge },
 		{ indent: 2, text: 'if leftArr[leftPos] <= rightArr[rightPos]:', codePartId: MergeSortPartId.Compare },
 		{ indent: 3, text: 'arr[i] = leftArr[leftPos]', codePartId: MergeSortPartId.TakeLeft },
@@ -43,10 +46,12 @@ export const mergeSortTemplate: DetailedCodeTemplate = {
 		{ indent: 3, text: 'arr[i] = rightArr[rightPos]', codePartId: MergeSortPartId.TakeRight },
 		{ indent: 3, text: 'rightPos += 1', codePartId: MergeSortPartId.TakeRight },
 		{ indent: 2, text: 'i += 1', codePartId: '' },
+		LineBreak,
 		{ indent: 1, text: 'while leftPos < len(leftArr):', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'arr[i] = leftArr[leftPos]', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'leftPos += 1', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'i += 1', codePartId: MergeSortPartId.AppendLeft },
+		LineBreak,
 		{ indent: 1, text: 'while rightPos < len(rightArr):', codePartId: MergeSortPartId.AppendRight },
 		{ indent: 2, text: 'arr[i] = rightArr[rightPos]', codePartId: MergeSortPartId.AppendRight },
 		{ indent: 2, text: 'rightPos += 1', codePartId: MergeSortPartId.AppendRight },
@@ -60,14 +65,15 @@ export const mergeSortTemplate: DetailedCodeTemplate = {
 		{ indent: 2, text: 'mergeSort(arr, mid + 1, right);', codePartId: MergeSortPartId.CallRight },
 		{ indent: 2, text: 'merge(arr, left, mid, right);', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: '}', codePartId: MergeSortPartId.Divide },
-		{ indent: 1, text: '// merge done', codePartId: MergeSortPartId.MergeDone },
+		{ indent: 1, text: '// merge sort done', codePartId: MergeSortPartId.MergeDone },
 		{ indent: 0, text: '}', codePartId: MergeSortPartId.MergeSort },
-		{ indent: 0, text: '', codePartId: '' },
+		LineBreak,
 		{ indent: 0, text: 'function merge(arr, left, mid, right) {', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'const leftArr = arr.slice(left, mid + 1);', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'const rightArr = arr.slice(mid + 1, right + 1);', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'let leftPos = 0, rightPos = 0;', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'let i = left;', codePartId: MergeSortPartId.Merge },
+		LineBreak,
 		{ indent: 1, text: 'while (leftPos < leftArr.length && rightPos < rightArr.length) {', codePartId: MergeSortPartId.Merge },
 		{ indent: 2, text: 'if (leftArr[leftPos] <= rightArr[rightPos]) {', codePartId: MergeSortPartId.Compare },
 		{ indent: 3, text: 'arr[i] = leftArr[leftPos];', codePartId: MergeSortPartId.TakeLeft },
@@ -78,11 +84,13 @@ export const mergeSortTemplate: DetailedCodeTemplate = {
 		{ indent: 2, text: '}', codePartId: MergeSortPartId.Compare },
 		{ indent: 2, text: 'i += 1;', codePartId: '' },
 		{ indent: 1, text: '}', codePartId: MergeSortPartId.Merge },
+		LineBreak,
 		{ indent: 1, text: 'while (leftPos < leftArr.length) {', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'arr[i] = leftArr[leftPos];', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'leftPos += 1;', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'i += 1;', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 1, text: '}', codePartId: MergeSortPartId.AppendLeft },
+		LineBreak,
 		{ indent: 1, text: 'while (rightPos < rightArr.length) {', codePartId: MergeSortPartId.AppendRight },
 		{ indent: 2, text: 'arr[i] = rightArr[rightPos];', codePartId: MergeSortPartId.AppendRight },
 		{ indent: 2, text: 'rightPos += 1;', codePartId: MergeSortPartId.AppendRight },
@@ -98,19 +106,22 @@ export const mergeSortTemplate: DetailedCodeTemplate = {
 		{ indent: 2, text: 'mergeSort(arr, mid + 1, right);', codePartId: MergeSortPartId.CallRight },
 		{ indent: 2, text: 'merge(arr, left, mid, right);', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: '}', codePartId: MergeSortPartId.Divide },
-		{ indent: 1, text: '// merge done', codePartId: MergeSortPartId.MergeDone },
+		{ indent: 1, text: '// merge sort done', codePartId: MergeSortPartId.MergeDone },
 		{ indent: 0, text: '}', codePartId: MergeSortPartId.MergeSort },
-		{ indent: 0, text: '', codePartId: '' },
+		LineBreak,
 		{ indent: 0, text: 'void merge(int arr[], int left, int mid, int right) {', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'int leftSize = mid - left + 1;', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'int rightSize = right - mid;', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'int leftArr[leftSize], rightArr[rightSize];', codePartId: MergeSortPartId.Merge },
+		LineBreak,
 		{ indent: 1, text: 'for (int p = 0; p < leftSize; p++)', codePartId: MergeSortPartId.Merge },
 		{ indent: 2, text: 'leftArr[p] = arr[left + p];', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'for (int p = 0; p < rightSize; p++)', codePartId: MergeSortPartId.Merge },
 		{ indent: 2, text: 'rightArr[p] = arr[mid + 1 + p];', codePartId: MergeSortPartId.Merge },
+		LineBreak,
 		{ indent: 1, text: 'int leftPos = 0, rightPos = 0;', codePartId: MergeSortPartId.Merge },
 		{ indent: 1, text: 'int i = left;', codePartId: MergeSortPartId.Merge },
+		LineBreak,
 		{ indent: 1, text: 'while (leftPos < leftSize && rightPos < rightSize) {', codePartId: MergeSortPartId.Merge },
 		{ indent: 2, text: 'if (leftArr[leftPos] <= rightArr[rightPos]) {', codePartId: MergeSortPartId.Compare },
 		{ indent: 3, text: 'arr[i] = leftArr[leftPos];', codePartId: MergeSortPartId.TakeLeft },
@@ -121,11 +132,13 @@ export const mergeSortTemplate: DetailedCodeTemplate = {
 		{ indent: 2, text: '}', codePartId: MergeSortPartId.Compare },
 		{ indent: 2, text: 'i += 1;', codePartId: '' },
 		{ indent: 1, text: '}', codePartId: MergeSortPartId.Merge },
+		LineBreak,
 		{ indent: 1, text: 'while (leftPos < leftSize) {', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'arr[i] = leftArr[leftPos];', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'leftPos += 1;', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 2, text: 'i += 1;', codePartId: MergeSortPartId.AppendLeft },
 		{ indent: 1, text: '}', codePartId: MergeSortPartId.AppendLeft },
+		LineBreak,
 		{ indent: 1, text: 'while (rightPos < rightSize) {', codePartId: MergeSortPartId.AppendRight },
 		{ indent: 2, text: 'arr[i] = rightArr[rightPos];', codePartId: MergeSortPartId.AppendRight },
 		{ indent: 2, text: 'rightPos += 1;', codePartId: MergeSortPartId.AppendRight },
@@ -163,7 +176,7 @@ export function mergeSortSteps(input: number[]): SortStep[] {
 			} else {
 				shift(array, rightStart, leftPos);
 
-				trace.paint({ moved: [leftPos, rightStart] });
+				trace.paint({ moved: [leftPos] });
 				trace.record({
 					codePartId: MergeSortPartId.Shift,
 					label: `Shift element from ${rightStart} to ${leftPos}`,
@@ -202,9 +215,9 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		let leftPos = left;
 		let leftEnd = mid;
 		let rightPos = mid + 1;
-		const mergeTargetRow = level - 1;
+		const targetAreaRow = level - 1;
 
-		trace.paint({ left: range(leftPos, leftEnd), right: range(rightPos, right), compared: [] });
+		trace.paint({ light: range(leftPos, leftEnd), dark: range(rightPos, right), compared: [] });
 		trace.record({
 			codePartId: MergeSortPartId.Merge,
 			label: `Start merging arr[${left}..${mid}] and arr[${mid + 1}..${right}]`,
@@ -213,15 +226,15 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				mid,
 				right,
 				i: leftPos,
-				mergeTargetLeft: left,
-				mergeTargetRight: right,
-				mergeTargetRow,
+				targetAreaLeft: left,
+				targetAreaRight: right,
+				targetAreaRow,
 			},
 		});
 
 		let i = leftPos;
 		while (leftPos <= leftEnd && rightPos <= right) {
-			trace.paint({ compared: [leftPos, rightPos], left: range(leftPos, leftEnd), right: range(rightPos, right) });
+			trace.paint({ compared: [leftPos, rightPos], light: range(leftPos, leftEnd), dark: range(rightPos, right) });
 			trace.record({
 				codePartId: MergeSortPartId.Compare,
 				label: `Compare arr[${leftPos}] and arr[${rightPos}]`,
@@ -230,24 +243,24 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 					right,
 					leftPos,
 					rightPos,
-					mergeTargetLeft: left,
-					mergeTargetRight: right,
-					mergeTargetRow,
+					targetAreaLeft: left,
+					targetAreaRight: right,
+					targetAreaRow,
 				},
 			});
 
 			if (array[leftPos].value <= array[rightPos].value) {
 				trace.setCoords(leftPos, level - 1, i);
-				trace.paint({ moved: [leftPos], left: range(leftPos, leftEnd), right: range(rightPos, right) });
+				trace.paint({ moved: [leftPos], light: range(leftPos, leftEnd), dark: range(rightPos, right) });
 				trace.record({
 					codePartId: MergeSortPartId.TakeLeft,
 					label: `Move arr[${leftPos}] to output position ${i}`,
 					variables: {
 						i,
 						leftPos,
-						mergeTargetLeft: left,
-						mergeTargetRight: right,
-						mergeTargetRow,
+						targetAreaLeft: left,
+						targetAreaRight: right,
+						targetAreaRow,
 					},
 				});
 				leftPos += 1;
@@ -266,16 +279,16 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 					trace.setCoords(leftPos + offset + 1, level, preservedColumns[offset]);
 				}
 
-				trace.paint({ moved: [leftPos], left: range(leftPos, leftEnd + 1), right: range(rightPos + 1, right) });
+				trace.paint({ moved: [leftPos], light: range(leftPos, leftEnd + 1), dark: range(rightPos + 1, right) });
 				trace.record({
 					codePartId: MergeSortPartId.TakeRight,
 					label: `Move arr[${rightPos}] to output position ${i}`,
 					variables: {
 						i,
 						rightPos,
-						mergeTargetLeft: left,
-						mergeTargetRight: right,
-						mergeTargetRow,
+						targetAreaLeft: left,
+						targetAreaRight: right,
+						targetAreaRow,
 					},
 				});
 
@@ -288,15 +301,15 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 
 		while (leftPos <= leftEnd) {
 			trace.setCoords(leftPos, level - 1, leftPos);
-			trace.paint({ moved: [leftPos], left: range(leftPos + 1, leftEnd) });
+			trace.paint({ moved: [leftPos], light: range(leftPos + 1, leftEnd) });
 			trace.record({
 				codePartId: MergeSortPartId.AppendLeft,
 				label: `Insert remaining left item at position ${leftPos}`,
 				variables: {
 					i: leftPos,
-					mergeTargetLeft: left,
-					mergeTargetRight: right,
-					mergeTargetRow,
+					targetAreaLeft: left,
+					targetAreaRight: right,
+					targetAreaRow,
 				},
 			});
 			leftPos += 1;
@@ -304,16 +317,16 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 
 		while (rightPos <= right) {
 			trace.setCoords(rightPos, level - 1, i);
-			trace.paint({ moved: [rightPos], right: range(rightPos + 1, right) });
+			trace.paint({ moved: [rightPos], dark: range(rightPos + 1, right) });
 			trace.record({
 				codePartId: MergeSortPartId.AppendRight,
 				label: `Insert remaining right item at position ${i}`,
 				variables: {
 					i,
 					rightPos,
-					mergeTargetLeft: left,
-					mergeTargetRight: right,
-					mergeTargetRow,
+					targetAreaLeft: left,
+					targetAreaRight: right,
+					targetAreaRow,
 				},
 			});
 			rightPos += 1;
@@ -330,22 +343,22 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 
 	const mergeSort = (left: number, right: number, level: number) => {
 		const currentWorkingRow = level - 1;
-		trace.paint({ left: range(left, right) });
+		trace.paint({ light: range(left, right) });
 		trace.record({
 			codePartId: MergeSortPartId.MergeSort,
 			label: `Start merge_sort on arr[${left}..${right}]`,
 			variables: {
 				left,
 				right,
-				mergeTargetLeft: left,
-				mergeTargetRight: right,
-				mergeTargetRow: currentWorkingRow,
+				targetAreaLeft: left,
+				targetAreaRight: right,
+				targetAreaRow: currentWorkingRow,
 			},
 		});
 
 		if (left < right) {
 			const mid = Math.floor((left + right) / 2);
-			trace.paint({ left: range(left, mid), right: range(mid + 1, right) });
+			trace.paint({ light: range(left, mid), dark: range(mid + 1, right) });
 			trace.record({
 				codePartId: MergeSortPartId.Divide,
 				label: `Divide arr[${left}..${right}] into arr[${left}..${mid}] and arr[${mid + 1}..${right}]`,
@@ -353,36 +366,36 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 					left,
 					mid,
 					right,
-					mergeTargetLeft: left,
-					mergeTargetRight: right,
-					mergeTargetRow: currentWorkingRow,
+					targetAreaLeft: left,
+					targetAreaRight: right,
+					targetAreaRow: currentWorkingRow,
 				},
 			});
 
 			// move left part to the next row
 			trace.setRow(range(left, mid), level);
-			trace.paint({ left: range(left, mid) });
+			trace.paint({ light: range(left, mid) });
 			trace.record({
 				codePartId: MergeSortPartId.CallLeft,
 				label: `Merge sort arr[${left}..${mid}]`,
 				variables: {
-					mergeTargetLeft: left,
-					mergeTargetRight: right,
-					mergeTargetRow: currentWorkingRow,
+					targetAreaLeft: left,
+					targetAreaRight: right,
+					targetAreaRow: currentWorkingRow,
 				},
 			});
 			mergeSort(left, mid, level + 1);
 
 			// move right part to the next row
 			trace.setRow(range(mid + 1, right), level);
-			trace.paint({ right: range(mid + 1, right) });
+			trace.paint({ dark: range(mid + 1, right) });
 			trace.record({
 				codePartId: MergeSortPartId.CallRight,
 				label: `Merge sort arr[${mid + 1}..${right}]`,
 				variables: {
-					mergeTargetLeft: left,
-					mergeTargetRight: right,
-					mergeTargetRow: currentWorkingRow,
+					targetAreaLeft: left,
+					targetAreaRight: right,
+					targetAreaRow: currentWorkingRow,
 				},
 			});
 			mergeSort(mid + 1, right, level + 1);
@@ -397,9 +410,9 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			variables: {
 				left,
 				right,
-				mergeTargetLeft: left,
-				mergeTargetRight: right,
-				mergeTargetRow: currentWorkingRow,
+				targetAreaLeft: left,
+				targetAreaRight: right,
+				targetAreaRow: currentWorkingRow,
 			},
 		});
 	};

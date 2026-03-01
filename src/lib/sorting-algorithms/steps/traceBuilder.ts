@@ -4,8 +4,8 @@ export enum ItemHighlightType {
 	Compare = 'compare',
 	Move = 'move',
 	Sorted = 'sorted',
-	Left = 'left',
-	Right = 'right',
+	Light = 'light',
+	Dark = 'dark',
 }
 
 export class Item {
@@ -29,8 +29,8 @@ export interface TracePaintOptions {
 	compared?: number[];
 	moved?: number[];
 	sorted?: number[];
-	left?: number[];
-	right?: number[];
+	light?: number[];
+	dark?: number[];
 }
 
 interface DetailedTraceBuilderOptions {
@@ -64,19 +64,19 @@ export class DetailedTraceBuilder {
 		return this.array;
 	}
 
-	paint({ compared = [], moved = [], sorted = [], left = [], right = [] }: TracePaintOptions = {}): void {
+	paint({ compared = [], moved = [], sorted = [], light = [], dark = [] }: TracePaintOptions = {}): void {
 		for (const item of this.array) {
 			item.highlightType = null;
 		}
 
-		for (const index of left) {
+		for (const index of light) {
 			if (this.array[index]) {
-				this.array[index].highlightType = ItemHighlightType.Left;
+				this.array[index].highlightType = ItemHighlightType.Light;
 			}
 		}
-		for (const index of right) {
+		for (const index of dark) {
 			if (this.array[index]) {
-				this.array[index].highlightType = ItemHighlightType.Right;
+				this.array[index].highlightType = ItemHighlightType.Dark;
 			}
 		}
 

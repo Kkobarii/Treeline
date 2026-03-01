@@ -19,6 +19,8 @@ export interface DetailedSortStep {
 	variables: Record<string, number | string>;
 }
 
+export const LineBreak: CodeLine = { indent: 0, text: '', codePartId: '' };
+
 export interface CodeLine {
 	indent: number;
 	text: string;

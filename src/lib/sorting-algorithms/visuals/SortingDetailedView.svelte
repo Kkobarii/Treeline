@@ -1,6 +1,6 @@
 <script lang="ts">
 	import hljs from 'highlight.js';
-	import { onDestroy, tick } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 
 	import { getCodeTemplate } from '../misc/codeTemplates';
@@ -13,6 +13,8 @@
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
 	const codeTemplate = getCodeTemplate(algorithmId);
+	const languageStorageKey = 'sortingDetailedViewCodeLanguage';
+	const delayStorageKey = 'sortingDetailedViewDelayMs';
 
 	let language = $state<CodeLanguage>('python');
 	let codeLines = $derived(codeTemplate[language]);
@@ -30,6 +32,7 @@
 	let isPlaying = $state(false);
 	let delayMs = $state(450);
 	let timer: number | null = null;
+	let hasHydratedPreferences = $state(false);
 	let nextRunAt = $state(0);
 	let lastStepAdvanceAt = $state(0);
 	let fastAnimation = $state(false);
@@ -50,38 +53,42 @@
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
 	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
 	let variables = $derived(currentStep ? currentStep.variables : {});
-	let isMergeFunctionWorking = $derived(algorithmId === 'merge');
-	let mergeTargetArea = $derived.by(() => {
-		if (!isMergeFunctionWorking || gridColumns <= 0) {
+	let isMergeSort = $derived(algorithmId === 'merge');
+	let isQuickSort = $derived(algorithmId === 'quick');
+
+	let useExpandedAnimationArea = $derived(isMergeSort || isQuickSort);
+	let targetAreaHighlight = $derived.by(() => {
+		if (!useExpandedAnimationArea || gridColumns <= 0) {
 			return null;
 		}
 
-		const mergeTargetLeft = Number((variables as Record<string, unknown>).mergeTargetLeft);
-		const mergeTargetRight = Number((variables as Record<string, unknown>).mergeTargetRight);
-		const mergeTargetRow = Number((variables as Record<string, unknown>).mergeTargetRow);
+		const targetAreaLeft = Number((variables as Record<string, unknown>).targetAreaLeft);
+		const targetAreaRight = Number((variables as Record<string, unknown>).targetAreaRight);
+		const targetAreaRow = Number((variables as Record<string, unknown>).targetAreaRow);
 
-		if (!Number.isFinite(mergeTargetLeft) || !Number.isFinite(mergeTargetRight) || !Number.isFinite(mergeTargetRow)) {
+		if (!Number.isFinite(targetAreaLeft) || !Number.isFinite(targetAreaRight) || !Number.isFinite(targetAreaRow)) {
 			return null;
 		}
 
-		const leftColumn = Math.max(0, Math.min(gridColumns - 1, Math.floor(mergeTargetLeft)));
-		const rightColumn = Math.max(leftColumn, Math.min(gridColumns - 1, Math.floor(mergeTargetRight)));
-		const targetRow = Math.max(0, Math.floor(mergeTargetRow));
+		const leftColumn = Math.max(0, Math.min(gridColumns - 1, Math.floor(targetAreaLeft)));
+		const rightColumn = Math.max(leftColumn, Math.min(gridColumns - 1, Math.floor(targetAreaRight)));
+		const targetRow = Math.max(0, Math.floor(targetAreaRow));
 		const spanColumns = rightColumn - leftColumn + 1;
 		const totalGapRem = (gridColumns - 1) * 0.35;
 		const spanGapRem = (spanColumns - 1) * 0.35;
 		const leftOffsetGapsRem = leftColumn * 0.35;
 		const trackWidthExpression = `(100% - ${totalGapRem}rem) / ${gridColumns}`;
-		const mergeTargetExpandPx = 3;
+		const targetAreaExpandPx = 3;
+		const rowStepExpression = isQuickSort ? '46px' : '(92px + 0.35rem)';
 
 		return {
-			left: `calc(${leftColumn} * (${trackWidthExpression}) + ${leftOffsetGapsRem}rem - ${mergeTargetExpandPx}px)`,
-			width: `calc(${spanColumns} * (${trackWidthExpression}) + ${spanGapRem}rem + ${mergeTargetExpandPx * 2}px)`,
-			top: `calc(${targetRow} * (92px + 0.35rem) - ${mergeTargetExpandPx}px)`,
-			height: `calc(92px + ${mergeTargetExpandPx * 2}px)`,
+			left: `calc(${leftColumn} * (${trackWidthExpression}) + ${leftOffsetGapsRem}rem - ${targetAreaExpandPx}px)`,
+			width: `calc(${spanColumns} * (${trackWidthExpression}) + ${spanGapRem}rem + ${targetAreaExpandPx * 2}px)`,
+			top: `calc(${targetRow} * ${rowStepExpression} - ${targetAreaExpandPx}px)`,
+			height: `calc(92px + ${targetAreaExpandPx * 2}px)`,
 		};
 	});
-	let useExpandedAnimationArea = $derived(algorithmId === 'merge' || algorithmId === 'quick');
+
 	let normalFlipDurationMs = $derived(isPlaying ? Math.max(100, Math.floor(delayMs * 0.85)) : 300);
 	let activeFlipDurationMs = $derived(fastAnimation ? Math.max(35, Math.floor(normalFlipDurationMs * 0.22)) : normalFlipDurationMs);
 	let arcHeightFactor = $state(0.1);
@@ -118,6 +125,20 @@
 			timer = null;
 		}
 	}
+
+	onMount(() => {
+		const storedLanguage = sessionStorage.getItem(languageStorageKey);
+		if (storedLanguage === 'python' || storedLanguage === 'javascript' || storedLanguage === 'c') {
+			language = storedLanguage;
+		}
+
+		const storedDelay = Number(sessionStorage.getItem(delayStorageKey));
+		if (Number.isFinite(storedDelay) && storedDelay >= 200 && storedDelay <= 1200) {
+			delayMs = storedDelay;
+		}
+
+		hasHydratedPreferences = true;
+	});
 
 	function shuffleArray() {
 		clearTimer();
@@ -197,6 +218,15 @@
 		return () => clearTimer();
 	});
 
+	$effect(() => {
+		if (!hasHydratedPreferences || typeof window === 'undefined') {
+			return;
+		}
+
+		sessionStorage.setItem(languageStorageKey, language);
+		sessionStorage.setItem(delayStorageKey, String(delayMs));
+	});
+
 	onDestroy(() => clearTimer());
 </script>
 
@@ -239,12 +269,13 @@
 
 		<div
 			class="array-grid"
-			class:array-grid-expanded={useExpandedAnimationArea}
+			class:array-grid-expanded={isMergeSort}
+			class:array-grid-quick-overlap={isQuickSort}
 			style={`grid-template-columns: repeat(${gridColumns || 1}, minmax(0, 1fr));`}>
-			{#if mergeTargetArea}
+			{#if targetAreaHighlight}
 				<div
 					class="merge-target-area"
-					style={`left: ${mergeTargetArea.left}; width: ${mergeTargetArea.width}; top: ${mergeTargetArea.top}; height: ${mergeTargetArea.height};`}>
+					style={`left: ${targetAreaHighlight.left}; width: ${targetAreaHighlight.width}; top: ${targetAreaHighlight.top}; height: ${targetAreaHighlight.height};`}>
 				</div>
 			{/if}
 			{#each gridCells as cell (cell.key)}
@@ -253,8 +284,8 @@
 					class:item-compared={cell.item?.highlightType === ItemHighlightType.Compare}
 					class:item-moved={cell.item?.highlightType === ItemHighlightType.Move}
 					class:item-sorted={cell.item?.highlightType === ItemHighlightType.Sorted}
-					class:item-left={cell.item?.highlightType === ItemHighlightType.Left}
-					class:item-right={cell.item?.highlightType === ItemHighlightType.Right}
+					class:item-light={cell.item?.highlightType === ItemHighlightType.Light}
+					class:item-dark={cell.item?.highlightType === ItemHighlightType.Dark}
 					animate:curvedFlip={{
 						duration: activeFlipDurationMs,
 						easing: cubicInOut,
@@ -293,11 +324,12 @@
 		<div class="flex flex-col">
 			{#each highlightedCodeLines as line, index (`${language}-${index}`)}
 				<div
-					class="code-line"
+					class="code-line pt-0.5"
 					class:code-line-active={line.codePartId === currentCodePartId}>
 					<code
 						class={`language-${language}`}
-						style={`padding-left: ${line.indent * 12}px`}>{@html line.highlightedText}</code>
+						style={`padding-left: ${line.indent * 12}px`}
+						class:line-break={line.text === ''}>{@html line.highlightedText}&nbsp;</code>
 				</div>
 			{/each}
 		</div>
@@ -325,7 +357,7 @@
 
 	.detailed-layout {
 		@apply grid gap-4;
-		grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+		grid-template-columns: minmax(0, 65%) minmax(0, 35%);
 	}
 
 	.controls-row {
@@ -352,6 +384,12 @@
 
 	.array-grid-expanded {
 		min-height: calc(92px * 5 + 0.35rem * 4);
+	}
+
+	.array-grid-quick-overlap {
+		row-gap: 0;
+		grid-auto-rows: 46px;
+		padding-bottom: 46px;
 	}
 
 	.array-slot {
@@ -394,20 +432,21 @@
 		background: var(--color-primary-ultra-light);
 	}
 
-	.item-left {
+	.item-light {
 		background: var(--color-gray-200);
 	}
 
-	.item-right {
+	.item-dark {
 		background: var(--color-gray-400);
 	}
 
 	.code-line {
 		@apply pr-1 pl-1 text-sm;
 		background: var(--color-tertiary-ultra-light);
-		min-height: 24px;
+		/* min-height: 24px; */
 		display: flex;
 		align-items: center;
+		font-size: small;
 	}
 
 	.code-line code {
@@ -418,6 +457,10 @@
 
 	.code-line-active {
 		background: oklch(from var(--color-primary-light) l c h / 0.5);
+	}
+
+	.line-break {
+		max-height: 0.7em;
 	}
 
 	@media (max-width: 1040px) {
