@@ -91,6 +91,8 @@
 	--color-gray-800: oklch(0.791 0.028 102.3);
 	--color-gray-900: oklch(0.895 0.019 100.1);
 	--color-gray-950: oklch(0.948 0.008 98.77);
+
+	--color-white: #000000;
 }
 
 main button {

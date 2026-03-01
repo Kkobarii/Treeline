@@ -23,6 +23,7 @@
 	let currentStep = $derived(steps[currentStepIndex]);
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
 	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
+	let barTransitionMs = $derived(isPlaying ? stepDelayMs : 120);
 
 	function clearTimer() {
 		if (timer) {
@@ -148,7 +149,7 @@
 				class:bar-compared={item.highlightType === ItemHighlightType.Compare}
 				class:bar-moved={item.highlightType === ItemHighlightType.Move}
 				class:bar-sorted={item.highlightType === ItemHighlightType.Sorted}
-				style={`height: ${Math.max(item.value, 1)}%;`}>
+				style={`height: ${Math.max(item.value, 1)}%; transition: height ${barTransitionMs}ms linear, background-color ${barTransitionMs}ms ease;`}>
 			</div>
 		{/each}
 	</div>
@@ -160,16 +161,13 @@
 	.bars-wrapper {
 		@apply grid h-[26rem] items-end gap-[2px] rounded-xl border p-3;
 		grid-template-columns: repeat(100, minmax(0, 1fr));
-		background-color: var(--color-tertiary-ultra-light);
-		border: 1px solid var(--color-tertiary);
+		background-color: var(--color-white);
+		border: 1px solid var(--color-gray-200);
 	}
 
 	.sort-bar {
 		@apply rounded-sm;
 		background-color: var(--color-green-300);
-		transition:
-			height 60ms linear,
-			background-color 120ms ease;
 	}
 
 	.bar-compared {
@@ -177,7 +175,7 @@
 	}
 
 	.bar-moved {
-		background-color: var(--color-secondary-dark);
+		background-color: var(--color-green-800);
 	}
 
 	.bar-sorted {
