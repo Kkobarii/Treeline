@@ -5,6 +5,7 @@ import type { DetailedCodeTemplate, DetailedSortStep, SortStep } from '../steps/
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
 
 export enum SelectionSortPartId {
+	StartSelectionSort = 'start-selection-sort',
 	OuterLoop = 'outer-loop',
 	ScanLoop = 'scan-loop',
 	Compare = 'compare',
@@ -15,36 +16,43 @@ export enum SelectionSortPartId {
 export const selectionSortTemplate: DetailedCodeTemplate = {
 	algorithmId: 'selection',
 	python: [
-		{ indent: 0, text: 'for i in range(n - 1):', codePartId: SelectionSortPartId.OuterLoop },
-		{ indent: 1, text: 'min_idx = i', codePartId: SelectionSortPartId.OuterLoop },
-		{ indent: 1, text: 'for j in range(i + 1, n):', codePartId: SelectionSortPartId.ScanLoop },
-		{ indent: 2, text: 'if arr[j] < arr[min_idx]:', codePartId: SelectionSortPartId.Compare },
-		{ indent: 3, text: 'min_idx = j', codePartId: SelectionSortPartId.NewMin },
-		{ indent: 1, text: 'arr[i], arr[min_idx] = arr[min_idx], arr[i]', codePartId: SelectionSortPartId.Swap },
+		{ indent: 0, text: 'def selection_sort(arr):', codePartId: SelectionSortPartId.StartSelectionSort },
+		{ indent: 1, text: 'n = len(arr)', codePartId: SelectionSortPartId.StartSelectionSort },
+		{ indent: 1, text: 'for i in range(n - 1):', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 2, text: 'min_idx = i', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 2, text: 'for j in range(i + 1, n):', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 3, text: 'if arr[j] < arr[min_idx]:', codePartId: SelectionSortPartId.Compare },
+		{ indent: 4, text: 'min_idx = j', codePartId: SelectionSortPartId.NewMin },
+		{ indent: 2, text: 'arr[i], arr[min_idx] = arr[min_idx], arr[i]', codePartId: SelectionSortPartId.Swap },
 	],
 	javascript: [
-		{ indent: 0, text: 'for (let i = 0; i < n - 1; i += 1) {', codePartId: SelectionSortPartId.OuterLoop },
-		{ indent: 1, text: 'let minIndex = i;', codePartId: SelectionSortPartId.OuterLoop },
-		{ indent: 1, text: 'for (let j = i + 1; j < n; j += 1) {', codePartId: SelectionSortPartId.ScanLoop },
-		{ indent: 2, text: 'if (arr[j] < arr[minIndex]) {', codePartId: SelectionSortPartId.Compare },
-		{ indent: 3, text: 'minIndex = j;', codePartId: SelectionSortPartId.NewMin },
-		{ indent: 2, text: '}', codePartId: SelectionSortPartId.NewMin },
-		{ indent: 1, text: '}', codePartId: SelectionSortPartId.ScanLoop },
-		{ indent: 1, text: '[arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];', codePartId: SelectionSortPartId.Swap },
-		{ indent: 0, text: '}', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 0, text: 'function selectionSort(arr) {', codePartId: SelectionSortPartId.StartSelectionSort },
+		{ indent: 1, text: 'const n = arr.length;', codePartId: SelectionSortPartId.StartSelectionSort },
+		{ indent: 1, text: 'for (let i = 0; i < n - 1; i += 1) {', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 2, text: 'let minIndex = i;', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 2, text: 'for (let j = i + 1; j < n; j += 1) {', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 3, text: 'if (arr[j] < arr[minIndex]) {', codePartId: SelectionSortPartId.Compare },
+		{ indent: 4, text: 'minIndex = j;', codePartId: SelectionSortPartId.NewMin },
+		{ indent: 3, text: '}', codePartId: SelectionSortPartId.Compare },
+		{ indent: 2, text: '}', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 2, text: '[arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];', codePartId: SelectionSortPartId.Swap },
+		{ indent: 1, text: '}', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 0, text: '}', codePartId: SelectionSortPartId.StartSelectionSort },
 	],
 	c: [
-		{ indent: 0, text: 'for (int i = 0; i < n - 1; i++) {', codePartId: SelectionSortPartId.OuterLoop },
-		{ indent: 1, text: 'int min_idx = i;', codePartId: SelectionSortPartId.OuterLoop },
-		{ indent: 1, text: 'for (int j = i + 1; j < n; j++) {', codePartId: SelectionSortPartId.ScanLoop },
-		{ indent: 2, text: 'if (arr[j] < arr[min_idx]) {', codePartId: SelectionSortPartId.Compare },
-		{ indent: 3, text: 'min_idx = j;', codePartId: SelectionSortPartId.NewMin },
-		{ indent: 2, text: '}', codePartId: SelectionSortPartId.NewMin },
-		{ indent: 1, text: '}', codePartId: SelectionSortPartId.ScanLoop },
-		{ indent: 1, text: 'int tmp = arr[i];', codePartId: SelectionSortPartId.Swap },
-		{ indent: 1, text: 'arr[i] = arr[min_idx];', codePartId: SelectionSortPartId.Swap },
-		{ indent: 1, text: 'arr[min_idx] = tmp;', codePartId: SelectionSortPartId.Swap },
-		{ indent: 0, text: '}', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 0, text: 'void selectionSort(int arr[], int n) {', codePartId: SelectionSortPartId.StartSelectionSort },
+		{ indent: 1, text: 'for (int i = 0; i < n - 1; i++) {', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 2, text: 'int min_idx = i;', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 2, text: 'for (int j = i + 1; j < n; j++) {', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 3, text: 'if (arr[j] < arr[min_idx]) {', codePartId: SelectionSortPartId.Compare },
+		{ indent: 4, text: 'min_idx = j;', codePartId: SelectionSortPartId.NewMin },
+		{ indent: 3, text: '}', codePartId: SelectionSortPartId.Compare },
+		{ indent: 2, text: '}', codePartId: SelectionSortPartId.ScanLoop },
+		{ indent: 2, text: 'int tmp = arr[i];', codePartId: SelectionSortPartId.Swap },
+		{ indent: 2, text: 'arr[i] = arr[min_idx];', codePartId: SelectionSortPartId.Swap },
+		{ indent: 2, text: 'arr[min_idx] = tmp;', codePartId: SelectionSortPartId.Swap },
+		{ indent: 1, text: '}', codePartId: SelectionSortPartId.OuterLoop },
+		{ indent: 0, text: '}', codePartId: SelectionSortPartId.StartSelectionSort },
 	],
 };
 
@@ -58,35 +66,42 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 	const n = array.length;
 	let sortedIndices: number[] = [];
 
+	trace.paint({ sorted: sortedIndices });
+	trace.record({
+		codePartId: SelectionSortPartId.StartSelectionSort,
+		label: 'Start selection sort',
+		variables: { n },
+	});
+
 	for (let i = 0; i < n - 1; i += 1) {
 		let minIndex = i;
-		trace.paint({ compared: [i], sorted: sortedIndices });
+		trace.paint({ dark: [i], sorted: sortedIndices });
 		trace.record({
-			codePartId: 'outer-loop',
+			codePartId: SelectionSortPartId.OuterLoop,
 			label: `Start searching minimum for position ${i}`,
 			variables: { i, minIndex },
 		});
 
 		for (let j = i + 1; j < n; j += 1) {
-			trace.paint({ compared: [j, minIndex], sorted: sortedIndices });
+			trace.paint({ light: [j], dark: [minIndex], sorted: sortedIndices });
 			trace.record({
-				codePartId: 'scan-loop',
+				codePartId: SelectionSortPartId.ScanLoop,
 				label: `Scan j=${j} against current minimum`,
 				variables: { i, j, minIndex },
 			});
 
 			trace.paint({ compared: [j, minIndex], sorted: sortedIndices });
 			trace.record({
-				codePartId: 'compare',
+				codePartId: SelectionSortPartId.Compare,
 				label: `Compare arr[${j}] with current minimum arr[${minIndex}]`,
 				variables: { i, j, minIndex },
 			});
 
 			if (array[j].value < array[minIndex].value) {
 				minIndex = j;
-				trace.paint({ compared: [minIndex], sorted: sortedIndices });
+				trace.paint({ dark: [minIndex], sorted: sortedIndices });
 				trace.record({
-					codePartId: 'new-min',
+					codePartId: SelectionSortPartId.NewMin,
 					label: `New minimum found at index ${minIndex}`,
 					variables: { i, j, minIndex },
 				});
@@ -97,7 +112,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 			swap(array, i, minIndex);
 			trace.paint({ moved: [i, minIndex], sorted: sortedIndices });
 			trace.record({
-				codePartId: 'swap',
+				codePartId: SelectionSortPartId.Swap,
 				label: `Swap index ${i} with minimum index ${minIndex}`,
 				variables: { i, minIndex },
 			});
