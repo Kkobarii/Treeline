@@ -106,12 +106,6 @@
 	});
 </script>
 
-<p
-	class="mb-3 text-sm"
-	style="color: var(--color-text);">
-	{algorithm.description}
-</p>
-
 <div class="treeline-card flex flex-col gap-4">
 	<div class="flex flex-wrap items-center gap-2">
 		<button onclick={regenerateArray}>Shuffle 100 Keys</button>

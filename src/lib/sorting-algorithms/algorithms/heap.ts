@@ -142,12 +142,28 @@ export function heapSortSteps(input: number[]): SortStep[] {
 		const left = 2 * root + 1;
 		const right = 2 * root + 2;
 
-		trace.paint({ compared: [root, left, right], sorted: sortedIndices() });
-		trace.record({
-			codePartId: 'compare',
-			label: `Compare ${root} with ${left} and ${right}`,
-			variables: { root, left, right },
-		});
+		if (left < heapSize && right < heapSize) {
+			trace.paint({ compared: [root, left, right], sorted: sortedIndices() });
+			trace.record({
+				codePartId: 'compare',
+				label: `Compare ${root} with ${left} and ${right}`,
+				variables: { root, left, right },
+			});
+		} else if (left < heapSize) {
+			trace.paint({ compared: [root, left], sorted: sortedIndices() });
+			trace.record({
+				codePartId: 'compare',
+				label: `Compare ${root} with left child ${left}`,
+				variables: { root, left },
+			});
+		} else if (right < heapSize) {
+			trace.paint({ compared: [root, right], sorted: sortedIndices() });
+			trace.record({
+				codePartId: 'compare',
+				label: `Compare ${root} with right child ${right}`,
+				variables: { root, right },
+			});
+		}
 
 		if (left < heapSize && array[left].value > array[largest].value) {
 			largest = left;

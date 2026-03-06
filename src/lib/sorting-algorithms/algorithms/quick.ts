@@ -124,7 +124,7 @@ export function quickSortSteps(input: number[]): SortStep[] {
 			if (array[j].value <= pivot) {
 				i += 1;
 				swap(array, i, j);
-				trace.paint({ moved: [i, j], sorted: sortedIndices() });
+				trace.paint({ moved: [i, j], compared: [high], sorted: sortedIndices() });
 				trace.record({
 					codePartId: 'swap',
 					label: `Move arr[${j}] into left partition`,
