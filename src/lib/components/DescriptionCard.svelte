@@ -50,6 +50,21 @@
 </script>
 
 <div class="treeline-card">
+	<noscript class="prose">
+		<h1>Description</h1>
+		<p>Description content loads dynamically and JavaScript is currently disabled.</p>
+		{#if filename}
+			<p>
+				You can still read the raw description here:
+				<a
+					href={buildUrl(normalize(filename))}
+					class="text-primary underline">
+					{normalize(filename)}
+				</a>
+			</p>
+		{/if}
+	</noscript>
+
 	{#if loadError}
 		<p class="text-sm text-red-500">{loadError}</p>
 	{:else if html}

@@ -4,45 +4,16 @@
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
 
 	let { children } = $props();
-	let structuresDropdownOpen = $state(false);
-	let sortingDropdownOpen = $state(false);
-	let mobileMenuOpen = $state(false);
-	let mobileStructuresOpen = $state(false);
-	let mobileSortingOpen = $state(false);
-
-	function closeMobileMenu() {
-		mobileMenuOpen = false;
-		mobileStructuresOpen = false;
-		mobileSortingOpen = false;
-	}
-
-	function openMobileMenu() {
-		mobileMenuOpen = true;
-	}
-
-	function toggleMobileMenu() {
-		if (mobileMenuOpen) {
-			closeMobileMenu();
-		} else {
-			openMobileMenu();
-		}
-	}
 </script>
 
 <ModeWatcher />
 
-{#if mobileMenuOpen}
-	<div
-		class="mobile-menu-overlay"
-		role="button"
-		tabindex="0"
-		aria-label="Close menu"
-		onclick={() => closeMobileMenu()}
-		onkeydown={e => e.key === 'Escape' && closeMobileMenu()}>
-	</div>
-{/if}
-
 <nav class="header-nav">
+	<input
+		id="mobile-nav-toggle"
+		type="checkbox"
+		class="mobile-menu-toggle" />
+
 	<div class="container mx-auto flex items-center gap-8 px-6 py-4">
 		<a
 			href="/"
@@ -57,147 +28,115 @@
 
 		<div class="ml-4 hidden items-center gap-6 md:flex">
 			<div
-				class="relative"
+				class="nav-dropdown relative"
 				role="menuitem"
-				tabindex="0"
-				onmouseenter={() => (structuresDropdownOpen = true)}
-				onmouseleave={() => (structuresDropdownOpen = false)}>
+				tabindex="0">
 				<button
 					class="header-link flex items-center gap-2"
-					aria-expanded={structuresDropdownOpen}
 					aria-haspopup="true">
 					Data Structures
-					<span
-						class="transition-transform duration-200"
-						style="transform: {structuresDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'}">
-						▼
-					</span>
+					<span class="nav-dropdown-chevron transition-transform duration-200"> ▼ </span>
 				</button>
 
-				{#if structuresDropdownOpen}
-					<div class="dropdown-menu">
-						<a
-							href="/data-structures/binary-search-tree"
-							class="dropdown-link"
-							onclick={() => (structuresDropdownOpen = false)}>
-							Binary Search Tree
-						</a>
-						<a
-							href="/data-structures/avl-tree"
-							class="dropdown-link"
-							onclick={() => (structuresDropdownOpen = false)}>
-							AVL Tree
-						</a>
-						<a
-							href="/data-structures/red-black-tree"
-							class="dropdown-link"
-							onclick={() => (structuresDropdownOpen = false)}>
-							Red-Black Tree
-						</a>
-						<a
-							href="/data-structures/b-tree"
-							class="dropdown-link"
-							onclick={() => (structuresDropdownOpen = false)}>
-							B-Tree
-						</a>
-						<a
-							href="/data-structures/heap"
-							class="dropdown-link"
-							onclick={() => (structuresDropdownOpen = false)}>
-							Heap
-						</a>
-						<a
-							href="/data-structures/linked-list"
-							class="dropdown-link"
-							onclick={() => (structuresDropdownOpen = false)}>
-							Linked List
-						</a>
-						<a
-							href="/data-structures/stack"
-							class="dropdown-link"
-							onclick={() => (structuresDropdownOpen = false)}>
-							Stack
-						</a>
-						<a
-							href="/data-structures/queue"
-							class="dropdown-link"
-							onclick={() => (structuresDropdownOpen = false)}>
-							Queue
-						</a>
-					</div>
-				{/if}
+				<div class="dropdown-menu">
+					<a
+						href="/data-structures/binary-search-tree"
+						class="dropdown-link">
+						Binary Search Tree
+					</a>
+					<a
+						href="/data-structures/avl-tree"
+						class="dropdown-link">
+						AVL Tree
+					</a>
+					<a
+						href="/data-structures/red-black-tree"
+						class="dropdown-link">
+						Red-Black Tree
+					</a>
+					<a
+						href="/data-structures/b-tree"
+						class="dropdown-link">
+						B-Tree
+					</a>
+					<a
+						href="/data-structures/heap"
+						class="dropdown-link">
+						Heap
+					</a>
+					<a
+						href="/data-structures/linked-list"
+						class="dropdown-link">
+						Linked List
+					</a>
+					<a
+						href="/data-structures/stack"
+						class="dropdown-link">
+						Stack
+					</a>
+					<a
+						href="/data-structures/queue"
+						class="dropdown-link">
+						Queue
+					</a>
+				</div>
 			</div>
 
 			<div
-				class="relative"
+				class="nav-dropdown relative"
 				role="menuitem"
-				tabindex="0"
-				onmouseenter={() => (sortingDropdownOpen = true)}
-				onmouseleave={() => (sortingDropdownOpen = false)}>
+				tabindex="0">
 				<button
 					class="header-link flex items-center gap-2"
-					aria-expanded={sortingDropdownOpen}
 					aria-haspopup="true">
 					Sorting Algorithms
-					<span
-						class="transition-transform duration-200"
-						style="transform: {sortingDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'}">
-						▼
-					</span>
+					<span class="nav-dropdown-chevron transition-transform duration-200"> ▼ </span>
 				</button>
 
-				{#if sortingDropdownOpen}
-					<div class="dropdown-menu">
-						<a
-							href="/sorting-algorithms/bubble"
-							class="dropdown-link"
-							onclick={() => (sortingDropdownOpen = false)}>
-							Bubble Sort
-						</a>
-						<a
-							href="/sorting-algorithms/selection"
-							class="dropdown-link"
-							onclick={() => (sortingDropdownOpen = false)}>
-							Selection Sort
-						</a>
-						<a
-							href="/sorting-algorithms/insertion"
-							class="dropdown-link"
-							onclick={() => (sortingDropdownOpen = false)}>
-							Insertion Sort
-						</a>
-						<a
-							href="/sorting-algorithms/merge"
-							class="dropdown-link"
-							onclick={() => (sortingDropdownOpen = false)}>
-							Merge Sort
-						</a>
-						<a
-							href="/sorting-algorithms/quick"
-							class="dropdown-link"
-							onclick={() => (sortingDropdownOpen = false)}>
-							Quick Sort
-						</a>
-						<a
-							href="/sorting-algorithms/heap"
-							class="dropdown-link"
-							onclick={() => (sortingDropdownOpen = false)}>
-							Heap Sort
-						</a>
-					</div>
-				{/if}
+				<div class="dropdown-menu">
+					<a
+						href="/sorting-algorithms/bubble"
+						class="dropdown-link">
+						Bubble Sort
+					</a>
+					<a
+						href="/sorting-algorithms/selection"
+						class="dropdown-link">
+						Selection Sort
+					</a>
+					<a
+						href="/sorting-algorithms/insertion"
+						class="dropdown-link">
+						Insertion Sort
+					</a>
+					<a
+						href="/sorting-algorithms/merge"
+						class="dropdown-link">
+						Merge Sort
+					</a>
+					<a
+						href="/sorting-algorithms/quick"
+						class="dropdown-link">
+						Quick Sort
+					</a>
+					<a
+						href="/sorting-algorithms/heap"
+						class="dropdown-link">
+						Heap Sort
+					</a>
+				</div>
 			</div>
 		</div>
 
 		<div class="ml-auto flex items-center gap-3">
-			<button
+			<label
+				for="mobile-nav-toggle"
 				aria-label="Toggle menu"
-				class="header-burger-button"
-				onclick={toggleMobileMenu}>
+				class="header-burger-button md:hidden">
 				<span class="burger-line"></span>
 				<span class="burger-line"></span>
 				<span class="burger-line"></span>
-			</button>
+			</label>
 
 			<button
 				aria-label="Toggle dark mode"
@@ -216,127 +155,114 @@
 		</div>
 	</div>
 
-	{#if mobileMenuOpen}
-		<div class="mobile-menu">
-			<div class="mobile-menu-section">
-				<button
-					class="mobile-menu-button"
-					onclick={() => (mobileStructuresOpen = !mobileStructuresOpen)}>
-					<span>Data Structures</span>
-					<span
-						class="transition-transform duration-200"
-						style="transform: {mobileStructuresOpen ? 'rotate(180deg)' : 'rotate(0deg)'}">
-						▼
-					</span>
-				</button>
-				{#if mobileStructuresOpen}
-					<div class="mobile-submenu">
-						<a
-							href="/data-structures/binary-search-tree"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Binary Search Tree
-						</a>
-						<a
-							href="/data-structures/avl-tree"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							AVL Tree
-						</a>
-						<a
-							href="/data-structures/red-black-tree"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Red-Black Tree
-						</a>
-						<a
-							href="/data-structures/b-tree"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							B-Tree
-						</a>
-						<a
-							href="/data-structures/heap"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Heap
-						</a>
-						<a
-							href="/data-structures/linked-list"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Linked List
-						</a>
-						<a
-							href="/data-structures/stack"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Stack
-						</a>
-						<a
-							href="/data-structures/queue"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Queue
-						</a>
-					</div>
-				{/if}
-			</div>
+	<label
+		for="mobile-nav-toggle"
+		class="mobile-menu-overlay md:hidden"
+		aria-label="Close menu"></label>
 
-			<div class="mobile-menu-section">
-				<button
-					class="mobile-menu-button"
-					onclick={() => (mobileSortingOpen = !mobileSortingOpen)}>
-					<span>Sorting Algorithms</span>
-					<span
-						class="transition-transform duration-200"
-						style="transform: {mobileSortingOpen ? 'rotate(180deg)' : 'rotate(0deg)'}">
-						▼
-					</span>
-				</button>
-				{#if mobileSortingOpen}
-					<div class="mobile-submenu">
-						<a
-							href="/sorting-algorithms/bubble"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Bubble Sort
-						</a>
-						<a
-							href="/sorting-algorithms/selection"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Selection Sort
-						</a>
-						<a
-							href="/sorting-algorithms/insertion"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Insertion Sort
-						</a>
-						<a
-							href="/sorting-algorithms/merge"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Merge Sort
-						</a>
-						<a
-							href="/sorting-algorithms/quick"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Quick Sort
-						</a>
-						<a
-							href="/sorting-algorithms/heap"
-							class="mobile-submenu-link"
-							onclick={() => closeMobileMenu()}>
-							Heap Sort
-						</a>
-					</div>
-				{/if}
+	<div class="mobile-menu md:hidden">
+		<details class="mobile-menu-section">
+			<summary class="mobile-menu-button">
+				<span>Data Structures</span>
+				<span class="mobile-menu-chevron transition-transform duration-200">▼</span>
+			</summary>
+			<div class="mobile-submenu">
+				<a
+					href="/data-structures/binary-search-tree"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Binary Search Tree
+				</a>
+				<a
+					href="/data-structures/avl-tree"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					AVL Tree
+				</a>
+				<a
+					href="/data-structures/red-black-tree"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Red-Black Tree
+				</a>
+				<a
+					href="/data-structures/b-tree"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					B-Tree
+				</a>
+				<a
+					href="/data-structures/heap"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Heap
+				</a>
+				<a
+					href="/data-structures/linked-list"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Linked List
+				</a>
+				<a
+					href="/data-structures/stack"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Stack
+				</a>
+				<a
+					href="/data-structures/queue"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Queue
+				</a>
 			</div>
-		</div>
-	{/if}
+		</details>
+
+		<details class="mobile-menu-section">
+			<summary class="mobile-menu-button">
+				<span>Sorting Algorithms</span>
+				<span class="mobile-menu-chevron transition-transform duration-200">▼</span>
+			</summary>
+			<div class="mobile-submenu">
+				<a
+					href="/sorting-algorithms/bubble"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Bubble Sort
+				</a>
+				<a
+					href="/sorting-algorithms/selection"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Selection Sort
+				</a>
+				<a
+					href="/sorting-algorithms/insertion"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Insertion Sort
+				</a>
+				<a
+					href="/sorting-algorithms/merge"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Merge Sort
+				</a>
+				<a
+					href="/sorting-algorithms/quick"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Quick Sort
+				</a>
+				<a
+					href="/sorting-algorithms/heap"
+					data-sveltekit-reload
+					class="mobile-submenu-link">
+					Heap Sort
+				</a>
+			</div>
+		</details>
+	</div>
 </nav>
 
 <div class="header-spacer"></div>
