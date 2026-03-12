@@ -2,6 +2,7 @@
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { OperationType } from '$lib/data-structures/structures/dataStructure';
 	import { enforceMinMax } from '$lib/data-structures/utils/utils';
+	import { t } from '$lib/i18n';
 
 	import BaseControls from '../BaseControls.svelte';
 
@@ -13,19 +14,19 @@
 
 <BaseControls
 	{operationManager}
-	title="Heap Controls"
+	title={$t('controls.heap.title')}
 	bind:manualValue
 	bind:locked>
 	<div class="buttons-in-col">
 		<button
 			on:click={() => operationManager.operation(OperationType.Heap.Insert, Math.floor(Math.random() * 1000))}
 			disabled={locked}>
-			Insert Random Node
+			{$t('controls.heap.insertRandom')}
 		</button>
 		<button
 			on:click={() => operationManager.reset()}
 			disabled={locked}>
-			Reset
+			{$t('common.reset')}
 		</button>
 	</div>
 
@@ -44,12 +45,12 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.Heap.Insert, manualValue)}
 			disabled={locked}>
-			Insert
+			{$t('common.insert')}
 		</button>
 		<button
 			on:click={() => operationManager.operation(OperationType.Heap.ExtractRoot, null)}
 			disabled={locked}>
-			Extract Root
+			{$t('controls.heap.extractRoot')}
 		</button>
 	</div>
 </BaseControls>

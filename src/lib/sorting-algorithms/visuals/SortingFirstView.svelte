@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 
+	import { t } from '$lib/i18n';
+
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 	import { createShuffledArray } from '../misc/utils';
@@ -22,7 +24,7 @@
 
 	let currentStep = $derived(steps[currentStepIndex]);
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
-	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
+	let stepLabel = $derived(currentStep ? currentStep.label : $t('sorting.noSteps'));
 	let barTransitionMs = $derived(isPlaying ? stepDelayMs : 120);
 
 	function clearTimer() {
@@ -108,17 +110,17 @@
 
 <div class="treeline-card flex flex-col gap-4">
 	<div class="flex flex-wrap items-center gap-2">
-		<button onclick={regenerateArray}>Shuffle 100 Keys</button>
-		<button onclick={runOrPause}>{isPlaying ? 'Pause' : 'Run'}</button>
+		<button onclick={regenerateArray}>{$t('sorting.controls.shuffle', { count: 100 })}</button>
+		<button onclick={runOrPause}>{isPlaying ? $t('common.pause') : $t('common.run')}</button>
 		<button
 			onclick={stepBackward}
-			disabled={!steps.length || currentStepIndex === 0}>Step Back</button>
+			disabled={!steps.length || currentStepIndex === 0}>{$t('sorting.controls.stepBack')}</button>
 		<button
 			onclick={stepForward}
-			disabled={!steps.length || currentStepIndex >= steps.length - 1}>Step Forward</button>
+			disabled={!steps.length || currentStepIndex >= steps.length - 1}>{$t('sorting.controls.stepForward')}</button>
 		<label
 			class="ml-2"
-			for="speed-slider">Speed</label>
+			for="speed-slider">{$t('common.speed')}</label>
 		<input
 			id="speed-slider"
 			type="range"
@@ -132,7 +134,7 @@
 	<div
 		class="flex flex-col gap-[0.4rem] text-[0.85rem]"
 		style="color: var(--color-text);">
-		<span>Step {steps.length ? currentStepIndex + 1 : 0}/{steps.length}</span>
+		<span>{$t('common.step')} {steps.length ? currentStepIndex + 1 : 0}/{steps.length}</span>
 		<span>{stepLabel}</span>
 	</div>
 

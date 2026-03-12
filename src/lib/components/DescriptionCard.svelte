@@ -1,34 +1,33 @@
 <script lang="ts">
 	import { marked } from 'marked';
-	import { onMount } from 'svelte';
 
 	import { base } from '$app/paths';
 
-	export let filename: string;
+	import { locale, t } from '$lib/i18n';
 
-	let html = '';
-	let loadError: string | null = null;
+	const { filename }: { filename: string } = $props();
+
+	let html = $state('');
+	let loadError = $state<string | null>(null);
 	let controller: AbortController | null = null;
 
-	const normalize = (name: string) => {
+	const normalize = (name: string, loc: string) => {
 		const trimmed = name.trim().replace(/^\.?(\/)+/, '');
-		return trimmed.endsWith('.md') ? trimmed : `${trimmed}.md`;
+		// Remove any existing .md extension then add locale suffix
+		const base = trimmed.replace(/\.md$/, '');
+		return `${base}.${loc}.md`;
 	};
 
 	const buildUrl = (target: string) => `${base}/descriptions/${target}`;
 
-	onMount(() => {
-		loadMarkdown(filename);
-	});
-
-	const loadMarkdown = async (name: string) => {
+	const loadMarkdown = async (name: string, loc: string) => {
 		if (!name) {
 			html = '';
 			loadError = null;
 			return;
 		}
 
-		const target = normalize(name);
+		const target = normalize(name, loc);
 		controller?.abort();
 		controller = new AbortController();
 
@@ -44,22 +43,24 @@
 		} catch (error) {
 			if ((error as Error).name === 'AbortError') return;
 			html = '';
-			loadError = `Description file ${target} not found or could not be loaded.`;
+			loadError = $t('description.notFound', { filename: target });
 		}
 	};
+
+	$effect(() => {
+		loadMarkdown(filename, $locale);
+	});
 </script>
 
 <div class="treeline-card">
 	<noscript class="prose">
-		<h1>Description</h1>
-		<p>Description content loads dynamically and JavaScript is currently disabled.</p>
+		<h1>{$t('description.title')}</h1>
+		<p>{$t('description.noJs')}</p>
 		{#if filename}
 			<p>
-				You can still read the raw description here:
-				<a
-					href={buildUrl(normalize(filename))}
-					class="text-primary underline">
-					{normalize(filename)}
+				{$t('description.readRaw')}
+				<a href={buildUrl(normalize(filename, 'en'))} class="text-primary underline">
+					{normalize(filename, 'en')}
 				</a>
 			</p>
 		{/if}

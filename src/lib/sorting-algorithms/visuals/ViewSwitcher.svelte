@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
+
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 
@@ -21,19 +23,19 @@
 			aria-hidden="true">
 		</div>
 		{#if view === 'big-picture'}
-			<span class="switcher-option switcher-active">Big Picture</span>
+			<span class="switcher-option switcher-active">{$t('sorting.views.bigPicture')}</span>
 			<button
 				onclick={() => onViewChange('detailed')}
 				class="switcher-option switcher-inactive">
-				Detailed
+				{$t('sorting.views.detailed')}
 			</button>
 		{:else}
 			<button
 				onclick={() => onViewChange('big-picture')}
 				class="switcher-option switcher-inactive">
-				Big Picture
+				{$t('sorting.views.bigPicture')}
 			</button>
-			<span class="switcher-option switcher-active">Detailed</span>
+			<span class="switcher-option switcher-active">{$t('sorting.views.detailed')}</span>
 		{/if}
 	</div>
 </div>

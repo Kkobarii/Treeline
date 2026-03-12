@@ -2,6 +2,7 @@
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { OperationType } from '$lib/data-structures/structures/dataStructure';
 	import { enforceMinMax } from '$lib/data-structures/utils/utils';
+	import { t } from '$lib/i18n';
 
 	import BaseControls from '../BaseControls.svelte';
 
@@ -13,19 +14,19 @@
 
 <BaseControls
 	{operationManager}
-	title="Tree Controls"
+	title={$t('controls.tree.title')}
 	bind:manualValue
 	bind:locked>
 	<div class="buttons-in-col">
 		<button
 			on:click={() => operationManager.operation(OperationType.Tree.Insert, Math.floor(Math.random() * 1000))}
 			disabled={locked}>
-			Insert Random Node
+			{$t('controls.tree.insertRandom')}
 		</button>
 		<button
 			on:click={() => operationManager.reset()}
 			disabled={locked}>
-			Reset
+			{$t('common.reset')}
 		</button>
 	</div>
 	<div class="buttons-in-row">
@@ -43,17 +44,17 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.Tree.Insert, manualValue)}
 			disabled={locked}>
-			Insert
+			{$t('common.insert')}
 		</button>
 		<button
 			on:click={() => operationManager.operation(OperationType.Tree.Remove, manualValue)}
 			disabled={locked}>
-			Remove
+			{$t('common.remove')}
 		</button>
 		<button
 			on:click={() => operationManager.operation(OperationType.Tree.Find, manualValue)}
 			disabled={locked}>
-			Find
+			{$t('common.find')}
 		</button>
 	</div>
 </BaseControls>

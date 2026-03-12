@@ -2,8 +2,16 @@
 	import '../app.css';
 
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
+	import { onMount } from 'svelte';
+
+	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
+	import { locale, t } from '$lib/i18n';
 
 	let { children } = $props();
+
+	onMount(() => {
+		locale.initialize();
+	});
 </script>
 
 <ModeWatcher />
@@ -34,7 +42,7 @@
 				<button
 					class="header-link flex items-center gap-2"
 					aria-haspopup="true">
-					Data Structures
+					{$t('nav.dataStructures')}
 					<span class="nav-dropdown-chevron transition-transform duration-200"> ▼ </span>
 				</button>
 
@@ -42,42 +50,42 @@
 					<a
 						href="/data-structures/binary-search-tree"
 						class="dropdown-link">
-						Binary Search Tree
+						{$t('dataStructures.binarySearchTree')}
 					</a>
 					<a
 						href="/data-structures/avl-tree"
 						class="dropdown-link">
-						AVL Tree
+						{$t('dataStructures.avlTree')}
 					</a>
 					<a
 						href="/data-structures/red-black-tree"
 						class="dropdown-link">
-						Red-Black Tree
+						{$t('dataStructures.redBlackTree')}
 					</a>
 					<a
 						href="/data-structures/b-tree"
 						class="dropdown-link">
-						B-Tree
+						{$t('dataStructures.bTree')}
 					</a>
 					<a
 						href="/data-structures/heap"
 						class="dropdown-link">
-						Heap
+						{$t('dataStructures.heap')}
 					</a>
 					<a
 						href="/data-structures/linked-list"
 						class="dropdown-link">
-						Linked List
+						{$t('dataStructures.linkedList')}
 					</a>
 					<a
 						href="/data-structures/stack"
 						class="dropdown-link">
-						Stack
+						{$t('dataStructures.stack')}
 					</a>
 					<a
 						href="/data-structures/queue"
 						class="dropdown-link">
-						Queue
+						{$t('dataStructures.queue')}
 					</a>
 				</div>
 			</div>
@@ -89,7 +97,7 @@
 				<button
 					class="header-link flex items-center gap-2"
 					aria-haspopup="true">
-					Sorting Algorithms
+					{$t('nav.sortingAlgorithms')}
 					<span class="nav-dropdown-chevron transition-transform duration-200"> ▼ </span>
 				</button>
 
@@ -97,32 +105,32 @@
 					<a
 						href="/sorting-algorithms/bubble"
 						class="dropdown-link">
-						Bubble Sort
+						{$t('sortingAlgorithms.bubbleSort')}
 					</a>
 					<a
 						href="/sorting-algorithms/selection"
 						class="dropdown-link">
-						Selection Sort
+						{$t('sortingAlgorithms.selectionSort')}
 					</a>
 					<a
 						href="/sorting-algorithms/insertion"
 						class="dropdown-link">
-						Insertion Sort
+						{$t('sortingAlgorithms.insertionSort')}
 					</a>
 					<a
 						href="/sorting-algorithms/merge"
 						class="dropdown-link">
-						Merge Sort
+						{$t('sortingAlgorithms.mergeSort')}
 					</a>
 					<a
 						href="/sorting-algorithms/quick"
 						class="dropdown-link">
-						Quick Sort
+						{$t('sortingAlgorithms.quickSort')}
 					</a>
 					<a
 						href="/sorting-algorithms/heap"
 						class="dropdown-link">
-						Heap Sort
+						{$t('sortingAlgorithms.heapSort')}
 					</a>
 				</div>
 			</div>
@@ -137,6 +145,8 @@
 				<span class="burger-line"></span>
 				<span class="burger-line"></span>
 			</label>
+
+			<LanguageSwitcher />
 
 			<button
 				aria-label="Toggle dark mode"
@@ -163,7 +173,7 @@
 	<div class="mobile-menu md:hidden">
 		<details class="mobile-menu-section">
 			<summary class="mobile-menu-button">
-				<span>Data Structures</span>
+				<span>{$t('nav.dataStructures')}</span>
 				<span class="mobile-menu-chevron transition-transform duration-200">▼</span>
 			</summary>
 			<div class="mobile-submenu">
@@ -171,56 +181,56 @@
 					href="/data-structures/binary-search-tree"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Binary Search Tree
+					{$t('dataStructures.binarySearchTree')}
 				</a>
 				<a
 					href="/data-structures/avl-tree"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					AVL Tree
+					{$t('dataStructures.avlTree')}
 				</a>
 				<a
 					href="/data-structures/red-black-tree"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Red-Black Tree
+					{$t('dataStructures.redBlackTree')}
 				</a>
 				<a
 					href="/data-structures/b-tree"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					B-Tree
+					{$t('dataStructures.bTree')}
 				</a>
 				<a
 					href="/data-structures/heap"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Heap
+					{$t('dataStructures.heap')}
 				</a>
 				<a
 					href="/data-structures/linked-list"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Linked List
+					{$t('dataStructures.linkedList')}
 				</a>
 				<a
 					href="/data-structures/stack"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Stack
+					{$t('dataStructures.stack')}
 				</a>
 				<a
 					href="/data-structures/queue"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Queue
+					{$t('dataStructures.queue')}
 				</a>
 			</div>
 		</details>
 
 		<details class="mobile-menu-section">
 			<summary class="mobile-menu-button">
-				<span>Sorting Algorithms</span>
+				<span>{$t('nav.sortingAlgorithms')}</span>
 				<span class="mobile-menu-chevron transition-transform duration-200">▼</span>
 			</summary>
 			<div class="mobile-submenu">
@@ -228,37 +238,37 @@
 					href="/sorting-algorithms/bubble"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Bubble Sort
+					{$t('sortingAlgorithms.bubbleSort')}
 				</a>
 				<a
 					href="/sorting-algorithms/selection"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Selection Sort
+					{$t('sortingAlgorithms.selectionSort')}
 				</a>
 				<a
 					href="/sorting-algorithms/insertion"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Insertion Sort
+					{$t('sortingAlgorithms.insertionSort')}
 				</a>
 				<a
 					href="/sorting-algorithms/merge"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Merge Sort
+					{$t('sortingAlgorithms.mergeSort')}
 				</a>
 				<a
 					href="/sorting-algorithms/quick"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Quick Sort
+					{$t('sortingAlgorithms.quickSort')}
 				</a>
 				<a
 					href="/sorting-algorithms/heap"
 					data-sveltekit-reload
 					class="mobile-submenu-link">
-					Heap Sort
+					{$t('sortingAlgorithms.heapSort')}
 				</a>
 			</div>
 		</details>
@@ -278,7 +288,7 @@
 				src="/branch.svg"
 				alt="Treeline logo"
 				class="h-6 w-6" />
-			<span class="footer-text">© 2026 Treeline. Visual tool for learning data structures and sorting algorithms.</span>
+			<span class="footer-text">{$t('footer.copyright')}</span>
 		</div>
 		<div class="flex items-center gap-4">
 			<a
@@ -288,7 +298,7 @@
 				rel="noopener noreferrer">GitHub</a>
 			<a
 				href="/about"
-				class="footer-link">About</a>
+				class="footer-link">{$t('nav.about')}</a>
 		</div>
 	</div>
 </footer>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { OperationType } from '$lib/data-structures/structures/dataStructure';
+	import { t } from '$lib/i18n';
 
 	import BaseControls from '../BaseControls.svelte';
 
@@ -12,7 +13,7 @@
 
 <BaseControls
 	{operationManager}
-	title="Stack Controls"
+	title={$t('controls.stack.title')}
 	bind:manualValue
 	bind:locked>
 	<div class="buttons-in-col">
@@ -20,13 +21,13 @@
 			<button
 				on:click={() => operationManager.operation(OperationType.Stack.Push, Math.floor(Math.random() * 1000))}
 				disabled={locked}>
-				Push Random
+				{$t('controls.stack.pushRandom')}
 			</button>
 		</div>
 		<button
 			on:click={() => operationManager.reset()}
 			disabled={locked}>
-			Reset
+			{$t('common.reset')}
 		</button>
 	</div>
 
@@ -38,7 +39,7 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.Stack.Push, manualValue)}
 			disabled={locked}>
-			Push
+			{$t('controls.stack.push')}
 		</button>
 	</div>
 
@@ -46,12 +47,12 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.Stack.Pop, null)}
 			disabled={locked}>
-			Pop
+			{$t('controls.stack.pop')}
 		</button>
 		<button
 			on:click={() => operationManager.operation(OperationType.Stack.Peek, null)}
 			disabled={locked}>
-			Peek
+			{$t('controls.stack.peek')}
 		</button>
 	</div>
 </BaseControls>

@@ -4,11 +4,12 @@
 	import { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import BTreeVisual from '$lib/data-structures/structures/bTree/BTreeVisual.svelte';
 	import { StructureType } from '$lib/data-structures/structures/dataStructure';
+	import { t } from '$lib/i18n';
 
 	let operationManager: OperationManager = new OperationManager(StructureType.BTree);
 </script>
 
-<h1 class="page-title">B-Tree</h1>
+<h1 class="page-title">{$t('dataStructures.bTree')}</h1>
 <p style="color: red; font-weight: bold;">This is very much broken and I know it. Will fix later.</p>
 <div class="page-layout">
 	<BTreeVisual {operationManager} />

@@ -3,6 +3,8 @@
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 
+	import { t } from '$lib/i18n';
+
 	import { getCodeTemplate } from '../misc/codeTemplates';
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
@@ -51,7 +53,7 @@
 		),
 	);
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
-	let stepLabel = $derived(currentStep ? currentStep.label : 'No steps available for this array.');
+	let stepLabel = $derived(currentStep ? currentStep.label : $t('sorting.noSteps'));
 	let variables = $derived(currentStep ? currentStep.variables : {});
 	let isMergeSort = $derived(algorithmId === 'merge');
 	let isQuickSort = $derived(algorithmId === 'quick');
@@ -240,18 +242,18 @@
 <div class="detailed-layout">
 	<div class="treeline-card flex flex-col gap-[0.85rem]">
 		<div class="controls-row">
-			<button onclick={shuffleArray}>Shuffle 16</button>
-			<button onclick={runOrPause}>{isPlaying ? 'Pause' : 'Run'}</button>
+			<button onclick={shuffleArray}>{$t('sorting.controls.shuffle16')}</button>
+			<button onclick={runOrPause}>{isPlaying ? $t('common.pause') : $t('common.run')}</button>
 			<button
 				onclick={stepBackManual}
-				disabled={isPlaying || !steps.length || currentStepIndex === 0}>Back</button>
+				disabled={isPlaying || !steps.length || currentStepIndex === 0}>{$t('common.back')}</button>
 			<button
 				onclick={stepForwardManual}
-				disabled={isPlaying || !steps.length || currentStepIndex >= steps.length - 1}>Next</button>
+				disabled={isPlaying || !steps.length || currentStepIndex >= steps.length - 1}>{$t('common.next')}</button>
 		</div>
 
 		<div class="controls-row">
-			<label for="delay">Speed</label>
+			<label for="delay">{$t('common.speed')}</label>
 			<input
 				id="delay"
 				type="range"
@@ -263,7 +265,7 @@
 		</div>
 
 		<div class="flex flex-col gap-[0.35rem] text-[0.85rem]">
-			<div>Step {steps.length ? currentStepIndex + 1 : 0}/{steps.length}</div>
+			<div>{$t('common.step')} {steps.length ? currentStepIndex + 1 : 0}/{steps.length}</div>
 			<div>{stepLabel}</div>
 		</div>
 
@@ -313,11 +315,11 @@
 
 	<div class="treeline-card flex flex-col gap-[0.85rem]">
 		<div class="flex items-center justify-between">
-			<h2>Algorithm Code</h2>
+			<h2>{$t('sorting.code.title')}</h2>
 			<select bind:value={language}>
-				<option value="python">Python</option>
-				<option value="javascript">JavaScript</option>
-				<option value="c">C</option>
+				<option value="python">{$t('sorting.code.python')}</option>
+				<option value="javascript">{$t('sorting.code.javascript')}</option>
+				<option value="c">{$t('sorting.code.c')}</option>
 			</select>
 		</div>
 

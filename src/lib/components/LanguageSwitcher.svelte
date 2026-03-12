@@ -1,0 +1,150 @@
+<script lang="ts">
+	import { locale, locales, type Locale } from '$lib/i18n';
+
+	let isOpen = $state(false);
+
+	function selectLocale(code: Locale) {
+		locale.set(code);
+		isOpen = false;
+	}
+
+	function toggleDropdown() {
+		isOpen = !isOpen;
+	}
+
+	function handleClickOutside(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (!target.closest('.language-switcher')) {
+			isOpen = false;
+		}
+	}
+
+	$effect(() => {
+		if (typeof window !== 'undefined') {
+			document.addEventListener('click', handleClickOutside);
+			return () => document.removeEventListener('click', handleClickOutside);
+		}
+	});
+
+	const currentLocale = $derived(locales.find(l => l.code === $locale));
+</script>
+
+<div class="language-switcher relative">
+	<button
+		type="button"
+		class="language-button"
+		onclick={toggleDropdown}
+		aria-label="Select language"
+		aria-expanded={isOpen}>
+		<span class="flag">{currentLocale?.flag}</span>
+		<span class="language-code">{currentLocale?.code.toUpperCase()}</span>
+		<span
+			class="chevron"
+			class:chevron-open={isOpen}>▼</span>
+	</button>
+
+	{#if isOpen}
+		<div class="language-dropdown">
+			{#each locales as loc}
+				<button
+					type="button"
+					class="language-option"
+					class:language-option-active={loc.code === $locale}
+					onclick={() => selectLocale(loc.code)}>
+					<span class="flag">{loc.flag}</span>
+					<span class="language-name">{loc.name}</span>
+				</button>
+			{/each}
+		</div>
+	{/if}
+</div>
+
+<style>
+	.language-switcher {
+		position: relative;
+		z-index: 100;
+	}
+
+	.language-button {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.4rem 0.6rem;
+		border-radius: 0.5rem;
+		background: transparent;
+		border: 1px solid transparent;
+		cursor: pointer;
+		font-size: 0.85rem;
+		color: var(--color-text);
+		transition: all 0.2s ease;
+	}
+
+	.language-button:hover {
+		background: oklch(from var(--color-gray-200) l c h / 0.5);
+		border-color: oklch(from var(--color-gray-400) l c h / 0.4);
+	}
+
+	.flag {
+		font-size: 1.1rem;
+		line-height: 1;
+	}
+
+	.language-code {
+		font-weight: 500;
+	}
+
+	.chevron {
+		font-size: 0.6rem;
+		transition: transform 0.2s ease;
+		opacity: 0.7;
+	}
+
+	.chevron-open {
+		transform: rotate(180deg);
+	}
+
+	.language-dropdown {
+		position: absolute;
+		top: calc(100% + 0.35rem);
+		right: 0;
+		min-width: 140px;
+		background: var(--color-gray-100);
+		border: 1px solid oklch(from var(--color-gray-400) l c h / 0.5);
+		border-radius: 0.5rem;
+		box-shadow:
+			0 4px 6px -1px oklch(from var(--color-gray-900) l c h / 0.1),
+			0 2px 4px -2px oklch(from var(--color-gray-900) l c h / 0.1);
+		overflow: hidden;
+	}
+
+	.language-option {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.6rem 0.8rem;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		font-size: 0.9rem;
+		color: var(--color-text);
+		text-align: left;
+		transition: background 0.15s ease;
+	}
+
+	.language-option:hover {
+		background: oklch(from var(--color-gray-200) l c h / 0.6);
+	}
+
+	.language-option-active {
+		background: oklch(from var(--color-primary-light) l c h / 0.3);
+	}
+
+	.language-option-active:hover {
+		background: oklch(from var(--color-primary-light) l c h / 0.4);
+	}
+
+	.language-name {
+		flex: 1;
+	}
+</style>

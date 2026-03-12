@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { OperationType } from '$lib/data-structures/structures/dataStructure';
+	import { t } from '$lib/i18n';
 
 	import BaseControls from '../BaseControls.svelte';
 
@@ -12,7 +13,7 @@
 
 <BaseControls
 	{operationManager}
-	title="Queue Controls"
+	title={$t('controls.queue.title')}
 	bind:manualValue
 	bind:locked>
 	<div class="buttons-in-col">
@@ -20,13 +21,13 @@
 			<button
 				on:click={() => operationManager.operation(OperationType.Queue.Enqueue, Math.floor(Math.random() * 1000))}
 				disabled={locked}>
-				Enqueue Random
+				{$t('controls.queue.enqueueRandom')}
 			</button>
 		</div>
 		<button
 			on:click={() => operationManager.reset()}
 			disabled={locked}>
-			Reset
+			{$t('common.reset')}
 		</button>
 	</div>
 
@@ -38,7 +39,7 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.Queue.Enqueue, manualValue)}
 			disabled={locked}>
-			Enqueue
+			{$t('controls.queue.enqueue')}
 		</button>
 	</div>
 
@@ -46,12 +47,12 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.Queue.Dequeue, null)}
 			disabled={locked}>
-			Dequeue
+			{$t('controls.queue.dequeue')}
 		</button>
 		<button
 			on:click={() => operationManager.operation(OperationType.Queue.Peek, null)}
 			disabled={locked}>
-			Peek
+			{$t('controls.queue.peek')}
 		</button>
 	</div>
 </BaseControls>
