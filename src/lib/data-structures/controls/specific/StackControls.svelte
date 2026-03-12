@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { OperationType } from '$lib/data-structures/structures/dataStructure';
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
 
 	import BaseControls from '../BaseControls.svelte';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 
 	export let operationManager: OperationManager;
 
@@ -13,7 +16,7 @@
 
 <BaseControls
 	{operationManager}
-	title={$t('controls.stack.title')}
+	title={t('controls.stack.title')}
 	bind:manualValue
 	bind:locked>
 	<div class="buttons-in-col">
@@ -21,13 +24,13 @@
 			<button
 				on:click={() => operationManager.operation(OperationType.Stack.Push, Math.floor(Math.random() * 1000))}
 				disabled={locked}>
-				{$t('controls.stack.pushRandom')}
+				{t('controls.stack.pushRandom')}
 			</button>
 		</div>
 		<button
 			on:click={() => operationManager.reset()}
 			disabled={locked}>
-			{$t('common.reset')}
+			{t('common.reset')}
 		</button>
 	</div>
 
@@ -39,7 +42,7 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.Stack.Push, manualValue)}
 			disabled={locked}>
-			{$t('controls.stack.push')}
+			{t('controls.stack.push')}
 		</button>
 	</div>
 
@@ -47,12 +50,12 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.Stack.Pop, null)}
 			disabled={locked}>
-			{$t('controls.stack.pop')}
+			{t('controls.stack.pop')}
 		</button>
 		<button
 			on:click={() => operationManager.operation(OperationType.Stack.Peek, null)}
 			disabled={locked}>
-			{$t('controls.stack.peek')}
+			{t('controls.stack.peek')}
 		</button>
 	</div>
 </BaseControls>

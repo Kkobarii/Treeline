@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
 
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 	import { createShuffledArray } from '../misc/utils';
 	import type { SortStep } from '../steps/stepTypes';
 	import { ItemHighlightType } from '../steps/traceBuilder';
+
+	const locale = getLocale();
+	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -24,7 +27,7 @@
 
 	let currentStep = $derived(steps[currentStepIndex]);
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
-	let stepLabel = $derived(currentStep ? currentStep.label : $t('sorting.noSteps'));
+	let stepLabel = $derived(currentStep ? currentStep.label : t('sorting.noSteps'));
 	let barTransitionMs = $derived(isPlaying ? stepDelayMs : 120);
 
 	function clearTimer() {
@@ -110,17 +113,17 @@
 
 <div class="treeline-card flex flex-col gap-4">
 	<div class="flex flex-wrap items-center gap-2">
-		<button onclick={regenerateArray}>{$t('sorting.controls.shuffle', { count: 100 })}</button>
-		<button onclick={runOrPause}>{isPlaying ? $t('common.pause') : $t('common.run')}</button>
+		<button onclick={regenerateArray}>{t('sorting.controls.shuffle', { count: 100 })}</button>
+		<button onclick={runOrPause}>{isPlaying ? t('common.pause') : t('common.run')}</button>
 		<button
 			onclick={stepBackward}
-			disabled={!steps.length || currentStepIndex === 0}>{$t('sorting.controls.stepBack')}</button>
+			disabled={!steps.length || currentStepIndex === 0}>{t('sorting.controls.stepBack')}</button>
 		<button
 			onclick={stepForward}
-			disabled={!steps.length || currentStepIndex >= steps.length - 1}>{$t('sorting.controls.stepForward')}</button>
+			disabled={!steps.length || currentStepIndex >= steps.length - 1}>{t('sorting.controls.stepForward')}</button>
 		<label
 			class="ml-2"
-			for="speed-slider">{$t('common.speed')}</label>
+			for="speed-slider">{t('common.speed')}</label>
 		<input
 			id="speed-slider"
 			type="range"
@@ -134,7 +137,7 @@
 	<div
 		class="flex flex-col gap-[0.4rem] text-[0.85rem]"
 		style="color: var(--color-text);">
-		<span>{$t('common.step')} {steps.length ? currentStepIndex + 1 : 0}/{steps.length}</span>
+		<span>{t('common.step')} {steps.length ? currentStepIndex + 1 : 0}/{steps.length}</span>
 		<span>{stepLabel}</span>
 	</div>
 

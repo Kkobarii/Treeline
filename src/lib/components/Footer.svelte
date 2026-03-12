@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 </script>
 
 <footer class="footer-nav">
@@ -9,7 +12,7 @@
 				src="/branch.svg"
 				alt="Treeline logo"
 				class="h-6 w-6" />
-			<span class="footer-text">{$t('footer.copyright')}</span>
+			<span class="footer-text">{t('footer.copyright')}</span>
 		</div>
 		<div class="flex items-center gap-4">
 			<a
@@ -18,8 +21,8 @@
 				target="_blank"
 				rel="noopener noreferrer">GitHub</a>
 			<a
-				href="/about"
-				class="footer-link">{$t('nav.about')}</a>
+				href="/{locale}/about"
+				class="footer-link">{t('nav.about')}</a>
 		</div>
 	</div>
 </footer>

@@ -2,9 +2,12 @@
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { OperationType } from '$lib/data-structures/structures/dataStructure';
 	import { enforceMinMax } from '$lib/data-structures/utils/utils';
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
 
 	import BaseControls from '../BaseControls.svelte';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 
 	export let operationManager: OperationManager;
 
@@ -14,19 +17,19 @@
 
 <BaseControls
 	{operationManager}
-	title={$t('controls.heap.title')}
+	title={t('controls.heap.title')}
 	bind:manualValue
 	bind:locked>
 	<div class="buttons-in-col">
 		<button
 			on:click={() => operationManager.operation(OperationType.Heap.Insert, Math.floor(Math.random() * 1000))}
 			disabled={locked}>
-			{$t('controls.heap.insertRandom')}
+			{t('controls.heap.insertRandom')}
 		</button>
 		<button
 			on:click={() => operationManager.reset()}
 			disabled={locked}>
-			{$t('common.reset')}
+			{t('common.reset')}
 		</button>
 	</div>
 
@@ -45,12 +48,12 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.Heap.Insert, manualValue)}
 			disabled={locked}>
-			{$t('common.insert')}
+			{t('common.insert')}
 		</button>
 		<button
 			on:click={() => operationManager.operation(OperationType.Heap.ExtractRoot, null)}
 			disabled={locked}>
-			{$t('controls.heap.extractRoot')}
+			{t('controls.heap.extractRoot')}
 		</button>
 	</div>
 </BaseControls>

@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 </script>
 
 <div class="ml-4 hidden items-center gap-6 md:flex">
@@ -10,50 +13,50 @@
 		<button
 			class="header-link flex items-center gap-2"
 			aria-haspopup="true">
-			{$t('nav.dataStructures')}
+			{t('nav.dataStructures')}
 			<span class="nav-dropdown-chevron transition-transform duration-200"> ▼ </span>
 		</button>
 
 		<div class="dropdown-menu">
 			<a
-				href="/data-structures/binary-search-tree"
+				href="/{locale}/data-structures/binary-search-tree"
 				class="dropdown-link">
-				{$t('dataStructures.binarySearchTree')}
+				{t('dataStructures.binarySearchTree')}
 			</a>
 			<a
-				href="/data-structures/avl-tree"
+				href="/{locale}/data-structures/avl-tree"
 				class="dropdown-link">
-				{$t('dataStructures.avlTree')}
+				{t('dataStructures.avlTree')}
 			</a>
 			<a
-				href="/data-structures/red-black-tree"
+				href="/{locale}/data-structures/red-black-tree"
 				class="dropdown-link">
-				{$t('dataStructures.redBlackTree')}
+				{t('dataStructures.redBlackTree')}
 			</a>
 			<a
-				href="/data-structures/b-tree"
+				href="/{locale}/data-structures/b-tree"
 				class="dropdown-link">
-				{$t('dataStructures.bTree')}
+				{t('dataStructures.bTree')}
 			</a>
 			<a
-				href="/data-structures/heap"
+				href="/{locale}/data-structures/heap"
 				class="dropdown-link">
-				{$t('dataStructures.heap')}
+				{t('dataStructures.heap')}
 			</a>
 			<a
-				href="/data-structures/linked-list"
+				href="/{locale}/data-structures/linked-list"
 				class="dropdown-link">
-				{$t('dataStructures.linkedList')}
+				{t('dataStructures.linkedList')}
 			</a>
 			<a
-				href="/data-structures/stack"
+				href="/{locale}/data-structures/stack"
 				class="dropdown-link">
-				{$t('dataStructures.stack')}
+				{t('dataStructures.stack')}
 			</a>
 			<a
-				href="/data-structures/queue"
+				href="/{locale}/data-structures/queue"
 				class="dropdown-link">
-				{$t('dataStructures.queue')}
+				{t('dataStructures.queue')}
 			</a>
 		</div>
 	</div>
@@ -65,40 +68,40 @@
 		<button
 			class="header-link flex items-center gap-2"
 			aria-haspopup="true">
-			{$t('nav.sortingAlgorithms')}
+			{t('nav.sortingAlgorithms')}
 			<span class="nav-dropdown-chevron transition-transform duration-200"> ▼ </span>
 		</button>
 
 		<div class="dropdown-menu">
 			<a
-				href="/sorting-algorithms/bubble"
+				href="/{locale}/sorting-algorithms/bubble"
 				class="dropdown-link">
-				{$t('sortingAlgorithms.bubbleSort')}
+				{t('sortingAlgorithms.bubbleSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/selection"
+				href="/{locale}/sorting-algorithms/selection"
 				class="dropdown-link">
-				{$t('sortingAlgorithms.selectionSort')}
+				{t('sortingAlgorithms.selectionSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/insertion"
+				href="/{locale}/sorting-algorithms/insertion"
 				class="dropdown-link">
-				{$t('sortingAlgorithms.insertionSort')}
+				{t('sortingAlgorithms.insertionSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/merge"
+				href="/{locale}/sorting-algorithms/merge"
 				class="dropdown-link">
-				{$t('sortingAlgorithms.mergeSort')}
+				{t('sortingAlgorithms.mergeSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/quick"
+				href="/{locale}/sorting-algorithms/quick"
 				class="dropdown-link">
-				{$t('sortingAlgorithms.quickSort')}
+				{t('sortingAlgorithms.quickSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/heap"
+				href="/{locale}/sorting-algorithms/heap"
 				class="dropdown-link">
-				{$t('sortingAlgorithms.heapSort')}
+				{t('sortingAlgorithms.heapSort')}
 			</a>
 		</div>
 	</div>

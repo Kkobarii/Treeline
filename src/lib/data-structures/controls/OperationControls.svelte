@@ -8,7 +8,10 @@
 		EventType,
 		OperationManager,
 	} from '$lib/data-structures/operation/operationManager';
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 
 	export let operationManager: OperationManager;
 
@@ -83,21 +86,21 @@
 
 <div class="flex min-h-0 flex-1 flex-row gap-2 md:flex-col md:gap-6">
 	<div class="flex flex-col gap-3">
-		<h2 class="text-primary text-lg font-bold break-words">{$t('controls.operation.title')}</h2>
+		<h2 class="text-primary text-lg font-bold break-words">{t('controls.operation.title')}</h2>
 		<div class="flex flex-col items-start gap-2 md:flex-row md:items-center">
 			<button
 				class="w-full md:w-auto"
 				type="button"
 				on:click={() => operationManager.previous()}
 				disabled={!canDoPrevious || locked}>
-				{$t('common.previous')}
+				{t('common.previous')}
 			</button>
 			<button
 				class="w-full md:w-auto"
 				type="button"
 				on:click={() => operationManager.next()}
 				disabled={!canDoNext || locked}>
-				{$t('common.next')}
+				{t('common.next')}
 			</button>
 			<label class="inline-flex items-center gap-2">
 				<input
@@ -106,13 +109,13 @@
 					class="styled-checkbox"
 					on:change={() => operationManager.toggleShowSteps()}
 					disabled={locked} />
-				<span>{$t('common.steps')}</span>
+				<span>{t('common.steps')}</span>
 			</label>
 		</div>
 	</div>
 
 	<div class="flex min-h-0 flex-1 flex-col gap-3">
-		<h2 class="text-primary text-lg font-bold break-words">{$t('controls.operation.info')}</h2>
+		<h2 class="text-primary text-lg font-bold break-words">{t('controls.operation.info')}</h2>
 
 		<div
 			class="min-h-0 flex-1 overflow-y-auto"

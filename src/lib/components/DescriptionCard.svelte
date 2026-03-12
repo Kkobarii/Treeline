@@ -3,9 +3,12 @@
 
 	import { base } from '$app/paths';
 
-	import { locale, t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
 
 	const { filename }: { filename: string } = $props();
+
+	const locale = getLocale();
+	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
 
 	let html = $state('');
 	let loadError = $state<string | null>(null);
@@ -43,23 +46,25 @@
 		} catch (error) {
 			if ((error as Error).name === 'AbortError') return;
 			html = '';
-			loadError = $t('description.notFound', { filename: target });
+			loadError = t('description.notFound', { filename: target });
 		}
 	};
 
 	$effect(() => {
-		loadMarkdown(filename, $locale);
+		loadMarkdown(filename, locale);
 	});
 </script>
 
 <div class="treeline-card">
 	<noscript class="prose">
-		<h1>{$t('description.title')}</h1>
-		<p>{$t('description.noJs')}</p>
+		<h1>{t('description.title')}</h1>
+		<p>{t('description.noJs')}</p>
 		{#if filename}
 			<p>
-				{$t('description.readRaw')}
-				<a href={buildUrl(normalize(filename, 'en'))} class="text-primary underline">
+				{t('description.readRaw')}
+				<a
+					href={buildUrl(normalize(filename, 'en'))}
+					class="text-primary underline">
 					{normalize(filename, 'en')}
 				</a>
 			</p>

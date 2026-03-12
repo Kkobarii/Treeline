@@ -4,12 +4,15 @@
 	import { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import BSTreeVisual from '$lib/data-structures/structures/bsTree/BSTreeVisual.svelte';
 	import { StructureType } from '$lib/data-structures/structures/dataStructure';
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 
 	let operationManager: OperationManager = new OperationManager(StructureType.BSTree);
 </script>
 
-<h1 class="page-title">{$t('dataStructures.binarySearchTree')}</h1>
+<h1 class="page-title">{t('dataStructures.binarySearchTree')}</h1>
 <div class="page-layout">
 	<BSTreeVisual {operationManager} />
 	<TreeControls {operationManager} />

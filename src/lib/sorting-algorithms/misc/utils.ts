@@ -29,7 +29,6 @@ export function swap<T>(array: T[], leftIndex: number, rightIndex: number): void
 	[array[leftIndex], array[rightIndex]] = [array[rightIndex], array[leftIndex]];
 }
 
-
 export function shift<T>(array: T[], fromIndex: number, toIndex: number): void {
 	if (fromIndex === toIndex) {
 		return;

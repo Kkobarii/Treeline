@@ -3,6 +3,9 @@
 	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
 	import MobileMenu from '$lib/components/MobileMenu.svelte';
 	import ThemeSwitcher from '$lib/components/ThemeSwitcher.svelte';
+	import { getLocale } from '$lib/i18n';
+
+	const locale = getLocale();
 </script>
 
 <nav class="header-nav">
@@ -13,7 +16,7 @@
 
 	<div class="container mx-auto flex items-center gap-8 px-6 py-4">
 		<a
-			href="/"
+			href="/{locale}"
 			class="flex items-center gap-3 no-underline"
 			aria-label="Treeline home">
 			<img

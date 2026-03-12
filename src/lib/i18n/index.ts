@@ -1,4 +1,4 @@
-import { derived, get, writable } from 'svelte/store';
+import { getContext, setContext } from 'svelte';
 
 import cs from './translations/cs';
 import en, { type Translation } from './translations/en';
@@ -15,40 +15,15 @@ const translations: Record<Locale, Translation> = {
 	cs,
 };
 
-const LOCALE_STORAGE_KEY = 'treeline-locale';
+const LOCALE_KEY = Symbol('locale');
 
-function getInitialLocale(): Locale {
-	if (typeof window === 'undefined') return 'en';
-
-	const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
-	if (stored && (stored === 'en' || stored === 'cs')) {
-		return stored;
-	}
-
-	const browserLang = navigator.language.split('-')[0];
-	if (browserLang === 'cs') return 'cs';
-
-	return 'en';
+export function setLocaleContext(lang: Locale) {
+	setContext(LOCALE_KEY, lang);
 }
 
-function createLocaleStore() {
-	const { subscribe, set, update } = writable<Locale>('en');
-
-	return {
-		subscribe,
-		set: (locale: Locale) => {
-			if (typeof window !== 'undefined') {
-				localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-			}
-			set(locale);
-		},
-		initialize: () => {
-			set(getInitialLocale());
-		},
-	};
+export function getLocale(): Locale {
+	return getContext<Locale>(LOCALE_KEY) ?? 'en';
 }
-
-export const locale = createLocaleStore();
 
 function getNestedValue(obj: Record<string, unknown>, path: string): string | undefined {
 	const keys = path.split('.');
@@ -64,19 +39,17 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string | un
 	return typeof current === 'string' ? current : undefined;
 }
 
-export const t = derived(locale, $locale => {
-	return (key: string, params?: Record<string, string | number>): string => {
-		const translation = getNestedValue(translations[$locale], key);
+export function translate(lang: Locale, key: string, params?: Record<string, string | number>): string {
+	const translation = getNestedValue(translations[lang], key);
 
-		if (!translation) {
-			console.warn(`Missing translation for key: ${key} in locale: ${$locale}`);
-			return key;
-		}
+	if (!translation) {
+		console.warn(`Missing translation for key: ${key} in locale: ${lang}`);
+		return key;
+	}
 
-		if (!params) return translation;
+	if (!params) return translation;
 
-		return Object.entries(params).reduce((str, [paramKey, paramValue]) => {
-			return str.replace(new RegExp(`{${paramKey}}`, 'g'), String(paramValue));
-		}, translation);
-	};
-});
+	return Object.entries(params).reduce((str, [paramKey, paramValue]) => {
+		return str.replace(new RegExp(`{${paramKey}}`, 'g'), String(paramValue));
+	}, translation);
+}

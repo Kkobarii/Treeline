@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { OperationType } from '$lib/data-structures/structures/dataStructure';
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
 
 	import BaseControls from '../BaseControls.svelte';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 
 	export let operationManager: OperationManager;
 
@@ -13,7 +16,7 @@
 
 <BaseControls
 	{operationManager}
-	title={$t('controls.linkedList.title')}
+	title={t('controls.linkedList.title')}
 	bind:manualValue
 	bind:locked>
 	<div class="buttons-in-col">
@@ -21,18 +24,18 @@
 			<button
 				on:click={() => operationManager.operation(OperationType.LinkedList.InsertHead, Math.floor(Math.random() * 1000))}
 				disabled={locked}>
-				{$t('controls.linkedList.insertRandomHead')}
+				{t('controls.linkedList.insertRandomHead')}
 			</button>
 			<button
 				on:click={() => operationManager.operation(OperationType.LinkedList.InsertTail, Math.floor(Math.random() * 1000))}
 				disabled={locked}>
-				{$t('controls.linkedList.insertRandomTail')}
+				{t('controls.linkedList.insertRandomTail')}
 			</button>
 		</div>
 		<button
 			on:click={() => operationManager.reset()}
 			disabled={locked}>
-			{$t('common.reset')}
+			{t('common.reset')}
 		</button>
 	</div>
 
@@ -44,12 +47,12 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.LinkedList.InsertHead, manualValue)}
 			disabled={locked}>
-			{$t('controls.linkedList.insertHead')}
+			{t('controls.linkedList.insertHead')}
 		</button>
 		<button
 			on:click={() => operationManager.operation(OperationType.LinkedList.InsertTail, manualValue)}
 			disabled={locked}>
-			{$t('controls.linkedList.insertTail')}
+			{t('controls.linkedList.insertTail')}
 		</button>
 	</div>
 
@@ -57,12 +60,12 @@
 		<button
 			on:click={() => operationManager.operation(OperationType.LinkedList.Find, manualValue)}
 			disabled={locked}>
-			{$t('common.find')}
+			{t('common.find')}
 		</button>
 		<button
 			on:click={() => operationManager.operation(OperationType.LinkedList.Remove, manualValue)}
 			disabled={locked}>
-			{$t('common.remove')}
+			{t('common.remove')}
 		</button>
 	</div>
 </BaseControls>

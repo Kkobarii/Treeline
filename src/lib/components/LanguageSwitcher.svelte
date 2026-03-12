@@ -1,11 +1,29 @@
 <script lang="ts">
-	import { locale, locales, type Locale } from '$lib/i18n';
+	import { page } from '$app/stores';
 
+	import { getLocale, locales, type Locale } from '$lib/i18n';
+
+	const locale = getLocale();
 	let isOpen = $state(false);
 
 	function selectLocale(code: Locale) {
-		locale.set(code);
+		if (code === locale) {
+			isOpen = false;
+			return;
+		}
+
+		// Replace current language segment in URL with new one
+		const currentPath = $page.url.pathname;
+		const newPath = currentPath.replace(/^\/(en|cs)/, `/${code}`);
+
+		// Store preference for future visits
+		if (typeof window !== 'undefined') {
+			localStorage.setItem('treeline-locale', code);
+		}
+
 		isOpen = false;
+		// Full page load required because context is set at layout initialization
+		window.location.href = newPath;
 	}
 
 	function toggleDropdown() {
@@ -26,7 +44,7 @@
 		}
 	});
 
-	const currentLocale = $derived(locales.find(l => l.code === $locale));
+	const currentLocale = locales.find(l => l.code === locale);
 </script>
 
 <div class="language-switcher relative">
@@ -49,7 +67,7 @@
 				<button
 					type="button"
 					class="language-option"
-					class:language-option-active={loc.code === $locale}
+					class:language-option-active={loc.code === locale}
 					onclick={() => selectLocale(loc.code)}>
 					<span class="flag">{loc.flag}</span>
 					<span class="language-name">{loc.name}</span>

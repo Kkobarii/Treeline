@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
 
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 
 	let {
 		algorithmId,
@@ -23,7 +26,7 @@
 </script>
 
 <div class="mb-3 flex items-center justify-between gap-2">
-	<h1 class="page-title">{$t(algorithmNameKeys[algorithmId])}</h1>
+	<h1 class="page-title">{t(algorithmNameKeys[algorithmId])}</h1>
 	<div
 		class="view-switcher"
 		style={`--pill-x: ${view === 'big-picture' ? 0 : 1};`}>
@@ -32,19 +35,19 @@
 			aria-hidden="true">
 		</div>
 		{#if view === 'big-picture'}
-			<span class="switcher-option switcher-active">{$t('sorting.views.bigPicture')}</span>
+			<span class="switcher-option switcher-active">{t('sorting.views.bigPicture')}</span>
 			<button
 				onclick={() => onViewChange('detailed')}
 				class="switcher-option switcher-inactive">
-				{$t('sorting.views.detailed')}
+				{t('sorting.views.detailed')}
 			</button>
 		{:else}
 			<button
 				onclick={() => onViewChange('big-picture')}
 				class="switcher-option switcher-inactive">
-				{$t('sorting.views.bigPicture')}
+				{t('sorting.views.bigPicture')}
 			</button>
-			<span class="switcher-option switcher-active">{$t('sorting.views.detailed')}</span>
+			<span class="switcher-option switcher-active">{t('sorting.views.detailed')}</span>
 		{/if}
 	</div>
 </div>

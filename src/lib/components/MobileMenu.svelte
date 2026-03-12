@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { getLocale, translate } from '$lib/i18n';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 </script>
 
 <label
@@ -10,102 +13,102 @@
 <div class="mobile-menu md:hidden">
 	<details class="mobile-menu-section">
 		<summary class="mobile-menu-button">
-			<span>{$t('nav.dataStructures')}</span>
+			<span>{t('nav.dataStructures')}</span>
 			<span class="mobile-menu-chevron transition-transform duration-200">▼</span>
 		</summary>
 		<div class="mobile-submenu">
 			<a
-				href="/data-structures/binary-search-tree"
+				href="/{locale}/data-structures/binary-search-tree"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('dataStructures.binarySearchTree')}
+				{t('dataStructures.binarySearchTree')}
 			</a>
 			<a
-				href="/data-structures/avl-tree"
+				href="/{locale}/data-structures/avl-tree"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('dataStructures.avlTree')}
+				{t('dataStructures.avlTree')}
 			</a>
 			<a
-				href="/data-structures/red-black-tree"
+				href="/{locale}/data-structures/red-black-tree"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('dataStructures.redBlackTree')}
+				{t('dataStructures.redBlackTree')}
 			</a>
 			<a
-				href="/data-structures/b-tree"
+				href="/{locale}/data-structures/b-tree"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('dataStructures.bTree')}
+				{t('dataStructures.bTree')}
 			</a>
 			<a
-				href="/data-structures/heap"
+				href="/{locale}/data-structures/heap"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('dataStructures.heap')}
+				{t('dataStructures.heap')}
 			</a>
 			<a
-				href="/data-structures/linked-list"
+				href="/{locale}/data-structures/linked-list"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('dataStructures.linkedList')}
+				{t('dataStructures.linkedList')}
 			</a>
 			<a
-				href="/data-structures/stack"
+				href="/{locale}/data-structures/stack"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('dataStructures.stack')}
+				{t('dataStructures.stack')}
 			</a>
 			<a
-				href="/data-structures/queue"
+				href="/{locale}/data-structures/queue"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('dataStructures.queue')}
+				{t('dataStructures.queue')}
 			</a>
 		</div>
 	</details>
 
 	<details class="mobile-menu-section">
 		<summary class="mobile-menu-button">
-			<span>{$t('nav.sortingAlgorithms')}</span>
+			<span>{t('nav.sortingAlgorithms')}</span>
 			<span class="mobile-menu-chevron transition-transform duration-200">▼</span>
 		</summary>
 		<div class="mobile-submenu">
 			<a
-				href="/sorting-algorithms/bubble"
+				href="/{locale}/sorting-algorithms/bubble"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('sortingAlgorithms.bubbleSort')}
+				{t('sortingAlgorithms.bubbleSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/selection"
+				href="/{locale}/sorting-algorithms/selection"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('sortingAlgorithms.selectionSort')}
+				{t('sortingAlgorithms.selectionSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/insertion"
+				href="/{locale}/sorting-algorithms/insertion"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('sortingAlgorithms.insertionSort')}
+				{t('sortingAlgorithms.insertionSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/merge"
+				href="/{locale}/sorting-algorithms/merge"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('sortingAlgorithms.mergeSort')}
+				{t('sortingAlgorithms.mergeSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/quick"
+				href="/{locale}/sorting-algorithms/quick"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('sortingAlgorithms.quickSort')}
+				{t('sortingAlgorithms.quickSort')}
 			</a>
 			<a
-				href="/sorting-algorithms/heap"
+				href="/{locale}/sorting-algorithms/heap"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
-				{$t('sortingAlgorithms.heapSort')}
+				{t('sortingAlgorithms.heapSort')}
 			</a>
 		</div>
 	</details>
