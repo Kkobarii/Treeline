@@ -11,10 +11,19 @@
 	}: { algorithmId: SortingAlgorithmId; view: 'big-picture' | 'detailed'; onViewChange: (view: 'big-picture' | 'detailed') => void } =
 		$props();
 	const algorithm = getSortingAlgorithm(algorithmId);
+
+	const algorithmNameKeys: Record<SortingAlgorithmId, string> = {
+		bubble: 'sortingAlgorithms.bubbleSort',
+		selection: 'sortingAlgorithms.selectionSort',
+		insertion: 'sortingAlgorithms.insertionSort',
+		merge: 'sortingAlgorithms.mergeSort',
+		quick: 'sortingAlgorithms.quickSort',
+		heap: 'sortingAlgorithms.heapSort',
+	};
 </script>
 
 <div class="mb-3 flex items-center justify-between gap-2">
-	<h1 class="page-title">{algorithm.name}</h1>
+	<h1 class="page-title">{$t(algorithmNameKeys[algorithmId])}</h1>
 	<div
 		class="view-switcher"
 		style={`--pill-x: ${view === 'big-picture' ? 0 : 1};`}>
