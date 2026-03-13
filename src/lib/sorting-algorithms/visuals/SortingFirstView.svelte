@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 
 	import { getLocale, translate } from '$lib/i18n';
 
@@ -15,15 +15,15 @@
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
 
-	const initialArray = createShuffledArray(100);
-	let baseArray = $state(initialArray);
-	let steps = $state<SortStep[]>(algorithm.generateSteps(initialArray));
+	let baseArray = $state<number[]>([]);
+	let steps = $state<SortStep[]>([]);
 	let currentStepIndex = $state(0);
 	let isPlaying = $state(false);
 	let stepDelayMs = $state(40);
 	let timer: ReturnType<typeof setInterval> | null = null;
 	const stepDelayStorageKey = 'sortingFirstViewStepDelayMs';
 	let hasHydratedPreferences = $state(false);
+	let hasInitialBarsReveal = $state(false);
 
 	let currentStep = $derived(steps[currentStepIndex]);
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
@@ -37,11 +37,30 @@
 		}
 	}
 
-	onMount(() => {
+	const waitForHydrationPaint = () =>
+		new Promise<void>(resolve => {
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					resolve();
+				});
+			});
+		});
+
+	onMount(async () => {
 		const storedDelay = Number(sessionStorage.getItem(stepDelayStorageKey));
 		if (Number.isFinite(storedDelay) && storedDelay >= 10 && storedDelay <= 120) {
 			stepDelayMs = storedDelay;
 		}
+
+		const nextArray = createShuffledArray(100);
+		baseArray = nextArray;
+		steps = algorithm.generateSteps(nextArray);
+		currentStepIndex = 0;
+
+		await tick();
+		await waitForHydrationPaint();
+		hasInitialBarsReveal = true;
+
 		hasHydratedPreferences = true;
 	});
 
@@ -148,7 +167,7 @@
 				class:bar-compared={item.highlightType === ItemHighlightType.Compare}
 				class:bar-moved={item.highlightType === ItemHighlightType.Move}
 				class:bar-sorted={item.highlightType === ItemHighlightType.Sorted}
-				style={`height: ${Math.max(item.value, 1)}%; transition: height ${barTransitionMs}ms linear, background-color ${barTransitionMs}ms ease;`}>
+				style={`height: ${Math.max(item.value, 1)}%; transform: scaleY(${hasInitialBarsReveal ? 1 : 0}); transition: transform 360ms ease-out, height ${barTransitionMs}ms linear, background-color ${barTransitionMs}ms ease;`}>
 			</div>
 		{/each}
 	</div>
@@ -167,6 +186,7 @@
 	.sort-bar {
 		@apply rounded-sm;
 		background-color: var(--color-green-300);
+		transform-origin: bottom;
 	}
 
 	.bar-compared {

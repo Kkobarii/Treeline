@@ -3,17 +3,24 @@ import { getContext, setContext } from 'svelte';
 import cs from './translations/cs';
 import en, { type Translation } from './translations/en';
 
-export type Locale = 'en' | 'cs';
-
-export const locales: { code: Locale; name: string; flag: string }[] = [
-	{ code: 'en', name: 'English', flag: '🇬🇧' },
-	{ code: 'cs', name: 'Čeština', flag: '🇨🇿' },
-];
-
-const translations: Record<Locale, Translation> = {
+const translations = {
 	en,
 	cs,
-};
+} satisfies Record<string, Translation>;
+
+export type Locale = keyof typeof translations;
+
+export const defaultLocale: Locale = 'en';
+
+export const locales: { code: Locale; name: string; flag: string }[] = Object.entries(translations).map(([code, translation]) => ({
+	code: code as Locale,
+	name: translation.meta.name,
+	flag: translation.meta.flag,
+}));
+
+export function isLocale(lang: string): lang is Locale {
+	return lang in translations;
+}
 
 const LOCALE_KEY = Symbol('locale');
 
@@ -22,7 +29,7 @@ export function setLocaleContext(lang: Locale) {
 }
 
 export function getLocale(): Locale {
-	return getContext<Locale>(LOCALE_KEY) ?? 'en';
+	return getContext<Locale>(LOCALE_KEY) ?? defaultLocale;
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string): string | undefined {

@@ -1,6 +1,11 @@
 import type { Translation } from './en';
 
 const cs: Translation = {
+	meta: {
+		name: 'Čeština',
+		flag: '🇨🇿',
+	},
+
 	common: {
 		run: 'Spustit',
 		pause: 'Pozastavit',
@@ -23,7 +28,7 @@ const cs: Translation = {
 	},
 
 	footer: {
-		copyright: '© 2026 Treeline. Vizuální nástroj pro výuku datových struktur a třídicích algoritmů.',
+		copyright: 'Vizuální nástroj pro výuku datových struktur a třídicích algoritmů.',
 	},
 
 	dataStructures: {
@@ -58,10 +63,10 @@ const cs: Translation = {
 		},
 		linkedList: {
 			title: 'Ovládání spojového seznamu',
-			insertRandomHead: 'Vložit náhodnou hlavu',
-			insertRandomTail: 'Vložit náhodný konec',
-			insertHead: 'Vložit hlavu',
-			insertTail: 'Vložit konec',
+			insertRandomHead: 'Vložit na začátek náhodně',
+			insertRandomTail: 'Vložit na konec náhodně',
+			insertHead: 'Vložit na začátek',
+			insertTail: 'Vložit na konec',
 		},
 		stack: {
 			title: 'Ovládání zásobníku',
@@ -86,11 +91,11 @@ const cs: Translation = {
 	sorting: {
 		views: {
 			bigPicture: 'Přehled',
-			detailed: 'Detailní',
+			detailed: 'Detail',
 		},
 		controls: {
 			shuffle: 'Zamíchat {count} klíčů',
-			shuffle16: 'Zamíchat 16',
+			shuffle16: 'Zamíchat',
 			stepBack: 'Krok zpět',
 			stepForward: 'Krok vpřed',
 		},
@@ -100,13 +105,13 @@ const cs: Translation = {
 			javascript: 'JavaScript',
 			c: 'C',
 		},
-		noSteps: 'Žádné kroky nejsou k dispozici pro toto pole.',
+		noSteps: 'Pro toto pole nejsou k dispozici žádné kroky.',
 	},
 
 	description: {
 		title: 'Popis',
 		noJs: 'Obsah popisu se načítá dynamicky a JavaScript je momentálně vypnutý.',
-		readRaw: 'Stále si můžete přečíst surový popis zde:',
+		readRaw: 'Stále si můžete přečíst popis zde:',
 		notFound: 'Soubor s popisem {filename} nebyl nalezen nebo ho nebylo možné načíst.',
 	},
 };

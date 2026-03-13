@@ -1,4 +1,9 @@
 const en = {
+	meta: {
+		name: 'English',
+		flag: '🇬🇧',
+	},
+
 	common: {
 		run: 'Run',
 		pause: 'Pause',
@@ -21,7 +26,7 @@ const en = {
 	},
 
 	footer: {
-		copyright: '© 2026 Treeline. Visual tool for learning data structures and sorting algorithms.',
+		copyright: 'Visual tool for learning data structures and sorting algorithms.',
 	},
 
 	dataStructures: {
@@ -88,7 +93,7 @@ const en = {
 		},
 		controls: {
 			shuffle: 'Shuffle {count} Keys',
-			shuffle16: 'Shuffle 16',
+			shuffle16: 'Shuffle',
 			stepBack: 'Step Back',
 			stepForward: 'Step Forward',
 		},

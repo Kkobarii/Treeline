@@ -12,7 +12,7 @@
 				src="/branch.svg"
 				alt="Treeline logo"
 				class="h-6 w-6" />
-			<span class="footer-text">{t('footer.copyright')}</span>
+			<span class="footer-text">{'© 2026 Treeline. ' + t('footer.copyright')}</span>
 		</div>
 		<div class="flex items-center gap-4">
 			<a

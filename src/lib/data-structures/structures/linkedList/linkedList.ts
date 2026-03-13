@@ -89,7 +89,6 @@ export class LinkedList extends DataStructure {
 		}
 
 		this.size++;
-		console.log('current state:', this);
 		return newNode;
 	}
 
