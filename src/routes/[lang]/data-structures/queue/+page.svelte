@@ -18,4 +18,4 @@
 	<QueueControls {operationManager} />
 </div>
 
-<DescriptionCard filename="data-structures/queue" />
+<DescriptionCard />

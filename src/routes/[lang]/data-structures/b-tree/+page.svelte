@@ -19,4 +19,4 @@
 	<TreeControls {operationManager} />
 </div>
 
-<DescriptionCard filename="data-structures/b_tree" />
+<DescriptionCard />

@@ -2,4 +2,4 @@
 	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
 </script>
 
-<DescriptionCard filename="about" />
+<DescriptionCard />

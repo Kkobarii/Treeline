@@ -1,8 +1,13 @@
 <script lang="ts">
+	import { page } from '$app/state';
+
 	import { getLocale, translate } from '$lib/i18n';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
+	const sortingDetailSuffix = $derived(
+		page.url.pathname.startsWith(`/${locale}/sorting-algorithms/`) && page.url.pathname.endsWith('/detail') ? '/detail' : '',
+	);
 </script>
 
 <label
@@ -75,37 +80,37 @@
 		</summary>
 		<div class="mobile-submenu">
 			<a
-				href="/{locale}/sorting-algorithms/bubble"
+				href="/{locale}/sorting-algorithms/bubble{sortingDetailSuffix}"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
 				{t('sortingAlgorithms.bubbleSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/selection"
+				href="/{locale}/sorting-algorithms/selection{sortingDetailSuffix}"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
 				{t('sortingAlgorithms.selectionSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/insertion"
+				href="/{locale}/sorting-algorithms/insertion{sortingDetailSuffix}"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
 				{t('sortingAlgorithms.insertionSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/merge"
+				href="/{locale}/sorting-algorithms/merge{sortingDetailSuffix}"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
 				{t('sortingAlgorithms.mergeSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/quick"
+				href="/{locale}/sorting-algorithms/quick{sortingDetailSuffix}"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
 				{t('sortingAlgorithms.quickSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/heap"
+				href="/{locale}/sorting-algorithms/heap{sortingDetailSuffix}"
 				data-sveltekit-reload
 				class="mobile-submenu-link">
 				{t('sortingAlgorithms.heapSort')}

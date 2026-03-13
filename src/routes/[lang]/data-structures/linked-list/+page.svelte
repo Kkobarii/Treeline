@@ -18,4 +18,4 @@
 	<LinkedListControls {operationManager} />
 </div>
 
-<DescriptionCard filename="data-structures/linked_list" />
+<DescriptionCard />

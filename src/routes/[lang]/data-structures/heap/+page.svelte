@@ -18,4 +18,4 @@
 	<HeapControls {operationManager} />
 </div>
 
-<DescriptionCard filename="data-structures/heap" />
+<DescriptionCard />

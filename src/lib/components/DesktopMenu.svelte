@@ -1,8 +1,13 @@
 <script lang="ts">
+	import { page } from '$app/state';
+
 	import { getLocale, translate } from '$lib/i18n';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
+	const sortingDetailSuffix = $derived(
+		page.url.pathname.startsWith(`/${locale}/sorting-algorithms/`) && page.url.pathname.endsWith('/detail') ? '/detail' : '',
+	);
 </script>
 
 <div class="ml-4 hidden items-center gap-6 md:flex">
@@ -74,32 +79,32 @@
 
 		<div class="dropdown-menu">
 			<a
-				href="/{locale}/sorting-algorithms/bubble"
+				href="/{locale}/sorting-algorithms/bubble{sortingDetailSuffix}"
 				class="dropdown-link">
 				{t('sortingAlgorithms.bubbleSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/selection"
+				href="/{locale}/sorting-algorithms/selection{sortingDetailSuffix}"
 				class="dropdown-link">
 				{t('sortingAlgorithms.selectionSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/insertion"
+				href="/{locale}/sorting-algorithms/insertion{sortingDetailSuffix}"
 				class="dropdown-link">
 				{t('sortingAlgorithms.insertionSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/merge"
+				href="/{locale}/sorting-algorithms/merge{sortingDetailSuffix}"
 				class="dropdown-link">
 				{t('sortingAlgorithms.mergeSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/quick"
+				href="/{locale}/sorting-algorithms/quick{sortingDetailSuffix}"
 				class="dropdown-link">
 				{t('sortingAlgorithms.quickSort')}
 			</a>
 			<a
-				href="/{locale}/sorting-algorithms/heap"
+				href="/{locale}/sorting-algorithms/heap{sortingDetailSuffix}"
 				class="dropdown-link">
 				{t('sortingAlgorithms.heapSort')}
 			</a>

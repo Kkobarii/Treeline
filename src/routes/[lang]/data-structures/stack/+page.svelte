@@ -18,4 +18,4 @@
 	<StackControls {operationManager} />
 </div>
 
-<DescriptionCard filename="data-structures/stack" />
+<DescriptionCard />

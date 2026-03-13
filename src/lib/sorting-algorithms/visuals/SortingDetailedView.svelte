@@ -15,7 +15,13 @@
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
 
-	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
+	let {
+		algorithmId,
+		initialArray,
+	}: {
+		algorithmId: SortingAlgorithmId;
+		initialArray?: number[];
+	} = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
 	const codeTemplate = getCodeTemplate(algorithmId);
 	const languageStorageKey = 'sortingDetailedViewCodeLanguage';
@@ -30,9 +36,9 @@
 		})),
 	);
 
-	const initialArray = createShuffledArray(16);
-	let baseArray = $state(initialArray);
-	let steps = $state<DetailedSortStep[]>(algorithm.generateDetailedSteps(initialArray));
+	const startingArray = initialArray?.length ? [...initialArray] : createShuffledArray(16);
+	let baseArray = $state(startingArray);
+	let steps = $state<DetailedSortStep[]>(algorithm.generateDetailedSteps(startingArray));
 	let currentStepIndex = $state(0);
 	let isPlaying = $state(false);
 	let delayMs = $state(450);

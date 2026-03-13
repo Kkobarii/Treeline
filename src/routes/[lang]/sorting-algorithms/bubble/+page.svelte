@@ -1,5 +1,20 @@
 <script lang="ts">
-	import SortingVisual from '$lib/sorting-algorithms/visuals/SortingVisual.svelte';
+	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
+	import { getLocale, translate } from '$lib/i18n';
+	import SortingFirstView from '$lib/sorting-algorithms/visuals/SortingFirstView.svelte';
+	import ViewSwitcher from '$lib/sorting-algorithms/visuals/ViewSwitcher.svelte';
+
+	const locale = getLocale();
+	const t = (key: string) => translate(locale, key);
 </script>
 
-<SortingVisual algorithmId="bubble" />
+<div class="mb-3 flex items-center justify-between gap-2">
+	<h1 class="page-title">{t('sortingAlgorithms.bubbleSort')}</h1>
+	<ViewSwitcher
+		algorithmId="bubble"
+		view="big-picture" />
+</div>
+
+<SortingFirstView algorithmId="bubble" />
+
+<DescriptionCard />

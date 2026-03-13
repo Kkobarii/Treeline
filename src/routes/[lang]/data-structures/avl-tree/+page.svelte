@@ -18,4 +18,4 @@
 	<TreeControls {operationManager} />
 </div>
 
-<DescriptionCard filename="data-structures/avl_tree" />
+<DescriptionCard />
