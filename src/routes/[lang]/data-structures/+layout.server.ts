@@ -1,4 +1,4 @@
-import { defaultLocale, isLocale } from '$lib/i18n';
+import { defaultLocale, isLocale, translate } from '$lib/i18n';
 import { loadDescription } from '$lib/server/descriptions';
 
 import type { LayoutServerLoad } from './$types';
@@ -14,10 +14,27 @@ const descriptions: Record<string, string> = {
 	stack: 'data-structures/stack',
 };
 
+const titles: Record<string, string> = {
+	'avl-tree': 'dataStructures.avlTree',
+	'b-tree': 'dataStructures.bTree',
+	'binary-search-tree': 'dataStructures.binarySearchTree',
+	heap: 'dataStructures.heap',
+	'linked-list': 'dataStructures.linkedList',
+	queue: 'dataStructures.queue',
+	'red-black-tree': 'dataStructures.redBlackTree',
+	stack: 'dataStructures.stack',
+};
+
 export const load: LayoutServerLoad = async ({ params, url }) => {
 	const slug = url.pathname.split('/').filter(Boolean).at(-1) ?? '';
 	const description = descriptions[slug];
 	const locale = isLocale(params.lang) ? params.lang : defaultLocale;
+	const titleKey = titles[slug] ?? 'nav.dataStructures';
 
-	return loadDescription(description, locale);
+	const descriptionData = await loadDescription(description, locale);
+
+	return {
+		...descriptionData,
+		pageTitle: translate(locale, titleKey),
+	};
 };

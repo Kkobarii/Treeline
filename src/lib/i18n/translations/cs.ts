@@ -43,12 +43,12 @@ const cs: Translation = {
 	},
 
 	sortingAlgorithms: {
-		bubbleSort: 'Bublinkové třídění',
-		selectionSort: 'Třídění výběrem',
-		insertionSort: 'Třídění vkládáním',
-		mergeSort: 'Třídění slučováním',
-		quickSort: 'Rychlé třídění',
-		heapSort: 'Třídění haldou',
+		bubbleSort: 'Bubble sort',
+		selectionSort: 'Selection sort',
+		insertionSort: 'Insertion sort',
+		mergeSort: 'Merge sort',
+		quickSort: 'Quick sort',
+		heapSort: 'Heap sort',
 	},
 
 	controls: {

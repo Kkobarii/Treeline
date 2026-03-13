@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import Footer from '$lib/components/Footer.svelte';
 	import Nav from '$lib/components/Nav.svelte';
 	import { setLocaleContext } from '$lib/i18n';
@@ -7,6 +8,10 @@
 
 	setLocaleContext(data.lang);
 </script>
+
+<svelte:head>
+	<title>{page.data.pageTitle ? `${page.data.pageTitle} - Treeline` : 'Treeline'}</title>
+</svelte:head>
 
 <Nav />
 
