@@ -1,5 +1,5 @@
 import { StepDetail } from '$lib/data-structures/operation/stepData';
-import { DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
 
 export class MarkOverfullData extends StepDetail {
 	constructor(
@@ -9,7 +9,7 @@ export class MarkOverfullData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.bTree.markOverfullData', { nodeId, currentCount, maxCount });
+		super(StepType.BTree.MarkOverfull, 'steps.dataStructures.bTree.markOverfullData', { nodeId, currentCount, maxCount });
 	}
 }
 
@@ -22,7 +22,7 @@ export class SplitData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.bTree.splitData', { nodeId, middleValue, leftNodeId, rightNodeId });
+		super(StepType.BTree.Split, 'steps.dataStructures.bTree.splitData', { nodeId, middleValue, leftNodeId, rightNodeId });
 	}
 }
 
@@ -35,7 +35,8 @@ export class PromoteMiddleData extends StepDetail {
 		public endSnapshot: DataStructure,
 	) {
 		super(
-			isNewRoot ? 'steps.dataStructures.bTree.promoteMiddleAsNewRootData' : 'steps.dataStructures.bTree.promoteMiddleIntoParentData',
+			StepType.BTree.PromoteMiddle,
+			isNewRoot ? 'steps.dataStructures.bTree.promoteMiddleNewRootData' : 'steps.dataStructures.bTree.promoteMiddleData',
 			{ middleValue, targetNodeId },
 		);
 	}
@@ -51,7 +52,7 @@ export class ChooseBranchData extends StepDetail {
 		public upperBound: number | null,
 	) {
 		if (lowerBound !== null && upperBound !== null) {
-			super('steps.dataStructures.bTree.chooseBranchBetweenData', {
+			super(StepType.BTree.ChooseBranch, 'steps.dataStructures.bTree.chooseBranchBetweenData', {
 				childIndex,
 				childId,
 				value,
@@ -62,7 +63,7 @@ export class ChooseBranchData extends StepDetail {
 		}
 
 		if (lowerBound !== null) {
-			super('steps.dataStructures.bTree.chooseBranchGreaterThanData', {
+			super(StepType.BTree.ChooseBranch, 'steps.dataStructures.bTree.chooseBranchGreaterThanData', {
 				childIndex,
 				childId,
 				value,
@@ -72,7 +73,7 @@ export class ChooseBranchData extends StepDetail {
 		}
 
 		if (upperBound !== null) {
-			super('steps.dataStructures.bTree.chooseBranchLessThanData', {
+			super(StepType.BTree.ChooseBranch, 'steps.dataStructures.bTree.chooseBranchLessThanData', {
 				childIndex,
 				childId,
 				value,
@@ -81,7 +82,7 @@ export class ChooseBranchData extends StepDetail {
 			return;
 		}
 
-		super('steps.dataStructures.bTree.chooseBranchData', { childIndex, childId, value });
+		super(StepType.BTree.ChooseBranch, 'steps.dataStructures.bTree.chooseBranchData', { childIndex, childId, value });
 	}
 }
 
@@ -92,7 +93,7 @@ export class InsertValueData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.bTree.insertValueData', { nodeId, value });
+		super(StepType.BTree.InsertValue, 'steps.dataStructures.bTree.insertValueData', { nodeId, value });
 	}
 }
 
@@ -103,7 +104,7 @@ export class RemoveValueData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.bTree.removeValueData', { nodeId, value });
+		super(StepType.BTree.RemoveValue, 'steps.dataStructures.bTree.removeValueData', { nodeId, value });
 	}
 }
 
@@ -116,7 +117,12 @@ export class ReplaceValueData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.bTree.replaceValueData', { nodeId, oldValue, newValue, replacementSource });
+		super(StepType.BTree.ReplaceValue, 'steps.dataStructures.bTree.replaceValueData', {
+			nodeId,
+			oldValue,
+			newValue,
+			replacementSource,
+		});
 	}
 }
 
@@ -129,7 +135,12 @@ export class BorrowFromLeftData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.bTree.borrowFromLeftData', { childId, siblingId, borrowedValue, parentValue });
+		super(StepType.BTree.BorrowFromLeft, 'steps.dataStructures.bTree.borrowFromLeftData', {
+			childId,
+			siblingId,
+			borrowedValue,
+			parentValue,
+		});
 	}
 }
 
@@ -142,7 +153,12 @@ export class BorrowFromRightData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.bTree.borrowFromRightData', { childId, siblingId, borrowedValue, parentValue });
+		super(StepType.BTree.BorrowFromRight, 'steps.dataStructures.bTree.borrowFromRightData', {
+			childId,
+			siblingId,
+			borrowedValue,
+			parentValue,
+		});
 	}
 }
 
@@ -154,7 +170,11 @@ export class MergeChildrenData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.bTree.mergeChildrenData', { leftChildId, rightChildId, parentValue: parentValue ?? '' });
+		super(StepType.BTree.MergeChildren, 'steps.dataStructures.bTree.mergeChildrenData', {
+			leftChildId,
+			rightChildId,
+			parentValue: parentValue ?? '',
+		});
 	}
 }
 
@@ -166,6 +186,7 @@ export class FindInorderReplacementData extends StepDetail {
 		public replacementType: 'predecessor' | 'successor',
 	) {
 		super(
+			StepType.BTree.FindInorderReplacement,
 			replacementType === 'predecessor'
 				? 'steps.dataStructures.bTree.findInorderReplacementPredecessorData'
 				: 'steps.dataStructures.bTree.findInorderReplacementSuccessorData',

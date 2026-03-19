@@ -1,5 +1,5 @@
 import { StepDetail } from '$lib/data-structures/operation/stepData';
-import { DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
 
 export class CreateHeadData extends StepDetail {
 	constructor(
@@ -8,7 +8,7 @@ export class CreateHeadData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.linkedList.createHeadData', { nodeId, value });
+		super(StepType.LinkedList.CreateHead, 'steps.dataStructures.linkedList.createHeadData', { nodeId, value });
 	}
 }
 
@@ -19,7 +19,7 @@ export class InsertAtHeadData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.linkedList.insertAtHeadData', { nodeId, value });
+		super(StepType.LinkedList.InsertAtHead, 'steps.dataStructures.linkedList.insertAtHeadData', { nodeId, value });
 	}
 }
 
@@ -30,7 +30,7 @@ export class InsertAtTailData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.linkedList.insertAtTailData', { nodeId, value });
+		super(StepType.LinkedList.InsertAtTail, 'steps.dataStructures.linkedList.insertAtTailData', { nodeId, value });
 	}
 }
 
@@ -41,7 +41,12 @@ export class CompareData extends StepDetail {
 		public currentValue: number,
 		public position: number,
 	) {
-		super('steps.dataStructures.linkedList.compareData', { searchValue, currentId, currentValue, position });
+		super(StepType.LinkedList.Compare, 'steps.dataStructures.linkedList.compareData', {
+			searchValue,
+			currentId,
+			currentValue,
+			position,
+		});
 	}
 }
 
@@ -50,13 +55,13 @@ export class TraverseNextData extends StepDetail {
 		public fromId: number,
 		public toId: number,
 	) {
-		super('steps.dataStructures.linkedList.traverseNextData', { fromId, toId });
+		super(StepType.LinkedList.TraverseNext, 'steps.dataStructures.linkedList.traverseNextData', { fromId, toId });
 	}
 }
 
 export class TraverseToTailData extends StepDetail {
 	constructor(public fromId: number) {
-		super('steps.dataStructures.linkedList.traverseToTailData', { fromId });
+		super(StepType.LinkedList.TraverseToTail, 'steps.dataStructures.linkedList.traverseToTailData', { fromId });
 	}
 }
 
@@ -66,13 +71,13 @@ export class FoundData extends StepDetail {
 		public value: number,
 		public position: number,
 	) {
-		super('steps.dataStructures.linkedList.foundData', { nodeId, value, position });
+		super(StepType.LinkedList.Found, 'steps.dataStructures.linkedList.foundData', { nodeId, value, position });
 	}
 }
 
 export class NotFoundData extends StepDetail {
 	constructor(public value: number) {
-		super('steps.dataStructures.linkedList.notFoundData', { value });
+		super(StepType.LinkedList.NotFound, 'steps.dataStructures.linkedList.notFoundData', { value });
 	}
 }
 
@@ -81,7 +86,7 @@ export class MarkToDeleteData extends StepDetail {
 		public nodeId: number,
 		public value: number,
 	) {
-		super('steps.dataStructures.linkedList.markToDeleteData', { nodeId, value });
+		super(StepType.LinkedList.MarkToDelete, 'steps.dataStructures.linkedList.markToDeleteData', { nodeId, value });
 	}
 }
 
@@ -90,7 +95,7 @@ export class RemoveHeadData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.linkedList.removeHeadData');
+		super(StepType.LinkedList.RemoveHead, 'steps.dataStructures.linkedList.removeHeadData');
 	}
 }
 
@@ -100,12 +105,12 @@ export class RemoveNodeData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.linkedList.removeNodeData', { nodeId });
+		super(StepType.LinkedList.RemoveNode, 'steps.dataStructures.linkedList.removeNodeData', { nodeId });
 	}
 }
 
 export class EmptyListData extends StepDetail {
 	constructor() {
-		super('steps.dataStructures.linkedList.emptyListData');
+		super(StepType.LinkedList.EmptyList, 'steps.dataStructures.linkedList.emptyListData');
 	}
 }

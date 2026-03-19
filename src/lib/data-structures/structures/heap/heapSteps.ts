@@ -1,5 +1,5 @@
 import { StepDetail } from '$lib/data-structures/operation/stepData';
-import { DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
 
 export class AppendData extends StepDetail {
 	constructor(
@@ -9,7 +9,7 @@ export class AppendData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.heap.appendData', { value });
+		super(StepType.Heap.Append, 'steps.dataStructures.heap.appendData', { value });
 	}
 }
 
@@ -20,6 +20,7 @@ export class CompareWithParentData extends StepDetail {
 		public needsSwap: boolean,
 	) {
 		super(
+			StepType.Heap.CompareWithParent,
 			needsSwap
 				? 'steps.dataStructures.heap.compareWithParentNeedsSwapData'
 				: 'steps.dataStructures.heap.compareWithParentCorrectData',
@@ -37,7 +38,7 @@ export class ReplaceRootWithLastData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.heap.replaceRootWithLastData', { rootValue, lastValue });
+		super(StepType.Heap.ReplaceRootWithLast, 'steps.dataStructures.heap.replaceRootWithLastData', { rootValue, lastValue });
 	}
 }
 
@@ -47,6 +48,7 @@ export class CompareWithChildrenData extends StepDetail {
 		public largestChildId: number | null,
 	) {
 		super(
+			StepType.Heap.CompareWithChildren,
 			largestChildId !== null
 				? 'steps.dataStructures.heap.compareWithChildrenHasLargestData'
 				: 'steps.dataStructures.heap.compareWithChildrenCorrectData',
@@ -61,7 +63,7 @@ export class FindLargestChildData extends StepDetail {
 		public largestChildId: number,
 		public largestChildValue: number,
 	) {
-		super('steps.dataStructures.heap.findLargestChildData', { largestChildId, largestChildValue });
+		super(StepType.Heap.FindLargestChild, 'steps.dataStructures.heap.findLargestChildData', { largestChildId, largestChildValue });
 	}
 }
 
@@ -74,6 +76,6 @@ export class SwapData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.heap.swapData', { fromId, fromValue, toId, toValue });
+		super(StepType.Heap.Swap, 'steps.dataStructures.heap.swapData', { fromId, fromValue, toId, toValue });
 	}
 }

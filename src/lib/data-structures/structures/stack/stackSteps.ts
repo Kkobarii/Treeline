@@ -1,5 +1,5 @@
 import { StepDetail } from '$lib/data-structures/operation/stepData';
-import { DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
 
 export class PushData extends StepDetail {
 	constructor(
@@ -8,7 +8,7 @@ export class PushData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.stack.pushData', { value });
+		super(StepType.Stack.Push, 'steps.dataStructures.stack.pushData', { value });
 	}
 }
 
@@ -19,7 +19,7 @@ export class PopData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.stack.popData', { value });
+		super(StepType.Stack.Pop, 'steps.dataStructures.stack.popData', { value });
 	}
 }
 
@@ -28,12 +28,12 @@ export class PeekData extends StepDetail {
 		public nodeId: number,
 		public value: number,
 	) {
-		super('steps.dataStructures.stack.peekData', { value });
+		super(StepType.Stack.Peek, 'steps.dataStructures.stack.peekData', { value });
 	}
 }
 
 export class EmptyData extends StepDetail {
 	constructor() {
-		super('steps.dataStructures.stack.emptyData');
+		super(StepType.Stack.Empty, 'steps.dataStructures.stack.emptyData');
 	}
 }

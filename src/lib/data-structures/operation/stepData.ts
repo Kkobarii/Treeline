@@ -1,21 +1,25 @@
-import { DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
 import { StepLabel, type StepLabelParams } from '$lib/steps/stepLabel';
 
 export class StepDetail extends StepLabel {
-	constructor(label: string, params: StepLabelParams = {}) {
+	constructor(
+		public type: string,
+		label: string,
+		params: StepLabelParams = {},
+	) {
 		super(label, params);
 	}
 }
 
 export class StartData extends StepDetail {
 	constructor() {
-		super('steps.dataStructures.common.startData');
+		super('Start', 'steps.dataStructures.common.startData');
 	}
 }
 
 export class EndData extends StepDetail {
 	constructor() {
-		super('steps.dataStructures.common.endData');
+		super('End', 'steps.dataStructures.common.endData');
 	}
 }
 
@@ -26,7 +30,7 @@ export class CreateRootData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.common.createRootData', { nodeId, value });
+		super(StepType.BSTree.CreateRoot, 'steps.dataStructures.common.createRootData', { nodeId, value });
 	}
 }
 
@@ -39,7 +43,7 @@ export class CreateLeafData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.common.createLeafData', { nodeId, value, parentId, direction });
+		super(StepType.BSTree.CreateLeaf, 'steps.dataStructures.common.createLeafData', { nodeId, value, parentId, direction });
 	}
 }
 
@@ -49,7 +53,7 @@ export class CompareData extends StepDetail {
 		public comparisonId: number,
 		public comparisonValue: number,
 	) {
-		super('steps.dataStructures.common.compareData', { value, comparisonId, comparisonValue });
+		super(StepType.BSTree.Compare, 'steps.dataStructures.common.compareData', { value, comparisonId, comparisonValue });
 	}
 }
 
@@ -59,7 +63,7 @@ export class TraverseData extends StepDetail {
 		public toId: number,
 		public direction: 'left' | 'right',
 	) {
-		super('steps.dataStructures.common.traverseData', { fromId, toId, direction });
+		super(StepType.BSTree.Traverse, 'steps.dataStructures.common.traverseData', { fromId, toId, direction });
 	}
 }
 
@@ -69,7 +73,7 @@ export class DropData extends StepDetail {
 		public reason: string,
 		public fromId: string,
 	) {
-		super('steps.dataStructures.common.dropData', { value, reason, fromId });
+		super(StepType.BSTree.Drop, 'steps.dataStructures.common.dropData', { value, reason, fromId });
 	}
 }
 
@@ -78,7 +82,7 @@ export class FoundData extends StepDetail {
 		public nodeId: number,
 		public value: number,
 	) {
-		super('steps.dataStructures.common.foundData', { nodeId, value });
+		super(StepType.BSTree.Found, 'steps.dataStructures.common.foundData', { nodeId, value });
 	}
 }
 
@@ -87,7 +91,7 @@ export class MarkToDeleteData extends StepDetail {
 		public nodeId: number,
 		public value: number,
 	) {
-		super('steps.dataStructures.common.markToDeleteData', { nodeId, value });
+		super(StepType.BSTree.MarkToDelete, 'steps.dataStructures.common.markToDeleteData', { nodeId, value });
 	}
 }
 
@@ -98,7 +102,7 @@ export class DeleteData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.common.deleteData', { nodeId, value });
+		super(StepType.BSTree.Delete, 'steps.dataStructures.common.deleteData', { nodeId, value });
 	}
 }
 
@@ -111,7 +115,12 @@ export class ReplaceWithChildData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.common.replaceWithChildData', { oldNodeId, newNodeId, newValue, direction });
+		super(StepType.BSTree.ReplaceWithChild, 'steps.dataStructures.common.replaceWithChildData', {
+			oldNodeId,
+			newNodeId,
+			newValue,
+			direction,
+		});
 	}
 }
 
@@ -125,7 +134,7 @@ export class ReplaceWithInorderSuccessorData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.common.replaceWithInorderSuccessorData', {
+		super(StepType.BSTree.ReplaceWithInorderSuccessor, 'steps.dataStructures.common.replaceWithInorderSuccessorData', {
 			oldNodeId,
 			successorNodeId,
 			successorValue,
@@ -144,7 +153,7 @@ export class RelinkSuccessorChildData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.common.relinkSuccessorChildData', {
+		super(StepType.BSTree.RelinkSuccessorChild, 'steps.dataStructures.common.relinkSuccessorChildData', {
 			childNodeId,
 			childValue,
 			newParentNodeId,
@@ -159,7 +168,11 @@ export class FoundInorderSuccessorData extends StepDetail {
 		public successorId: number,
 		public successorValue: number,
 	) {
-		super('steps.dataStructures.common.foundInorderSuccessorData', { nodeId, successorId, successorValue });
+		super(StepType.BSTree.FoundInorderSuccessor, 'steps.dataStructures.common.foundInorderSuccessorData', {
+			nodeId,
+			successorId,
+			successorValue,
+		});
 	}
 }
 
@@ -169,6 +182,6 @@ export class CaseAnalysisData extends StepDetail {
 		public description: string,
 		public nodeId?: number,
 	) {
-		super('steps.dataStructures.common.caseAnalysisData', { caseNumber, description });
+		super(StepType.BSTree.CaseAnalysis, 'steps.dataStructures.common.caseAnalysisData', { caseNumber, description });
 	}
 }

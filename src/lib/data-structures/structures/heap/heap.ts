@@ -1,9 +1,16 @@
 import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
 import { CreateRootData, DeleteData, DropData, MarkToDeleteData } from '$lib/data-structures/operation/stepData';
-import { AppendData, CompareWithChildrenData, CompareWithParentData, FindLargestChildData, ReplaceRootWithLastData, SwapData } from './heapSteps';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
-import { DataNode, DataStructure, OperationType, StepType, type OperationTypeValue } from '../dataStructure';
+import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';
+import {
+	AppendData,
+	CompareWithChildrenData,
+	CompareWithParentData,
+	FindLargestChildData,
+	ReplaceRootWithLastData,
+	SwapData,
+} from './heapSteps';
 
 export class HeapNode extends DataNode {
 	value: number;
@@ -47,7 +54,7 @@ export class Heap extends DataStructure {
 			const startSnapshot = this.snapshot();
 			this.nodes.push(newNode);
 			this.rebuildPointers();
-			data.step(StepData.new(StepType.BSTree.CreateRoot, new CreateRootData(newNode.id, value, startSnapshot, this.snapshot())));
+			data.step(StepData.new(new CreateRootData(newNode.id, value, startSnapshot, this.snapshot())));
 			return newNode;
 		}
 
@@ -57,7 +64,7 @@ export class Heap extends DataStructure {
 		const startSnapshot = this.snapshot();
 		this.nodes.push(newNode);
 		this.rebuildPointers();
-		data.step(StepData.new(StepType.Heap.Append, new AppendData(newNode.id, value, parent.id, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new AppendData(newNode.id, value, parent.id, startSnapshot, this.snapshot())));
 
 		this.bubbleUp(index, data);
 		return newNode;
@@ -65,7 +72,7 @@ export class Heap extends DataStructure {
 
 	extractRoot(data: OperationData): HeapNode | null {
 		if (this.nodes.length === 0) {
-			data.step(StepData.new(StepType.BSTree.Drop, new DropData(-1, 'heap empty', 'root')));
+			data.step(StepData.new(new DropData(-1, 'heap empty', 'root')));
 			return null;
 		}
 
@@ -73,7 +80,7 @@ export class Heap extends DataStructure {
 			const startSnapshot = this.snapshot();
 			const removed = this.nodes.pop()!;
 			this.rebuildPointers();
-			data.step(StepData.new(StepType.BSTree.Delete, new DeleteData(removed.id, removed.value, startSnapshot, this.snapshot())));
+			data.step(StepData.new(new DeleteData(removed.id, removed.value, startSnapshot, this.snapshot())));
 			return removed;
 		}
 
@@ -83,17 +90,17 @@ export class Heap extends DataStructure {
 		const rootValue = root.value;
 		const lastValue = lastNode.value;
 
-		data.step(StepData.new(StepType.BSTree.MarkToDelete, new MarkToDeleteData(root.id, root.value)));
+		data.step(StepData.new(new MarkToDeleteData(root.id, root.value)));
 
 		const swapStart = this.snapshot();
 		this.swapNodes(0, lastIndex);
 		this.rebuildPointers();
-		data.step(StepData.new(StepType.Heap.ReplaceRootWithLast, new ReplaceRootWithLastData(root.id, lastNode.id, rootValue, lastValue, swapStart, this.snapshot())));
+		data.step(StepData.new(new ReplaceRootWithLastData(root.id, lastNode.id, rootValue, lastValue, swapStart, this.snapshot())));
 
 		const deleteStart = this.snapshot();
 		const removed = this.nodes.pop()!;
 		this.rebuildPointers();
-		data.step(StepData.new(StepType.BSTree.Delete, new DeleteData(removed.id, removed.value, deleteStart, this.snapshot())));
+		data.step(StepData.new(new DeleteData(removed.id, removed.value, deleteStart, this.snapshot())));
 
 		this.bubbleDown(0, data);
 		return removed;
@@ -109,14 +116,14 @@ export class Heap extends DataStructure {
 			const parentValue = parent.value;
 
 			const needsSwap = child.value > parent.value;
-			data.step(StepData.new(StepType.Heap.CompareWithParent, new CompareWithParentData(child.id, parent.id, needsSwap)));
+			data.step(StepData.new(new CompareWithParentData(child.id, parent.id, needsSwap)));
 			if (!needsSwap) break;
 
 			const startSnapshot = this.snapshot();
 			this.swapNodes(currentIndex, parentIndex);
 			this.rebuildPointers();
 			const endSnapshot = this.snapshot();
-			data.step(StepData.new(StepType.Heap.Swap, new SwapData(child.id, parent.id, childValue, parentValue, startSnapshot, endSnapshot)));
+			data.step(StepData.new(new SwapData(child.id, parent.id, childValue, parentValue, startSnapshot, endSnapshot)));
 
 			currentIndex = parentIndex;
 		}
@@ -145,15 +152,19 @@ export class Heap extends DataStructure {
 			}
 
 			data.step(
-				StepData.new(StepType.Heap.CompareWithChildren, new CompareWithChildrenData(
-					this.nodes[currentIndex].id,
-					largestIndex !== currentIndex ? this.nodes[largestIndex].id : null,
-				)),
+				StepData.new(
+					new CompareWithChildrenData(
+						this.nodes[currentIndex].id,
+						largestIndex !== currentIndex ? this.nodes[largestIndex].id : null,
+					),
+				),
 			);
 
 			if (largestIndex !== currentIndex) {
 				data.step(
-					StepData.new(StepType.Heap.FindLargestChild, new FindLargestChildData(this.nodes[currentIndex].id, this.nodes[largestIndex].id, this.nodes[largestIndex].value)),
+					StepData.new(
+						new FindLargestChildData(this.nodes[currentIndex].id, this.nodes[largestIndex].id, this.nodes[largestIndex].value),
+					),
 				);
 
 				const currentNode = this.nodes[currentIndex];
@@ -165,7 +176,7 @@ export class Heap extends DataStructure {
 				this.swapNodes(currentIndex, largestIndex);
 				this.rebuildPointers();
 				const endSnapshot = this.snapshot();
-				data.step(StepData.new(StepType.Heap.Swap, new SwapData(currentNode.id, targetNode.id, currentValue, targetValue, startSnapshot, endSnapshot)));
+				data.step(StepData.new(new SwapData(currentNode.id, targetNode.id, currentValue, targetValue, startSnapshot, endSnapshot)));
 
 				currentIndex = largestIndex;
 			} else {

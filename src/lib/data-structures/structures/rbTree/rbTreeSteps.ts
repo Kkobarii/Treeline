@@ -1,5 +1,5 @@
 import { StepDetail } from '$lib/data-structures/operation/stepData';
-import { DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
 
 export class ColorNodeData extends StepDetail {
 	constructor(
@@ -8,7 +8,7 @@ export class ColorNodeData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.rbTree.colorNodeData', { nodeId, color });
+		super(StepType.RBTree.ColorNode, 'steps.dataStructures.rbTree.colorNodeData', { nodeId, color });
 	}
 }
 
@@ -20,7 +20,7 @@ export class RotateLeftData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.rbTree.rotateLeftData', { oldRootId, newRootId });
+		super(StepType.RBTree.RotateLeft, 'steps.dataStructures.rbTree.rotateLeftData', { oldRootId, newRootId });
 	}
 }
 
@@ -32,7 +32,7 @@ export class RotateRightData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.rbTree.rotateRightData', { oldRootId, newRootId });
+		super(StepType.RBTree.RotateRight, 'steps.dataStructures.rbTree.rotateRightData', { oldRootId, newRootId });
 	}
 }
 
@@ -41,6 +41,6 @@ export class FixupData extends StepDetail {
 		public nodeId: number,
 		public reason: string,
 	) {
-		super('steps.dataStructures.rbTree.fixupData', { nodeId, reason });
+		super(StepType.RBTree.Fixup, 'steps.dataStructures.rbTree.fixupData', { nodeId, reason });
 	}
 }

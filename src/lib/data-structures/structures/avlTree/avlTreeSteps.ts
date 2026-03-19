@@ -1,5 +1,5 @@
 import { StepDetail } from '$lib/data-structures/operation/stepData';
-import { DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
 
 export class UpdateHeightBalanceData extends StepDetail {
 	constructor(
@@ -9,7 +9,7 @@ export class UpdateHeightBalanceData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.avlTree.updateHeightBalanceData', { nodeId, height, balance });
+		super(StepType.AVLTree.UpdateHeightBalance, 'steps.dataStructures.avlTree.updateHeightBalanceData', { nodeId, height, balance });
 	}
 }
 
@@ -21,7 +21,7 @@ export class RotateLeftData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.avlTree.rotateLeftData', { oldRootId, newRootId });
+		super(StepType.AVLTree.RotateLeft, 'steps.dataStructures.avlTree.rotateLeftData', { oldRootId, newRootId });
 	}
 }
 
@@ -33,6 +33,6 @@ export class RotateRightData extends StepDetail {
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super('steps.dataStructures.avlTree.rotateRightData', { oldRootId, newRootId });
+		super(StepType.AVLTree.RotateRight, 'steps.dataStructures.avlTree.rotateRightData', { oldRootId, newRootId });
 	}
 }

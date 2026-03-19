@@ -1,4 +1,5 @@
 import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
+import { deepCopy } from '$lib/data-structures/utils/utils';
 import {
 	CaseAnalysisData,
 	CompareData,
@@ -14,9 +15,8 @@ import {
 	ReplaceWithInorderSuccessorData,
 	TraverseData,
 } from '$lib/data-structures/operation/stepData';
-import { deepCopy } from '$lib/data-structures/utils/utils';
 
-import { DataNode, DataStructure, OperationType, StepType, type OperationTypeValue } from '../dataStructure';
+import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';
 import { RotateLeftData, RotateRightData, UpdateHeightBalanceData } from './avlTreeSteps';
 
 export class AVLTreeNode extends DataNode {
@@ -97,9 +97,7 @@ export class AVLTree extends DataStructure {
 			parent.right = x;
 		}
 
-		data.step(
-			StepData.new(StepType.AVLTree.RotateRight, new RotateRightData(y.id, x.id, T2 ? T2.id : null, startSnapshot, this.snapshot())),
-		);
+		data.step(StepData.new(new RotateRightData(y.id, x.id, T2 ? T2.id : null, startSnapshot, this.snapshot())));
 	}
 
 	//
@@ -132,9 +130,7 @@ export class AVLTree extends DataStructure {
 			parent.right = y;
 		}
 
-		data.step(
-			StepData.new(StepType.AVLTree.RotateLeft, new RotateLeftData(x.id, y.id, T2 ? T2.id : null, startSnapshot, this.snapshot())),
-		);
+		data.step(StepData.new(new RotateLeftData(x.id, y.id, T2 ? T2.id : null, startSnapshot, this.snapshot())));
 	}
 
 	insert(value: number, data: OperationData): AVLTreeNode | null {
@@ -143,7 +139,7 @@ export class AVLTree extends DataStructure {
 			const newNode = new AVLTreeNode(this.generateId(), value);
 			let startSnapshot = this.snapshot();
 			this.root = newNode;
-			data.step(StepData.new(StepType.AVLTree.CreateRoot, new CreateRootData(newNode.id, value, startSnapshot, this.snapshot())));
+			data.step(StepData.new(new CreateRootData(newNode.id, value, startSnapshot, this.snapshot())));
 			return newNode;
 		}
 
@@ -153,45 +149,31 @@ export class AVLTree extends DataStructure {
 
 		while (current) {
 			path.push(current);
-			data.step(StepData.new(StepType.AVLTree.Compare, new CompareData(value, current.id, current.value)));
+			data.step(StepData.new(new CompareData(value, current.id, current.value)));
 			if (value < current.value) {
-				data.step(
-					StepData.new(StepType.AVLTree.Traverse, new TraverseData(current.id, current.left ? current.left.id : -1, 'left')),
-				);
+				data.step(StepData.new(new TraverseData(current.id, current.left ? current.left.id : -1, 'left')));
 				if (!current.left) {
 					const newNode = new AVLTreeNode(this.generateId(), value);
 					let startSnapshot = this.snapshot();
 					data.steps.pop();
 					current.left = newNode;
-					data.step(
-						StepData.new(
-							StepType.AVLTree.CreateLeaf,
-							new CreateLeafData(newNode.id, value, current.id, 'left', startSnapshot, this.snapshot()),
-						),
-					);
+					data.step(StepData.new(new CreateLeafData(newNode.id, value, current.id, 'left', startSnapshot, this.snapshot())));
 					break;
 				}
 				current = current.left;
 			} else if (value > current.value) {
-				data.step(
-					StepData.new(StepType.AVLTree.Traverse, new TraverseData(current.id, current.right ? current.right.id : -1, 'right')),
-				);
+				data.step(StepData.new(new TraverseData(current.id, current.right ? current.right.id : -1, 'right')));
 				if (!current.right) {
 					const newNode = new AVLTreeNode(this.generateId(), value);
 					let startSnapshot = this.snapshot();
 					data.steps.pop();
 					current.right = newNode;
-					data.step(
-						StepData.new(
-							StepType.AVLTree.CreateLeaf,
-							new CreateLeafData(newNode.id, value, current.id, 'right', startSnapshot, this.snapshot()),
-						),
-					);
+					data.step(StepData.new(new CreateLeafData(newNode.id, value, current.id, 'right', startSnapshot, this.snapshot())));
 					break;
 				}
 				current = current.right;
 			} else {
-				data.step(StepData.new(StepType.AVLTree.Drop, new DropData(value, 'duplicate value', current.id.toString())));
+				data.step(StepData.new(new DropData(value, 'duplicate value', current.id.toString())));
 				return current;
 			}
 		}
@@ -202,48 +184,33 @@ export class AVLTree extends DataStructure {
 			let startSnapshot = this.snapshot();
 			this.updateHeight(node);
 			const balance = this.getBalance(node);
-			data.step(
-				StepData.new(
-					StepType.AVLTree.UpdateHeightBalance,
-					new UpdateHeightBalanceData(node.id, node.height, balance, startSnapshot, this.snapshot()),
-				),
-			);
+			data.step(StepData.new(new UpdateHeightBalanceData(node.id, node.height, balance, startSnapshot, this.snapshot())));
 
 			// determine parent for potential attachment
 			const parent = path.length > 0 ? path[path.length - 1] : null;
 
 			// Left Left
 			if (balance > 1 && value < (node.left as AVLTreeNode).value) {
-				data.step(StepData.new(StepType.AVLTree.CaseAnalysis, new CaseAnalysisData(1, 'Left Left Case: Right Rotate', node.id)));
+				data.step(StepData.new(new CaseAnalysisData(1, 'Left Left Case: Right Rotate', node.id)));
 				this.rightRotate(parent, node, data);
 			}
 
 			// Right Right
 			else if (balance < -1 && value > (node.right as AVLTreeNode).value) {
-				data.step(StepData.new(StepType.AVLTree.CaseAnalysis, new CaseAnalysisData(2, 'Right Right Case: Left Rotate', node.id)));
+				data.step(StepData.new(new CaseAnalysisData(2, 'Right Right Case: Left Rotate', node.id)));
 				this.leftRotate(parent, node, data);
 			}
 
 			// Left Right
 			else if (balance > 1 && value > (node.left as AVLTreeNode).value) {
-				data.step(
-					StepData.new(
-						StepType.AVLTree.CaseAnalysis,
-						new CaseAnalysisData(3, 'Left Right Case: Left Rotate then Right Rotate', node.id),
-					),
-				);
+				data.step(StepData.new(new CaseAnalysisData(3, 'Left Right Case: Left Rotate then Right Rotate', node.id)));
 				this.leftRotate(node, node.left as AVLTreeNode, data);
 				this.rightRotate(parent, node, data);
 			}
 
 			// Right Left
 			else if (balance < -1 && value < (node.right as AVLTreeNode).value) {
-				data.step(
-					StepData.new(
-						StepType.AVLTree.CaseAnalysis,
-						new CaseAnalysisData(4, 'Right Left Case: Right Rotate then Left Rotate', node.id),
-					),
-				);
+				data.step(StepData.new(new CaseAnalysisData(4, 'Right Left Case: Right Rotate then Left Rotate', node.id)));
 				this.rightRotate(node, node.right as AVLTreeNode, data);
 				this.leftRotate(parent, node, data);
 			}
@@ -257,32 +224,28 @@ export class AVLTree extends DataStructure {
 		let last = current?.id.toString();
 
 		while (current) {
-			data.step(StepData.new(StepType.AVLTree.Compare, new CompareData(value, current.id, current.value)));
+			data.step(StepData.new(new CompareData(value, current.id, current.value)));
 			if (value === current.value) {
-				data.step(StepData.new(StepType.AVLTree.Found, new FoundData(current.id, value)));
+				data.step(StepData.new(new FoundData(current.id, value)));
 				return current;
 			} else if (value < current.value) {
-				data.step(
-					StepData.new(StepType.AVLTree.Traverse, new TraverseData(current.id, current.left ? current.left.id : -1, 'left')),
-				);
+				data.step(StepData.new(new TraverseData(current.id, current.left ? current.left.id : -1, 'left')));
 				last = current.left?.id.toString() ?? `dummy-${current.id}-L`;
 				current = current.left;
 			} else {
-				data.step(
-					StepData.new(StepType.AVLTree.Traverse, new TraverseData(current.id, current.right ? current.right.id : -1, 'right')),
-				);
+				data.step(StepData.new(new TraverseData(current.id, current.right ? current.right.id : -1, 'right')));
 				last = current.right?.id.toString() ?? `dummy-${current.id}-R`;
 				current = current.right;
 			}
 		}
 
-		data.step(StepData.new(StepType.AVLTree.Drop, new DropData(value, 'not found', last!)));
+		data.step(StepData.new(new DropData(value, 'not found', last!)));
 		return null;
 	}
 
 	remove(value: number, data: OperationData): boolean {
 		if (!this.root) {
-			data.step(StepData.new(StepType.AVLTree.Drop, new DropData(value, 'not found', 'root')));
+			data.step(StepData.new(new DropData(value, 'not found', 'root')));
 			return false;
 		}
 
@@ -295,40 +258,36 @@ export class AVLTree extends DataStructure {
 		let found = false;
 
 		while (current) {
-			data.step(StepData.new(StepType.AVLTree.Compare, new CompareData(value, current.id, current.value)));
+			data.step(StepData.new(new CompareData(value, current.id, current.value)));
 			if (value < current.value) {
-				data.step(
-					StepData.new(StepType.AVLTree.Traverse, new TraverseData(current.id, current.left ? current.left.id : -1, 'left')),
-				);
+				data.step(StepData.new(new TraverseData(current.id, current.left ? current.left.id : -1, 'left')));
 				path.push(current);
 				parent = current;
 				current = current.left;
 			} else if (value > current.value) {
-				data.step(
-					StepData.new(StepType.AVLTree.Traverse, new TraverseData(current.id, current.right ? current.right.id : -1, 'right')),
-				);
+				data.step(StepData.new(new TraverseData(current.id, current.right ? current.right.id : -1, 'right')));
 				path.push(current);
 				parent = current;
 				current = current.right;
 			} else {
 				// found
-				data.step(StepData.new(StepType.AVLTree.MarkToDelete, new MarkToDeleteData(current.id, value)));
+				data.step(StepData.new(new MarkToDeleteData(current.id, value)));
 				found = true;
 				break;
 			}
 		}
 
 		if (!found) {
-			data.step(StepData.new(StepType.AVLTree.Drop, new DropData(value, 'not found', parent ? parent.id.toString() : 'root')));
+			data.step(StepData.new(new DropData(value, 'not found', parent ? parent.id.toString() : 'root')));
 			return false;
 		}
 
 		// case: node with at most one child
 		if (!current!.left || !current!.right) {
 			if (!current!.left && !current!.right) {
-				data.step(StepData.new(StepType.AVLTree.CaseAnalysis, new CaseAnalysisData(1, 'Leaf node', current!.id)));
+				data.step(StepData.new(new CaseAnalysisData(1, 'Leaf node', current!.id)));
 			} else {
-				data.step(StepData.new(StepType.AVLTree.CaseAnalysis, new CaseAnalysisData(2, 'Single child', current!.id)));
+				data.step(StepData.new(new CaseAnalysisData(2, 'Single child', current!.id)));
 			}
 			const child = current!.left ? current!.left : current!.right;
 			let startSnapshot = this.snapshot();
@@ -341,7 +300,7 @@ export class AVLTree extends DataStructure {
 				} else {
 					parent.right = null;
 				}
-				data.step(StepData.new(StepType.AVLTree.Delete, new DeleteData(current!.id, value, startSnapshot, this.snapshot())));
+				data.step(StepData.new(new DeleteData(current!.id, value, startSnapshot, this.snapshot())));
 			} else {
 				if (!parent) {
 					this.root = child;
@@ -352,7 +311,6 @@ export class AVLTree extends DataStructure {
 				}
 				data.step(
 					StepData.new(
-						StepType.AVLTree.ReplaceWithChild,
 						new ReplaceWithChildData(
 							current!.id,
 							child.id,
@@ -368,7 +326,7 @@ export class AVLTree extends DataStructure {
 			// rebalance starting from parent upwards
 		} else {
 			// node with two children: find inorder successor
-			data.step(StepData.new(StepType.AVLTree.CaseAnalysis, new CaseAnalysisData(3, 'Two children', current!.id)));
+			data.step(StepData.new(new CaseAnalysisData(3, 'Two children', current!.id)));
 			let succParent = current!;
 			let successor = current!.right as AVLTreeNode;
 			// push current for rebalance path
@@ -379,12 +337,7 @@ export class AVLTree extends DataStructure {
 				successor = successor.left;
 			}
 
-			data.step(
-				StepData.new(
-					StepType.AVLTree.FoundInorderSuccessor,
-					new FoundInorderSuccessorData(current!.id, successor.id, successor.value),
-				),
-			);
+			data.step(StepData.new(new FoundInorderSuccessorData(current!.id, successor.id, successor.value)));
 
 			let relinkedChildId = null;
 			if (succParent !== current! && successor.right) {
@@ -392,7 +345,6 @@ export class AVLTree extends DataStructure {
 				succParent.left = successor.right;
 				data.step(
 					StepData.new(
-						StepType.AVLTree.RelinkSuccessorChild,
 						new RelinkSuccessorChildData(
 							successor.right!.id,
 							successor.right!.value,
@@ -423,7 +375,6 @@ export class AVLTree extends DataStructure {
 			current!.id = successor.id;
 			data.step(
 				StepData.new(
-					StepType.AVLTree.ReplaceWithInorderSuccessor,
 					new ReplaceWithInorderSuccessorData(
 						prevCurrentId,
 						successor.id,
@@ -443,46 +394,31 @@ export class AVLTree extends DataStructure {
 			let startSnapshot = this.snapshot();
 			this.updateHeight(node);
 			const balance = this.getBalance(node);
-			data.step(
-				StepData.new(
-					StepType.AVLTree.UpdateHeightBalance,
-					new UpdateHeightBalanceData(node.id, node.height, balance, startSnapshot, this.snapshot()),
-				),
-			);
+			data.step(StepData.new(new UpdateHeightBalanceData(node.id, node.height, balance, startSnapshot, this.snapshot())));
 			const parentAttach = path.length > 0 ? path[path.length - 1] : null;
 
 			// Left Left
 			if (balance > 1 && this.getBalance(node.left) >= 0) {
-				data.step(StepData.new(StepType.AVLTree.CaseAnalysis, new CaseAnalysisData(1, 'Left Left Case: Right Rotate', node.id)));
+				data.step(StepData.new(new CaseAnalysisData(1, 'Left Left Case: Right Rotate', node.id)));
 				this.rightRotate(parentAttach, node, data);
 			}
 
 			// Left Right
 			else if (balance > 1 && this.getBalance(node.left) < 0) {
-				data.step(
-					StepData.new(
-						StepType.AVLTree.CaseAnalysis,
-						new CaseAnalysisData(2, 'Left Right Case: Left Rotate then Right Rotate', node.id),
-					),
-				);
+				data.step(StepData.new(new CaseAnalysisData(2, 'Left Right Case: Left Rotate then Right Rotate', node.id)));
 				this.leftRotate(node, node.left as AVLTreeNode, data);
 				this.rightRotate(parentAttach, node, data);
 			}
 
 			// Right Right
 			else if (balance < -1 && this.getBalance(node.right) <= 0) {
-				data.step(StepData.new(StepType.AVLTree.CaseAnalysis, new CaseAnalysisData(3, 'Right Right Case: Left Rotate', node.id)));
+				data.step(StepData.new(new CaseAnalysisData(3, 'Right Right Case: Left Rotate', node.id)));
 				this.leftRotate(parentAttach, node, data);
 			}
 
 			// Right Left
 			else if (balance < -1 && this.getBalance(node.right) > 0) {
-				data.step(
-					StepData.new(
-						StepType.AVLTree.CaseAnalysis,
-						new CaseAnalysisData(4, 'Right Left Case: Right Rotate then Left Rotate', node.id),
-					),
-				);
+				data.step(StepData.new(new CaseAnalysisData(4, 'Right Left Case: Right Rotate then Left Rotate', node.id)));
 				this.rightRotate(node, node.right as AVLTreeNode, data);
 				this.leftRotate(parentAttach, node, data);
 			}

@@ -12,7 +12,7 @@ export class OperationData {
 	constructor(operation: string, startSnapshot: DataStructure) {
 		this.operation = operation;
 		this.startSnapshot = startSnapshot;
-		this.steps = [StepData.new('Start', new StartData())];
+		this.steps = [StepData.new(new StartData())];
 		this.endSnapshot = null;
 	}
 
@@ -22,7 +22,7 @@ export class OperationData {
 	}
 
 	end(endSnapshot: DataStructure) {
-		this.step(StepData.new('End', new EndData()));
+		this.step(StepData.new(new EndData()));
 		this.endSnapshot = endSnapshot;
 	}
 
@@ -54,7 +54,14 @@ export class StepData {
 		this.endSnapshot = endSnapshot;
 	}
 
-	static new(type: string, data: object, startSnapshot: DataStructure | null = null, endSnapshot: DataStructure | null = null): StepData {
+	static new(data: object, startSnapshot: DataStructure | null = null, endSnapshot: DataStructure | null = null): StepData {
+		const type = (data as any).type || 'Unknown';
+		if (!startSnapshot && (data as any).startSnapshot) {
+			startSnapshot = (data as any).startSnapshot;
+		}
+		if (!endSnapshot && (data as any).endSnapshot) {
+			endSnapshot = (data as any).endSnapshot;
+		}
 		return new StepData(0, type, data, startSnapshot, endSnapshot);
 	}
 }

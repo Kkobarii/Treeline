@@ -1,7 +1,7 @@
 import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
-import { DataNode, DataStructure, OperationType, StepType, type OperationTypeValue } from '../dataStructure';
+import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';
 import { EmptyData, PeekData, PopData, PushData } from './stackSteps';
 
 export class StackNode extends DataNode {
@@ -46,13 +46,13 @@ export class Stack extends DataStructure {
 		this.top = newNode;
 		this.size++;
 
-		data.step(StepData.new(StepType.Stack.Push, new PushData(newNode.id, value, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new PushData(newNode.id, value, startSnapshot, this.snapshot())));
 		return newNode;
 	}
 
 	pop(data: OperationData): number | null {
 		if (!this.top) {
-			data.step(StepData.new(StepType.Stack.Empty, new EmptyData()));
+			data.step(StepData.new(new EmptyData()));
 			return null;
 		}
 
@@ -63,17 +63,17 @@ export class Stack extends DataStructure {
 		this.top = this.top.next;
 		this.size--;
 
-		data.step(StepData.new(StepType.Stack.Pop, new PopData(nodeId, value, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new PopData(nodeId, value, startSnapshot, this.snapshot())));
 		return value;
 	}
 
 	peek(data: OperationData): number | null {
 		if (!this.top) {
-			data.step(StepData.new(StepType.Stack.Empty, new EmptyData()));
+			data.step(StepData.new(new EmptyData()));
 			return null;
 		}
 
-		data.step(StepData.new(StepType.Stack.Peek, new PeekData(this.top.id, this.top.value)));
+		data.step(StepData.new(new PeekData(this.top.id, this.top.value)));
 		return this.top.value;
 	}
 }
