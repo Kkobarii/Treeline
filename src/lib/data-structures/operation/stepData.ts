@@ -1,1129 +1,174 @@
-import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
+import { DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { StepLabel, type StepLabelParams } from '$lib/steps/stepLabel';
 
-import { StepData } from './operationData';
-
-export namespace Step {
-	export class StepDetail {
-		constructor(public action: string) {}
+export class StepDetail extends StepLabel {
+	constructor(label: string, params: StepLabelParams = {}) {
+		super(label, params);
 	}
+}
 
-	// Start / End
-	export class StartData extends StepDetail {
-		constructor() {
-			super('Start');
-		}
+export class StartData extends StepDetail {
+	constructor() {
+		super('steps.dataStructures.common.startData');
 	}
+}
 
-	export function Start(): StepData {
-		return StepData.new('Start', new StartData());
+export class EndData extends StepDetail {
+	constructor() {
+		super('steps.dataStructures.common.endData');
 	}
+}
 
-	export class EndData extends StepDetail {
-		constructor() {
-			super('End');
-		}
+export class CreateRootData extends StepDetail {
+	constructor(
+		public nodeId: number,
+		public value: number,
+		public startSnapshot: DataStructure,
+		public endSnapshot: DataStructure,
+	) {
+		super('steps.dataStructures.common.createRootData', { nodeId, value });
 	}
+}
 
-	export function End(): StepData {
-		return StepData.new('End', new EndData());
+export class CreateLeafData extends StepDetail {
+	constructor(
+		public nodeId: number,
+		public value: number,
+		public parentId: number,
+		public direction: 'left' | 'right',
+		public startSnapshot: DataStructure,
+		public endSnapshot: DataStructure,
+	) {
+		super('steps.dataStructures.common.createLeafData', { nodeId, value, parentId, direction });
 	}
+}
 
-	// Shared StepDetail subclasses for common tree operations
-	export namespace Common {
-		export class CreateRootData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Create root node ${nodeId} with value ${value}`);
-			}
-		}
-
-		export function CreateRoot(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.BSTree.CreateRoot, new CreateRootData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export function CreateLeaf(
-			nodeId: number,
-			value: number,
-			parentId: number,
-			direction: 'left' | 'right',
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BSTree.CreateLeaf,
-				new CreateLeafData(nodeId, value, parentId, direction, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class CreateLeafData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public parentId: number,
-				public direction: 'left' | 'right',
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Create leaf node ${nodeId} with value ${value} as ${direction} child of ${parentId}`);
-			}
-		}
-
-		export function Compare(value: number, comparisonId: number, comparisonValue: number): StepData {
-			return StepData.new(StepType.BSTree.Compare, new CompareData(value, comparisonId, comparisonValue));
-		}
-
-		export class CompareData extends StepDetail {
-			constructor(
-				public value: number,
-				public comparisonId: number,
-				public comparisonValue: number,
-			) {
-				super(`Compare value ${value} with node ${comparisonId}'s ${comparisonValue}`);
-			}
-		}
-
-		export function Traverse(fromId: number, toId: number, direction: 'left' | 'right'): StepData {
-			return StepData.new(StepType.BSTree.Traverse, new TraverseData(fromId, toId, direction));
-		}
-
-		export class TraverseData extends StepDetail {
-			constructor(
-				public fromId: number,
-				public toId: number,
-				public direction: 'left' | 'right',
-			) {
-				super(`Traverse ${direction} from node ${fromId} to node ${toId}`);
-			}
-		}
-
-		export function Drop(value: number, reason: string, fromId: string): StepData {
-			return StepData.new(StepType.BSTree.Drop, new DropData(value, reason, fromId));
-		}
-
-		export class DropData extends StepDetail {
-			constructor(
-				public value: number,
-				public reason: string,
-				public fromId: string,
-			) {
-				super(`Drop value ${value} from node ${fromId} due to ${reason}`);
-			}
-		}
-
-		export function Found(nodeId: number, value: number): StepData {
-			return StepData.new(StepType.BSTree.Found, new FoundData(nodeId, value));
-		}
-
-		export class FoundData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-			) {
-				super(`Found value ${value} at node ${nodeId}`);
-			}
-		}
-
-		export function MarkToDelete(nodeId: number, value: number): StepData {
-			return StepData.new(StepType.BSTree.MarkToDelete, new MarkToDeleteData(nodeId, value));
-		}
-
-		export class MarkToDeleteData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-			) {
-				super(`Mark node ${nodeId} with value ${value} to delete`);
-			}
-		}
-
-		export function Delete(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.BSTree.Delete, new DeleteData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export class DeleteData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Delete node ${nodeId} with value ${value}`);
-			}
-		}
-
-		export function ReplaceWithChild(
-			oldNodeId: number,
-			newNodeId: number,
-			newValue: number,
-			direction: 'left' | 'right',
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BSTree.ReplaceWithChild,
-				new ReplaceWithChildData(oldNodeId, newNodeId, newValue, direction, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class ReplaceWithChildData extends StepDetail {
-			constructor(
-				public oldNodeId: number,
-				public newNodeId: number,
-				public newValue: number,
-				public direction: 'left' | 'right',
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Replace node ${oldNodeId} with its ${direction} child node ${newNodeId} having value ${newValue}`);
-			}
-		}
-
-		export function ReplaceWithInorderSuccessor(
-			oldNodeId: number,
-			successorNodeId: number,
-			successorValue: number,
-			successorParentId: number,
-			relinkedChildId: number | null,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BSTree.ReplaceWithInorderSuccessor,
-				new ReplaceWithInorderSuccessorData(
-					oldNodeId,
-					successorNodeId,
-					successorValue,
-					successorParentId,
-					relinkedChildId,
-					startSnapshot,
-					endSnapshot,
-				),
-			);
-		}
-
-		export class ReplaceWithInorderSuccessorData extends StepDetail {
-			constructor(
-				public oldNodeId: number,
-				public successorNodeId: number,
-				public successorValue: number,
-				public successorParentId: number,
-				public relinkedChildId: number | null,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Replace node ${oldNodeId} with its inorder successor node ${successorNodeId} having value ${successorValue}`);
-			}
-		}
-
-		export class RelinkSuccessorChildData extends StepDetail {
-			constructor(
-				public childNodeId: number,
-				public childValue: number,
-				public newParentNodeId: number,
-				public newParentValue: number,
-				public successorNodeId: number,
-				public successorValue: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(
-					`Relink child node ${childNodeId} with value ${childValue} from successor to parent node ${newParentNodeId} with value ${newParentValue}`,
-				);
-			}
-		}
-
-		export function RelinkSuccessorChild(
-			childNodeId: number,
-			childValue: number,
-			newParentNodeId: number,
-			newParentValue: number,
-			successorNodeId: number,
-			successorValue: number,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BSTree.RelinkSuccessorChild,
-				new RelinkSuccessorChildData(
-					childNodeId,
-					childValue,
-					newParentNodeId,
-					newParentValue,
-					successorNodeId,
-					successorValue,
-					startSnapshot,
-					endSnapshot,
-				),
-			);
-		}
-
-		export class FoundInorderSuccessorData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public successorId: number,
-				public successorValue: number,
-			) {
-				super(`Found inorder successor node ${successorId} with value ${successorValue} for node ${nodeId}`);
-			}
-		}
-
-		export function FoundInorderSuccessor(nodeId: number, successorId: number, successorValue: number): StepData {
-			return StepData.new(StepType.BSTree.FoundInorderSuccessor, new FoundInorderSuccessorData(nodeId, successorId, successorValue));
-		}
-
-		export class CaseAnalysisData extends StepDetail {
-			constructor(
-				public caseNumber: number,
-				public description: string,
-				public nodeId?: number,
-			) {
-				super(`Case ${caseNumber}: ${description}`);
-			}
-		}
-
-		export function CaseAnalysis(caseNumber: number, description: string, nodeId?: number): StepData {
-			return StepData.new(StepType.BSTree.CaseAnalysis, new CaseAnalysisData(caseNumber, description, nodeId));
-		}
+export class CompareData extends StepDetail {
+	constructor(
+		public value: number,
+		public comparisonId: number,
+		public comparisonValue: number,
+	) {
+		super('steps.dataStructures.common.compareData', { value, comparisonId, comparisonValue });
 	}
+}
 
-	export namespace AVLTree {
-		// AVL-specific step details
-		export class UpdateHeightBalanceData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public height: number,
-				public balance: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Update height and balance of node ${nodeId} to H:${height}, B:${balance}`);
-			}
-		}
-
-		export function UpdateHeightBalance(
-			nodeId: number,
-			height: number,
-			balance: number,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.AVLTree.UpdateHeightBalance,
-				new UpdateHeightBalanceData(nodeId, height, balance, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class RotateLeftData extends StepDetail {
-			constructor(
-				public oldRootId: number,
-				public newRootId: number,
-				public adoptedChildId: number | null,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Rotate left at root ${oldRootId}, new root ${newRootId}`);
-			}
-		}
-
-		export function RotateLeft(
-			oldRootId: number,
-			newRootId: number,
-			adoptedChildId: number | null,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.AVLTree.RotateLeft,
-				new RotateLeftData(oldRootId, newRootId, adoptedChildId, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class RotateRightData extends StepDetail {
-			constructor(
-				public oldRootId: number,
-				public newRootId: number,
-				public adoptedChildId: number | null,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Rotate right at root ${oldRootId}, new root ${newRootId}`);
-			}
-		}
-
-		export function RotateRight(
-			oldRootId: number,
-			newRootId: number,
-			adoptedChildId: number | null,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.AVLTree.RotateRight,
-				new RotateRightData(oldRootId, newRootId, adoptedChildId, startSnapshot, endSnapshot),
-			);
-		}
+export class TraverseData extends StepDetail {
+	constructor(
+		public fromId: number,
+		public toId: number,
+		public direction: 'left' | 'right',
+	) {
+		super('steps.dataStructures.common.traverseData', { fromId, toId, direction });
 	}
+}
 
-	export namespace RBTree {
-		// Red-Black tree specific step details
-		export class ColorNodeData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public color: 'red' | 'black',
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Color node ${nodeId} ${color}`);
-			}
-		}
-
-		export function ColorNode(
-			nodeId: number,
-			color: 'red' | 'black',
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(StepType.RBTree.ColorNode, new ColorNodeData(nodeId, color, startSnapshot, endSnapshot));
-		}
-
-		export class RotateLeftData extends StepDetail {
-			constructor(
-				public oldRootId: number,
-				public newRootId: number,
-				public adoptedChildId: number | null,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`RB Rotate left at root ${oldRootId}, new root ${newRootId}`);
-			}
-		}
-
-		export function RotateLeft(
-			oldRootId: number,
-			newRootId: number,
-			adoptedChildId: number | null,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.RBTree.RotateLeft,
-				new RotateLeftData(oldRootId, newRootId, adoptedChildId, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class RotateRightData extends StepDetail {
-			constructor(
-				public oldRootId: number,
-				public newRootId: number,
-				public adoptedChildId: number | null,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`RB Rotate right at root ${oldRootId}, new root ${newRootId}`);
-			}
-		}
-
-		export function RotateRight(
-			oldRootId: number,
-			newRootId: number,
-			adoptedChildId: number | null,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.RBTree.RotateRight,
-				new RotateRightData(oldRootId, newRootId, adoptedChildId, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class FixupData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public reason: string,
-			) {
-				super(`Fixup at node ${nodeId}: ${reason}`);
-			}
-		}
-
-		export function Fixup(nodeId: number, reason: string): StepData {
-			return StepData.new(StepType.RBTree.Fixup, new FixupData(nodeId, reason));
-		}
+export class DropData extends StepDetail {
+	constructor(
+		public value: number,
+		public reason: string,
+		public fromId: string,
+	) {
+		super('steps.dataStructures.common.dropData', { value, reason, fromId });
 	}
+}
 
-	export namespace BTree {
-		// B-Tree specific step details
-		export class MarkOverfullData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public currentCount: number,
-				public maxCount: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Node ${nodeId} is overfull: ${currentCount} values (max ${maxCount})`);
-			}
-		}
-
-		export function MarkOverfull(
-			nodeId: number,
-			currentCount: number,
-			maxCount: number,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BTree.MarkOverfull,
-				new MarkOverfullData(nodeId, currentCount, maxCount, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class SplitData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public middleValue: number,
-				public leftNodeId: number,
-				public rightNodeId: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Split node ${nodeId}: move ${middleValue} up (left: ${leftNodeId}, right: ${rightNodeId})`);
-			}
-		}
-
-		export function Split(
-			nodeId: number,
-			middleValue: number,
-			leftNodeId: number,
-			rightNodeId: number,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BTree.Split,
-				new SplitData(nodeId, middleValue, leftNodeId, rightNodeId, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class PromoteMiddleData extends StepDetail {
-			constructor(
-				public middleValue: number,
-				public targetNodeId: number,
-				public isNewRoot: boolean,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				const msg = isNewRoot ? `Promote ${middleValue} as new root` : `Promote ${middleValue} into parent (${targetNodeId})`;
-				super(msg);
-			}
-		}
-
-		export function PromoteMiddle(
-			middleValue: number,
-			targetNodeId: number,
-			isNewRoot: boolean,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BTree.PromoteMiddle,
-				new PromoteMiddleData(middleValue, targetNodeId, isNewRoot, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class ChooseBranchData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public childIndex: number,
-				public childId: number,
-				public lowerBound: number | null,
-				public upperBound: number | null,
-			) {
-				let msg = `Choose child ${childIndex} (node ${childId}) for value ${value}`;
-				if (lowerBound !== null && upperBound !== null) {
-					msg += ` (between ${lowerBound} and ${upperBound})`;
-				} else if (lowerBound !== null) {
-					msg += ` (greater than ${lowerBound})`;
-				} else if (upperBound !== null) {
-					msg += ` (less than ${upperBound})`;
-				}
-				super(msg);
-			}
-		}
-
-		export function ChooseBranch(
-			nodeId: number,
-			value: number,
-			childIndex: number,
-			childId: number,
-			lowerBound: number | null,
-			upperBound: number | null,
-		): StepData {
-			return StepData.new(
-				StepType.BTree.ChooseBranch,
-				new ChooseBranchData(nodeId, value, childIndex, childId, lowerBound, upperBound),
-			);
-		}
-
-		export class InsertValueData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Insert value ${value} into node ${nodeId}`);
-			}
-		}
-
-		export function InsertValue(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.BTree.InsertValue, new InsertValueData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export class RemoveValueData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Remove value ${value} from node ${nodeId}`);
-			}
-		}
-
-		export function RemoveValue(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.BTree.RemoveValue, new RemoveValueData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export class ReplaceValueData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public oldValue: number,
-				public newValue: number,
-				public replacementSource: string,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Replace value ${oldValue} with ${newValue} (${replacementSource}) in node ${nodeId}`);
-			}
-		}
-
-		export function ReplaceValue(
-			nodeId: number,
-			oldValue: number,
-			newValue: number,
-			replacementSource: string,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BTree.ReplaceValue,
-				new ReplaceValueData(nodeId, oldValue, newValue, replacementSource, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class BorrowFromLeftData extends StepDetail {
-			constructor(
-				public childId: number,
-				public siblingId: number,
-				public borrowedValue: number,
-				public parentValue: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(
-					`Borrow value ${borrowedValue} from left sibling ${siblingId} through parent value ${parentValue} to node ${childId}`,
-				);
-			}
-		}
-
-		export function BorrowFromLeft(
-			childId: number,
-			siblingId: number,
-			borrowedValue: number,
-			parentValue: number,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BTree.BorrowFromLeft,
-				new BorrowFromLeftData(childId, siblingId, borrowedValue, parentValue, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class BorrowFromRightData extends StepDetail {
-			constructor(
-				public childId: number,
-				public siblingId: number,
-				public borrowedValue: number,
-				public parentValue: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(
-					`Borrow value ${borrowedValue} from right sibling ${siblingId} through parent value ${parentValue} to node ${childId}`,
-				);
-			}
-		}
-
-		export function BorrowFromRight(
-			childId: number,
-			siblingId: number,
-			borrowedValue: number,
-			parentValue: number,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BTree.BorrowFromRight,
-				new BorrowFromRightData(childId, siblingId, borrowedValue, parentValue, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class MergeChildrenData extends StepDetail {
-			constructor(
-				public leftChildId: number,
-				public rightChildId: number,
-				public parentValue: number | null,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Merge node ${leftChildId} and node ${rightChildId} with parent value ${parentValue}`);
-			}
-		}
-
-		export function MergeChildren(
-			leftChildId: number,
-			rightChildId: number,
-			parentValue: number | null,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.BTree.MergeChildren,
-				new MergeChildrenData(leftChildId, rightChildId, parentValue, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class FindInorderReplacementData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public childId: number,
-				public replacementValue: number,
-				public replacementType: 'predecessor' | 'successor',
-			) {
-				const typeText = replacementType === 'predecessor' ? 'predecessor' : 'successor';
-				super(`Found ${typeText} value ${replacementValue} in node ${childId} for node ${nodeId}`);
-			}
-		}
-
-		export function FindInorderReplacement(
-			nodeId: number,
-			childId: number,
-			replacementValue: number,
-			replacementType: 'predecessor' | 'successor',
-		): StepData {
-			return StepData.new(
-				StepType.BTree.FindInorderReplacement,
-				new FindInorderReplacementData(nodeId, childId, replacementValue, replacementType),
-			);
-		}
+export class FoundData extends StepDetail {
+	constructor(
+		public nodeId: number,
+		public value: number,
+	) {
+		super('steps.dataStructures.common.foundData', { nodeId, value });
 	}
+}
 
-	// Heap-specific step details
-	export namespace Heap {
-		export class AppendData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public parentId: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Append value ${value} to end of heap`);
-			}
-		}
-
-		export function Append(
-			nodeId: number,
-			value: number,
-			parentId: number,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(StepType.Heap.Append, new AppendData(nodeId, value, parentId, startSnapshot, endSnapshot));
-		}
-
-		export class CompareWithParentData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public parentId: number,
-				public needsSwap: boolean,
-			) {
-				const msg = needsSwap
-					? `Comparing node ${nodeId} with parent ${parentId} - needs swap`
-					: `Comparing node ${nodeId} with parent ${parentId} - in correct position`;
-				super(msg);
-			}
-		}
-
-		export function CompareWithParent(nodeId: number, parentId: number, needsSwap: boolean): StepData {
-			return StepData.new(StepType.Heap.CompareWithParent, new CompareWithParentData(nodeId, parentId, needsSwap));
-		}
-
-		export class ReplaceRootWithLastData extends StepDetail {
-			constructor(
-				public rootId: number,
-				public lastId: number,
-				public rootValue: number,
-				public lastValue: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Replace root ${rootValue} with last node ${lastValue}`);
-			}
-		}
-
-		export function ReplaceRootWithLast(
-			rootId: number,
-			lastId: number,
-			rootValue: number,
-			lastValue: number,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(
-				StepType.Heap.ReplaceRootWithLast,
-				new ReplaceRootWithLastData(rootId, lastId, rootValue, lastValue, startSnapshot, endSnapshot),
-			);
-		}
-
-		export class CompareWithChildrenData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public largestChildId: number | null,
-			) {
-				const msg =
-					largestChildId !== null
-						? `Comparing node ${nodeId} with children, largest is ${largestChildId}`
-						: `Node ${nodeId} is already in correct position`;
-				super(msg);
-			}
-		}
-
-		export function CompareWithChildren(nodeId: number, largestChildId: number | null): StepData {
-			return StepData.new(StepType.Heap.CompareWithChildren, new CompareWithChildrenData(nodeId, largestChildId));
-		}
-
-		export class FindLargestChildData extends StepDetail {
-			constructor(
-				public parentId: number,
-				public largestChildId: number,
-				public largestChildValue: number,
-			) {
-				super(`Found largest child: node ${largestChildId} with value ${largestChildValue}`);
-			}
-		}
-
-		export function FindLargestChild(parentId: number, largestChildId: number, largestChildValue: number): StepData {
-			return StepData.new(StepType.Heap.FindLargestChild, new FindLargestChildData(parentId, largestChildId, largestChildValue));
-		}
-
-		export class SwapData extends StepDetail {
-			constructor(
-				public fromId: number,
-				public toId: number,
-				public fromValue: number,
-				public toValue: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Swap node ${fromId} (value ${fromValue}) with node ${toId} (value ${toValue})`);
-			}
-		}
-
-		export function Swap(
-			fromId: number,
-			toId: number,
-			fromValue: number,
-			toValue: number,
-			startSnapshot: DataStructure,
-			endSnapshot: DataStructure,
-		): StepData {
-			return StepData.new(StepType.Heap.Swap, new SwapData(fromId, toId, fromValue, toValue, startSnapshot, endSnapshot));
-		}
+export class MarkToDeleteData extends StepDetail {
+	constructor(
+		public nodeId: number,
+		public value: number,
+	) {
+		super('steps.dataStructures.common.markToDeleteData', { nodeId, value });
 	}
+}
 
-	export namespace LinkedList {
-		export class CreateHeadData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Create head node ${nodeId} with value ${value}`);
-			}
-		}
-
-		export function CreateHead(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.LinkedList.CreateHead, new CreateHeadData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export class InsertAtHeadData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Insert node ${nodeId} with value ${value} at head`);
-			}
-		}
-
-		export function InsertAtHead(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.LinkedList.InsertAtHead, new InsertAtHeadData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export class InsertAtTailData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Insert node ${nodeId} with value ${value} at tail`);
-			}
-		}
-
-		export function InsertAtTail(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.LinkedList.InsertAtTail, new InsertAtTailData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export class CompareData extends StepDetail {
-			constructor(
-				public searchValue: number,
-				public currentId: number,
-				public currentValue: number,
-				public position: number,
-			) {
-				super(`Compare search value ${searchValue} with node ${currentId}'s value ${currentValue} at position ${position}`);
-			}
-		}
-
-		export function Compare(searchValue: number, currentId: number, currentValue: number, position: number): StepData {
-			return StepData.new(StepType.LinkedList.Compare, new CompareData(searchValue, currentId, currentValue, position));
-		}
-
-		export class TraverseNextData extends StepDetail {
-			constructor(
-				public fromId: number,
-				public toId: number,
-			) {
-				super(`Traverse from node ${fromId} to next node ${toId}`);
-			}
-		}
-
-		export function TraverseNext(fromId: number, toId: number): StepData {
-			return StepData.new(StepType.LinkedList.TraverseNext, new TraverseNextData(fromId, toId));
-		}
-
-		export class TraverseToTailData extends StepDetail {
-			constructor(public fromId: number) {
-				super(`Traverse to tail starting from node ${fromId}`);
-			}
-		}
-
-		export function TraverseToTail(fromId: number): StepData {
-			return StepData.new(StepType.LinkedList.TraverseToTail, new TraverseToTailData(fromId));
-		}
-
-		export class FoundData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public position: number,
-			) {
-				super(`Found value ${value} at node ${nodeId} at position ${position}`);
-			}
-		}
-
-		export function Found(nodeId: number, value: number, position: number): StepData {
-			return StepData.new(StepType.LinkedList.Found, new FoundData(nodeId, value, position));
-		}
-
-		export class NotFoundData extends StepDetail {
-			constructor(public value: number) {
-				super(`Value ${value} not found in list`);
-			}
-		}
-
-		export function NotFound(value: number): StepData {
-			return StepData.new(StepType.LinkedList.NotFound, new NotFoundData(value));
-		}
-
-		export class MarkToDeleteData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-			) {
-				super(`Mark node ${nodeId} with value ${value} for deletion`);
-			}
-		}
-
-		export function MarkToDelete(nodeId: number, value: number): StepData {
-			return StepData.new(StepType.LinkedList.MarkToDelete, new MarkToDeleteData(nodeId, value));
-		}
-
-		export class RemoveHeadData extends StepDetail {
-			constructor(
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Remove head node`);
-			}
-		}
-
-		export function RemoveHead(startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.LinkedList.RemoveHead, new RemoveHeadData(startSnapshot, endSnapshot));
-		}
-
-		export class RemoveNodeData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Remove node ${nodeId}`);
-			}
-		}
-
-		export function RemoveNode(nodeId: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.LinkedList.RemoveNode, new RemoveNodeData(nodeId, startSnapshot, endSnapshot));
-		}
-
-		export class EmptyListData extends StepDetail {
-			constructor() {
-				super(`List is empty`);
-			}
-		}
-
-		export function EmptyList(): StepData {
-			return StepData.new(StepType.LinkedList.EmptyList, new EmptyListData());
-		}
+export class DeleteData extends StepDetail {
+	constructor(
+		public nodeId: number,
+		public value: number,
+		public startSnapshot: DataStructure,
+		public endSnapshot: DataStructure,
+	) {
+		super('steps.dataStructures.common.deleteData', { nodeId, value });
 	}
+}
 
-	export namespace Stack {
-		export class PushData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Push value ${value} onto stack`);
-			}
-		}
-
-		export function Push(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.Stack.Push, new PushData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export class PopData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Pop value ${value} from stack`);
-			}
-		}
-
-		export function Pop(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.Stack.Pop, new PopData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export class PeekData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-			) {
-				super(`Peek top value ${value}`);
-			}
-		}
-
-		export function Peek(nodeId: number, value: number): StepData {
-			return StepData.new(StepType.Stack.Peek, new PeekData(nodeId, value));
-		}
-
-		export class EmptyData extends StepDetail {
-			constructor() {
-				super(`Stack is empty`);
-			}
-		}
-
-		export function Empty(): StepData {
-			return StepData.new(StepType.Stack.Empty, new EmptyData());
-		}
+export class ReplaceWithChildData extends StepDetail {
+	constructor(
+		public oldNodeId: number,
+		public newNodeId: number,
+		public newValue: number,
+		public direction: 'left' | 'right',
+		public startSnapshot: DataStructure,
+		public endSnapshot: DataStructure,
+	) {
+		super('steps.dataStructures.common.replaceWithChildData', { oldNodeId, newNodeId, newValue, direction });
 	}
+}
 
-	export namespace Queue {
-		export class EnqueueData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Enqueue value ${value} to queue`);
-			}
-		}
+export class ReplaceWithInorderSuccessorData extends StepDetail {
+	constructor(
+		public oldNodeId: number,
+		public successorNodeId: number,
+		public successorValue: number,
+		public successorParentId: number,
+		public relinkedChildId: number | null,
+		public startSnapshot: DataStructure,
+		public endSnapshot: DataStructure,
+	) {
+		super('steps.dataStructures.common.replaceWithInorderSuccessorData', {
+			oldNodeId,
+			successorNodeId,
+			successorValue,
+		});
+	}
+}
 
-		export function Enqueue(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.Queue.Enqueue, new EnqueueData(nodeId, value, startSnapshot, endSnapshot));
-		}
+export class RelinkSuccessorChildData extends StepDetail {
+	constructor(
+		public childNodeId: number,
+		public childValue: number,
+		public newParentNodeId: number,
+		public newParentValue: number,
+		public successorNodeId: number,
+		public successorValue: number,
+		public startSnapshot: DataStructure,
+		public endSnapshot: DataStructure,
+	) {
+		super('steps.dataStructures.common.relinkSuccessorChildData', {
+			childNodeId,
+			childValue,
+			newParentNodeId,
+			newParentValue,
+		});
+	}
+}
 
-		export class DequeueData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-				public startSnapshot: DataStructure,
-				public endSnapshot: DataStructure,
-			) {
-				super(`Dequeue value ${value} from queue`);
-			}
-		}
+export class FoundInorderSuccessorData extends StepDetail {
+	constructor(
+		public nodeId: number,
+		public successorId: number,
+		public successorValue: number,
+	) {
+		super('steps.dataStructures.common.foundInorderSuccessorData', { nodeId, successorId, successorValue });
+	}
+}
 
-		export function Dequeue(nodeId: number, value: number, startSnapshot: DataStructure, endSnapshot: DataStructure): StepData {
-			return StepData.new(StepType.Queue.Dequeue, new DequeueData(nodeId, value, startSnapshot, endSnapshot));
-		}
-
-		export class PeekData extends StepDetail {
-			constructor(
-				public nodeId: number,
-				public value: number,
-			) {
-				super(`Peek front value ${value}`);
-			}
-		}
-
-		export function Peek(nodeId: number, value: number): StepData {
-			return StepData.new(StepType.Queue.Peek, new PeekData(nodeId, value));
-		}
-
-		export class EmptyData extends StepDetail {
-			constructor() {
-				super(`Queue is empty`);
-			}
-		}
-
-		export function Empty(): StepData {
-			return StepData.new(StepType.Queue.Empty, new EmptyData());
-		}
+export class CaseAnalysisData extends StepDetail {
+	constructor(
+		public caseNumber: number,
+		public description: string,
+		public nodeId?: number,
+	) {
+		super('steps.dataStructures.common.caseAnalysisData', { caseNumber, description });
 	}
 }

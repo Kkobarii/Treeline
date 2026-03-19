@@ -1,8 +1,8 @@
-import { OperationData } from '$lib/data-structures/operation/operationData';
-import { Step } from '$lib/data-structures/operation/stepData';
+import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
-import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';
+import { DataNode, DataStructure, OperationType, StepType, type OperationTypeValue } from '../dataStructure';
+import { DequeueData, EmptyData, EnqueueData, PeekData } from './queueSteps';
 
 export class QueueNode extends DataNode {
 	value: number;
@@ -68,13 +68,13 @@ export class Queue extends DataStructure {
 		}
 
 		this.size++;
-		data.step(Step.Queue.Enqueue(newNode.id, value, startSnapshot, this.snapshot()));
+		data.step(StepData.new(StepType.Queue.Enqueue, new EnqueueData(newNode.id, value, startSnapshot, this.snapshot())));
 		return newNode;
 	}
 
 	dequeue(data: OperationData): number | null {
 		if (!this.front) {
-			data.step(Step.Queue.Empty());
+			data.step(StepData.new(StepType.Queue.Empty, new EmptyData()));
 			return null;
 		}
 
@@ -88,17 +88,17 @@ export class Queue extends DataStructure {
 		}
 
 		this.size--;
-		data.step(Step.Queue.Dequeue(nodeId, value, startSnapshot, this.snapshot()));
+		data.step(StepData.new(StepType.Queue.Dequeue, new DequeueData(nodeId, value, startSnapshot, this.snapshot())));
 		return value;
 	}
 
 	peek(data: OperationData): number | null {
 		if (!this.front) {
-			data.step(Step.Queue.Empty());
+			data.step(StepData.new(StepType.Queue.Empty, new EmptyData()));
 			return null;
 		}
 
-		data.step(Step.Queue.Peek(this.front.id, this.front.value));
+		data.step(StepData.new(StepType.Queue.Peek, new PeekData(this.front.id, this.front.value)));
 		return this.front.value;
 	}
 }

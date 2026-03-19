@@ -135,7 +135,7 @@
 										operations[currentOperation] === op
 											? 'bg-primary text-white'
 											: 'text-gray-700'} operation-step rounded p-1 text-sm transition-colors">
-										{step.id + 1}: {(step.data as any).action}
+										{step.id + 1}: {translate(locale, (step.data as any).label, (step.data as any).params)}
 									</li>
 								{/each}
 							</ul>

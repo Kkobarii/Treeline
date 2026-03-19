@@ -88,6 +88,98 @@ const cs: Translation = {
 		},
 	},
 
+	steps: {
+		dataStructures: {
+			common: {
+				startData: 'Začátek',
+				endData: 'Konec',
+				createRootData: 'Vytvořit kořenový uzel {nodeId} s hodnotou {value}',
+				createLeafData: 'Vytvořit listový uzel {nodeId} s hodnotou {value} jako {direction} potomek uzlu {parentId}',
+				compareData: 'Porovnat hodnotu {value} s uzlem {comparisonId} (hodnota {comparisonValue})',
+				traverseData: 'Přejít {direction} z uzlu {fromId} do uzlu {toId}',
+				dropData: 'Zahodit hodnotu {value} z uzlu {fromId} z důvodu {reason}',
+				foundData: 'Nalezena hodnota {value} v uzlu {nodeId}',
+				markToDeleteData: 'Označit uzel {nodeId} s hodnotou {value} ke smazání',
+				deleteData: 'Smazat uzel {nodeId} s hodnotou {value}',
+				replaceWithChildData: 'Nahradit uzel {oldNodeId} jeho {direction} potomkem {newNodeId} s hodnotou {newValue}',
+				replaceWithInorderSuccessorData:
+					'Nahradit uzel {oldNodeId} jeho inorder následníkem {successorNodeId} s hodnotou {successorValue}',
+				relinkSuccessorChildData:
+					'Přepojit potomka {childNodeId} s hodnotou {childValue} z následníka na rodičovský uzel {newParentNodeId} s hodnotou {newParentValue}',
+				foundInorderSuccessorData: 'Nalezen inorder následník {successorId} s hodnotou {successorValue} pro uzel {nodeId}',
+				caseAnalysisData: 'Případ {caseNumber}: {description}',
+			},
+			avlTree: {
+				updateHeightBalanceData: 'Aktualizovat výšku a vyvážení uzlu {nodeId} na H:{height}, B:{balance}',
+				rotateLeftData: 'Rotace doleva v kořeni {oldRootId}, nový kořen {newRootId}',
+				rotateRightData: 'Rotace doprava v kořeni {oldRootId}, nový kořen {newRootId}',
+			},
+			rbTree: {
+				colorNodeData: 'Obarvit uzel {nodeId} na {color}',
+				rotateLeftData: 'RB rotace doleva v kořeni {oldRootId}, nový kořen {newRootId}',
+				rotateRightData: 'RB rotace doprava v kořeni {oldRootId}, nový kořen {newRootId}',
+				fixupData: 'Oprava v uzlu {nodeId}: {reason}',
+			},
+			heap: {
+				appendData: 'Přidat hodnotu {value} na konec haldy',
+				compareWithParentNeedsSwapData: 'Porovnání uzlu {nodeId} s rodičem {parentId} - je potřeba prohodit',
+				compareWithParentCorrectData: 'Porovnání uzlu {nodeId} s rodičem {parentId} - správná pozice',
+				replaceRootWithLastData: 'Nahradit kořen {rootValue} posledním uzlem {lastValue}',
+				compareWithChildrenHasLargestData: 'Porovnání uzlu {nodeId} s potomky, největší je {largestChildId}',
+				compareWithChildrenCorrectData: 'Uzel {nodeId} je již na správné pozici',
+				findLargestChildData: 'Nalezen největší potomek: uzel {largestChildId} s hodnotou {largestChildValue}',
+				swapData: 'Prohodit uzel {fromId} (hodnota {fromValue}) s uzlem {toId} (hodnota {toValue})',
+			},
+			linkedList: {
+				createHeadData: 'Vytvořit hlavový uzel {nodeId} s hodnotou {value}',
+				insertAtHeadData: 'Vložit uzel {nodeId} s hodnotou {value} na začátek',
+				insertAtTailData: 'Vložit uzel {nodeId} s hodnotou {value} na konec',
+				compareData: 'Porovnat hledanou hodnotu {searchValue} s hodnotou {currentValue} v uzlu {currentId} na pozici {position}',
+				traverseNextData: 'Přejít z uzlu {fromId} na následující uzel {toId}',
+				traverseToTailData: 'Přejít na konec seznamu od uzlu {fromId}',
+				foundData: 'Nalezena hodnota {value} v uzlu {nodeId} na pozici {position}',
+				notFoundData: 'Hodnota {value} nebyla v seznamu nalezena',
+				markToDeleteData: 'Označit uzel {nodeId} s hodnotou {value} ke smazání',
+				removeHeadData: 'Odstranit hlavový uzel',
+				removeNodeData: 'Odstranit uzel {nodeId}',
+				emptyListData: 'Seznam je prázdný',
+			},
+			bTree: {
+				markOverfullData: 'Uzel {nodeId} je přeplněný: {currentCount} hodnot (max {maxCount})',
+				splitData: 'Rozdělit uzel {nodeId}: posunout {middleValue} nahoru (levý: {leftNodeId}, pravý: {rightNodeId})',
+				promoteMiddleAsNewRootData: 'Povýšit {middleValue} na nový kořen',
+				promoteMiddleIntoParentData: 'Povýšit {middleValue} do rodiče ({targetNodeId})',
+				chooseBranchData: 'Vybrat potomka {childIndex} (uzel {childId}) pro hodnotu {value}',
+				chooseBranchBetweenData:
+					'Vybrat potomka {childIndex} (uzel {childId}) pro hodnotu {value} (mezi {lowerBound} a {upperBound})',
+				chooseBranchGreaterThanData: 'Vybrat potomka {childIndex} (uzel {childId}) pro hodnotu {value} (větší než {lowerBound})',
+				chooseBranchLessThanData: 'Vybrat potomka {childIndex} (uzel {childId}) pro hodnotu {value} (menší než {upperBound})',
+				insertValueData: 'Vložit hodnotu {value} do uzlu {nodeId}',
+				removeValueData: 'Odebrat hodnotu {value} z uzlu {nodeId}',
+				replaceValueData: 'Nahradit hodnotu {oldValue} hodnotou {newValue} ({replacementSource}) v uzlu {nodeId}',
+				borrowFromLeftData:
+					'Vypůjčit hodnotu {borrowedValue} z levého sourozence {siblingId} přes rodičovskou hodnotu {parentValue} do uzlu {childId}',
+				borrowFromRightData:
+					'Vypůjčit hodnotu {borrowedValue} z pravého sourozence {siblingId} přes rodičovskou hodnotu {parentValue} do uzlu {childId}',
+				mergeChildrenData: 'Sloučit uzel {leftChildId} a uzel {rightChildId} s rodičovskou hodnotou {parentValue}',
+				findInorderReplacementPredecessorData: 'Nalezena hodnota předchůdce {replacementValue} v uzlu {childId} pro uzel {nodeId}',
+				findInorderReplacementSuccessorData: 'Nalezena hodnota následníka {replacementValue} v uzlu {childId} pro uzel {nodeId}',
+			},
+			stack: {
+				pushData: 'Vložit hodnotu {value} na zásobník',
+				popData: 'Odebrat hodnotu {value} ze zásobníku',
+				peekData: 'Nahlédnout na horní hodnotu {value}',
+				emptyData: 'Zásobník je prázdný',
+			},
+			queue: {
+				enqueueData: 'Zařadit hodnotu {value} do fronty',
+				dequeueData: 'Vyřadit hodnotu {value} z fronty',
+				peekData: 'Nahlédnout na čelní hodnotu {value}',
+				emptyData: 'Fronta je prázdná',
+			},
+		},
+	},
+
 	sorting: {
 		views: {
 			bigPicture: 'Přehled',

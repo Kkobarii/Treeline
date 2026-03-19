@@ -1,9 +1,9 @@
 import type { StepData } from '$lib/data-structures/operation/operationData';
 import type { OperationManager } from '$lib/data-structures/operation/operationManager';
-import { Step } from '$lib/data-structures/operation/stepData';
 import { StepType, type StepTypeValue } from '$lib/data-structures/structures/dataStructure';
 import type { RBTree } from '$lib/data-structures/structures/rbTree/rbTree';
 import type { RBTreeAnimator } from '$lib/data-structures/structures/rbTree/rbTreeAnimator';
+import type { ColorNodeData, FixupData, RotateLeftData, RotateRightData } from '$lib/data-structures/structures/rbTree/rbTreeSteps';
 import type { DataStructureAnimator } from '$lib/data-structures/visual/animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
@@ -11,41 +11,41 @@ import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandl
 
 import type { RBTreeAnnotator } from './rbTreeAnnotator';
 
-async function handleColorNodeForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: Step.RBTree.ColorNodeData) {
+async function handleColorNodeForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: ColorNodeData) {
 	annotator.annotateNode(`Color node ${data.nodeId} ${data.color}`, data.nodeId);
 	animator.ensure(data.endSnapshot! as RBTree);
 }
 
-async function handleColorNodeBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: Step.RBTree.ColorNodeData) {
+async function handleColorNodeBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: ColorNodeData) {
 	annotator.annotateNode(`Color node ${data.nodeId} ${data.color}`, data.nodeId);
 	animator.ensure(data.startSnapshot! as RBTree);
 }
 
-async function handleRotateLeftForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: Step.RBTree.RotateLeftData) {
+async function handleRotateLeftForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateLeftData) {
 	annotator.annotateNode(`Rotate left at root ${data.oldRootId}`, data.newRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as RBTree);
 }
 
-async function handleRotateLeftBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: Step.RBTree.RotateLeftData) {
+async function handleRotateLeftBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateLeftData) {
 	annotator.annotateNode(`Rotate left at root ${data.oldRootId}`, data.newRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as RBTree);
 }
 
-async function handleRotateRightForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: Step.RBTree.RotateRightData) {
+async function handleRotateRightForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateRightData) {
 	annotator.annotateNode(`Rotate right at root ${data.oldRootId}`, data.newRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as RBTree);
 }
 
-async function handleRotateRightBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: Step.RBTree.RotateRightData) {
+async function handleRotateRightBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateRightData) {
 	annotator.annotateNode(`Rotate right at root ${data.oldRootId}`, data.newRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as RBTree);
 }
 
-async function handleFixupForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: Step.RBTree.FixupData) {
+async function handleFixupForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: FixupData) {
 	annotator.annotateNode(`Fixup: ${data.reason}`, data.nodeId);
 }
 
-async function handleFixupBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: Step.RBTree.FixupData) {
+async function handleFixupBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: FixupData) {
 	annotator.annotateNode(`Fixup: ${data.reason}`, data.nodeId);
 }
 

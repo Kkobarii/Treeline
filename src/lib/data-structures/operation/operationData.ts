@@ -1,6 +1,6 @@
 import { DataStructure } from '$lib/data-structures/structures/dataStructure';
 
-import { Step } from './stepData';
+import { EndData, StartData } from './stepData';
 
 export class OperationData {
 	operation: string;
@@ -12,7 +12,7 @@ export class OperationData {
 	constructor(operation: string, startSnapshot: DataStructure) {
 		this.operation = operation;
 		this.startSnapshot = startSnapshot;
-		this.steps = [Step.Start()];
+		this.steps = [StepData.new('Start', new StartData())];
 		this.endSnapshot = null;
 	}
 
@@ -22,7 +22,7 @@ export class OperationData {
 	}
 
 	end(endSnapshot: DataStructure) {
-		this.step(Step.End());
+		this.step(StepData.new('End', new EndData()));
 		this.endSnapshot = endSnapshot;
 	}
 

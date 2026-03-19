@@ -86,6 +86,98 @@ const en = {
 		},
 	},
 
+	steps: {
+		dataStructures: {
+			common: {
+				startData: 'Start',
+				endData: 'End',
+				createRootData: 'Create root node {nodeId} with value {value}',
+				createLeafData: 'Create leaf node {nodeId} with value {value} as {direction} child of {parentId}',
+				compareData: "Compare value {value} with node {comparisonId}'s {comparisonValue}",
+				traverseData: 'Traverse {direction} from node {fromId} to node {toId}',
+				dropData: 'Drop value {value} from node {fromId} due to {reason}',
+				foundData: 'Found value {value} at node {nodeId}',
+				markToDeleteData: 'Mark node {nodeId} with value {value} to delete',
+				deleteData: 'Delete node {nodeId} with value {value}',
+				replaceWithChildData: 'Replace node {oldNodeId} with its {direction} child node {newNodeId} having value {newValue}',
+				replaceWithInorderSuccessorData:
+					'Replace node {oldNodeId} with its inorder successor node {successorNodeId} having value {successorValue}',
+				relinkSuccessorChildData:
+					'Relink child node {childNodeId} with value {childValue} from successor to parent node {newParentNodeId} with value {newParentValue}',
+				foundInorderSuccessorData: 'Found inorder successor node {successorId} with value {successorValue} for node {nodeId}',
+				caseAnalysisData: 'Case {caseNumber}: {description}',
+			},
+			avlTree: {
+				updateHeightBalanceData: 'Update height and balance of node {nodeId} to H:{height}, B:{balance}',
+				rotateLeftData: 'Rotate left at root {oldRootId}, new root {newRootId}',
+				rotateRightData: 'Rotate right at root {oldRootId}, new root {newRootId}',
+			},
+			rbTree: {
+				colorNodeData: 'Color node {nodeId} {color}',
+				rotateLeftData: 'RB rotate left at root {oldRootId}, new root {newRootId}',
+				rotateRightData: 'RB rotate right at root {oldRootId}, new root {newRootId}',
+				fixupData: 'Fixup at node {nodeId}: {reason}',
+			},
+			heap: {
+				appendData: 'Append value {value} to end of heap',
+				compareWithParentNeedsSwapData: 'Comparing node {nodeId} with parent {parentId} - needs swap',
+				compareWithParentCorrectData: 'Comparing node {nodeId} with parent {parentId} - in correct position',
+				replaceRootWithLastData: 'Replace root {rootValue} with last node {lastValue}',
+				compareWithChildrenHasLargestData: 'Comparing node {nodeId} with children, largest is {largestChildId}',
+				compareWithChildrenCorrectData: 'Node {nodeId} is already in correct position',
+				findLargestChildData: 'Found largest child: node {largestChildId} with value {largestChildValue}',
+				swapData: 'Swap node {fromId} (value {fromValue}) with node {toId} (value {toValue})',
+			},
+			linkedList: {
+				createHeadData: 'Create head node {nodeId} with value {value}',
+				insertAtHeadData: 'Insert node {nodeId} with value {value} at head',
+				insertAtTailData: 'Insert node {nodeId} with value {value} at tail',
+				compareData: "Compare search value {searchValue} with node {currentId}'s value {currentValue} at position {position}",
+				traverseNextData: 'Traverse from node {fromId} to next node {toId}',
+				traverseToTailData: 'Traverse to tail starting from node {fromId}',
+				foundData: 'Found value {value} at node {nodeId} at position {position}',
+				notFoundData: 'Value {value} not found in list',
+				markToDeleteData: 'Mark node {nodeId} with value {value} for deletion',
+				removeHeadData: 'Remove head node',
+				removeNodeData: 'Remove node {nodeId}',
+				emptyListData: 'List is empty',
+			},
+			bTree: {
+				markOverfullData: 'Node {nodeId} is overfull: {currentCount} values (max {maxCount})',
+				splitData: 'Split node {nodeId}: move {middleValue} up (left: {leftNodeId}, right: {rightNodeId})',
+				promoteMiddleAsNewRootData: 'Promote {middleValue} as new root',
+				promoteMiddleIntoParentData: 'Promote {middleValue} into parent ({targetNodeId})',
+				chooseBranchData: 'Choose child {childIndex} (node {childId}) for value {value}',
+				chooseBranchBetweenData:
+					'Choose child {childIndex} (node {childId}) for value {value} (between {lowerBound} and {upperBound})',
+				chooseBranchGreaterThanData: 'Choose child {childIndex} (node {childId}) for value {value} (greater than {lowerBound})',
+				chooseBranchLessThanData: 'Choose child {childIndex} (node {childId}) for value {value} (less than {upperBound})',
+				insertValueData: 'Insert value {value} into node {nodeId}',
+				removeValueData: 'Remove value {value} from node {nodeId}',
+				replaceValueData: 'Replace value {oldValue} with {newValue} ({replacementSource}) in node {nodeId}',
+				borrowFromLeftData:
+					'Borrow value {borrowedValue} from left sibling {siblingId} through parent value {parentValue} to node {childId}',
+				borrowFromRightData:
+					'Borrow value {borrowedValue} from right sibling {siblingId} through parent value {parentValue} to node {childId}',
+				mergeChildrenData: 'Merge node {leftChildId} and node {rightChildId} with parent value {parentValue}',
+				findInorderReplacementPredecessorData: 'Found predecessor value {replacementValue} in node {childId} for node {nodeId}',
+				findInorderReplacementSuccessorData: 'Found successor value {replacementValue} in node {childId} for node {nodeId}',
+			},
+			stack: {
+				pushData: 'Push value {value} onto stack',
+				popData: 'Pop value {value} from stack',
+				peekData: 'Peek top value {value}',
+				emptyData: 'Stack is empty',
+			},
+			queue: {
+				enqueueData: 'Enqueue value {value} to queue',
+				dequeueData: 'Dequeue value {value} from queue',
+				peekData: 'Peek front value {value}',
+				emptyData: 'Queue is empty',
+			},
+		},
+	},
+
 	sorting: {
 		views: {
 			bigPicture: 'Big Picture',
