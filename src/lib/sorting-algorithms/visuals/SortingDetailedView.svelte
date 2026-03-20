@@ -13,7 +13,7 @@
 	import { ItemHighlightType } from '../steps/traceBuilder';
 
 	const locale = getLocale();
-	const t = (key: string) => translate(locale, key);
+	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
 
 	let {
 		algorithmId,
@@ -62,7 +62,7 @@
 		),
 	);
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
-	let stepLabel = $derived(currentStep ? currentStep.label : t('sorting.noSteps'));
+	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : t('sorting.noSteps'));
 	let variables = $derived(currentStep ? currentStep.variables : {});
 	let isMergeSort = $derived(algorithmId === 'merge');
 	let isQuickSort = $derived(algorithmId === 'quick');

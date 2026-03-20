@@ -1,4 +1,5 @@
 import { range, swap } from '$lib/sorting-algorithms/misc/utils';
+import { StepLabel } from '$lib/steps/stepLabel';
 
 import { LineBreak, type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
@@ -146,21 +147,21 @@ export function heapSortSteps(input: number[]): SortStep[] {
 			trace.paint({ compared: [root, left, right], sorted: sortedIndices() });
 			trace.record({
 				codePartId: 'compare',
-				label: `Compare ${root} with ${left} and ${right}`,
+				stepLabel: new StepLabel('sorting.steps.heap.basic.compareRootLeftRight', { root, left, right }),
 				variables: { root, left, right },
 			});
 		} else if (left < heapSize) {
 			trace.paint({ compared: [root, left], sorted: sortedIndices() });
 			trace.record({
 				codePartId: 'compare',
-				label: `Compare ${root} with left child ${left}`,
+				stepLabel: new StepLabel('sorting.steps.heap.basic.compareRootLeft', { root, left }),
 				variables: { root, left },
 			});
 		} else if (right < heapSize) {
 			trace.paint({ compared: [root, right], sorted: sortedIndices() });
 			trace.record({
 				codePartId: 'compare',
-				label: `Compare ${root} with right child ${right}`,
+				stepLabel: new StepLabel('sorting.steps.heap.basic.compareRootRight', { root, right }),
 				variables: { root, right },
 			});
 		}
@@ -177,7 +178,7 @@ export function heapSortSteps(input: number[]): SortStep[] {
 			trace.paint({ moved: [root, largest], sorted: sortedIndices() });
 			trace.record({
 				codePartId: 'swap',
-				label: `Heapify swap ${root} ↔ ${largest}`,
+				stepLabel: new StepLabel('sorting.steps.heap.basic.heapifySwap', { root, largest }),
 				variables: { heapSize, root, largest },
 			});
 			heapify(heapSize, largest);
@@ -194,7 +195,7 @@ export function heapSortSteps(input: number[]): SortStep[] {
 		trace.paint({ moved: [0, end], sorted: sortedIndices() });
 		trace.record({
 			codePartId: 'swap',
-			label: `Move max value to index ${end}`,
+			stepLabel: new StepLabel('sorting.steps.heap.basic.moveMaxToIndex', { end }),
 			variables: { end },
 		});
 		heapify(end, 0);
@@ -232,7 +233,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ ...classicPaint });
 		trace.record({
 			codePartId: HeapSortPartId.Heapify,
-			label: `Compare ${root} with left child ${left}`,
+			stepLabel: new StepLabel('sorting.steps.heap.detailed.heapifyStart', { root, left }),
 			variables: { root, left },
 		});
 
@@ -240,7 +241,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ ...classicPaint, compared: [root, left] });
 			trace.record({
 				codePartId: HeapSortPartId.CompareLeft,
-				label: `Is left child ${left} larger than root ${root}?`,
+				stepLabel: new StepLabel('sorting.steps.heap.detailed.compareLeft', { left, root }),
 				variables: { root, left },
 			});
 			if (array[left].value > array[largest].value) {
@@ -249,7 +250,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.paint({ ...classicPaint, dark: [largest] });
 				trace.record({
 					codePartId: HeapSortPartId.LeftLarger,
-					label: `Left child ${left} is larger, update largest`,
+					stepLabel: new StepLabel('sorting.steps.heap.detailed.leftLarger', { left }),
 					variables: { root, left, largest },
 				});
 			}
@@ -259,7 +260,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ ...classicPaint, compared: [root, right] });
 			trace.record({
 				codePartId: HeapSortPartId.CompareRight,
-				label: `Is right child ${right} larger than current largest ${largest}?`,
+				stepLabel: new StepLabel('sorting.steps.heap.detailed.compareRight', { right, largest }),
 				variables: { root, right, largest },
 			});
 			if (array[right].value > array[largest].value) {
@@ -268,7 +269,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.paint({ ...classicPaint, dark: [largest] });
 				trace.record({
 					codePartId: HeapSortPartId.RightLarger,
-					label: `Right child ${right} is larger, update largest`,
+					stepLabel: new StepLabel('sorting.steps.heap.detailed.rightLarger', { right }),
 					variables: { root, right, largest },
 				});
 			}
@@ -279,14 +280,14 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ ...classicPaint, moved: [root, largest] });
 			trace.record({
 				codePartId: HeapSortPartId.SwapChild,
-				label: `Swap root ${root} with larger child ${largest}`,
+				stepLabel: new StepLabel('sorting.steps.heap.detailed.swapRootWithLargest', { root, largest }),
 				variables: { heapSize, root, largest },
 			});
 
 			trace.paint({ light: getHeapIndices(largest), sorted: sortedIndices() });
 			trace.record({
 				codePartId: HeapSortPartId.CallHeapifyRecursive,
-				label: `Call heapify recursively on index ${largest}`,
+				stepLabel: new StepLabel('sorting.steps.heap.detailed.callHeapifyRecursive', { largest }),
 				variables: { heapSize, largest },
 			});
 			heapify(heapSize, largest);
@@ -295,7 +296,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ sorted: sortedIndices(), light: getHeapIndices(root) });
 		trace.record({
 			codePartId: HeapSortPartId.EndHeapify,
-			label: `End heapify for root ${root}`,
+			stepLabel: new StepLabel('sorting.steps.heap.detailed.endHeapify', { root }),
 			variables: { root },
 		});
 	};
@@ -304,7 +305,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ sorted: sortedIndices() });
 		trace.record({
 			codePartId: HeapSortPartId.HeapSort,
-			label: `Start heap sort`,
+			stepLabel: new StepLabel('sorting.steps.heap.detailed.startHeapSort'),
 			variables: {},
 		});
 
@@ -312,7 +313,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ light: getHeapIndices(i), sorted: sortedIndices() });
 			trace.record({
 				codePartId: HeapSortPartId.BuildHeap,
-				label: `Build heap starting at index ${i}`,
+				stepLabel: new StepLabel('sorting.steps.heap.detailed.buildHeapAtIndex', { i }),
 				variables: { i },
 			});
 			heapify(n, i);
@@ -324,14 +325,14 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ moved: [0, end], sorted: sortedIndices() });
 			trace.record({
 				codePartId: HeapSortPartId.ExtractRoot,
-				label: `Move max value to index ${end}`,
+				stepLabel: new StepLabel('sorting.steps.heap.detailed.moveMaxToIndex', { end }),
 				variables: { end },
 			});
 
 			trace.paint({ light: getHeapIndices(0), sorted: sortedIndices() });
 			trace.record({
 				codePartId: HeapSortPartId.CallHeapifySort,
-				label: `Heapify root after extracting max`,
+				stepLabel: new StepLabel('sorting.steps.heap.detailed.heapifyAfterExtractingMax'),
 				variables: { end },
 			});
 			heapify(end, 0);
@@ -341,7 +342,7 @@ export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ sorted: sortedIndices() });
 		trace.record({
 			codePartId: HeapSortPartId.EndHeapSort,
-			label: `Heap sort complete`,
+			stepLabel: new StepLabel('sorting.steps.heap.detailed.heapSortComplete'),
 			variables: {},
 		});
 	};

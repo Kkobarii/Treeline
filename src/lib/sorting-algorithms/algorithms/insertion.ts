@@ -1,5 +1,6 @@
 import { range, swap } from '$lib/sorting-algorithms/misc/utils';
 import { detailedStepsToSortSteps } from '$lib/sorting-algorithms/steps/stepAdapters';
+import { StepLabel } from '$lib/steps/stepLabel';
 
 import type { DetailedCodeTemplate, DetailedSortStep, SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
@@ -61,7 +62,7 @@ export function insertionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 	trace.paint({ sorted: [0] });
 	trace.record({
 		codePartId: InsertionSortPartId.StartInsertionSort,
-		label: 'Start insertion sort: first element is already sorted',
+		stepLabel: new StepLabel('sorting.steps.insertion.start'),
 		variables: { n },
 	});
 
@@ -70,7 +71,7 @@ export function insertionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 		trace.paint({ light: [i], sorted: range(0, i - 1) });
 		trace.record({
 			codePartId: InsertionSortPartId.OuterLoop,
-			label: `Start sorting element at index ${i}`,
+			stepLabel: new StepLabel('sorting.steps.insertion.outerIteration', { i }),
 			variables: { i, j },
 		});
 
@@ -78,7 +79,7 @@ export function insertionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 			trace.paint({ compared: [j, j - 1], sorted: range(0, i) });
 			trace.record({
 				codePartId: InsertionSortPartId.Compare,
-				label: `Compare element at index ${j} with previous element`,
+				stepLabel: new StepLabel('sorting.steps.insertion.compare', { j, previousJ: j - 1 }),
 				variables: { i, j },
 			});
 
@@ -87,7 +88,7 @@ export function insertionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 				trace.paint({ moved: [j, j - 1], sorted: range(0, i) });
 				trace.record({
 					codePartId: InsertionSortPartId.Swap,
-					label: `Swap elements at indices ${j} and ${j - 1}`,
+					stepLabel: new StepLabel('sorting.steps.insertion.swap', { j, previousJ: j - 1 }),
 					variables: { i, j },
 				});
 				j -= 1;

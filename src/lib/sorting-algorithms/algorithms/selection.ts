@@ -1,5 +1,6 @@
 import { range, swap } from '$lib/sorting-algorithms/misc/utils';
 import { detailedStepsToSortSteps } from '$lib/sorting-algorithms/steps/stepAdapters';
+import { StepLabel } from '$lib/steps/stepLabel';
 
 import type { DetailedCodeTemplate, DetailedSortStep, SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
@@ -69,7 +70,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 	trace.paint({ sorted: sortedIndices });
 	trace.record({
 		codePartId: SelectionSortPartId.StartSelectionSort,
-		label: 'Start selection sort',
+		stepLabel: new StepLabel('sorting.steps.selection.start'),
 		variables: { n },
 	});
 
@@ -78,7 +79,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 		trace.paint({ dark: [i], sorted: sortedIndices });
 		trace.record({
 			codePartId: SelectionSortPartId.OuterLoop,
-			label: `Start searching minimum for position ${i}`,
+			stepLabel: new StepLabel('sorting.steps.selection.outerIteration', { i }),
 			variables: { i, minIndex },
 		});
 
@@ -86,14 +87,14 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 			trace.paint({ light: [j], dark: [minIndex], sorted: sortedIndices });
 			trace.record({
 				codePartId: SelectionSortPartId.ScanLoop,
-				label: `Scan j=${j} against current minimum`,
+				stepLabel: new StepLabel('sorting.steps.selection.scan', { j }),
 				variables: { i, j, minIndex },
 			});
 
 			trace.paint({ compared: [j, minIndex], sorted: sortedIndices });
 			trace.record({
 				codePartId: SelectionSortPartId.Compare,
-				label: `Compare arr[${j}] with current minimum arr[${minIndex}]`,
+				stepLabel: new StepLabel('sorting.steps.selection.compare', { j, minIndex }),
 				variables: { i, j, minIndex },
 			});
 
@@ -102,7 +103,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 				trace.paint({ dark: [minIndex], sorted: sortedIndices });
 				trace.record({
 					codePartId: SelectionSortPartId.NewMin,
-					label: `New minimum found at index ${minIndex}`,
+					stepLabel: new StepLabel('sorting.steps.selection.newMinimum', { minIndex }),
 					variables: { i, j, minIndex },
 				});
 			}
@@ -113,7 +114,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 			trace.paint({ moved: [i, minIndex], sorted: sortedIndices });
 			trace.record({
 				codePartId: SelectionSortPartId.Swap,
-				label: `Swap index ${i} with minimum index ${minIndex}`,
+				stepLabel: new StepLabel('sorting.steps.selection.swap', { i, minIndex }),
 				variables: { i, minIndex },
 			});
 		}

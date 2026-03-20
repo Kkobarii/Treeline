@@ -1,5 +1,6 @@
 import { range, swap } from '$lib/sorting-algorithms/misc/utils';
 import { detailedStepsToSortSteps } from '$lib/sorting-algorithms/steps/stepAdapters';
+import { StepLabel } from '$lib/steps/stepLabel';
 
 import { type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
@@ -62,7 +63,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 	trace.paint({ sorted: sortedIndices });
 	trace.record({
 		codePartId: BubbleSortPartId.StartBubbleSort,
-		label: 'Start bubble sort',
+		stepLabel: new StepLabel('sorting.steps.bubble.start'),
 		variables: { n },
 	});
 
@@ -70,7 +71,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ light: range(0, n - i - 1), sorted: sortedIndices });
 		trace.record({
 			codePartId: BubbleSortPartId.OuterLoop,
-			label: `Outer iteration i=${i}`,
+			stepLabel: new StepLabel('sorting.steps.bubble.outerIteration', { i }),
 			variables: { i, n },
 		});
 
@@ -78,14 +79,14 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ light: [j], sorted: sortedIndices });
 			trace.record({
 				codePartId: BubbleSortPartId.InnerLoop,
-				label: `Inner iteration j=${j}`,
+				stepLabel: new StepLabel('sorting.steps.bubble.innerIteration', { j }),
 				variables: { i, j },
 			});
 
 			trace.paint({ compared: [j, j + 1], sorted: sortedIndices });
 			trace.record({
 				codePartId: BubbleSortPartId.Compare,
-				label: `Compare arr[${j}] and arr[${j + 1}]`,
+				stepLabel: new StepLabel('sorting.steps.bubble.compare', { j, nextJ: j + 1 }),
 				variables: { i, j },
 			});
 
@@ -94,7 +95,7 @@ export function bubbleSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.paint({ moved: [j, j + 1], sorted: sortedIndices });
 				trace.record({
 					codePartId: BubbleSortPartId.Swap,
-					label: `Swap indices ${j} and ${j + 1}`,
+					stepLabel: new StepLabel('sorting.steps.bubble.swap', { j, nextJ: j + 1 }),
 					variables: { i, j },
 				});
 			}

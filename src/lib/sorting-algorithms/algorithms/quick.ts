@@ -1,4 +1,5 @@
 import { range, swap, uniqueSorted } from '$lib/sorting-algorithms/misc/utils';
+import { StepLabel } from '$lib/steps/stepLabel';
 
 import { LineBreak, type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
@@ -117,7 +118,7 @@ export function quickSortSteps(input: number[]): SortStep[] {
 			trace.paint({ compared: [j, high], sorted: sortedIndices() });
 			trace.record({
 				codePartId: 'compare',
-				label: `Compare arr[${j}] with pivot`,
+				stepLabel: new StepLabel('sorting.steps.quick.basic.compareWithPivot', { j }),
 				variables: { j, pivot, low, high },
 			});
 
@@ -127,7 +128,7 @@ export function quickSortSteps(input: number[]): SortStep[] {
 				trace.paint({ moved: [i, j], compared: [high], sorted: sortedIndices() });
 				trace.record({
 					codePartId: 'swap',
-					label: `Move arr[${j}] into left partition`,
+					stepLabel: new StepLabel('sorting.steps.quick.basic.moveIntoLeftPartition', { j }),
 					variables: { i, j, pivot },
 				});
 			}
@@ -137,7 +138,7 @@ export function quickSortSteps(input: number[]): SortStep[] {
 		trace.paint({ moved: [i + 1, high], sorted: sortedIndices() });
 		trace.record({
 			codePartId: 'swap-pivot',
-			label: `Place pivot at index ${i + 1}`,
+			stepLabel: new StepLabel('sorting.steps.quick.basic.placePivot', { pivotIndex: i + 1 }),
 			variables: { pivotIndex: i + 1 },
 		});
 
@@ -179,7 +180,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ compared: [high], sorted: sortedIndices() });
 		trace.record({
 			codePartId: QuickSortPartId.Partition,
-			label: `Partition arr[${low}..${high}] with pivot arr[${high}]`,
+			stepLabel: new StepLabel('sorting.steps.quick.detailed.partitionStart', { low, high }),
 			variables: {
 				low,
 				high,
@@ -205,7 +206,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			});
 			trace.record({
 				codePartId: QuickSortPartId.Compare,
-				label: `Compare arr[${j}] with pivot arr[${high}]`,
+				stepLabel: new StepLabel('sorting.steps.quick.detailed.compareWithPivotAtHigh', { j, high }),
 				variables: {
 					low,
 					high,
@@ -230,7 +231,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				});
 				trace.record({
 					codePartId: QuickSortPartId.Swap,
-					label: `Move arr[${j}] into left partition at index ${i}`,
+					stepLabel: new StepLabel('sorting.steps.quick.detailed.moveIntoLeftPartitionAtIndex', { j, i }),
 					variables: {
 						low,
 						high,
@@ -252,7 +253,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		});
 		trace.record({
 			codePartId: QuickSortPartId.Compare,
-			label: `All elements compared. Place pivot in final position at index ${i + 1}`,
+			stepLabel: new StepLabel('sorting.steps.quick.detailed.allComparedPlacePivot', { pivotIndex: i + 1 }),
 			variables: {
 				low,
 				high,
@@ -273,7 +274,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		});
 		trace.record({
 			codePartId: QuickSortPartId.PivotPlace,
-			label: `Place pivot at index ${i + 1}`,
+			stepLabel: new StepLabel('sorting.steps.quick.detailed.placePivot', { pivotIndex: i + 1 }),
 			variables: {
 				low,
 				high,
@@ -293,7 +294,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		});
 		trace.record({
 			codePartId: QuickSortPartId.PartitionDone,
-			label: `Partition done for arr[${low}..${high}] with pivot index ${i + 1}`,
+			stepLabel: new StepLabel('sorting.steps.quick.detailed.partitionDone', { low, high, pivotIndex: i + 1 }),
 			variables: {
 				low,
 				high,
@@ -318,7 +319,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ sorted: sortedIndices() });
 		trace.record({
 			codePartId: QuickSortPartId.QuickSort,
-			label: `Quick sort arr[${low}..${high}]`,
+			stepLabel: new StepLabel('sorting.steps.quick.detailed.quickSortSegment', { low, high }),
 			variables: {
 				low,
 				high,
@@ -334,7 +335,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ sorted: sortedIndices() });
 			trace.record({
 				codePartId: QuickSortPartId.QuickSortDone,
-				label: `Single-element segment arr[${low}] is sorted`,
+				stepLabel: new StepLabel('sorting.steps.quick.detailed.singleElementSorted', { low }),
 				variables: {
 					low,
 					high,
@@ -357,7 +358,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			});
 			trace.record({
 				codePartId: QuickSortPartId.CallLeft,
-				label: `Recurse left on arr[${low}..${pivotIndex - 1}]`,
+				stepLabel: new StepLabel('sorting.steps.quick.detailed.recurseLeft', { low, high: pivotIndex - 1 }),
 				variables: {
 					low,
 					high,
@@ -380,7 +381,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			});
 			trace.record({
 				codePartId: QuickSortPartId.CallRight,
-				label: `Recurse right on arr[${pivotIndex + 1}..${high}]`,
+				stepLabel: new StepLabel('sorting.steps.quick.detailed.recurseRight', { low: pivotIndex + 1, high }),
 				variables: {
 					low,
 					high,
@@ -398,7 +399,7 @@ export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ sorted: sortedIndices(), light: range(low, high) });
 		trace.record({
 			codePartId: QuickSortPartId.QuickSortDone,
-			label: `Finished quick_sort on arr[${low}..${high}]`,
+			stepLabel: new StepLabel('sorting.steps.quick.detailed.finishedQuickSortSegment', { low, high }),
 			variables: {
 				low,
 				high,

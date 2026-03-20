@@ -27,7 +27,9 @@
 
 	let currentStep = $derived(steps[currentStepIndex]);
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
-	let stepLabel = $derived(currentStep ? currentStep.label : t('sorting.noSteps'));
+	let stepLabel = $derived(
+		currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : t('sorting.noSteps'),
+	);
 	let barTransitionMs = $derived(isPlaying ? stepDelayMs : 120);
 
 	function clearTimer() {

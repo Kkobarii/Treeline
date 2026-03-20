@@ -1,4 +1,5 @@
 import { range, shift } from '$lib/sorting-algorithms/misc/utils';
+import { StepLabel } from '$lib/steps/stepLabel';
 
 import { LineBreak, type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
@@ -170,7 +171,7 @@ export function mergeSortSteps(input: number[]): SortStep[] {
 			trace.paint({ compared: [leftPos, rightStart] });
 			trace.record({
 				codePartId: MergeSortPartId.Compare,
-				label: `Compare arr[${leftPos}] and arr[${rightStart}]`,
+				stepLabel: new StepLabel('sorting.steps.merge.basic.compare', { leftPos, rightPos: rightStart }),
 				variables: {},
 			});
 
@@ -182,7 +183,7 @@ export function mergeSortSteps(input: number[]): SortStep[] {
 				trace.paint({ moved: [leftPos] });
 				trace.record({
 					codePartId: MergeSortPartId.Shift,
-					label: `Shift element from ${rightStart} to ${leftPos}`,
+					stepLabel: new StepLabel('sorting.steps.merge.basic.shift', { from: rightStart, to: leftPos }),
 					variables: {},
 				});
 				leftPos += 1;
@@ -223,7 +224,12 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ light: range(leftPos, leftEnd), dark: range(rightPos, right), compared: [] });
 		trace.record({
 			codePartId: MergeSortPartId.Merge,
-			label: `Start merging arr[${left}..${mid}] and arr[${mid + 1}..${right}]`,
+			stepLabel: new StepLabel('sorting.steps.merge.detailed.startMerging', {
+				left,
+				mid,
+				right,
+				rightStart: mid + 1,
+			}),
 			variables: {
 				left,
 				mid,
@@ -240,7 +246,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ compared: [leftPos, rightPos], light: range(leftPos, leftEnd), dark: range(rightPos, right) });
 			trace.record({
 				codePartId: MergeSortPartId.Compare,
-				label: `Compare arr[${leftPos}] and arr[${rightPos}]`,
+				stepLabel: new StepLabel('sorting.steps.merge.detailed.compare', { leftPos, rightPos }),
 				variables: {
 					left,
 					right,
@@ -257,7 +263,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.paint({ moved: [leftPos], light: range(leftPos, leftEnd), dark: range(rightPos, right) });
 				trace.record({
 					codePartId: MergeSortPartId.TakeLeft,
-					label: `Move arr[${leftPos}] to output position ${i}`,
+					stepLabel: new StepLabel('sorting.steps.merge.detailed.moveLeftToOutput', { leftPos, i }),
 					variables: {
 						i,
 						leftPos,
@@ -285,7 +291,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 				trace.paint({ moved: [leftPos], light: range(leftPos, leftEnd + 1), dark: range(rightPos + 1, right) });
 				trace.record({
 					codePartId: MergeSortPartId.TakeRight,
-					label: `Move arr[${rightPos}] to output position ${i}`,
+					stepLabel: new StepLabel('sorting.steps.merge.detailed.moveRightToOutput', { rightPos, i }),
 					variables: {
 						i,
 						rightPos,
@@ -307,7 +313,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ moved: [leftPos], light: range(leftPos + 1, leftEnd) });
 			trace.record({
 				codePartId: MergeSortPartId.AppendLeft,
-				label: `Insert remaining left item at position ${leftPos}`,
+				stepLabel: new StepLabel('sorting.steps.merge.detailed.insertRemainingLeft', { leftPos }),
 				variables: {
 					i: leftPos,
 					targetAreaLeft: left,
@@ -323,7 +329,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ moved: [rightPos], dark: range(rightPos + 1, right) });
 			trace.record({
 				codePartId: MergeSortPartId.AppendRight,
-				label: `Insert remaining right item at position ${i}`,
+				stepLabel: new StepLabel('sorting.steps.merge.detailed.insertRemainingRight', { i }),
 				variables: {
 					i,
 					rightPos,
@@ -335,13 +341,6 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			rightPos += 1;
 			i += 1;
 		}
-
-		// trace.paint({ sorted: range(left, right) });
-		// trace.record({
-		// 	codePartId: MergeSortPartId.MergeDone,
-		// 	label: `Merged segment arr[${left}..${right}]`,
-		// 	variables: { left, right },
-		// });
 	};
 
 	const mergeSort = (left: number, right: number, level: number) => {
@@ -349,7 +348,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ light: range(left, right) });
 		trace.record({
 			codePartId: MergeSortPartId.MergeSort,
-			label: `Start merge_sort on arr[${left}..${right}]`,
+			stepLabel: new StepLabel('sorting.steps.merge.detailed.startMergeSortSegment', { left, right }),
 			variables: {
 				left,
 				right,
@@ -364,7 +363,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ light: range(left, mid), dark: range(mid + 1, right) });
 			trace.record({
 				codePartId: MergeSortPartId.Divide,
-				label: `Divide arr[${left}..${right}] into arr[${left}..${mid}] and arr[${mid + 1}..${right}]`,
+				stepLabel: new StepLabel('sorting.steps.merge.detailed.divideSegment', { left, right, mid, rightStart: mid + 1 }),
 				variables: {
 					left,
 					mid,
@@ -380,7 +379,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ light: range(left, mid) });
 			trace.record({
 				codePartId: MergeSortPartId.CallLeft,
-				label: `Merge sort arr[${left}..${mid}]`,
+				stepLabel: new StepLabel('sorting.steps.merge.detailed.mergeSortLeftSegment', { left, mid }),
 				variables: {
 					targetAreaLeft: left,
 					targetAreaRight: right,
@@ -394,7 +393,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 			trace.paint({ dark: range(mid + 1, right) });
 			trace.record({
 				codePartId: MergeSortPartId.CallRight,
-				label: `Merge sort arr[${mid + 1}..${right}]`,
+				stepLabel: new StepLabel('sorting.steps.merge.detailed.mergeSortRightSegment', { rightStart: mid + 1, right }),
 				variables: {
 					targetAreaLeft: left,
 					targetAreaRight: right,
@@ -409,7 +408,7 @@ export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
 		trace.paint({ sorted: range(left, right) });
 		trace.record({
 			codePartId: MergeSortPartId.MergeDone,
-			label: `Finished merge_sort on arr[${left}..${right}]`,
+			stepLabel: new StepLabel('sorting.steps.merge.detailed.finishedMergeSortSegment', { left, right }),
 			variables: {
 				left,
 				right,

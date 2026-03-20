@@ -1,3 +1,5 @@
+import { StepLabel } from '$lib/steps/stepLabel';
+
 import type { DetailedSortStep } from './stepTypes';
 
 export enum ItemHighlightType {
@@ -55,7 +57,7 @@ export class DetailedTraceBuilder {
 
 		this.record({
 			codePartId: 'initial',
-			label: 'Initial array',
+			stepLabel: new StepLabel('sorting.steps.common.initialArray'),
 			variables: {},
 		});
 	}
@@ -218,7 +220,7 @@ export class DetailedTraceBuilder {
 			array: snapshotArray,
 			rows: this.useRows ? this.buildRowsSnapshot(snapshotArray) : undefined,
 			codePartId: step.codePartId,
-			label: step.label,
+			stepLabel: step.stepLabel,
 			variables: step.variables,
 		});
 	}
@@ -227,7 +229,7 @@ export class DetailedTraceBuilder {
 		this.paint({ sorted: this.array.map((_, index) => index) });
 		this.record({
 			codePartId: 'final',
-			label: 'Final array',
+			stepLabel: new StepLabel('sorting.steps.common.finalArray'),
 			variables: {},
 		});
 

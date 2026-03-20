@@ -1,10 +1,12 @@
+import type { StepLabel } from '$lib/steps/stepLabel';
+
 import type { SortingAlgorithmId } from '../misc/types';
 import type { Item } from './traceBuilder';
 
 // basic steps
 export interface SortStep {
 	array: Item[];
-	label: string;
+	stepLabel: StepLabel;
 }
 
 // detailed steps
@@ -15,7 +17,7 @@ export interface DetailedSortStep {
 	array: Item[];
 	rows?: Array<Array<Item | null>>;
 	codePartId: string;
-	label: string;
+	stepLabel: StepLabel;
 	variables: Record<string, number | string>;
 }
 
