@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 
 	import OperationStep from '$lib/data-structures/controls/OperationStep.svelte';
+	import { getStoredDebugMode, subscribeToDebugMode } from '$lib/data-structures/debugMode';
 	import type { OperationData } from '$lib/data-structures/operation/operationData';
 	import {
 		CurrentOperationChangedEvent,
@@ -43,8 +44,15 @@
 	let operations: OperationData[] = [];
 	let currentOperation: number = 0;
 	let currentStep: number = 0;
+	let debugMode: boolean = false;
+	let unsubscribeDebugMode: (() => void) | null = null;
 
 	onMount(() => {
+		debugMode = getStoredDebugMode();
+		unsubscribeDebugMode = subscribeToDebugMode(value => {
+			debugMode = value;
+		});
+
 		operationManager.addEventListener(EventType.CurrentOperationChanged, (e: Event) => {
 			const event = e as CustomEvent<CurrentOperationChangedEvent>;
 
@@ -78,6 +86,13 @@
 			locked = ev.detail;
 			updateCanDoFlags();
 		});
+
+		return () => {
+			if (unsubscribeDebugMode) {
+				unsubscribeDebugMode();
+				unsubscribeDebugMode = null;
+			}
+		};
 	});
 
 	function updateCanDoFlags() {
@@ -144,33 +159,35 @@
 		</div>
 	</div>
 
-	<div class="flex min-h-0 flex-1 flex-col gap-3">
-		<h2 class="text-primary text-lg font-bold break-words">{t('controls.operation.info')}</h2>
+	{#if debugMode}
+		<div class="flex min-h-0 flex-1 flex-col gap-3">
+			<h2 class="text-primary text-lg font-bold break-words">{t('controls.operation.info')}</h2>
 
-		<div
-			class="min-h-0 flex-1 overflow-y-auto"
-			id="operation-info">
-			<ul class="flex flex-col gap-2">
-				{#each operations as op}
-					<li
-						class="{operations[currentOperation] === op
-							? 'bg-primary-light'
-							: 'bg-gray-200'} mr-1 rounded p-2 text-sm break-words transition-colors">
-						{formatOperationTitle(op)}
-						{#if operations[currentOperation] === op}
-							<ul class="mt-2 flex flex-col gap-1">
-								{#each op.steps as step}
-									<OperationStep
-										{step}
-										isCurrent={operations[currentOperation].steps[currentStep] === step &&
-											operations[currentOperation] === op}
-										label={translate(locale, (step.data as any).label, (step.data as any).params)} />
-								{/each}
-							</ul>
-						{/if}
-					</li>
-				{/each}
-			</ul>
+			<div
+				class="min-h-0 flex-1 overflow-y-auto"
+				id="operation-info">
+				<ul class="flex flex-col gap-2">
+					{#each operations as op}
+						<li
+							class="{operations[currentOperation] === op
+								? 'bg-primary-light'
+								: 'bg-gray-200'} mr-1 rounded p-2 text-sm break-words transition-colors">
+							{formatOperationTitle(op)}
+							{#if operations[currentOperation] === op}
+								<ul class="mt-2 flex flex-col gap-1">
+									{#each op.steps as step}
+										<OperationStep
+											{step}
+											isCurrent={operations[currentOperation].steps[currentStep] === step &&
+												operations[currentOperation] === op}
+											label={translate(locale, (step.data as any).label, (step.data as any).params)} />
+									{/each}
+								</ul>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			</div>
 		</div>
-	</div>
+	{/if}
 </div>

@@ -4,6 +4,7 @@
 	import { Network, type Edge, type Node, type Options } from 'vis-network';
 
 	import { Colors } from '$lib/assets/colors';
+	import { getStoredDebugMode, setStoredDebugMode, subscribeToDebugMode } from '$lib/data-structures/debugMode';
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
 
@@ -30,14 +31,21 @@
 	let overlayCanvas: HTMLCanvasElement | null = null;
 	let showOverlay: boolean = true;
 	let debugMode: boolean = false;
+	let unsubscribeDebugMode: (() => void) | null = null;
 
-	function toggleDebugMode() {
-		debugMode = !debugMode;
+	function setDebugMode(value: boolean) {
+		debugMode = value;
 		if (!debugMode) {
 			showOverlay = true;
 		}
-		annotator.toggleDebugMode();
-		console.log('Debug mode toggled:', debugMode);
+
+		if (annotator) {
+			annotator.setDebugMode(debugMode);
+		}
+	}
+
+	function toggleDebugMode() {
+		setStoredDebugMode(!debugMode);
 	}
 
 	const defaultLayout = {
@@ -63,7 +71,11 @@
 
 		animator = new Animator({ network, nodes, edges, nodeOptions });
 		annotator = new Annotator({ canvas: overlayCanvas!, network, nodes, edges });
-		debugMode = annotator.debugMode;
+		setDebugMode(getStoredDebugMode());
+
+		unsubscribeDebugMode = subscribeToDebugMode(value => {
+			setDebugMode(value);
+		});
 
 		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new StepHandler());
 
@@ -87,6 +99,13 @@
 				annotator.redrawCanvas();
 			}
 		});
+
+		return () => {
+			if (unsubscribeDebugMode) {
+				unsubscribeDebugMode();
+				unsubscribeDebugMode = null;
+			}
+		};
 	});
 </script>
 
@@ -123,7 +142,6 @@
 			on:click={() => {
 				showOverlay = !showOverlay;
 				annotator.toggleShown();
-				console.log('Overlay toggled:', showOverlay);
 			}}>
 			{showOverlay ? 'Hide' : 'Show'} Overlay
 		</button>

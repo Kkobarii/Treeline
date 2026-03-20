@@ -305,7 +305,7 @@ label {
 }
 
 .controls-container {
-	min-width: 370px;
+	width: 450px;
 	height: 100%;
 }
 
