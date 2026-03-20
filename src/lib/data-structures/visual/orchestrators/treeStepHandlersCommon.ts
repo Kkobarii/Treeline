@@ -3,6 +3,7 @@ import type { OperationManager } from '$lib/data-structures/operation/operationM
 import type { AVLTreeAnimator } from '$lib/data-structures/structures/avlTree/avlTreeAnimator';
 import type { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
 import type { BTreeAnimator } from '$lib/data-structures/structures/bTree/bTreeAnimator';
+import { OperationType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
 import type { HeapAnimator } from '$lib/data-structures/structures/heap/heapAnimator';
 import type { LinkedListAnimator } from '$lib/data-structures/structures/linkedList/linkedListAnimator';
 import type { QueueAnimator } from '$lib/data-structures/structures/queue/queueAnimator';
@@ -38,6 +39,32 @@ type CommonAnimator =
 	| StackAnimator;
 type TreeAnimator = BSTreeAnimator | AVLTreeAnimator | RBTreeAnimator | BTreeAnimator | HeapAnimator;
 
+const operationTypeLabelMap: Record<OperationTypeValue, string> = {
+	[OperationType.Empty]: 'Initial',
+	[OperationType.Tree.Insert]: 'Insert',
+	[OperationType.Tree.Find]: 'Find',
+	[OperationType.Tree.Remove]: 'Remove',
+	[OperationType.Heap.Insert]: 'Insert',
+	[OperationType.Heap.ExtractRoot]: 'Extract Root',
+	[OperationType.LinkedList.InsertHead]: 'Insert Head',
+	[OperationType.LinkedList.InsertTail]: 'Insert Tail',
+	[OperationType.LinkedList.Find]: 'Find',
+	[OperationType.LinkedList.Remove]: 'Remove',
+	[OperationType.Stack.Push]: 'Push',
+	[OperationType.Stack.Pop]: 'Pop',
+	[OperationType.Stack.Peek]: 'Peek',
+	[OperationType.Queue.Enqueue]: 'Enqueue',
+	[OperationType.Queue.Dequeue]: 'Dequeue',
+	[OperationType.Queue.Peek]: 'Peek',
+};
+
+function getOperationLabel(operationManager: OperationManager): string {
+	const operation = operationManager.getCurrentOperation();
+	const base = operationTypeLabelMap[operation.type] ?? operation.type;
+	if (operation.value === null || operation.value === undefined) return base;
+	return `${base} ${operation.value}`;
+}
+
 export async function handleStartForwardCommon(
 	animator: CommonAnimator,
 	annotator: DataStructureAnnotator,
@@ -50,20 +77,19 @@ export async function handleStartForwardCommon(
 
 	animator.ensure(operationManager.getCurrentOperation().startSnapshot);
 
-	if (operationManager.getCurrentOperation().operation == 'Empty') {
+	if (operationManager.getCurrentOperation().type === OperationType.Empty) {
 		const info = `Start an operation to begin!`;
 		annotator.annotateNode(info, null);
 		return;
 	}
 
-	const info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
+	const info = `Starting ${getOperationLabel(operationManager)} operation`;
 	annotator.annotateNode(info, null);
 
 	if (animator.hasNodes()) {
-		const parts = operationManager.getCurrentOperation().operation.split(' ');
-		const value = parts.length > 1 ? parts[1] : null;
-		if (value !== null && value !== undefined && value !== '') {
-			annotator.createValueAnnotation(value, null);
+		const value = operationManager.getCurrentOperation().value;
+		if (value !== null && value !== undefined) {
+			annotator.createValueAnnotation(String(value), null);
 		}
 	}
 	const endPositions = animator.getPositions();
@@ -75,13 +101,13 @@ export async function handleStartBackwardCommon(
 	annotator: DataStructureAnnotator,
 	operationManager: OperationManager,
 ) {
-	if (operationManager.getCurrentOperation().operation == 'Empty') {
+	if (operationManager.getCurrentOperation().type === OperationType.Empty) {
 		const info = `The tree is empty`;
 		annotator.annotateNode(info, null);
 		return;
 	}
 
-	const info = `Starting ${operationManager.getCurrentOperation().operation.toString()} operation`;
+	const info = `Starting ${getOperationLabel(operationManager)} operation`;
 	annotator.annotateNode(info, null);
 	annotator.removeValueAnnotation();
 }

@@ -52,6 +52,9 @@ const cs: Translation = {
 	},
 
 	controls: {
+		common: {
+			initial: 'Počáteční',
+		},
 		tree: {
 			title: 'Ovládání stromu',
 			insertRandom: 'Vložit náhodný uzel',

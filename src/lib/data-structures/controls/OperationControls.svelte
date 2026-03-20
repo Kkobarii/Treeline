@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import OperationStep from '$lib/data-structures/controls/OperationStep.svelte';
 	import type { OperationData } from '$lib/data-structures/operation/operationData';
 	import {
 		CurrentOperationChangedEvent,
@@ -8,10 +9,30 @@
 		EventType,
 		OperationManager,
 	} from '$lib/data-structures/operation/operationManager';
+	import { OperationType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
 	import { getLocale, translate } from '$lib/i18n';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
+
+	const operationTypeTranslationMap: Record<OperationTypeValue, string> = {
+		[OperationType.Empty]: 'controls.common.initial',
+		[OperationType.Tree.Insert]: 'common.insert',
+		[OperationType.Tree.Find]: 'common.find',
+		[OperationType.Tree.Remove]: 'common.remove',
+		[OperationType.Heap.Insert]: 'common.insert',
+		[OperationType.Heap.ExtractRoot]: 'controls.heap.extractRoot',
+		[OperationType.LinkedList.InsertHead]: 'controls.linkedList.insertHead',
+		[OperationType.LinkedList.InsertTail]: 'controls.linkedList.insertTail',
+		[OperationType.LinkedList.Find]: 'common.find',
+		[OperationType.LinkedList.Remove]: 'common.remove',
+		[OperationType.Stack.Push]: 'controls.stack.push',
+		[OperationType.Stack.Pop]: 'controls.stack.pop',
+		[OperationType.Stack.Peek]: 'controls.stack.peek',
+		[OperationType.Queue.Enqueue]: 'controls.queue.enqueue',
+		[OperationType.Queue.Dequeue]: 'controls.queue.dequeue',
+		[OperationType.Queue.Peek]: 'controls.queue.peek',
+	};
 
 	export let operationManager: OperationManager;
 
@@ -64,13 +85,22 @@
 		canDoPrevious = operationManager.canDoPrevious();
 	}
 
+	function formatOperationTitle(operation: OperationData): string {
+		const translationKey = operationTypeTranslationMap[operation.type];
+		if (!translationKey) return operation.type;
+
+		const translatedOperation = t(translationKey);
+		if (operation.value === null || operation.value === undefined) return translatedOperation;
+		return `${translatedOperation} ${operation.value}`;
+	}
+
 	function scrollToCurrentStep() {
 		const operationInfo = document.getElementById('operation-info');
 		if (!operationInfo) return;
 
 		const stepElements = operationInfo.querySelectorAll('.operation-step');
 		stepElements.forEach(el => {
-			if (el.classList.contains('text-white')) {
+			if (el.classList.contains('is-current-step')) {
 				const container = operationInfo;
 				const htmlEl = el as HTMLElement;
 				const offset = htmlEl.offsetTop - container.offsetTop;
@@ -126,17 +156,15 @@
 						class="{operations[currentOperation] === op
 							? 'bg-primary-light'
 							: 'bg-gray-200'} mr-1 rounded p-2 text-sm break-words transition-colors">
-						{op.operation}
+						{formatOperationTitle(op)}
 						{#if operations[currentOperation] === op}
 							<ul class="mt-2 flex flex-col gap-1">
 								{#each op.steps as step}
-									<li
-										class="{operations[currentOperation].steps[currentStep] === step &&
-										operations[currentOperation] === op
-											? 'bg-primary text-white'
-											: 'text-gray-700'} operation-step rounded p-1 text-sm transition-colors">
-										{step.id + 1}: {translate(locale, (step.data as any).label, (step.data as any).params)}
-									</li>
+									<OperationStep
+										{step}
+										isCurrent={operations[currentOperation].steps[currentStep] === step &&
+											operations[currentOperation] === op}
+										label={translate(locale, (step.data as any).label, (step.data as any).params)} />
 								{/each}
 							</ul>
 						{/if}

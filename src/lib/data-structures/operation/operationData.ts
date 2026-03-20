@@ -1,16 +1,18 @@
-import { DataStructure } from '$lib/data-structures/structures/dataStructure';
+import { DataStructure, OperationType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
 
 import { EndData, StartData } from './stepData';
 
 export class OperationData {
-	operation: string;
+	type: OperationTypeValue;
+	value: number | null;
 
 	startSnapshot: DataStructure;
 	steps: StepData[];
 	endSnapshot: DataStructure | null;
 
-	constructor(operation: string, startSnapshot: DataStructure) {
-		this.operation = operation;
+	constructor(type: OperationTypeValue, value: number | null, startSnapshot: DataStructure) {
+		this.type = type;
+		this.value = value;
 		this.startSnapshot = startSnapshot;
 		this.steps = [StepData.new(new StartData())];
 		this.endSnapshot = null;
@@ -27,7 +29,7 @@ export class OperationData {
 	}
 
 	static Ignored(): OperationData {
-		let opData = new OperationData('Ignored', new DataStructure());
+		let opData = new OperationData(OperationType.Empty, null, new DataStructure());
 		opData.end(new DataStructure());
 		return opData;
 	}

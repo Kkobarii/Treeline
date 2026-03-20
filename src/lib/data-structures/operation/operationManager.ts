@@ -1,4 +1,4 @@
-import { getInitOperation, StructureType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
+import { getInitOperation, OperationType, StructureType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
 import { createEmptyStructure, deepCopyStructure } from '$lib/data-structures/structures/dataStructureUtils';
 
 import { OperationData, StepData } from './operationData';
@@ -120,7 +120,7 @@ export class OperationManager {
 		}
 
 		const snapshot = deepCopyStructure(structureType, structure);
-		const data = new OperationData('Empty', snapshot);
+		const data = new OperationData(OperationType.Empty, null, snapshot);
 		data.end(snapshot);
 		return data;
 	}

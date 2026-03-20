@@ -50,6 +50,9 @@ const en = {
 	},
 
 	controls: {
+		common: {
+			initial: 'Initial',
+		},
 		tree: {
 			title: 'Tree Controls',
 			insertRandom: 'Insert Random Node',

@@ -13,6 +13,7 @@ export enum StructureType {
 }
 
 export const OperationType = {
+	Empty: 'Empty',
 	Tree: {
 		Insert: 'Tree.Insert',
 		Find: 'Tree.Find',
@@ -41,6 +42,7 @@ export const OperationType = {
 } as const;
 
 export type OperationTypeValue =
+	| typeof OperationType.Empty
 	| (typeof OperationType.Tree)[keyof typeof OperationType.Tree]
 	| (typeof OperationType.Heap)[keyof typeof OperationType.Heap]
 	| (typeof OperationType.LinkedList)[keyof typeof OperationType.LinkedList]
@@ -168,9 +170,7 @@ export class DataStructure {
 	}
 
 	operation(type: OperationTypeValue, value: number | null): OperationData {
-		const name = type.split('.')[1];
-		const label = value === null || value === undefined ? name : `${name} ${value}`;
-		const data: OperationData = new OperationData(label, this.snapshot());
+		const data: OperationData = new OperationData(type, value, this.snapshot());
 		this.doOperation(type, value, data);
 		data.end(this.snapshot());
 		return data;
