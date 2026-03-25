@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import PillSwitcher from '$lib/components/PillSwitcher.svelte';
 	import OperationStep from '$lib/data-structures/controls/OperationStep.svelte';
 	import { getStoredDebugMode, subscribeToDebugMode } from '$lib/data-structures/debugMode';
 	import type { OperationData } from '$lib/data-structures/operation/operationData';
@@ -40,6 +41,7 @@
 	let canDoNext: boolean = false;
 	let canDoPrevious: boolean = false;
 	let locked: boolean = false;
+	let showSteps: boolean = false;
 
 	let operations: OperationData[] = [];
 	let currentOperation: number = 0;
@@ -78,6 +80,7 @@
 		});
 
 		operationManager.addEventListener(EventType.ShowStepsToggled, () => {
+			showSteps = operationManager.getShowSteps();
 			updateCanDoFlags();
 		});
 
@@ -132,30 +135,44 @@
 <div class="flex min-h-0 flex-1 flex-row gap-2 md:flex-col md:gap-6">
 	<div class="flex flex-col gap-3">
 		<h2 class="text-primary text-lg font-bold break-words">{t('controls.operation.title')}</h2>
-		<div class="flex flex-col items-start gap-2 md:flex-row md:items-center">
+		<div class="flex flex-col flex-wrap items-start gap-2 md:flex-row md:items-center">
 			<button
-				class="w-full md:w-auto"
+				class="inline-flex w-full items-center justify-center md:w-auto"
 				type="button"
 				on:click={() => operationManager.previous()}
+				aria-label={t('common.previous')}
 				disabled={!canDoPrevious || locked}>
-				{t('common.previous')}
+				<img
+					src="/controls/previous.svg"
+					alt="previous"
+					aria-hidden="true"
+					class="h-4 w-4" />
 			</button>
 			<button
-				class="w-full md:w-auto"
+				class="inline-flex w-full items-center justify-center md:w-auto"
 				type="button"
 				on:click={() => operationManager.next()}
+				aria-label={t('common.next')}
 				disabled={!canDoNext || locked}>
-				{t('common.next')}
+				<img
+					src="/controls/next.svg"
+					alt="next"
+					aria-hidden="true"
+					class="h-4 w-4" />
 			</button>
-			<label class="inline-flex items-center gap-2">
-				<input
-					id="steps-checkbox"
-					type="checkbox"
-					class="styled-checkbox"
-					on:change={() => operationManager.toggleShowSteps()}
-					disabled={locked} />
-				<span>{t('common.steps')}</span>
-			</label>
+			<PillSwitcher
+				selected={showSteps ? 1 : 0}
+				leftLabel={t('common.operation')}
+				rightLabel={t('common.step')}
+				size="sm"
+				onLeftClick={() => {
+					if (showSteps) operationManager.toggleShowSteps();
+				}}
+				onRightClick={() => {
+					if (!showSteps) operationManager.toggleShowSteps();
+				}}
+				disabled={locked}
+				className="w-full md:w-auto" />
 		</div>
 	</div>
 

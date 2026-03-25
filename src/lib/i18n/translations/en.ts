@@ -17,6 +17,7 @@ const en = {
 		insert: 'Insert',
 		remove: 'Remove',
 		find: 'Find',
+		operation: 'Operation',
 	},
 
 	nav: {

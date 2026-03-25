@@ -19,6 +19,7 @@ const cs: Translation = {
 		insert: 'Vložit',
 		remove: 'Odebrat',
 		find: 'Najít',
+		operation: 'Operace',
 	},
 
 	nav: {
