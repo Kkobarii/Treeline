@@ -146,7 +146,7 @@
 					src="/controls/previous.svg"
 					alt="previous"
 					aria-hidden="true"
-					class="h-4 w-4" />
+					class="h-4 w-4 dark:invert" />
 			</button>
 			<button
 				class="inline-flex w-full items-center justify-center md:w-auto"
@@ -158,7 +158,7 @@
 					src="/controls/next.svg"
 					alt="next"
 					aria-hidden="true"
-					class="h-4 w-4" />
+					class="h-4 w-4 dark:invert" />
 			</button>
 			<PillSwitcher
 				selected={showSteps ? 1 : 0}
