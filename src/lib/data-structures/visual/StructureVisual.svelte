@@ -147,3 +147,15 @@
 		</button>
 	</div>
 </div>
+
+<style>
+	.structure-visual-container {
+		flex-grow: 1;
+	}
+
+	@media (max-width: 768px) {
+		.structure-visual-container {
+			width: 100%;
+		}
+	}
+</style>

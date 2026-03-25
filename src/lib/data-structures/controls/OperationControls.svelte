@@ -191,3 +191,18 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	#operation-info::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+
+	#operation-info::-webkit-scrollbar-thumb {
+		background: rgba(90, 90, 90);
+	}
+
+	#operation-info::-webkit-scrollbar-track {
+		background: rgba(0, 0, 0, 0.2);
+	}
+</style>

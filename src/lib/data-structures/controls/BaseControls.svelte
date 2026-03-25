@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 
 	import { EventType, InputValueChangedEvent, type OperationManager } from '$lib/data-structures/operation/operationManager';
 
@@ -10,9 +10,10 @@
 		title: string;
 		manualValue?: number;
 		locked?: boolean;
+		children?: Snippet;
 	}
 
-	let { operationManager, title, manualValue = $bindable(0), locked = $bindable(false) }: Props = $props();
+	let { operationManager, title, manualValue = $bindable(0), locked = $bindable(false), children }: Props = $props();
 
 	onMount(() => {
 		operationManager.addEventListener(EventType.InputValueChanged, (e: Event) => {
@@ -31,7 +32,7 @@
 	<div class="flex flex-col gap-4">
 		<h2 class="text-primary text-lg font-bold">{title}</h2>
 		<div class="flex flex-col gap-4">
-			<slot />
+			{@render children?.()}
 		</div>
 	</div>
 
@@ -39,6 +40,19 @@
 </div>
 
 <style>
+	.controls-container {
+		width: 450px;
+		height: 100%;
+	}
+
+	@media (max-width: 768px) {
+		.controls-container {
+			min-width: 0;
+			width: 100%;
+			min-height: 30em;
+		}
+	}
+
 	:global(.controls-container .buttons-in-col) {
 		display: flex;
 		flex-direction: column;

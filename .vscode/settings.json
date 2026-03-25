@@ -3,5 +3,6 @@
         "Inorder",
         "oklch",
         "rgba"
-    ]
+    ],
+    "css.lint.unknownAtRules": "ignore"
 }

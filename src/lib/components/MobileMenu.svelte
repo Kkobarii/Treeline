@@ -118,3 +118,123 @@
 		</div>
 	</details>
 </div>
+
+<style>
+	.mobile-menu {
+		position: fixed;
+		right: 1.5rem;
+		width: min(280px, calc(100vw - 3rem));
+		background-color: oklch(from var(--color-primary) l c h / 0.95);
+		border: 1px solid var(--color-primary-dark);
+		border-radius: 1rem;
+		backdrop-filter: blur(8px);
+		z-index: 100;
+		display: flex;
+		flex-direction: column;
+		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+		opacity: 0;
+		transform: translateY(-8px);
+		visibility: hidden;
+		pointer-events: none;
+		transition:
+			opacity 0.2s ease,
+			transform 0.2s ease,
+			visibility 0.2s ease;
+	}
+
+	:global(.mobile-menu-toggle:checked) ~ .mobile-menu {
+		opacity: 1;
+		transform: translateY(0);
+		visibility: visible;
+		pointer-events: auto;
+	}
+
+	.mobile-menu-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 99;
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+	}
+
+	:global(.mobile-menu-toggle:checked) ~ .mobile-menu-overlay {
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+	}
+
+	.mobile-menu-section {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.mobile-menu-button {
+		color: white;
+		background: none;
+		border: none;
+		padding: 1rem 1.5rem;
+		font-size: 0.95rem;
+		font-weight: 500;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		transition: background-color 0.2s ease;
+		opacity: 0.9;
+	}
+
+	.mobile-menu-button::-webkit-details-marker {
+		display: none;
+	}
+
+	.mobile-menu-button::marker {
+		content: '';
+	}
+
+	.mobile-menu-button:hover {
+		background-color: color-mix(in srgb, var(--color-primary-light) 30%, transparent);
+		opacity: 1;
+	}
+
+	.mobile-menu-section[open] .mobile-menu-chevron {
+		transform: rotate(180deg);
+	}
+
+	.mobile-submenu {
+		display: flex;
+		flex-direction: column;
+		background-color: color-mix(in srgb, var(--color-primary-light) 20%, transparent);
+		animation: slideDown 0.2s ease;
+	}
+
+	.mobile-submenu-link {
+		color: white;
+		text-decoration: none;
+		padding: 0.75rem 2rem;
+		font-size: 0.9rem;
+		font-weight: 500;
+		transition: background-color 0.2s ease;
+		opacity: 0.85;
+	}
+
+	.mobile-submenu-link:hover {
+		background-color: color-mix(in srgb, var(--color-primary-light) 30%, transparent);
+		opacity: 1;
+	}
+
+	@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+</style>
