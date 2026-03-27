@@ -1,4 +1,5 @@
 import { getDummyNodeId, NodeData } from '$lib/data-structures/utils/graphs';
+import { deepEqual } from '$lib/data-structures/utils/utils';
 import { Timer } from '$lib/utils/timer';
 
 import { DataStructureAnimator, type DataStructureAnimatorOpts } from './dataStructureAnimator';
@@ -6,6 +7,48 @@ import { DataStructureAnimator, type DataStructureAnimatorOpts } from './dataStr
 export class BinaryTreeAnimator extends DataStructureAnimator {
 	constructor(opts: DataStructureAnimatorOpts) {
 		super(opts);
+	}
+
+	private isNodeConsistent(currentNode: any, expectedNode: any): boolean {
+		for (const [key, value] of Object.entries(expectedNode)) {
+			if (!deepEqual(currentNode?.[key], value)) return false;
+		}
+		return true;
+	}
+
+	private isEdgeConsistent(currentEdge: any, expectedEdge: any): boolean {
+		for (const [key, value] of Object.entries(expectedEdge)) {
+			if (!deepEqual(currentEdge?.[key], value)) return false;
+		}
+		return true;
+	}
+
+	private hasNodeInconsistencies(expectedNodes: any[]): boolean {
+		const currentNodes = this.nodes.get();
+		if (currentNodes.length !== expectedNodes.length) return true;
+
+		const currentById = new Map(currentNodes.map(node => [node.id, node]));
+		for (const expectedNode of expectedNodes) {
+			const currentNode = currentById.get(expectedNode.id);
+			if (!currentNode) return true;
+			if (!this.isNodeConsistent(currentNode, expectedNode)) return true;
+		}
+
+		return false;
+	}
+
+	private hasEdgeInconsistencies(expectedEdges: any[]): boolean {
+		const currentEdges = this.edges.get();
+		if (currentEdges.length !== expectedEdges.length) return true;
+
+		const currentByKey = new Map(currentEdges.map(edge => [edge.id, edge]));
+		for (const expectedEdge of expectedEdges) {
+			const currentEdge = currentByKey.get(expectedEdge.id);
+			if (!currentEdge) return true;
+			if (!this.isEdgeConsistent(currentEdge, expectedEdge)) return true;
+		}
+
+		return false;
 	}
 
 	protected async animateLegsMove(nodeId: string | number, grow: boolean) {
@@ -61,37 +104,50 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 		try {
 			const timer = new Timer();
 			const newData = toGraphFn(tree.root ?? null);
+			const expectedNodes = newData.nodes.get();
+			const expectedEdges = newData.edges.get();
+
 			timer.checkpoint('graph');
 
-			// update existing nodes or add new ones
-			for (const n of newData.nodes.get()) {
-				if (this.nodes.get(n.id!)) {
-					this.updateNodeRaw(n);
-				} else {
-					this.addNodeRaw(n);
+			const nodesInconsistent = this.hasNodeInconsistencies(expectedNodes);
+			const edgesInconsistent = this.hasEdgeInconsistencies(expectedEdges);
+			timer.checkpoint('check');
+
+			if (nodesInconsistent) {
+				// update existing nodes or add new ones
+				for (const n of expectedNodes) {
+					if (this.nodes.get(n.id!)) {
+						this.updateNodeRaw(n);
+					} else {
+						this.addNodeRaw(n);
+					}
 				}
+
+				// remove nodes that are no longer present
+				const newNodeIds = new Set(expectedNodes.map((n: any) => n.id));
+				for (const existingNode of this.nodes.get()) {
+					if (!newNodeIds.has(existingNode.id)) {
+						this.removeNodeRaw(existingNode.id!);
+					}
+				}
+				timer.checkpoint('nodes');
 			}
 
-			// remove nodes that are no longer present
-			const newNodeIds = new Set(newData.nodes.get().map((n: any) => n.id));
-			for (const existingNode of this.nodes.get()) {
-				if (!newNodeIds.has(existingNode.id)) {
-					this.removeNodeRaw(existingNode.id!);
-				}
+			if (edgesInconsistent) {
+				// rebuild edges from authoritative graph
+				try {
+					this.edges.clear();
+					this.edges.add(expectedEdges);
+				} catch {}
+				timer.checkpoint('edges');
 			}
-			timer.checkpoint('nodes');
 
-			// rebuild edges from authoritative graph
-			try {
-				this.edges.clear();
-				this.edges.add(newData.edges.get());
-			} catch {}
-			timer.checkpoint('edges');
+			if (nodesInconsistent || edgesInconsistent) {
+				this.clearDisconnectedDummyNodes();
+				timer.checkpoint('cleanup');
+			}
 
-			this.clearDisconnectedDummyNodes();
-			timer.checkpoint('cleanup');
-
-			// timer.printReport('BinaryTreeAnimator.ensureTree: ');
+			timer.printReport('BinaryTreeAnimator.ensureTree: ');
 		} catch (err) {
 			console.warn('BinaryTreeAnimator.ensureTree error', err);
 		}

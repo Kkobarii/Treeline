@@ -46,10 +46,10 @@ export class AVLTreeStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: AVLTreeAnnotator, isForward: boolean) {
 		let animator = baseAnimator as AVLTreeAnimator;
 		if (isForward && currentStep.startSnapshot) {
-			await animator.ensureAndAnimate(currentStep.startSnapshot);
+			await animator.ensure(currentStep.startSnapshot);
 		}
 		if (!isForward && currentStep.endSnapshot) {
-			await animator.ensureAndAnimate(currentStep.endSnapshot);
+			await animator.ensure(currentStep.endSnapshot);
 		}
 	}
 
@@ -57,10 +57,10 @@ export class AVLTreeStepHandler extends StepHandlerBase {
 		let animator = baseAnimator as AVLTreeAnimator;
 
 		if (isForward && currentStep.endSnapshot) {
-			await animator.ensureAndAnimate(currentStep.endSnapshot);
+			await animator.ensure(currentStep.endSnapshot);
 		}
 		if (!isForward && currentStep.startSnapshot) {
-			await animator.ensureAndAnimate(currentStep.startSnapshot);
+			await animator.ensure(currentStep.startSnapshot);
 		}
 	}
 

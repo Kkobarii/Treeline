@@ -147,10 +147,10 @@ export class LinkedListStepHandler extends StepHandlerBase {
 		let animator = baseAnimator as LinkedListAnimator;
 
 		if (isForward && currentStep.startSnapshot) {
-			await animator.ensureAndAnimate(currentStep.startSnapshot);
+			await animator.ensure(currentStep.startSnapshot);
 		}
 		if (!isForward && currentStep.endSnapshot) {
-			await animator.ensureAndAnimate(currentStep.endSnapshot);
+			await animator.ensure(currentStep.endSnapshot);
 		}
 	}
 
@@ -163,10 +163,10 @@ export class LinkedListStepHandler extends StepHandlerBase {
 		let animator = baseAnimator as LinkedListAnimator;
 
 		if (isForward && currentStep.endSnapshot) {
-			await animator.ensureAndAnimate(currentStep.endSnapshot);
+			await animator.ensure(currentStep.endSnapshot);
 		}
 		if (!isForward && currentStep.startSnapshot) {
-			await animator.ensureAndAnimate(currentStep.startSnapshot);
+			await animator.ensure(currentStep.startSnapshot);
 		}
 	}
 

@@ -2,6 +2,30 @@ export function deepCopy<T>(obj: T): T {
 	return JSON.parse(JSON.stringify(obj));
 }
 
+export function deepEqual(a: any, b: any): boolean {
+	if (a === b) return true;
+	if (a == null || b == null) return a === b;
+	if (Array.isArray(a) || Array.isArray(b)) {
+		if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+		for (let i = 0; i < a.length; i++) {
+			if (!deepEqual(a[i], b[i])) return false;
+		}
+		return true;
+	}
+	if (typeof a === 'object' && typeof b === 'object') {
+		const aKeys = Object.keys(a).sort();
+		const bKeys = Object.keys(b).sort();
+		if (aKeys.length !== bKeys.length) return false;
+		for (let i = 0; i < aKeys.length; i++) {
+			const key = aKeys[i];
+			if (key !== bKeys[i]) return false;
+			if (!deepEqual(a[key], b[key])) return false;
+		}
+		return true;
+	}
+	return false;
+}
+
 const inputConstraints = {
 	min: 0,
 	max: 999,

@@ -82,6 +82,8 @@ export class OperationListChangedEvent {
 }
 
 export class OperationManager {
+	private static readonly SHOW_STEPS_STORAGE_KEY = 'structuresShowSteps';
+
 	private structureType: StructureType;
 	private initialNodeCount: number = 10;
 
@@ -97,6 +99,8 @@ export class OperationManager {
 
 	constructor(structureType: StructureType, initialNodeCount: number = 10) {
 		console.log(`%cMounting ${structureType} OperationManager`, 'color: orange; font-weight: bold;');
+
+		this.showSteps = this.loadShowStepsFromStorage();
 
 		this.structureType = structureType;
 		this.initialNodeCount = initialNodeCount;
@@ -136,6 +140,29 @@ export class OperationManager {
 		}
 
 		return Array.from(chosen);
+	}
+
+	private loadShowStepsFromStorage(): boolean {
+		if (typeof localStorage === 'undefined') return false;
+
+		try {
+			const rawValue = localStorage.getItem(OperationManager.SHOW_STEPS_STORAGE_KEY);
+			if (rawValue === null) return false;
+			return rawValue === 'true';
+		} catch (error) {
+			console.warn('Failed to read showSteps from localStorage:', error);
+			return false;
+		}
+	}
+
+	private persistShowStepsToStorage() {
+		if (typeof localStorage === 'undefined') return;
+
+		try {
+			localStorage.setItem(OperationManager.SHOW_STEPS_STORAGE_KEY, String(this.showSteps));
+		} catch (error) {
+			console.warn('Failed to persist showSteps to localStorage:', error);
+		}
 	}
 
 	addEventListener(eventType: EventType, listener: EventListener, updateNow: boolean = true) {
@@ -336,6 +363,7 @@ export class OperationManager {
 
 	toggleShowSteps() {
 		this.showSteps = !this.showSteps;
+		this.persistShowStepsToStorage();
 		this.emit(EventType.ShowStepsToggled);
 	}
 
