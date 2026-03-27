@@ -190,10 +190,7 @@ const cs: Translation = {
 			detailed: 'Detail',
 		},
 		controls: {
-			shuffle: 'Zamíchat {count} klíčů',
-			shuffle16: 'Zamíchat',
-			stepBack: 'Krok zpět',
-			stepForward: 'Krok vpřed',
+			shuffle: 'Zamíchat',
 		},
 		code: {
 			title: 'Kód algoritmu',

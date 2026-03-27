@@ -5,6 +5,8 @@
 
 	import { getLocale, translate } from '$lib/i18n';
 
+	import CodeLanguageSelect from '../components/CodeLanguageSelect.svelte';
+	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
 	import { getCodeTemplate } from '../misc/codeTemplates';
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
@@ -26,6 +28,8 @@
 	const codeTemplate = getCodeTemplate(algorithmId);
 	const languageStorageKey = 'sortingDetailedViewCodeLanguage';
 	const delayStorageKey = 'sortingDetailedViewDelayMs';
+	const delayMinMs = 200;
+	const delayMaxMs = 1000;
 
 	let language = $state<CodeLanguage>('python');
 	let codeLines = $derived(codeTemplate[language]);
@@ -62,7 +66,7 @@
 		),
 	);
 	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
-	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : t('sorting.noSteps'));
+	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : '');
 	let variables = $derived(currentStep ? currentStep.variables : {});
 	let isMergeSort = $derived(algorithmId === 'merge');
 	let isQuickSort = $derived(algorithmId === 'quick');
@@ -104,6 +108,39 @@
 	let activeFlipDurationMs = $derived(fastAnimation ? Math.max(35, Math.floor(normalFlipDurationMs * 0.22)) : normalFlipDurationMs);
 	let arcHeightFactor = $state(0.1);
 
+	function animateCardHeight(node: HTMLElement) {
+		let previousHeight = node.offsetHeight;
+		let isAnimating = false;
+
+		const resizeObserver = new ResizeObserver(() => {
+			if (isAnimating) {
+				return;
+			}
+
+			const nextHeight = node.offsetHeight;
+			if (Math.abs(nextHeight - previousHeight) < 1) {
+				return;
+			}
+
+			isAnimating = true;
+			node.style.overflow = 'hidden';
+
+			const animation = node.animate([{ height: `${previousHeight}px` }, { height: `${nextHeight}px` }], {
+				duration: 280,
+				easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+			});
+
+			animation.onfinish = animation.oncancel = () => {
+				previousHeight = node.offsetHeight;
+				node.style.overflow = '';
+				isAnimating = false;
+			};
+		});
+
+		resizeObserver.observe(node);
+		return { destroy: () => resizeObserver.disconnect() };
+	}
+
 	function curvedFlip(
 		_: Element,
 		{ from, to }: { from: DOMRect; to: DOMRect },
@@ -144,7 +181,7 @@
 		}
 
 		const storedDelay = Number(sessionStorage.getItem(delayStorageKey));
-		if (Number.isFinite(storedDelay) && storedDelay >= 200 && storedDelay <= 1200) {
+		if (Number.isFinite(storedDelay) && storedDelay >= delayMinMs && storedDelay <= delayMaxMs) {
 			delayMs = storedDelay;
 		}
 
@@ -154,7 +191,7 @@
 	function shuffleArray() {
 		clearTimer();
 		isPlaying = false;
-		const nextArray = createShuffledArray(16);
+		const nextArray = createShuffledArray(currentArray.length);
 		baseArray = nextArray;
 		steps = algorithm.generateDetailedSteps(nextArray);
 		currentStepIndex = 0;
@@ -249,34 +286,23 @@
 	href="//unpkg.com/@catppuccin/highlightjs@1.0.1/css/catppuccin-latte.css" />
 
 <div class="detailed-layout">
-	<div class="treeline-card flex flex-col gap-[0.85rem]">
-		<div class="controls-row">
-			<button onclick={shuffleArray}>{t('sorting.controls.shuffle16')}</button>
-			<button onclick={runOrPause}>{isPlaying ? t('common.pause') : t('common.run')}</button>
-			<button
-				onclick={stepBackManual}
-				disabled={isPlaying || !steps.length || currentStepIndex === 0}>{t('common.back')}</button>
-			<button
-				onclick={stepForwardManual}
-				disabled={isPlaying || !steps.length || currentStepIndex >= steps.length - 1}>{t('common.next')}</button>
-		</div>
-
-		<div class="controls-row">
-			<label for="delay">{t('common.speed')}</label>
-			<input
-				id="delay"
-				type="range"
-				min="200"
-				max="1200"
-				step="20"
-				bind:value={delayMs} />
-			<span class="text-xs">{delayMs}ms</span>
-		</div>
-
-		<div class="flex flex-col gap-[0.35rem] text-[0.85rem]">
-			<div>{t('common.step')} {steps.length ? currentStepIndex + 1 : 0}/{steps.length}</div>
-			<div>{stepLabel}</div>
-		</div>
+	<div
+		class="treeline-card flex flex-col gap-[0.85rem]"
+		use:animateCardHeight>
+		<SortingPlaybackControls
+			stepDescription={stepLabel}
+			currentStep={steps.length ? currentStepIndex + 1 : 0}
+			totalSteps={steps.length}
+			{isPlaying}
+			canStepBackward={steps.length > 0 && currentStepIndex > 0}
+			canStepForward={steps.length > 0 && currentStepIndex < steps.length - 1}
+			minDelay={delayMinMs}
+			maxDelay={delayMaxMs}
+			bind:delayMs
+			onShuffle={shuffleArray}
+			onTogglePlay={runOrPause}
+			onStepBackward={stepBackManual}
+			onStepForward={stepForwardManual} />
 
 		<div
 			class="array-grid"
@@ -323,13 +349,11 @@
 	</div>
 
 	<div class="treeline-card flex flex-col gap-[0.85rem]">
-		<div class="flex items-center justify-between">
-			<h2>{t('sorting.code.title')}</h2>
-			<select bind:value={language}>
-				<option value="python">{t('sorting.code.python')}</option>
-				<option value="javascript">{t('sorting.code.javascript')}</option>
-				<option value="c">{t('sorting.code.c')}</option>
-			</select>
+		<div class="flex items-center justify-between border-b border-gray-200 pb-3">
+			<h2 class="text-primary text-lg font-bold">{t('sorting.code.title')}</h2>
+			<CodeLanguageSelect
+				value={language}
+				onchange={lang => (language = lang)} />
 		</div>
 
 		<div class="flex flex-col">
@@ -369,10 +393,6 @@
 	.detailed-layout {
 		@apply grid gap-4;
 		grid-template-columns: minmax(0, 65%) minmax(0, 35%);
-	}
-
-	.controls-row {
-		@apply flex flex-wrap items-center gap-[0.45rem];
 	}
 
 	.array-grid {

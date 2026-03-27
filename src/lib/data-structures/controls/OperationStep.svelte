@@ -39,14 +39,14 @@
 		: 'operation-step-item--normal'}">
 	<button
 		type="button"
-		class="operation-step-trigger flex w-full items-start justify-between gap-2 text-left"
+		class="operation-step-trigger flex w-full items-start gap-2 text-left"
 		on:click={toggleExpanded}
 		aria-expanded={expanded}
 		disabled={!hasDetails}>
 		<span class="break-words">{step.id + 1}: {label}</span>
 		{#if hasDetails}
 			<span
-				class="operation-step-indicator mt-0.5 text-xs {isCurrent
+				class="operation-step-indicator text-xs {isCurrent
 					? 'operation-step-indicator--current'
 					: 'operation-step-indicator--normal'}">
 				{expanded ? '-' : '+'}
@@ -78,6 +78,8 @@
 		border: none;
 		padding: 0;
 		cursor: pointer;
+		justify-content: space-between;
+		align-items: start;
 	}
 
 	.operation-step-trigger:hover {

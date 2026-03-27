@@ -3,6 +3,7 @@
 
 	import { getLocale, translate } from '$lib/i18n';
 
+	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 	import { createShuffledArray } from '../misc/utils';
@@ -11,6 +12,8 @@
 
 	const locale = getLocale();
 	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
+	const stepDelayMinMs = 5;
+	const stepDelayMaxMs = 120;
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -27,9 +30,7 @@
 
 	let currentStep = $derived(steps[currentStepIndex]);
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
-	let stepLabel = $derived(
-		currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : t('sorting.noSteps'),
-	);
+	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : '');
 	let barTransitionMs = $derived(isPlaying ? stepDelayMs : 120);
 
 	function clearTimer() {
@@ -50,7 +51,7 @@
 
 	onMount(async () => {
 		const storedDelay = Number(sessionStorage.getItem(stepDelayStorageKey));
-		if (Number.isFinite(storedDelay) && storedDelay >= 10 && storedDelay <= 120) {
+		if (Number.isFinite(storedDelay) && storedDelay >= stepDelayMinMs && storedDelay <= stepDelayMaxMs) {
 			stepDelayMs = storedDelay;
 		}
 
@@ -133,34 +134,20 @@
 </script>
 
 <div class="treeline-card flex flex-col gap-4">
-	<div class="flex flex-wrap items-center gap-2">
-		<button onclick={regenerateArray}>{t('sorting.controls.shuffle', { count: 100 })}</button>
-		<button onclick={runOrPause}>{isPlaying ? t('common.pause') : t('common.run')}</button>
-		<button
-			onclick={stepBackward}
-			disabled={!steps.length || currentStepIndex === 0}>{t('sorting.controls.stepBack')}</button>
-		<button
-			onclick={stepForward}
-			disabled={!steps.length || currentStepIndex >= steps.length - 1}>{t('sorting.controls.stepForward')}</button>
-		<label
-			class="ml-2"
-			for="speed-slider">{t('common.speed')}</label>
-		<input
-			id="speed-slider"
-			type="range"
-			min="10"
-			max="120"
-			step="5"
-			bind:value={stepDelayMs} />
-		<span class="text-xs">{stepDelayMs}ms</span>
-	</div>
-
-	<div
-		class="flex flex-col gap-[0.4rem] text-[0.85rem]"
-		style="color: var(--color-text);">
-		<span>{t('common.step')} {steps.length ? currentStepIndex + 1 : 0}/{steps.length}</span>
-		<span>{stepLabel}</span>
-	</div>
+	<SortingPlaybackControls
+		stepDescription={stepLabel}
+		currentStep={steps.length ? currentStepIndex + 1 : 0}
+		totalSteps={steps.length}
+		{isPlaying}
+		canStepBackward={steps.length > 0 && currentStepIndex > 0}
+		canStepForward={steps.length > 0 && currentStepIndex < steps.length - 1}
+		minDelay={stepDelayMinMs}
+		maxDelay={stepDelayMaxMs}
+		bind:delayMs={stepDelayMs}
+		onShuffle={regenerateArray}
+		onTogglePlay={runOrPause}
+		onStepBackward={stepBackward}
+		onStepForward={stepForward} />
 
 	<div class="bars-wrapper">
 		{#each displayedArray as item}

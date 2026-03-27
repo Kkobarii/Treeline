@@ -188,10 +188,7 @@ const en = {
 			detailed: 'Detailed',
 		},
 		controls: {
-			shuffle: 'Shuffle {count} Keys',
-			shuffle16: 'Shuffle',
-			stepBack: 'Step Back',
-			stepForward: 'Step Forward',
+			shuffle: 'Shuffle',
 		},
 		code: {
 			title: 'Algorithm Code',
