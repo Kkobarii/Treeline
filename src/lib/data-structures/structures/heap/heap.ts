@@ -1,4 +1,5 @@
 import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
+import { DROP_REASON_HEAP_EMPTY } from '$lib/data-structures/operation/stepConstants';
 import { CreateRootData, DeleteData, DropData, MarkToDeleteData } from '$lib/data-structures/operation/stepData';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
@@ -72,7 +73,7 @@ export class Heap extends DataStructure {
 
 	extractRoot(data: OperationData): HeapNode | null {
 		if (this.nodes.length === 0) {
-			data.step(StepData.new(new DropData(-1, 'heap empty', 'root')));
+			data.step(StepData.new(new DropData(-1, DROP_REASON_HEAP_EMPTY, 'root')));
 			return null;
 		}
 

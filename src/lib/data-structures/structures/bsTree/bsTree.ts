@@ -1,5 +1,14 @@
 import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
 import {
+	CASE_LEAF_NODE,
+	CASE_SINGLE_CHILD,
+	CASE_TWO_CHILDREN,
+	DIRECTION_LEFT,
+	DIRECTION_RIGHT,
+	DROP_REASON_DUPLICATE_VALUE,
+	DROP_REASON_NOT_FOUND,
+} from '$lib/data-structures/operation/stepConstants';
+import {
 	CaseAnalysisData,
 	CompareData,
 	CreateLeafData,
@@ -70,24 +79,28 @@ export class BSTree extends DataStructure {
 				if (!current.left) {
 					let startSnapshot = this.snapshot();
 					current.left = newNode;
-					data.step(StepData.new(new CreateLeafData(newNode.id, value, current.id, 'left', startSnapshot, this.snapshot())));
+					data.step(
+						StepData.new(new CreateLeafData(newNode.id, value, current.id, DIRECTION_LEFT, startSnapshot, this.snapshot())),
+					);
 					break;
 				}
 
-				data.step(StepData.new(new TraverseData(current.id, current.left.id, 'left')));
+				data.step(StepData.new(new TraverseData(current.id, current.left.id, DIRECTION_LEFT)));
 				current = current.left;
 			} else if (value > current.value) {
 				if (!current.right) {
 					let startSnapshot = this.snapshot();
 					current.right = newNode;
-					data.step(StepData.new(new CreateLeafData(newNode.id, value, current.id, 'right', startSnapshot, this.snapshot())));
+					data.step(
+						StepData.new(new CreateLeafData(newNode.id, value, current.id, DIRECTION_RIGHT, startSnapshot, this.snapshot())),
+					);
 					break;
 				}
 
-				data.step(StepData.new(new TraverseData(current.id, current.right.id, 'right')));
+				data.step(StepData.new(new TraverseData(current.id, current.right.id, DIRECTION_RIGHT)));
 				current = current.right;
 			} else {
-				data.step(StepData.new(new DropData(value, 'duplicate value', current.id.toString())));
+				data.step(StepData.new(new DropData(value, DROP_REASON_DUPLICATE_VALUE, current.id.toString())));
 				break;
 			}
 		}
@@ -105,23 +118,23 @@ export class BSTree extends DataStructure {
 				data.step(StepData.new(new FoundData(current.id, value)));
 				return current;
 			} else if (value < current.value) {
-				data.step(StepData.new(new TraverseData(current.id, current.left ? current.left.id : -1, 'left')));
+				data.step(StepData.new(new TraverseData(current.id, current.left ? current.left.id : -1, DIRECTION_LEFT)));
 				last = current.left?.id.toString() ?? getDummyNodeId(current.id, 'left');
 				current = current.left;
 			} else {
-				data.step(StepData.new(new TraverseData(current.id, current.right ? current.right.id : -1, 'right')));
+				data.step(StepData.new(new TraverseData(current.id, current.right ? current.right.id : -1, DIRECTION_RIGHT)));
 				last = current.right?.id.toString() ?? getDummyNodeId(current.id, 'right');
 				current = current.right;
 			}
 		}
 
-		data.step(StepData.new(new DropData(value, 'not found', last!)));
+		data.step(StepData.new(new DropData(value, DROP_REASON_NOT_FOUND, last!)));
 		return null;
 	}
 
 	remove(value: number, data: OperationData): boolean {
 		if (!this.root) {
-			data.step(StepData.new(new DropData(value, 'not found', 'root')));
+			data.step(StepData.new(new DropData(value, DROP_REASON_NOT_FOUND, 'root')));
 			return false;
 		}
 
@@ -132,12 +145,12 @@ export class BSTree extends DataStructure {
 		while (current) {
 			data.step(StepData.new(new CompareData(value, current.id, current.value)));
 			if (value < current.value) {
-				data.step(StepData.new(new TraverseData(current.id, current.left ? current.left.id : -1, 'left')));
+				data.step(StepData.new(new TraverseData(current.id, current.left ? current.left.id : -1, DIRECTION_LEFT)));
 				last = current.left?.id.toString() ?? getDummyNodeId(current.id, 'left');
 				parent = current;
 				current = current.left;
 			} else if (value > current.value) {
-				data.step(StepData.new(new TraverseData(current.id, current.right ? current.right.id : -1, 'right')));
+				data.step(StepData.new(new TraverseData(current.id, current.right ? current.right.id : -1, DIRECTION_RIGHT)));
 				last = current.right?.id.toString() ?? getDummyNodeId(current.id, 'right');
 				parent = current;
 				current = current.right;
@@ -147,14 +160,14 @@ export class BSTree extends DataStructure {
 		}
 
 		if (!current) {
-			data.step(StepData.new(new DropData(value, 'not found', last)));
+			data.step(StepData.new(new DropData(value, DROP_REASON_NOT_FOUND, last)));
 			return false;
 		}
 
 		data.step(StepData.new(new MarkToDeleteData(current.id, value)));
 
 		if (!current.left && !current.right) {
-			data.step(StepData.new(new CaseAnalysisData(1, 'Leaf node', current.id)));
+			data.step(StepData.new(new CaseAnalysisData(1, CASE_LEAF_NODE, current.id)));
 
 			let startSnapshot = this.snapshot();
 			if (!parent) {
@@ -169,7 +182,7 @@ export class BSTree extends DataStructure {
 		}
 
 		if (!current.left || !current.right) {
-			data.step(StepData.new(new CaseAnalysisData(2, 'Single child', current.id)));
+			data.step(StepData.new(new CaseAnalysisData(2, CASE_SINGLE_CHILD, current.id)));
 
 			const child = current.left ? current.left : current.right!;
 			let startSnapshot = this.snapshot();
@@ -186,7 +199,7 @@ export class BSTree extends DataStructure {
 						current.id,
 						child.id,
 						child.value,
-						current.left ? 'left' : 'right',
+						current.left ? DIRECTION_LEFT : DIRECTION_RIGHT,
 						startSnapshot,
 						this.snapshot(),
 					),
@@ -195,7 +208,7 @@ export class BSTree extends DataStructure {
 			return true;
 		}
 
-		data.step(StepData.new(new CaseAnalysisData(3, 'Two children', current.id)));
+		data.step(StepData.new(new CaseAnalysisData(3, CASE_TWO_CHILDREN, current.id)));
 
 		let succParent: BSTreeNode = current;
 		let successor: BSTreeNode = current.right!;

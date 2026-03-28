@@ -39,7 +39,7 @@ export class CreateLeafData extends StepDetail {
 		public nodeId: number,
 		public value: number,
 		public parentId: number,
-		public direction: 'left' | 'right',
+		public direction: string,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
@@ -61,7 +61,7 @@ export class TraverseData extends StepDetail {
 	constructor(
 		public fromId: number,
 		public toId: number,
-		public direction: 'left' | 'right',
+		public direction: string,
 	) {
 		super(StepType.BSTree.Traverse, 'steps.dataStructures.common.traverseData', { fromId, toId, direction });
 	}
@@ -111,7 +111,7 @@ export class ReplaceWithChildData extends StepDetail {
 		public oldNodeId: number,
 		public newNodeId: number,
 		public newValue: number,
-		public direction: 'left' | 'right',
+		public direction: string,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {

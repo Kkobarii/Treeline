@@ -1,4 +1,17 @@
 import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
+import {
+	BTREE_BORROW_FROM_LEFT_SIBLING,
+	BTREE_BORROW_FROM_RIGHT_SIBLING,
+	BTREE_GET_PREDECESSOR,
+	BTREE_GET_SUCCESSOR,
+	BTREE_MERGE_CHILDREN,
+	BTREE_MERGE_WITH_SIBLING,
+	BTREE_VALUE_IN_INTERNAL_NODE,
+	BTREE_VALUE_IN_LEAF_NODE,
+	DROP_REASON_DUPLICATE_VALUE,
+	DROP_REASON_NOT_FOUND,
+	DROP_REASON_UNKNOWN,
+} from '$lib/data-structures/operation/stepConstants';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
 import { CaseAnalysisData, CreateRootData, DropData, FoundData, MarkToDeleteData } from '../../operation/stepData';
@@ -66,7 +79,7 @@ export class BTree extends DataStructure {
 
 	find(value: number, data: OperationData): BTreeNode | null {
 		if (!this.root) {
-			data.step(StepData.new(new DropData(value, 'not found', 'root')));
+			data.step(StepData.new(new DropData(value, DROP_REASON_NOT_FOUND, 'root')));
 			return null;
 		}
 
@@ -87,7 +100,7 @@ export class BTree extends DataStructure {
 
 			// If leaf, value not found
 			if (current.isLeaf) {
-				data.step(StepData.new(new DropData(value, 'not found', current.id.toString())));
+				data.step(StepData.new(new DropData(value, DROP_REASON_NOT_FOUND, current.id.toString())));
 				return null;
 			}
 
@@ -99,7 +112,7 @@ export class BTree extends DataStructure {
 			current = current.children[i] || null;
 		}
 
-		data.step(StepData.new(new DropData(value, 'not found', 'unknown')));
+		data.step(StepData.new(new DropData(value, DROP_REASON_NOT_FOUND, DROP_REASON_UNKNOWN)));
 		return null;
 	}
 
@@ -168,7 +181,7 @@ export class BTree extends DataStructure {
 		// Check for duplicate
 		const existing = this.find(value, OperationData.Ignored());
 		if (existing) {
-			data.step(StepData.new(new DropData(value, 'duplicate value', existing.id.toString())));
+			data.step(StepData.new(new DropData(value, DROP_REASON_DUPLICATE_VALUE, existing.id.toString())));
 			return existing;
 		}
 
@@ -216,14 +229,14 @@ export class BTree extends DataStructure {
 
 	remove(value: number, data: OperationData): boolean {
 		if (!this.root) {
-			data.step(StepData.new(new DropData(value, 'not found', 'root')));
+			data.step(StepData.new(new DropData(value, DROP_REASON_NOT_FOUND, 'root')));
 			return false;
 		}
 
 		// Check if value exists
 		const existing = this.find(value, OperationData.Ignored());
 		if (!existing) {
-			data.step(StepData.new(new DropData(value, 'not found', 'unknown')));
+			data.step(StepData.new(new DropData(value, DROP_REASON_NOT_FOUND, DROP_REASON_UNKNOWN)));
 			return false;
 		}
 
@@ -254,7 +267,7 @@ export class BTree extends DataStructure {
 
 		// Case 1: Value is in this node and it's a leaf
 		if (idx < node.values.length && value === node.values[idx] && node.isLeaf) {
-			data.step(StepData.new(new CaseAnalysisData(1, 'Value in leaf node', node.id)));
+			data.step(StepData.new(new CaseAnalysisData(1, BTREE_VALUE_IN_LEAF_NODE, node.id)));
 			const startSnapshot = this.snapshot();
 			removeAt(node, idx);
 			data.step(StepData.new(new RemoveValueData(node.id, value, startSnapshot, this.snapshot())));
@@ -263,7 +276,7 @@ export class BTree extends DataStructure {
 
 		// Case 2: Value is in this node and it's an internal node
 		if (idx < node.values.length && value === node.values[idx]) {
-			data.step(StepData.new(new CaseAnalysisData(2, 'Value in internal node', node.id)));
+			data.step(StepData.new(new CaseAnalysisData(2, BTREE_VALUE_IN_INTERNAL_NODE, node.id)));
 			this.removeFromNonLeaf(node, idx, data);
 			return;
 		}
@@ -294,7 +307,7 @@ export class BTree extends DataStructure {
 
 		// Case 2a: Left child has at least t keys
 		if (node.children[idx].values.length >= t) {
-			data.step(StepData.new(new CaseAnalysisData(21, 'Get predecessor', node.children[idx].id)));
+			data.step(StepData.new(new CaseAnalysisData(21, BTREE_GET_PREDECESSOR, node.children[idx].id)));
 			const predecessor = this.getPredecessor(node.children[idx]);
 			data.step(StepData.new(new FindInorderReplacementData(node.id, node.children[idx].id, predecessor, 'predecessor')));
 			const startSnapshot = this.snapshot();
@@ -304,7 +317,7 @@ export class BTree extends DataStructure {
 		}
 		// Case 2b: Right child has at least t keys
 		else if (node.children[idx + 1].values.length >= t) {
-			data.step(StepData.new(new CaseAnalysisData(22, 'Get successor', node.children[idx + 1].id)));
+			data.step(StepData.new(new CaseAnalysisData(22, BTREE_GET_SUCCESSOR, node.children[idx + 1].id)));
 			const successor = this.getSuccessor(node.children[idx + 1]);
 			data.step(StepData.new(new FindInorderReplacementData(node.id, node.children[idx + 1].id, successor, 'successor')));
 			const startSnapshot = this.snapshot();
@@ -314,7 +327,7 @@ export class BTree extends DataStructure {
 		}
 		// Case 2c: Both children have t-1 keys, merge
 		else {
-			data.step(StepData.new(new CaseAnalysisData(23, 'Merge children', node.id)));
+			data.step(StepData.new(new CaseAnalysisData(23, BTREE_MERGE_CHILDREN, node.id)));
 			this.mergeChildren(node, idx, data, false);
 			this.removeFromNode(node.children[idx], value, data);
 		}
@@ -341,17 +354,17 @@ export class BTree extends DataStructure {
 
 		// Borrow from left sibling
 		if (idx !== 0 && node.children[idx - 1].values.length >= t) {
-			data.step(StepData.new(new CaseAnalysisData(31, 'Borrow from left sibling', node.children[idx].id)));
+			data.step(StepData.new(new CaseAnalysisData(31, BTREE_BORROW_FROM_LEFT_SIBLING, node.children[idx].id)));
 			this.borrowFromLeft(node, idx, data);
 		}
 		// Borrow from right sibling
 		else if (idx !== node.children.length - 1 && node.children[idx + 1].values.length >= t) {
-			data.step(StepData.new(new CaseAnalysisData(32, 'Borrow from right sibling', node.children[idx].id)));
+			data.step(StepData.new(new CaseAnalysisData(32, BTREE_BORROW_FROM_RIGHT_SIBLING, node.children[idx].id)));
 			this.borrowFromRight(node, idx, data);
 		}
 		// Merge with sibling
 		else {
-			data.step(StepData.new(new CaseAnalysisData(33, 'Merge with sibling', node.children[idx].id)));
+			data.step(StepData.new(new CaseAnalysisData(33, BTREE_MERGE_WITH_SIBLING, node.children[idx].id)));
 			if (idx !== node.children.length - 1) {
 				this.mergeChildren(node, idx, data);
 			} else {

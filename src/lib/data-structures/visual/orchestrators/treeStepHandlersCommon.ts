@@ -156,8 +156,9 @@ export async function handleCreateRootBackwardCommon(animator: TreeAnimator, ann
 }
 
 export async function handleCreateLeafForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CreateLeafData) {
+	const direction = t(annotator.locale, data.direction);
 	const info = t(annotator.locale, 'steps.dataStructures.common.createLeafData', {
-		direction: data.direction,
+		direction,
 		value: String(data.value),
 	});
 	annotator.annotateNode(info, data.parentId);
@@ -167,8 +168,9 @@ export async function handleCreateLeafForwardCommon(animator: CommonAnimator, an
 }
 
 export async function handleCreateLeafBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CreateLeafData) {
+	const direction = t(annotator.locale, data.direction);
 	const info = t(annotator.locale, 'steps.dataStructures.common.createLeafData', {
-		direction: data.direction,
+		direction,
 		value: String(data.value),
 	});
 	annotator.annotateNode(info, data.parentId);
@@ -198,25 +200,29 @@ export async function handleCompareBackwardCommon(animator: CommonAnimator, anno
 }
 
 export async function handleTraverseForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: TraverseData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.traverseData', { direction: data.direction });
+	const direction = t(annotator.locale, data.direction);
+	const info = t(annotator.locale, 'steps.dataStructures.common.traverseData', { direction });
 	annotator.annotateNode(info, data.fromId);
 	await annotator.moveValueAnnotationTo(data.toId);
 }
 
 export async function handleTraverseBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: TraverseData) {
 	await annotator.moveValueAnnotationTo(data.fromId);
-	const info = t(annotator.locale, 'steps.dataStructures.common.traverseData', { direction: data.direction });
+	const direction = t(annotator.locale, data.direction);
+	const info = t(annotator.locale, 'steps.dataStructures.common.traverseData', { direction });
 	annotator.annotateNode(info, data.fromId);
 }
 
 export async function handleDropForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: DropData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.dropData', { value: String(data.value) });
+	const reason = t(annotator.locale, data.reason);
+	const info = t(annotator.locale, 'steps.dataStructures.common.dropData', { value: String(data.value), reason, fromId: data.fromId });
 	annotator.annotateNode(info, data.fromId);
 	annotator.clearValueAnnotation();
 }
 
 export async function handleDropBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: DropData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.dropData', { value: String(data.value) });
+	const reason = t(annotator.locale, data.reason);
+	const info = t(annotator.locale, 'steps.dataStructures.common.dropData', { value: String(data.value), reason, fromId: data.fromId });
 	annotator.annotateNode(info, data.fromId);
 	annotator.createValueAnnotation(String(data.value), data.fromId);
 }
@@ -271,7 +277,8 @@ export async function handleReplaceWithChildForwardCommon(
 	data: ReplaceWithChildData,
 ) {
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t(annotator.locale, 'steps.dataStructures.common.replaceWithChildData', { direction: data.direction });
+	const direction = t(annotator.locale, data.direction);
+	const info = t(annotator.locale, 'steps.dataStructures.common.replaceWithChildData', { direction });
 	annotator.annotateNode(info, data.newNodeId);
 }
 
@@ -281,7 +288,8 @@ export async function handleReplaceWithChildBackwardCommon(
 	data: ReplaceWithChildData,
 ) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t(annotator.locale, 'steps.dataStructures.common.replaceWithChildData', { direction: data.direction });
+	const direction = t(annotator.locale, data.direction);
+	const info = t(annotator.locale, 'steps.dataStructures.common.replaceWithChildData', { direction });
 	annotator.annotateNode(info, data.oldNodeId);
 
 	animator.setNodeColor(data.oldNodeId, Colors.Red);
@@ -381,9 +389,10 @@ export async function handleReplaceWithInorderSuccessorBackwardCommon(
 }
 
 export async function handleCaseAnalysisForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CaseAnalysisData) {
+	const description = t(annotator.locale, data.description);
 	const info = t(annotator.locale, 'steps.dataStructures.common.caseAnalysisData', {
 		caseNumber: String(data.caseNumber),
-		description: data.description,
+		description,
 	});
 	annotator.annotateNode(info, data.nodeId || null);
 }
@@ -393,9 +402,10 @@ export async function handleCaseAnalysisBackwardCommon(
 	annotator: DataStructureAnnotator,
 	data: CaseAnalysisData,
 ) {
+	const description = t(annotator.locale, data.description);
 	const info = t(annotator.locale, 'steps.dataStructures.common.caseAnalysisData', {
 		caseNumber: String(data.caseNumber),
-		description: data.description,
+		description,
 	});
 	annotator.annotateNode(info, data.nodeId || null);
 }
