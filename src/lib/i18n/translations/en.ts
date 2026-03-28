@@ -95,6 +95,8 @@ const en = {
 			common: {
 				startData: 'Start',
 				endData: 'End',
+				emptyData: 'Data structure is empty',
+				startingOperationData: 'Starting operation: {operation}',
 				createRootData: 'Create root node {nodeId} with value {value}',
 				createLeafData: 'Create leaf node {nodeId} with value {value} as {direction} child of {parentId}',
 				compareData: "Compare value {value} with node {comparisonId}'s {comparisonValue}",
@@ -123,14 +125,14 @@ const en = {
 				fixupData: 'Fixup at node {nodeId}: {reason}',
 			},
 			heap: {
+				swapData: 'Swap nodes',
+				findLargestChildData: 'Find largest child',
+				findLargestChildNotFoundData: 'The node has a correct position',
 				appendData: 'Append value {value} to end of heap',
+				compareWithChildrenData: 'Comparing node {nodeId} with children',
 				compareWithParentNeedsSwapData: 'Comparing node {nodeId} with parent {parentId} - needs swap',
 				compareWithParentCorrectData: 'Comparing node {nodeId} with parent {parentId} - in correct position',
 				replaceRootWithLastData: 'Replace root {rootValue} with last node {lastValue}',
-				compareWithChildrenHasLargestData: 'Comparing node {nodeId} with children, largest is {largestChildId}',
-				compareWithChildrenCorrectData: 'Node {nodeId} is already in correct position',
-				findLargestChildData: 'Found largest child: node {largestChildId} with value {largestChildValue}',
-				swapData: 'Swap node {fromId} (value {fromValue}) with node {toId} (value {toValue})',
 			},
 			linkedList: {
 				createHeadData: 'Create head node {nodeId} with value {value}',

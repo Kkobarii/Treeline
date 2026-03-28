@@ -8,45 +8,66 @@ import type { DataStructureAnimator } from '$lib/data-structures/visual/animator
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
+import { translate as t } from '$lib/i18n';
 
 import type { RBTreeAnnotator } from './rbTreeAnnotator';
 
 async function handleColorNodeForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: ColorNodeData) {
-	annotator.annotateNode(`Color node ${data.nodeId} ${data.color}`, data.nodeId);
+	const info = t(annotator.locale, 'steps.dataStructures.rbTree.colorNodeData', { color: data.color });
+	annotator.annotateNode(info, data.nodeId);
 	animator.ensure(data.endSnapshot! as RBTree);
 }
 
 async function handleColorNodeBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: ColorNodeData) {
-	annotator.annotateNode(`Color node ${data.nodeId} ${data.color}`, data.nodeId);
+	const info = t(annotator.locale, 'steps.dataStructures.rbTree.colorNodeData', { color: data.color });
+	annotator.annotateNode(info, data.nodeId);
 	animator.ensure(data.startSnapshot! as RBTree);
 }
 
 async function handleRotateLeftForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateLeftData) {
-	annotator.annotateNode(`Rotate left at root ${data.oldRootId}`, data.newRootId);
+	const info = t(annotator.locale, 'steps.dataStructures.rbTree.rotateLeftData', {
+		oldRootId: String(data.oldRootId),
+		newRootId: String(data.newRootId),
+	});
+	annotator.annotateNode(info, data.newRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as RBTree);
 }
 
 async function handleRotateLeftBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateLeftData) {
-	annotator.annotateNode(`Rotate left at root ${data.oldRootId}`, data.newRootId);
+	const info = t(annotator.locale, 'steps.dataStructures.rbTree.rotateLeftData', {
+		oldRootId: String(data.oldRootId),
+		newRootId: String(data.newRootId),
+	});
+	annotator.annotateNode(info, data.newRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as RBTree);
 }
 
 async function handleRotateRightForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateRightData) {
-	annotator.annotateNode(`Rotate right at root ${data.oldRootId}`, data.newRootId);
+	const info = t(annotator.locale, 'steps.dataStructures.rbTree.rotateRightData', {
+		oldRootId: String(data.oldRootId),
+		newRootId: String(data.newRootId),
+	});
+	annotator.annotateNode(info, data.newRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as RBTree);
 }
 
 async function handleRotateRightBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateRightData) {
-	annotator.annotateNode(`Rotate right at root ${data.oldRootId}`, data.newRootId);
+	const info = t(annotator.locale, 'steps.dataStructures.rbTree.rotateRightData', {
+		oldRootId: String(data.oldRootId),
+		newRootId: String(data.newRootId),
+	});
+	annotator.annotateNode(info, data.newRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as RBTree);
 }
 
 async function handleFixupForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: FixupData) {
-	annotator.annotateNode(`Fixup: ${data.reason}`, data.nodeId);
+	const info = t(annotator.locale, 'steps.dataStructures.rbTree.fixupData');
+	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handleFixupBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: FixupData) {
-	annotator.annotateNode(`Fixup: ${data.reason}`, data.nodeId);
+	const info = t(annotator.locale, 'steps.dataStructures.rbTree.fixupData');
+	annotator.annotateNode(info, data.nodeId);
 }
 
 export class RBTreeStepHandler extends StepHandlerBase {

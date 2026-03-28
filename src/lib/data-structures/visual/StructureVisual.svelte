@@ -7,6 +7,7 @@
 	import { getStoredDebugMode, setStoredDebugMode, subscribeToDebugMode } from '$lib/data-structures/debugMode';
 	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
+	import { getLocale } from '$lib/i18n';
 
 	export let Animator: any;
 	export let Annotator: any;
@@ -70,7 +71,7 @@
 		network = new Network(container!, { nodes, edges }, options);
 
 		animator = new Animator({ network, nodes, edges, nodeOptions });
-		annotator = new Annotator({ canvas: overlayCanvas!, network, nodes, edges });
+		annotator = new Annotator({ canvas: overlayCanvas!, network, nodes, edges, locale: getLocale() });
 		setDebugMode(getStoredDebugMode());
 
 		unsubscribeDebugMode = subscribeToDebugMode(value => {

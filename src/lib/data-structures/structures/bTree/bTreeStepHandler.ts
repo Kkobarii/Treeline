@@ -6,6 +6,7 @@ import type { DataStructureAnimator } from '$lib/data-structures/visual/animator
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
+import { translate as t } from '$lib/i18n';
 
 export class BTreeStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
@@ -162,7 +163,11 @@ export class BTreeStepHandler extends StepHandlerBase {
 		const { nodeId } = data;
 		// Color the overfull node red to highlight the constraint violation
 		animator.setNodeColor(nodeId, '#FF4500');
-		annotator.annotateNode(`Overfull: ${data.currentCount}/${data.maxCount}`, nodeId);
+		const info = t((annotator as any).locale, 'steps.dataStructures.bTree.markOverfullData', {
+			currentCount: String(data.currentCount),
+			maxCount: String(data.maxCount),
+		});
+		annotator.annotateNode(info, nodeId);
 	}
 
 	async handleMarkOverfullBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -173,11 +178,12 @@ export class BTreeStepHandler extends StepHandlerBase {
 	}
 
 	async handleSplitForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
-		const { nodeId, leftNodeId, rightNodeId, middleValue } = data;
+		const { nodeId, middleValue } = data;
 		// Animate the split: ensure end snapshot is applied
 		animator.ensure(data.endSnapshot);
 		// Annotate the split operation
-		annotator.annotateNode(`Split: ${middleValue} moved up`, nodeId);
+		const info = t((annotator as any).locale, 'steps.dataStructures.bTree.splitData', { middleValue: String(middleValue) });
+		annotator.annotateNode(info, nodeId);
 	}
 
 	async handleSplitBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -191,8 +197,10 @@ export class BTreeStepHandler extends StepHandlerBase {
 		const { middleValue, targetNodeId, isNewRoot } = data;
 		// Animate to the promotion result
 		animator.ensure(data.endSnapshot);
-		const msg = isNewRoot ? `${middleValue} becomes new root` : `${middleValue} promoted to parent`;
-		annotator.annotateNode(msg, targetNodeId);
+		const info = isNewRoot
+			? t((annotator as any).locale, 'steps.dataStructures.bTree.promoteMiddleAsNewRootData', { middleValue: String(middleValue) })
+			: t((annotator as any).locale, 'steps.dataStructures.bTree.promoteMiddleIntoParentData', { middleValue: String(middleValue) });
+		annotator.annotateNode(info, targetNodeId);
 	}
 
 	async handlePromoteMiddleBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -206,15 +214,30 @@ export class BTreeStepHandler extends StepHandlerBase {
 		// Highlight the edge to the child we're going to traverse to
 		animator.setEdgeStyle(nodeId, childId, '#FF4500', 4);
 		// Build the annotation message
-		let msg = `Going to child ${childIndex}`;
+		let info: string;
 		if (lowerBound !== null && upperBound !== null) {
-			msg += ` (${lowerBound} < ${value} < ${upperBound})`;
+			info = t((annotator as any).locale, 'steps.dataStructures.bTree.chooseBranchBetweenData', {
+				childIndex: String(childIndex),
+				lowerBound: String(lowerBound),
+				value: String(value),
+				upperBound: String(upperBound),
+			});
 		} else if (lowerBound !== null) {
-			msg += ` (${value} > ${lowerBound})`;
+			info = t((annotator as any).locale, 'steps.dataStructures.bTree.chooseBranchGreaterThanData', {
+				childIndex: String(childIndex),
+				value: String(value),
+				lowerBound: String(lowerBound),
+			});
 		} else if (upperBound !== null) {
-			msg += ` (${value} < ${upperBound})`;
+			info = t((annotator as any).locale, 'steps.dataStructures.bTree.chooseBranchLessThanData', {
+				childIndex: String(childIndex),
+				value: String(value),
+				upperBound: String(upperBound),
+			});
+		} else {
+			info = t((annotator as any).locale, 'steps.dataStructures.bTree.chooseBranchData', { childIndex: String(childIndex) });
 		}
-		annotator.annotateNode(msg, nodeId);
+		annotator.annotateNode(info, nodeId);
 	}
 
 	async handleChooseBranchBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -230,7 +253,8 @@ export class BTreeStepHandler extends StepHandlerBase {
 		animator.ensure(data.endSnapshot);
 		// Highlight the node where insertion happened
 		animator.setNodeColor(nodeId, '#90EE90');
-		annotator.annotateNode(`Inserted ${value}`, nodeId);
+		const info = t((annotator as any).locale, 'steps.dataStructures.bTree.insertValueData', { value: String(value) });
+		annotator.annotateNode(info, nodeId);
 	}
 
 	async handleInsertValueBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -247,7 +271,8 @@ export class BTreeStepHandler extends StepHandlerBase {
 		animator.ensure(data.endSnapshot);
 		// Highlight the node where removal happened
 		animator.setNodeColor(nodeId, '#FFB6C1');
-		annotator.annotateNode(`Removed ${value}`, nodeId);
+		const info = t((annotator as any).locale, 'steps.dataStructures.bTree.removeValueData', { value: String(value) });
+		annotator.annotateNode(info, nodeId);
 	}
 
 	async handleRemoveValueBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -264,7 +289,12 @@ export class BTreeStepHandler extends StepHandlerBase {
 		animator.ensure(data.endSnapshot);
 		// Highlight the node where replacement happened
 		animator.setNodeColor(nodeId, '#FFD700');
-		annotator.annotateNode(`Replaced ${oldValue} with ${newValue} (${replacementSource})`, nodeId);
+		const info = t((annotator as any).locale, 'steps.dataStructures.bTree.replaceValueData', {
+			oldValue: String(oldValue),
+			newValue: String(newValue),
+			replacementSource: String(replacementSource),
+		});
+		annotator.annotateNode(info, nodeId);
 	}
 
 	async handleReplaceValueBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -276,13 +306,16 @@ export class BTreeStepHandler extends StepHandlerBase {
 	}
 
 	async handleBorrowFromLeftForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
-		const { childId, siblingId, borrowedValue, parentValue } = data;
+		const { childId, siblingId, borrowedValue } = data;
 		// Apply the end snapshot to show the borrowed value
 		animator.ensure(data.endSnapshot);
 		// Highlight both nodes involved in the borrow
 		animator.setNodeColor(childId, '#87CEEB');
 		animator.setNodeColor(siblingId, '#FFA07A');
-		annotator.annotateNode(`Borrowed ${borrowedValue} from left sibling`, childId);
+		const info = t((annotator as any).locale, 'steps.dataStructures.bTree.borrowFromLeftData', {
+			borrowedValue: String(borrowedValue),
+		});
+		annotator.annotateNode(info, childId);
 	}
 
 	async handleBorrowFromLeftBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -295,13 +328,16 @@ export class BTreeStepHandler extends StepHandlerBase {
 	}
 
 	async handleBorrowFromRightForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
-		const { childId, siblingId, borrowedValue, parentValue } = data;
+		const { childId, siblingId, borrowedValue } = data;
 		// Apply the end snapshot to show the borrowed value
 		animator.ensure(data.endSnapshot);
 		// Highlight both nodes involved in the borrow
 		animator.setNodeColor(childId, '#87CEEB');
 		animator.setNodeColor(siblingId, '#FFA07A');
-		annotator.annotateNode(`Borrowed ${borrowedValue} from right sibling`, childId);
+		const info = t((annotator as any).locale, 'steps.dataStructures.bTree.borrowFromRightData', {
+			borrowedValue: String(borrowedValue),
+		});
+		annotator.annotateNode(info, childId);
 	}
 
 	async handleBorrowFromRightBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -314,12 +350,13 @@ export class BTreeStepHandler extends StepHandlerBase {
 	}
 
 	async handleMergeChildrenForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
-		const { leftChildId, rightChildId, parentValue } = data;
+		const { leftChildId, parentValue } = data;
 		// Apply the end snapshot to show the merged node
 		animator.ensure(data.endSnapshot);
 		// Highlight the merged node
 		animator.setNodeColor(leftChildId, '#DDA0DD');
-		annotator.annotateNode(`Merged with sibling (parent value: ${parentValue})`, leftChildId);
+		const info = t((annotator as any).locale, 'steps.dataStructures.bTree.mergeChildrenData', { parentValue: String(parentValue) });
+		annotator.annotateNode(info, leftChildId);
 	}
 
 	async handleMergeChildrenBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
@@ -331,11 +368,18 @@ export class BTreeStepHandler extends StepHandlerBase {
 	}
 
 	async handleFindInorderReplacementForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {
-		const { nodeId, childId, replacementValue, replacementType } = data;
+		const { childId, replacementValue, replacementType } = data;
 		// Highlight the child node where the replacement value was found
 		animator.setNodeColor(childId, '#98FB98');
-		const typeText = replacementType === 'predecessor' ? 'predecessor' : 'successor';
-		annotator.annotateNode(`Found ${typeText}: ${replacementValue}`, childId);
+		const info =
+			replacementType === 'predecessor'
+				? t((annotator as any).locale, 'steps.dataStructures.bTree.findInorderReplacementPredecessorData', {
+						replacementValue: String(replacementValue),
+					})
+				: t((annotator as any).locale, 'steps.dataStructures.bTree.findInorderReplacementSuccessorData', {
+						replacementValue: String(replacementValue),
+					});
+		annotator.annotateNode(info, childId);
 	}
 
 	async handleFindInorderReplacementBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: any) {

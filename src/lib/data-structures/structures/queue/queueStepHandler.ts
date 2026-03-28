@@ -5,6 +5,7 @@ import { DataStructureAnimator } from '$lib/data-structures/visual/animators/dat
 import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
+import { translate as t } from '$lib/i18n';
 
 import { QueueAnimator } from './queueAnimator';
 
@@ -28,41 +29,49 @@ async function handleEndBackward(animator: QueueAnimator, annotator: DataStructu
 // Enqueue handlers
 async function handleEnqueueForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
 	await animator.ensureAndAnimate(data.endSnapshot);
-	annotator.annotateNode(`Enqueued ${data.value} to queue`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.queue.enqueueData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handleEnqueueBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	annotator.annotateNode(`Enqueued ${data.value} to queue`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.queue.enqueueData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 // Dequeue handlers
 async function handleDequeueForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
 	await animator.ensureAndAnimate(data.endSnapshot);
-	annotator.annotateNode(`Dequeued ${data.value} from queue`, null);
+	const info = t((annotator as any).locale, 'steps.dataStructures.queue.dequeueData', { value: String(data.value) });
+	annotator.annotateNode(info, null);
 }
 
 async function handleDequeueBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	annotator.annotateNode(`Dequeued ${data.value} from queue`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.queue.dequeueData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 // Peek handlers
 async function handlePeekForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`Peeked front value ${data.value}`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.queue.peekData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handlePeekBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`Peeked front value ${data.value}`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.queue.peekData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 // Empty handlers
 async function handleEmptyForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`Queue is empty`, null);
+	const info = t((annotator as any).locale, 'steps.dataStructures.queue.emptyData');
+	annotator.annotateNode(info, null);
 }
 
 async function handleEmptyBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`Queue is empty`, null);
+	const info = t((annotator as any).locale, 'steps.dataStructures.queue.emptyData');
+	annotator.annotateNode(info, null);
 }
 
 export class QueueStepHandler extends StepHandlerBase {

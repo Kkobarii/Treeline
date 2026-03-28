@@ -5,6 +5,7 @@ import { DataStructureAnimator } from '$lib/data-structures/visual/animators/dat
 import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
+import { translate as t } from '$lib/i18n';
 
 import { StackAnimator } from './stackAnimator';
 
@@ -28,41 +29,49 @@ async function handleEndBackward(animator: StackAnimator, annotator: DataStructu
 // Push handlers
 async function handlePushForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
 	await animator.ensureAndAnimate(data.endSnapshot);
-	annotator.annotateNode(`Pushed ${data.value} onto stack`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.stack.pushData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handlePushBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	annotator.annotateNode(`Pushed ${data.value} onto stack`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.stack.pushData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 // Pop handlers
 async function handlePopForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
 	await animator.ensureAndAnimate(data.endSnapshot);
-	annotator.annotateNode(`Popped ${data.value} from stack`, null);
+	const info = t((annotator as any).locale, 'steps.dataStructures.stack.popData', { value: String(data.value) });
+	annotator.annotateNode(info, null);
 }
 
 async function handlePopBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	annotator.annotateNode(`Popped ${data.value} from stack`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.stack.popData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 // Peek handlers
 async function handlePeekForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`Peeked value ${data.value}`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.stack.peekData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handlePeekBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`Peeked value ${data.value}`, data.nodeId);
+	const info = t((annotator as any).locale, 'steps.dataStructures.stack.peekData', { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
 }
 
 // Empty handlers
 async function handleEmptyForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`Stack is empty`, null);
+	const info = t((annotator as any).locale, 'steps.dataStructures.stack.emptyData');
+	annotator.annotateNode(info, null);
 }
 
 async function handleEmptyBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
-	annotator.annotateNode(`Stack is empty`, null);
+	const info = t((annotator as any).locale, 'steps.dataStructures.stack.emptyData');
+	annotator.annotateNode(info, null);
 }
 
 export class StackStepHandler extends StepHandlerBase {

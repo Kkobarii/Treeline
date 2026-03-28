@@ -7,18 +7,18 @@ import type { DataStructureAnnotator } from '../annotators/dataStructureAnnotato
 export abstract class StepHandlerBase {
 	/** Prepare renderer for the incoming step (apply start snapshot when forward, end snapshot when backward). */
 	abstract stepSetup(
-		currentStep: StepData, 
-		animator: DataStructureAnimator, 
+		currentStep: StepData,
+		animator: DataStructureAnimator,
 		annotator: DataStructureAnnotator,
-		isForward: boolean
+		isForward: boolean,
 	): Promise<void> | void;
 
 	/** Clean up after a step (apply end or start snapshot as needed). */
 	abstract stepCleanup(
-		currentStep: StepData, 
-		animator: DataStructureAnimator, 
-		annotator: DataStructureAnnotator, 
-		isForward: boolean
+		currentStep: StepData,
+		animator: DataStructureAnimator,
+		annotator: DataStructureAnnotator,
+		isForward: boolean,
 	): Promise<void> | void;
 
 	/** Route the step to concrete per-step handlers. */

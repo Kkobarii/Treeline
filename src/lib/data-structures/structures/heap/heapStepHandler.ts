@@ -15,9 +15,13 @@ import type { DataStructureAnimator } from '$lib/data-structures/visual/animator
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
+import { translate as t } from '$lib/i18n';
 
 async function handleSwapForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: SwapData) {
-	const info = `Swapped nodes`;
+	const info = t((annotator as any).locale, 'steps.dataStructures.heap.swapData', {
+		fromValue: String(data.fromValue),
+		toValue: String(data.toValue),
+	});
 	annotator.annotateNode(info, data.fromId);
 	animator.setNodeColor(data.toId, Colors.HeapAffectedNode);
 	animator.setNodeColor(data.fromId, Colors.HeapCurrentNode);
@@ -25,28 +29,39 @@ async function handleSwapForward(animator: HeapAnimator, annotator: DataStructur
 }
 
 async function handleSwapBackward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: SwapData) {
-	const info = `Swapped nodes`;
+	const info = t((annotator as any).locale, 'steps.dataStructures.heap.swapData', {
+		fromValue: String(data.fromValue),
+		toValue: String(data.toValue),
+	});
 	annotator.annotateNode(info, data.fromId);
 	animator.resetNodeColor(data.toId);
 	await animator.ensureAndAnimate(data.startSnapshot);
 }
 
 async function handleFindLargestChildForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: FindLargestChildData) {
-	const info = data.largestChildId !== null ? `Found largest child` : `Node is in correct position`;
+	const info =
+		data.largestChildId !== null
+			? t((annotator as any).locale, 'steps.dataStructures.heap.findLargestChildData', {
+					largestChildValue: String(data.largestChildValue),
+				})
+			: t((annotator as any).locale, 'steps.dataStructures.heap.findLargestChildNotFoundData');
 	annotator.annotateNode(info, data.parentId);
-
 	animator.setNodeColor(data.largestChildId, Colors.HeapAffectedNode);
 }
 
 async function handleFindLargestChildBackward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: FindLargestChildData) {
-	const info = data.largestChildId !== null ? `Found largest child` : `Node is in correct position`;
+	const info =
+		data.largestChildId !== null
+			? t((annotator as any).locale, 'steps.dataStructures.heap.findLargestChildData', {
+					largestChildValue: String(data.largestChildValue),
+				})
+			: t((annotator as any).locale, 'steps.dataStructures.heap.findLargestChildNotFoundData');
 	annotator.annotateNode(info, data.parentId);
-
 	animator.resetNodeColor(data.largestChildId);
 }
 
 async function handleAppendForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: AppendData) {
-	const info = `Append value ${data.value} to end of heap`;
+	const info = t((annotator as any).locale, 'steps.dataStructures.heap.appendData', { value: String(data.value) });
 	annotator.annotateNode(info, data.parentId);
 
 	annotator.clearValueAnnotation();
@@ -56,7 +71,7 @@ async function handleAppendForward(animator: HeapAnimator, annotator: DataStruct
 }
 
 async function handleAppendBackward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: AppendData) {
-	const info = `Append value ${data.value} to end of heap`;
+	const info = t((annotator as any).locale, 'steps.dataStructures.heap.appendData', { value: String(data.value) });
 	annotator.annotateNode(info, data.parentId);
 	animator.resetNodeColor(data.nodeId);
 
@@ -65,27 +80,44 @@ async function handleAppendBackward(animator: HeapAnimator, annotator: DataStruc
 }
 
 async function handleCompareWithChildrenForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: CompareWithChildrenData) {
-	const info = data.largestChildId !== null ? `Comparing node and children` : `Node is in correct position`;
+	const info =
+		data.largestChildId !== null
+			? t((annotator as any).locale, 'steps.dataStructures.heap.compareWithChildrenData')
+			: t((annotator as any).locale, 'steps.dataStructures.heap.compareWithChildrenCorrectData');
 	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handleCompareWithChildrenBackward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: CompareWithChildrenData) {
-	const info = data.largestChildId !== null ? `Comparing node and children` : `Node is in correct position`;
+	const info =
+		data.largestChildId !== null
+			? t((annotator as any).locale, 'steps.dataStructures.heap.compareWithChildrenData')
+			: t((annotator as any).locale, 'steps.dataStructures.heap.compareWithChildrenCorrectData');
 	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handleCompareWithParentForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: CompareWithParentData) {
-	const info = data.needsSwap ? `Comparing with parent - needs swap` : `Comparing with parent - correct position`;
+	const info = data.needsSwap
+		? t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentNeedsSwapData', {
+				parentValue: String(data.parentValue),
+			})
+		: t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentCorrectData', { parentValue: String(data.parentValue) });
 	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handleCompareWithParentBackward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: CompareWithParentData) {
-	const info = data.needsSwap ? `Comparing with parent - needs swap` : `Comparing with parent - correct position`;
+	const info = data.needsSwap
+		? t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentNeedsSwapData', {
+				parentValue: String(data.parentValue),
+			})
+		: t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentCorrectData', { parentValue: String(data.parentValue) });
 	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handleReplaceRootWithLastForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: ReplaceRootWithLastData) {
-	const info = `Replaced root ${data.rootValue} with last ${data.lastValue}`;
+	const info = t((annotator as any).locale, 'steps.dataStructures.heap.replaceRootWithLastData', {
+		rootValue: String(data.rootValue),
+		lastValue: String(data.lastValue),
+	});
 	annotator.annotateNode(info, data.rootId);
 	animator.setNodeColor(data.lastId, Colors.HeapCurrentNode);
 	animator.setNodeColor(data.rootId, Colors.Red);
@@ -93,7 +125,10 @@ async function handleReplaceRootWithLastForward(animator: HeapAnimator, annotato
 }
 
 async function handleReplaceRootWithLastBackward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: ReplaceRootWithLastData) {
-	const info = `Replaced root ${data.rootValue} with last ${data.lastValue}`;
+	const info = t((annotator as any).locale, 'steps.dataStructures.heap.replaceRootWithLastData', {
+		rootValue: String(data.rootValue),
+		lastValue: String(data.lastValue),
+	});
 	annotator.annotateNode(info, data.rootId);
 	animator.resetNodeColor(data.lastId);
 	animator.resetNodeColor(data.rootId);

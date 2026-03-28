@@ -3,6 +3,7 @@ import type { Edge, Network, Node } from 'vis-network';
 
 import { shadeColor } from '$lib/assets/colors';
 import { isDummyNodeId } from '$lib/data-structures/utils/graphs';
+import type { Locale } from '$lib/i18n';
 
 import { Annotation } from './annotation';
 import { IdAnnotation } from './idAnnotation';
@@ -14,6 +15,8 @@ export interface DataStructureAnnotatorOpts {
 	network: Network;
 	nodes: DataSet<Node>;
 	edges: DataSet<Edge>;
+
+	locale: Locale;
 }
 
 export class DataStructureAnnotator {
@@ -27,6 +30,8 @@ export class DataStructureAnnotator {
 	currentAnnotation: Annotation | null = null;
 	currentValueAnnotation: ValueAnnotation | null = null;
 
+	public locale: Locale = 'en';
+
 	constructor(opts: DataStructureAnnotatorOpts) {
 		this.canvas = opts.canvas;
 		this.ctx = this.canvas.getContext('2d')!;
@@ -34,6 +39,8 @@ export class DataStructureAnnotator {
 		this.network = opts.network;
 		this.nodes = opts.nodes;
 		this.edges = opts.edges;
+
+		this.locale = opts.locale;
 	}
 
 	public debugMode: boolean = false;
