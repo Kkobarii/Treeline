@@ -9,7 +9,6 @@ import type { LinkedListAnimator } from '$lib/data-structures/structures/linkedL
 import type { QueueAnimator } from '$lib/data-structures/structures/queue/queueAnimator';
 import type { RBTreeAnimator } from '$lib/data-structures/structures/rbTree/rbTreeAnimator';
 import type { StackAnimator } from '$lib/data-structures/structures/stack/stackAnimator';
-import { comparisonValuesToSymbol } from '$lib/data-structures/utils/utils';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { translate as t, type Locale } from '$lib/i18n';
 
@@ -180,20 +179,18 @@ export async function handleCreateLeafBackwardCommon(animator: CommonAnimator, a
 }
 
 export async function handleCompareForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CompareData) {
-	const comparisonSymbol = comparisonValuesToSymbol(data.value, data.comparisonValue);
 	const info = t(annotator.locale, 'steps.dataStructures.common.compareData', {
 		value: String(data.value),
-		comparisonSymbol,
+		comparisonSymbol: data.comparisonSymbol,
 		comparisonValue: String(data.comparisonValue),
 	});
 	annotator.annotateNode(info, data.comparisonId);
 }
 
 export async function handleCompareBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CompareData) {
-	const comparisonSymbol = comparisonValuesToSymbol(data.value, data.comparisonValue);
 	const info = t(annotator.locale, 'steps.dataStructures.common.compareData', {
 		value: String(data.value),
-		comparisonSymbol,
+		comparisonSymbol: data.comparisonSymbol,
 		comparisonValue: String(data.comparisonValue),
 	});
 	annotator.annotateNode(info, data.comparisonId);

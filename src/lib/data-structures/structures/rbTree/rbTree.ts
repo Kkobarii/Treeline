@@ -303,11 +303,11 @@ export class RBTree extends DataStructure {
 				return current;
 			} else if (value < current.value) {
 				data.step(StepData.new(new TraverseData(current.id, current.left ? current.left.id : -1, DIRECTION_LEFT)));
-				last = current.left?.id.toString() ?? getDummyNodeId(current.id, DIRECTION_LEFT);
+				last = current.left?.id.toString() ?? getDummyNodeId(current.id, 'left');
 				current = current.left;
 			} else {
 				data.step(StepData.new(new TraverseData(current.id, current.right ? current.right.id : -1, DIRECTION_RIGHT)));
-				last = current.right?.id.toString() ?? getDummyNodeId(current.id, DIRECTION_RIGHT);
+				last = current.right?.id.toString() ?? getDummyNodeId(current.id, 'right');
 				current = current.right;
 			}
 		}
@@ -330,11 +330,11 @@ export class RBTree extends DataStructure {
 			data.step(StepData.new(new CompareData(value, current.id, current.value)));
 			if (value < current.value) {
 				data.step(StepData.new(new TraverseData(current.id, current.left ? current.left.id : -1, DIRECTION_LEFT)));
-				last = current.left?.id.toString() ?? getDummyNodeId(current.id, DIRECTION_LEFT);
+				last = current.left?.id.toString() ?? getDummyNodeId(current.id, 'left');
 				current = current.left;
 			} else if (value > current.value) {
 				data.step(StepData.new(new TraverseData(current.id, current.right ? current.right.id : -1, DIRECTION_RIGHT)));
-				last = current.right?.id.toString() ?? getDummyNodeId(current.id, DIRECTION_RIGHT);
+				last = current.right?.id.toString() ?? getDummyNodeId(current.id, 'right');
 				current = current.right;
 			} else {
 				break; // found

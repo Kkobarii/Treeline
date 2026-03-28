@@ -48,12 +48,20 @@ export class CreateLeafData extends StepDetail {
 }
 
 export class CompareData extends StepDetail {
+	public comparisonSymbol: string;
 	constructor(
 		public value: number,
 		public comparisonId: number,
 		public comparisonValue: number,
 	) {
-		super(StepType.BSTree.Compare, 'steps.dataStructures.common.compareData', { value, comparisonId, comparisonValue });
+		const comparisonSymbol = value < comparisonValue ? '<' : value > comparisonValue ? '>' : '=';
+		super(StepType.BSTree.Compare, 'steps.dataStructures.common.compareData', {
+			value,
+			comparisonId,
+			comparisonValue,
+			comparisonSymbol,
+		});
+		this.comparisonSymbol = comparisonSymbol;
 	}
 }
 

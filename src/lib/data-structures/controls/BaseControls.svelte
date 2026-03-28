@@ -41,7 +41,8 @@
 
 <style>
 	.controls-container {
-		width: 450px;
+		width: 25%;
+		min-width: 300px;
 		height: 100%;
 	}
 

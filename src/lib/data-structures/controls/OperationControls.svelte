@@ -17,6 +17,19 @@
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
 
+	// Recursively translate parameter values if they are translation keys
+	function translateParams(params: Record<string, any>): Record<string, any> {
+		const translated: Record<string, any> = {};
+		for (const [key, value] of Object.entries(params)) {
+			if (typeof value === 'string' && value.startsWith('steps.')) {
+				translated[key] = translate(locale, value);
+			} else {
+				translated[key] = value;
+			}
+		}
+		return translated;
+	}
+
 	const operationTypeTranslationMap: Record<OperationTypeValue, string> = {
 		[OperationType.Empty]: 'controls.common.initial',
 		[OperationType.Tree.Insert]: 'common.insert',
@@ -197,7 +210,11 @@
 											{step}
 											isCurrent={operations[currentOperation].steps[currentStep] === step &&
 												operations[currentOperation] === op}
-											label={translate(locale, (step.data as any).label, (step.data as any).params)} />
+											label={translate(
+												locale,
+												(step.data as any).label,
+												translateParams((step.data as any).params),
+											)} />
 									{/each}
 								</ul>
 							{/if}

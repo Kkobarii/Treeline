@@ -99,7 +99,7 @@ const en = {
 				startingOperationData: 'Starting operation: {operation}',
 				createRootData: 'Create root node with value {value}',
 				createLeafData: 'Create {direction} child with value {value}',
-				compareData: 'Compare value {value} with {comparisonSymbol} {comparisonValue}',
+				compareData: '{value} {comparisonSymbol} {comparisonValue}',
 				traverseData: 'Traverse {direction}',
 				dropData: 'Drop value {value}',
 				foundData: 'Found value {value}',
