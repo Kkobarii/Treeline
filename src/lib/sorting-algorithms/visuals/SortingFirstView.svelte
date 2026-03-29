@@ -174,20 +174,20 @@
 
 	.sort-bar {
 		@apply rounded-sm;
-		background-color: var(--color-green-300);
+		background-color: var(--color-gray-500);
 		transform-origin: bottom;
 	}
 
 	.bar-compared {
-		background-color: var(--color-green-600);
+		background-color: var(--color-red-500);
 	}
 
 	.bar-moved {
-		background-color: var(--color-green-800);
+		background-color: var(--color-blue-500);
 	}
 
 	.bar-sorted {
-		background-color: var(--color-green-400);
+		background-color: var(--color-green-500);
 	}
 
 	@media (max-width: 768px) {

@@ -58,7 +58,6 @@
 	.header-title {
 		font-size: 1.75rem;
 		font-weight: 700;
-		color: white;
 		letter-spacing: -0.02em;
 	}
 
@@ -108,7 +107,7 @@
 	.burger-line {
 		width: 24px;
 		height: 2px;
-		background-color: white;
+		background-color: var(--color-black);
 		border-radius: 1px;
 		transition: all 0.3s ease;
 	}

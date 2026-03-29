@@ -154,7 +154,7 @@
 		appearance: none;
 		height: 0.48rem;
 		border-radius: 999px;
-		background: oklch(from var(--color-primary) l c h / 0.25);
+		background: oklch(from var(--color-secondary) l c h / 0.25);
 		direction: rtl;
 	}
 
@@ -164,7 +164,7 @@
 		width: 0.95rem;
 		height: 0.95rem;
 		border-radius: 999px;
-		border: 2px solid var(--color-primary-dark);
+		border: 2px solid var(--color-secondary-dark);
 		background: var(--color-white);
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 	}
@@ -173,7 +173,7 @@
 		width: 0.95rem;
 		height: 0.95rem;
 		border-radius: 999px;
-		border: 2px solid var(--color-primary-dark);
+		border: 2px solid var(--color-secondary-dark);
 		background: var(--color-white);
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 	}
@@ -181,16 +181,16 @@
 	.speed-slider::-moz-range-track {
 		height: 0.48rem;
 		border-radius: 999px;
-		background: oklch(from var(--color-primary) l c h / 0.25);
+		background: oklch(from var(--color-secondary) l c h / 0.25);
 	}
 
 	.step-status {
-		border-color: oklch(from var(--color-primary) l c h / 0.35);
-		background: oklch(from var(--color-primary) l c h / 0.2);
+		border-color: oklch(from var(--color-secondary) l c h / 0.35);
+		background: oklch(from var(--color-secondary) l c h / 0.2);
 	}
 
 	.step-number {
-		color: var(--color-primary-dark);
+		color: var(--color-secondary-dark);
 	}
 
 	.step-description {
@@ -198,10 +198,10 @@
 	}
 
 	[role='progressbar'] {
-		background: oklch(from var(--color-primary) l c h / 0.18);
+		background: oklch(from var(--color-secondary) l c h / 0.18);
 	}
 
 	[role='progressbar'] > div {
-		background: var(--color-primary);
+		background: var(--color-secondary);
 	}
 </style>

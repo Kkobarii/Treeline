@@ -92,8 +92,8 @@
 		gap: 0.5rem;
 		padding: 0.6rem 0.75rem;
 		border-radius: 0.5rem;
-		background: var(--color-tertiary-ultra-light);
-		border: 1px solid var(--color-tertiary);
+		background: var(--color-primary-ultra-light);
+		border: 1px solid var(--color-primary-light);
 		cursor: pointer;
 		font-size: 0.8rem;
 		font-weight: 500;
@@ -104,13 +104,13 @@
 	}
 
 	.code-language-button:hover {
-		background-color: oklch(from var(--color-tertiary-ultra-light) calc(l - 0.06) c h);
-		border-color: oklch(from var(--color-tertiary) calc(l - 0.08) c h);
+		background-color: oklch(from var(--color-primary-ultra-light) calc(l - 0.06) c h);
+		border-color: oklch(from var(--color-primary) calc(l - 0.08) c h);
 	}
 
 	.code-language-button:focus {
 		outline: none;
-		box-shadow: 0 0 0 2px oklch(from var(--color-primary) l c h / 0.35);
+		box-shadow: 0 0 0 2px oklch(from var(--color-secondary) l c h / 0.35);
 	}
 
 	.language-name {
@@ -150,7 +150,7 @@
 		right: 0;
 		min-width: 100%;
 		background: var(--color-gray-50);
-		border: 1px solid var(--color-gray-300);
+		border: 1px solid var(--color-gray-100);
 		border-radius: 0.5rem;
 		box-shadow:
 			0 4px 6px -1px oklch(from var(--color-gray-900) l c h / 0.1),
@@ -184,8 +184,8 @@
 	}
 
 	.language-option-active {
-		background-color: oklch(from var(--color-primary) l c h / 0.15);
-		color: var(--color-primary-dark);
+		background-color: oklch(from var(--color-secondary) l c h / 0.15);
+		color: var(--color-secondary-dark);
 	}
 
 	.language-option-active::after {

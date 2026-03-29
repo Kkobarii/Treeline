@@ -114,7 +114,6 @@
 
 <style>
 	.header-link {
-		color: white;
 		text-decoration: none;
 		font-size: 0.95rem;
 		font-weight: 500;
@@ -134,7 +133,6 @@
 		left: 0;
 		right: 0;
 		height: 2px;
-		background-color: white;
 		transform: scaleX(0);
 		transition: transform 0.2s ease;
 	}
@@ -148,16 +146,15 @@
 		top: 100%;
 		left: 0;
 		min-width: 200px;
-		background-color: oklch(from var(--color-primary) l c h / 0.95);
-		border: 1px solid var(--color-primary-dark);
+		background-color: oklch(from var(--color-panel) l c h / 0.75);
+		border: 1px solid var(--color-panel);
 		border-radius: 0.5rem;
-		backdrop-filter: blur(8px);
+		backdrop-filter: blur(6px);
 		margin-top: 0.5rem;
 		display: flex;
 		flex-direction: column;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 		z-index: 101;
-		opacity: 0;
 		transform: translateY(-8px);
 		visibility: hidden;
 		pointer-events: none;
@@ -169,7 +166,6 @@
 
 	.nav-dropdown:hover .dropdown-menu,
 	.nav-dropdown:focus-within .dropdown-menu {
-		opacity: 1;
 		transform: translateY(0);
 		visibility: visible;
 		pointer-events: auto;
@@ -191,17 +187,16 @@
 	}
 
 	.dropdown-link {
-		color: white;
 		text-decoration: none;
 		padding: 0.75rem 1rem;
 		font-size: 0.95rem;
 		font-weight: 500;
 		transition: background-color 0.2s ease;
-		opacity: 0.9;
+		backdrop-filter: blur(8px);
 	}
 
 	.dropdown-link:hover {
-		background-color: color-mix(in srgb, var(--color-primary-light) 30%, transparent);
+		background-color: color-mix(in srgb, var(--color-white) 10%, transparent);
 		opacity: 1;
 	}
 

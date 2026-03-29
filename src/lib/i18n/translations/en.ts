@@ -166,6 +166,7 @@ const en = {
 				findLargestChildNotFoundData: 'Node is in correct position',
 				appendData: 'Append value {value} to end of heap',
 				compareWithChildrenData: 'Compare node with children',
+				compareWithChildrenHasLargestData: 'Compare node with children - needs swap',
 				compareWithChildrenCorrectData: 'Compare node with children - in correct position',
 				compareWithParentNeedsSwapData: 'Compare with parent - needs swap',
 				compareWithParentCorrectData: 'Compare with parent - in correct position',

@@ -148,6 +148,7 @@
 		color: var(--color-text);
 		text-align: left;
 		transition: background 0.15s ease;
+		color: var(--color-black);
 	}
 
 	.language-option:hover {
@@ -155,11 +156,11 @@
 	}
 
 	.language-option-active {
-		background: oklch(from var(--color-primary-light) l c h / 0.3);
+		background: oklch(from var(--color-secondary-light) l c h / 0.3);
 	}
 
 	.language-option-active:hover {
-		background: oklch(from var(--color-primary-light) l c h / 0.4);
+		background: oklch(from var(--color-secondary-light) l c h / 0.4);
 	}
 
 	.language-name {

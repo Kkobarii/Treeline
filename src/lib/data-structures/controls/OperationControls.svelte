@@ -147,7 +147,7 @@
 
 <div class="flex min-h-0 flex-1 flex-row gap-2 md:flex-col md:gap-6">
 	<div class="flex flex-col gap-3">
-		<h2 class="text-primary text-lg font-bold break-words">{t('controls.operation.title')}</h2>
+		<h2 class="text-secondary text-lg font-bold break-words">{t('controls.operation.title')}</h2>
 		<div class="flex flex-col flex-wrap items-start gap-2 md:flex-row md:items-center">
 			<button
 				class="inline-flex w-full items-center justify-center md:w-auto"
@@ -191,7 +191,7 @@
 
 	{#if debugMode}
 		<div class="flex min-h-0 flex-1 flex-col gap-3">
-			<h2 class="text-primary text-lg font-bold break-words">{t('controls.operation.info')}</h2>
+			<h2 class="text-secondary text-lg font-bold break-words">{t('controls.operation.info')}</h2>
 
 			<div
 				class="min-h-0 flex-1 overflow-y-auto"
@@ -200,7 +200,7 @@
 					{#each operations as op}
 						<li
 							class="{operations[currentOperation] === op
-								? 'bg-primary-light'
+								? 'bg-secondary-light/80'
 								: 'bg-gray-200'} mr-1 rounded p-2 text-sm break-words transition-colors">
 							{formatOperationTitle(op)}
 							{#if operations[currentOperation] === op}

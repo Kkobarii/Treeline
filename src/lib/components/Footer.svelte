@@ -33,14 +33,12 @@
 	}
 
 	.footer-text {
-		color: white;
 		font-size: 0.875rem;
 		opacity: 0.9;
 		text-align: center;
 	}
 
 	.footer-link {
-		color: white;
 		text-decoration: none;
 		font-size: 0.875rem;
 		font-weight: 500;

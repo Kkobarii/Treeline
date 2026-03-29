@@ -108,7 +108,7 @@
 		width: calc((100% - var(--switcher-gap) - (var(--switcher-padding) * 2)) / 2);
 		box-sizing: border-box;
 		border-radius: var(--option-radius);
-		background-color: oklch(from var(--color-primary-light) l c h / 0.8);
+		background-color: oklch(from var(--color-secondary-light) l c h / 0.8);
 		transform: translateX(calc(var(--pill-x) * (100% + var(--switcher-gap))));
 		transition: transform 220ms ease;
 		z-index: 0;
@@ -139,7 +139,7 @@
 	}
 
 	.switcher-option:focus-visible {
-		box-shadow: 0 0 0 2px var(--color-primary);
+		box-shadow: 0 0 0 2px var(--color-secondary);
 	}
 
 	.switcher-option:disabled {

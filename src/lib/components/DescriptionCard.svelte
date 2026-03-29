@@ -16,7 +16,7 @@
 	:global(.treeline-card .prose h1),
 	:global(.treeline-card .prose h2),
 	:global(.treeline-card .prose h3) {
-		color: var(--color-primary);
+		color: var(--color-secondary);
 		font-weight: 700;
 		margin-top: 1.5rem;
 		margin-bottom: 0.75rem;
@@ -29,7 +29,7 @@
 
 	:global(.treeline-card .prose h2) {
 		font-size: 1.5rem;
-		border-bottom: 2px solid var(--color-primary-light);
+		border-bottom: 2px solid var(--color-secondary-light);
 		padding-bottom: 0.5rem;
 	}
 
@@ -69,7 +69,7 @@
 	}
 
 	:global(.treeline-card .prose th) {
-		background-color: var(--color-primary);
+		background-color: var(--color-secondary);
 		color: white;
 		font-weight: 600;
 		padding: 0.75rem 1rem;

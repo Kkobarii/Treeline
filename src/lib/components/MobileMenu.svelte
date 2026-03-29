@@ -124,8 +124,8 @@
 		position: fixed;
 		right: 1.5rem;
 		width: min(280px, calc(100vw - 3rem));
-		background-color: oklch(from var(--color-primary) l c h / 0.95);
-		border: 1px solid var(--color-primary-dark);
+		background-color: oklch(from var(--color-panel) l c h / 0.95);
+		border: 1px solid var(--color-panel);
 		border-radius: 1rem;
 		backdrop-filter: blur(8px);
 		z-index: 100;
@@ -197,7 +197,7 @@
 	}
 
 	.mobile-menu-button:hover {
-		background-color: color-mix(in srgb, var(--color-primary-light) 30%, transparent);
+		/* background-color: color-mix(in srgb, var(--color-white) 10%, transparent); */
 		opacity: 1;
 	}
 
@@ -208,7 +208,7 @@
 	.mobile-submenu {
 		display: flex;
 		flex-direction: column;
-		background-color: color-mix(in srgb, var(--color-primary-light) 20%, transparent);
+		background-color: color-mix(in srgb, var(--color-secondary-light) 10%, transparent);
 		animation: slideDown 0.2s ease;
 	}
 
@@ -223,7 +223,7 @@
 	}
 
 	.mobile-submenu-link:hover {
-		background-color: color-mix(in srgb, var(--color-primary-light) 30%, transparent);
+		/* background-color: color-mix(in srgb, var(--color-white) 10%, transparent); */
 		opacity: 1;
 	}
 

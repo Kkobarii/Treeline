@@ -350,7 +350,7 @@
 
 	<div class="treeline-card flex flex-col gap-[0.85rem]">
 		<div class="flex items-center justify-between border-b border-gray-200 pb-3">
-			<h2 class="text-primary text-lg font-bold">{t('sorting.code.title')}</h2>
+			<h2 class="text-secondary text-lg font-bold">{t('sorting.code.title')}</h2>
 			<CodeLanguageSelect
 				value={language}
 				onchange={lang => (language = lang)} />
@@ -408,8 +408,8 @@
 		@apply pointer-events-none;
 		position: absolute;
 		height: 92px;
-		background: oklch(from var(--color-primary-light) l c h / 0.4);
-		border: 1px solid oklch(from var(--color-primary) l c h / 0.6);
+		background: oklch(from var(--color-secondary-light) l c h / 0.4);
+		border: 1px solid oklch(from var(--color-secondary) l c h / 0.6);
 		z-index: 0;
 	}
 
@@ -431,8 +431,8 @@
 
 	.array-item {
 		@apply flex h-[92px] min-w-0 flex-row items-stretch gap-0 overflow-hidden border p-0;
-		background: var(--color-tertiary-ultra-light);
-		border: 1px solid var(--color-tertiary);
+		background: var(--color-white);
+		border: 1px solid var(--color-primary-light);
 		transition: background-color 140ms ease;
 		will-change: transform;
 		transform: translateZ(0);
@@ -443,32 +443,32 @@
 
 	.value-marker-track {
 		@apply flex w-[10px] shrink-0 items-end overflow-hidden;
-		background: var(--color-tertiary-ultra-light);
+		background: var(--color-white);
 	}
 
 	.value-marker-fill {
 		@apply w-full;
-		background: var(--color-primary);
-	}
-
-	.item-compared {
-		background: var(--color-primary-light);
-	}
-
-	.item-moved {
 		background: var(--color-secondary);
 	}
 
+	.item-compared {
+		background: var(--color-red-300);
+	}
+
+	.item-moved {
+		background: var(--color-blue-300);
+	}
+
 	.item-sorted {
-		background: var(--color-primary-ultra-light);
+		background: var(--color-green-200);
 	}
 
 	.item-light {
-		background: var(--color-gray-200);
+		background: var(--color-cyan-300);
 	}
 
 	.item-dark {
-		background: var(--color-gray-400);
+		background: var(--color-purple-300);
 	}
 
 	.code-line {

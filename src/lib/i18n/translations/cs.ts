@@ -95,7 +95,7 @@ const cs: Translation = {
 	steps: {
 		dataStructures: {
 			common: {
-				startData: 'Spusťte operaci, abyste mohli začít!',
+				startData: 'Spuštění operace',
 				endData: 'Konec',
 				emptyData: 'Strom je prázdný',
 				startingOperationData: 'Zahajování operace {operation}',
@@ -168,6 +168,7 @@ const cs: Translation = {
 				findLargestChildNotFoundData: 'Uzel je v správné pozici',
 				appendData: 'Připojit hodnotu {value} na konec haldy',
 				compareWithChildrenData: 'Porovnání uzlu a potomků',
+				compareWithChildrenHasLargestData: 'Porovnání uzlu a potomků - potřeba výměy',
 				compareWithChildrenCorrectData: 'Porovnání uzlu a potomků - správná pozice',
 				compareWithParentNeedsSwapData: 'Porovnání s rodičem - potřeba výměny',
 				compareWithParentCorrectData: 'Porovnání s rodičem - správná pozice',

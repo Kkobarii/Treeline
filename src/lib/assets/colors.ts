@@ -2,22 +2,21 @@ export const Colors = {
 	Black: '#000000',
 	White: '#FFFFFF',
 
-	Green: '#7CFC00',
-	Blue: '#1E90FF',
-	Red: '#FF4500',
-	Yellow: '#FFD700',
-	Node: '#a0c56a',
+	Blue: '#7a98cf',
+	Red: '#be664d',
+	Yellow: '#edd77e',
+	YellowHighlight: '#ffb347',
+	Node: '#a8d170',
 
 	ValueNode: '#ffb347',
-	ValueNodeHighlight: '#ffa500',
 	Info: '#aaaaaa',
 	Id: '#dddddd',
 
-	RBTreeRed: '#ff3333',
-	RBTreeBlack: '#333333',
+	RBTreeRed: '#db8069',
+	RBTreeBlack: '#474a47',
 
-	HeapCurrentNode: '#27ae60',
-	HeapAffectedNode: '#f39c12',
+	HeapCurrentNode: '#7a98cf',
+	HeapAffectedNode: '#86cae8',
 };
 
 export function shadeColor(color: string, percent: number) {

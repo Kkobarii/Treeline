@@ -227,7 +227,7 @@ export async function handleDropBackwardCommon(animator: CommonAnimator, annotat
 export function handleFoundForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: FoundData) {
 	const info = t(annotator.locale, 'steps.dataStructures.common.foundData', { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
-	animator.setNodeColor(data.nodeId, Colors.Green);
+	animator.setNodeColor(data.nodeId, Colors.Blue);
 	annotator.clearValueAnnotation();
 }
 

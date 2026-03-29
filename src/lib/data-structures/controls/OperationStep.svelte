@@ -92,7 +92,7 @@
 	}
 
 	.operation-step-item--current {
-		background-color: oklch(from var(--color-primary-dark) l c h / 0.3);
+		background-color: oklch(from var(--color-secondary-dark) l c h / 0.3);
 	}
 
 	.operation-step-item--normal {
