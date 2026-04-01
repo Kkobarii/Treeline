@@ -12,10 +12,12 @@ export enum ItemHighlightType {
 
 export class Item {
 	private readonly rawValue: number;
+	readonly id: string;
 	highlightType: ItemHighlightType | null = null;
 
-	constructor(value: number) {
+	constructor(value: number, id: string) {
 		this.rawValue = value;
+		this.id = id;
 	}
 
 	get value(): number {
@@ -25,6 +27,18 @@ export class Item {
 	get label(): string {
 		return `${this.rawValue}`;
 	}
+}
+
+export function generateItemIds(values: number[]): string[] {
+	const indexed = values.map((value, index) => ({ value, index }));
+	indexed.sort((a, b) => a.value - b.value || a.index - b.index);
+
+	const ids = new Array<string>(values.length);
+	for (let sortedPosition = 0; sortedPosition < indexed.length; sortedPosition++) {
+		ids[indexed[sortedPosition].index] = `${sortedPosition}`;
+	}
+
+	return ids;
 }
 
 export interface TracePaintOptions {
@@ -42,15 +56,16 @@ interface DetailedTraceBuilderOptions {
 export class DetailedTraceBuilder {
 	private readonly array: Item[];
 	private readonly steps: DetailedSortStep[] = [];
-	private readonly rowByValue = new Map<number, number>();
-	private readonly columnByValue = new Map<number, number>();
+	private readonly rowById = new Map<string, number>();
+	private readonly columnById = new Map<string, number>();
 	private readonly useRows: boolean;
 
 	constructor(initialArray: number[], options: DetailedTraceBuilderOptions = {}) {
 		this.useRows = options.useRows ?? false;
-		this.array = initialArray.map(value => {
-			const item = new Item(value);
-			this.rowByValue.set(item.value, 0);
+		const ids = generateItemIds(initialArray);
+		this.array = initialArray.map((value, index) => {
+			const item = new Item(value, ids[index]);
+			this.rowById.set(item.id, 0);
 
 			return item;
 		});
@@ -103,7 +118,7 @@ export class DetailedTraceBuilder {
 		for (const index of indices) {
 			const item = this.array[index];
 			if (item) {
-				this.rowByValue.set(item.value, Math.max(0, row));
+				this.rowById.set(item.id, Math.max(0, row));
 			}
 		}
 	}
@@ -115,8 +130,8 @@ export class DetailedTraceBuilder {
 				continue;
 			}
 
-			const currentRow = this.rowByValue.get(item.value) ?? 0;
-			this.rowByValue.set(item.value, currentRow + amount);
+			const currentRow = this.rowById.get(item.id) ?? 0;
+			this.rowById.set(item.id, currentRow + amount);
 		}
 	}
 
@@ -127,8 +142,8 @@ export class DetailedTraceBuilder {
 				continue;
 			}
 
-			const currentRow = this.rowByValue.get(item.value) ?? 0;
-			this.rowByValue.set(item.value, Math.max(0, currentRow - amount));
+			const currentRow = this.rowById.get(item.id) ?? 0;
+			this.rowById.set(item.id, Math.max(0, currentRow - amount));
 		}
 	}
 
@@ -136,7 +151,7 @@ export class DetailedTraceBuilder {
 		for (const index of indices) {
 			const item = this.array[index];
 			if (item) {
-				this.columnByValue.set(item.value, Math.max(0, column));
+				this.columnById.set(item.id, Math.max(0, column));
 			}
 		}
 	}
@@ -144,7 +159,7 @@ export class DetailedTraceBuilder {
 	getColumn(index: number): number | undefined {
 		const item = this.array[index];
 		if (item) {
-			return this.columnByValue.get(item.value);
+			return this.columnById.get(item.id);
 		}
 		return undefined;
 	}
@@ -153,7 +168,7 @@ export class DetailedTraceBuilder {
 		for (const index of indices) {
 			const item = this.array[index];
 			if (item) {
-				this.columnByValue.delete(item.value);
+				this.columnById.delete(item.id);
 			}
 		}
 	}
@@ -161,8 +176,8 @@ export class DetailedTraceBuilder {
 	setCoords(index: number, row: number, column: number): void {
 		const item = this.array[index];
 		if (item) {
-			this.rowByValue.set(item.value, Math.max(0, row));
-			this.columnByValue.set(item.value, Math.max(0, column));
+			this.rowById.set(item.id, Math.max(0, row));
+			this.columnById.set(item.id, Math.max(0, column));
 		}
 	}
 
@@ -173,8 +188,8 @@ export class DetailedTraceBuilder {
 
 		const positionedItems = snapshotArray.map((item, defaultCol) => ({
 			item,
-			row: this.rowByValue.get(item.value) ?? 0,
-			col: this.columnByValue.get(item.value) ?? defaultCol,
+			row: this.rowById.get(item.id) ?? 0,
+			col: this.columnById.get(item.id) ?? defaultCol,
 		}));
 		const maxRow = Math.max(...positionedItems.map(({ row }) => row));
 		const rowCount = maxRow + 1;
@@ -210,7 +225,7 @@ export class DetailedTraceBuilder {
 
 	record(step: Omit<DetailedSortStep, 'array'>): void {
 		const snapshotArray = this.array.map(item => {
-			const snapshotItem = new Item(item.value);
+			const snapshotItem = new Item(item.value, item.id);
 			snapshotItem.highlightType = item.highlightType;
 
 			return snapshotItem;

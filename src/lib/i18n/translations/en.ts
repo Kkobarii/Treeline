@@ -237,6 +237,13 @@ const en = {
 		controls: {
 			shuffle: 'Shuffle',
 		},
+		arrayTypes: {
+			label: 'Starting array',
+			shuffled: 'Random',
+			almostSorted: 'Almost Sorted',
+			reverse: 'Reverse Sorted',
+			duplicates: 'Duplicates',
+		},
 		code: {
 			title: 'Algorithm Code',
 			python: 'Python',

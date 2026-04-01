@@ -97,19 +97,15 @@ async function handleCompareWithChildrenBackward(animator: HeapAnimator, annotat
 
 async function handleCompareWithParentForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: CompareWithParentData) {
 	const info = data.needsSwap
-		? t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentNeedsSwapData', {
-				parentValue: String(data.parentValue),
-			})
-		: t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentCorrectData', { parentValue: String(data.parentValue) });
+		? t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentNeedsSwapData')
+		: t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentCorrectData');
 	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handleCompareWithParentBackward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: CompareWithParentData) {
 	const info = data.needsSwap
-		? t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentNeedsSwapData', {
-				parentValue: String(data.parentValue),
-			})
-		: t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentCorrectData', { parentValue: String(data.parentValue) });
+		? t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentNeedsSwapData')
+		: t((annotator as any).locale, 'steps.dataStructures.heap.compareWithParentCorrectData');
 	annotator.annotateNode(info, data.nodeId);
 }
 

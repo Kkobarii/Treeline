@@ -10,7 +10,8 @@
 	import { getCodeTemplate } from '../misc/codeTemplates';
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
-	import { createShuffledArray } from '../misc/utils';
+	import { createArrayByType } from '../misc/utils';
+	import type { ArrayType } from '../misc/utils';
 	import type { CodeLanguage, DetailedSortStep } from '../steps/stepTypes';
 	import { ItemHighlightType } from '../steps/traceBuilder';
 
@@ -28,6 +29,7 @@
 	const codeTemplate = getCodeTemplate(algorithmId);
 	const languageStorageKey = 'sortingDetailedViewCodeLanguage';
 	const delayStorageKey = 'sortingDetailedViewDelayMs';
+	const arrayTypeStorageKey = 'sortingArrayType';
 	const delayMinMs = 200;
 	const delayMaxMs = 1000;
 
@@ -40,12 +42,13 @@
 		})),
 	);
 
-	const startingArray = initialArray?.length ? [...initialArray] : createShuffledArray(16);
+	const startingArray = initialArray?.length ? [...initialArray] : createArrayByType('shuffled', 16);
 	let baseArray = $state(startingArray);
 	let steps = $state<DetailedSortStep[]>(algorithm.generateDetailedSteps(startingArray));
 	let currentStepIndex = $state(0);
 	let isPlaying = $state(false);
 	let delayMs = $state(450);
+	let arrayType = $state<ArrayType>('shuffled');
 	let timer: number | null = null;
 	let hasHydratedPreferences = $state(false);
 	let nextRunAt = $state(0);
@@ -60,8 +63,8 @@
 		currentRows.flatMap((row, rowIndex) =>
 			row.map((item, colIndex) => ({
 				item,
-				key: item ? `item-${item.value}` : `slot-${rowIndex}-${colIndex}`,
-				indexLabel: item ? currentArray.findIndex(candidate => candidate.value === item.value) : -1,
+				key: item ? `item-${item.id}` : `slot-${rowIndex}-${colIndex}`,
+				indexLabel: item ? currentArray.findIndex(candidate => candidate.id === item.id) : -1,
 			})),
 		),
 	);
@@ -174,7 +177,9 @@
 		}
 	}
 
-	onMount(() => {
+	const validArrayTypes: ArrayType[] = ['shuffled', 'almost-sorted', 'reverse', 'duplicates'];
+
+	onMount(async () => {
 		const storedLanguage = sessionStorage.getItem(languageStorageKey);
 		if (storedLanguage === 'python' || storedLanguage === 'javascript' || storedLanguage === 'c') {
 			language = storedLanguage;
@@ -185,16 +190,32 @@
 			delayMs = storedDelay;
 		}
 
-		hasHydratedPreferences = true;
-	});
+		const storedArrayType = sessionStorage.getItem(arrayTypeStorageKey);
+		if (storedArrayType && validArrayTypes.includes(storedArrayType as ArrayType)) {
+			arrayType = storedArrayType as ArrayType;
+		}
 
-	function shuffleArray() {
-		clearTimer();
-		isPlaying = false;
-		const nextArray = createShuffledArray(currentArray.length);
+		await tick();
+
+		const nextArray = createArrayByType(arrayType, startingArray.length);
 		baseArray = nextArray;
 		steps = algorithm.generateDetailedSteps(nextArray);
 		currentStepIndex = 0;
+
+		hasHydratedPreferences = true;
+	});
+
+	function regenerateArray() {
+		clearTimer();
+		isPlaying = false;
+		const nextArray = createArrayByType(arrayType, currentArray.length);
+		baseArray = nextArray;
+		steps = algorithm.generateDetailedSteps(nextArray);
+		currentStepIndex = 0;
+	}
+
+	function changeArrayType(type: ArrayType) {
+		arrayType = type;
 	}
 
 	async function stepForward(isManualStep = false) {
@@ -273,6 +294,7 @@
 
 		sessionStorage.setItem(languageStorageKey, language);
 		sessionStorage.setItem(delayStorageKey, String(delayMs));
+		sessionStorage.setItem(arrayTypeStorageKey, arrayType);
 	});
 
 	onDestroy(() => clearTimer());
@@ -299,7 +321,9 @@
 			minDelay={delayMinMs}
 			maxDelay={delayMaxMs}
 			bind:delayMs
-			onShuffle={shuffleArray}
+			{arrayType}
+			onShuffle={regenerateArray}
+			onArrayTypeChange={changeArrayType}
 			onTogglePlay={runOrPause}
 			onStepBackward={stepBackManual}
 			onStepForward={stepForwardManual} />

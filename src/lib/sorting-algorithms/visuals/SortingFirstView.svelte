@@ -6,7 +6,8 @@
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
-	import { createShuffledArray } from '../misc/utils';
+	import { createArrayByType } from '../misc/utils';
+	import type { ArrayType } from '../misc/utils';
 	import type { SortStep } from '../steps/stepTypes';
 	import { ItemHighlightType } from '../steps/traceBuilder';
 
@@ -14,6 +15,7 @@
 	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
 	const stepDelayMinMs = 5;
 	const stepDelayMaxMs = 120;
+	const arraySize = 100;
 
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 	const algorithm = getSortingAlgorithm(algorithmId);
@@ -23,8 +25,10 @@
 	let currentStepIndex = $state(0);
 	let isPlaying = $state(false);
 	let stepDelayMs = $state(40);
+	let arrayType = $state<ArrayType>('shuffled');
 	let timer: ReturnType<typeof setInterval> | null = null;
 	const stepDelayStorageKey = 'sortingFirstViewStepDelayMs';
+	const arrayTypeStorageKey = 'sortingArrayType';
 	let hasHydratedPreferences = $state(false);
 	let hasInitialBarsReveal = $state(false);
 
@@ -32,6 +36,7 @@
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
 	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : '');
 	let barTransitionMs = $derived(isPlaying ? stepDelayMs : 120);
+	let maxValue = $derived(displayedArray.length > 0 ? Math.max(...displayedArray.map(item => item.value)) : 1);
 
 	function clearTimer() {
 		if (timer) {
@@ -49,13 +54,20 @@
 			});
 		});
 
+	const validArrayTypes: ArrayType[] = ['shuffled', 'almost-sorted', 'reverse', 'duplicates'];
+
 	onMount(async () => {
 		const storedDelay = Number(sessionStorage.getItem(stepDelayStorageKey));
 		if (Number.isFinite(storedDelay) && storedDelay >= stepDelayMinMs && storedDelay <= stepDelayMaxMs) {
 			stepDelayMs = storedDelay;
 		}
 
-		const nextArray = createShuffledArray(100);
+		const storedArrayType = sessionStorage.getItem(arrayTypeStorageKey);
+		if (storedArrayType && validArrayTypes.includes(storedArrayType as ArrayType)) {
+			arrayType = storedArrayType as ArrayType;
+		}
+
+		const nextArray = createArrayByType(arrayType, arraySize);
 		baseArray = nextArray;
 		steps = algorithm.generateSteps(nextArray);
 		currentStepIndex = 0;
@@ -70,10 +82,14 @@
 	function regenerateArray() {
 		clearTimer();
 		isPlaying = false;
-		const nextArray = createShuffledArray(100);
+		const nextArray = createArrayByType(arrayType, arraySize);
 		baseArray = nextArray;
 		steps = algorithm.generateSteps(nextArray);
 		currentStepIndex = 0;
+	}
+
+	function changeArrayType(type: ArrayType) {
+		arrayType = type;
 	}
 
 	function tickForward() {
@@ -126,6 +142,7 @@
 		}
 
 		sessionStorage.setItem(stepDelayStorageKey, String(stepDelayMs));
+		sessionStorage.setItem(arrayTypeStorageKey, arrayType);
 	});
 
 	onDestroy(() => {
@@ -144,7 +161,9 @@
 		minDelay={stepDelayMinMs}
 		maxDelay={stepDelayMaxMs}
 		bind:delayMs={stepDelayMs}
+		{arrayType}
 		onShuffle={regenerateArray}
+		onArrayTypeChange={changeArrayType}
 		onTogglePlay={runOrPause}
 		onStepBackward={stepBackward}
 		onStepForward={stepForward} />
@@ -156,7 +175,7 @@
 				class:bar-compared={item.highlightType === ItemHighlightType.Compare}
 				class:bar-moved={item.highlightType === ItemHighlightType.Move}
 				class:bar-sorted={item.highlightType === ItemHighlightType.Sorted}
-				style={`height: ${Math.max(item.value, 1)}%; transform: scaleY(${hasInitialBarsReveal ? 1 : 0}); transition: transform 360ms ease-out, height ${barTransitionMs}ms linear, background-color ${barTransitionMs}ms ease;`}>
+				style={`height: ${Math.max((item.value / maxValue) * 100, 1)}%; transform: scaleY(${hasInitialBarsReveal ? 1 : 0}); transition: transform 360ms ease-out, height ${barTransitionMs}ms linear, background-color ${barTransitionMs}ms ease;`}>
 			</div>
 		{/each}
 	</div>

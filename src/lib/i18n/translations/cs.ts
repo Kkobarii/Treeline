@@ -239,6 +239,13 @@ const cs: Translation = {
 		controls: {
 			shuffle: 'Zamíchat',
 		},
+		arrayTypes: {
+			label: 'Počáteční pole',
+			shuffled: 'Náhodné',
+			almostSorted: 'Téměř seřazené',
+			reverse: 'Obráceně seřazené',
+			duplicates: 'Duplikáty',
+		},
 		code: {
 			title: 'Kód algoritmu',
 			python: 'Python',
