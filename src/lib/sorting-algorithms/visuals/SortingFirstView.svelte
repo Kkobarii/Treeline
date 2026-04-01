@@ -90,6 +90,7 @@
 
 	function changeArrayType(type: ArrayType) {
 		arrayType = type;
+		regenerateArray();
 	}
 
 	function tickForward() {
@@ -185,28 +186,25 @@
 	@reference "../../../app.css";
 
 	.bars-wrapper {
-		@apply grid h-[26rem] items-end gap-[2px] rounded-xl border p-3;
+		@apply grid h-[26rem] items-end gap-[2px] rounded-xl border border-gray-200 bg-white p-3;
 		grid-template-columns: repeat(100, minmax(0, 1fr));
-		background-color: var(--color-white);
-		border: 1px solid var(--color-gray-200);
 	}
 
 	.sort-bar {
-		@apply rounded-sm;
-		background-color: var(--color-gray-500);
+		@apply rounded-sm bg-gray-500;
 		transform-origin: bottom;
 	}
 
 	.bar-compared {
-		background-color: var(--color-red-500);
+		@apply bg-red-500;
 	}
 
 	.bar-moved {
-		background-color: var(--color-blue-500);
+		@apply bg-blue-500;
 	}
 
 	.bar-sorted {
-		background-color: var(--color-green-500);
+		@apply bg-green-500;
 	}
 
 	@media (max-width: 768px) {

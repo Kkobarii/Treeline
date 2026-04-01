@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Dropdown from '$lib/components/Dropdown.svelte';
 	import { getLocale, translate } from '$lib/i18n';
 
 	import type { ArrayType } from '../misc/utils';
@@ -46,85 +47,36 @@
 	let stepProgressPct = $derived(totalSteps > 0 ? Math.max(0, Math.min(100, (currentStep / totalSteps) * 100)) : 0);
 	let sliderStep = $derived(Math.max(1, Math.round((maxDelay - minDelay) / 20)));
 
-	const arrayTypes: { type: ArrayType; labelKey: string }[] = [
-		{ type: 'shuffled', labelKey: 'sorting.arrayTypes.shuffled' },
-		{ type: 'almost-sorted', labelKey: 'sorting.arrayTypes.almostSorted' },
-		{ type: 'reverse', labelKey: 'sorting.arrayTypes.reverse' },
-		{ type: 'duplicates', labelKey: 'sorting.arrayTypes.duplicates' },
+	const arrayTypeOptions: { value: ArrayType; label: string }[] = [
+		{ value: 'shuffled', label: t('sorting.arrayTypes.shuffled') },
+		{ value: 'almost-sorted', label: t('sorting.arrayTypes.almostSorted') },
+		{ value: 'reverse', label: t('sorting.arrayTypes.reverse') },
+		{ value: 'duplicates', label: t('sorting.arrayTypes.duplicates') },
 	];
-
-	let dropdownOpen = $state(false);
-
-	function selectArrayType(type: ArrayType) {
-		onArrayTypeChange(type);
-		dropdownOpen = false;
-	}
-
-	function toggleDropdown() {
-		dropdownOpen = !dropdownOpen;
-	}
-
-	function handleClickOutside(event: MouseEvent) {
-		const target = event.target as HTMLElement;
-		if (!target.closest('.array-controls')) {
-			dropdownOpen = false;
-		}
-	}
-
-	$effect(() => {
-		if (typeof window !== 'undefined') {
-			document.addEventListener('click', handleClickOutside);
-			return () => document.removeEventListener('click', handleClickOutside);
-		}
-	});
-
-	let arrayTypeLabel = $derived(t(arrayTypes.find(a => a.type === arrayType)?.labelKey ?? arrayTypes[0].labelKey));
 </script>
 
 <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
 	<div class="flex min-w-0 flex-col gap-3">
 		<div class="flex flex-wrap items-center gap-2">
-			<div class="array-controls">
-				<div class="array-controls-group">
-					<button
-						type="button"
-						class="array-type-button"
-						onclick={toggleDropdown}
-						aria-label={t('sorting.arrayTypes.label')}
-						aria-expanded={dropdownOpen}>
-						<span class="array-type-label">{arrayTypeLabel}</span>
-						<span
-							class="chevron"
-							class:chevron-open={dropdownOpen}>▼</span>
-					</button>
+			<div class="array-controls-group">
+				<Dropdown
+					options={arrayTypeOptions}
+					value={arrayType}
+					onchange={onArrayTypeChange}
+					ariaLabel={t('sorting.arrayTypes.label')} />
 
-					<button
-						type="button"
-						class="shuffle-button"
-						onclick={onShuffle}
-						aria-label={t('sorting.controls.shuffle')}
-						title={t('sorting.controls.shuffle')}>
-						<img
-							class="shuffle-icon dark:invert"
-							src="/controls/shuffle.svg"
-							alt=""
-							aria-hidden="true" />
-					</button>
-				</div>
-
-				{#if dropdownOpen}
-					<div class="array-type-dropdown">
-						{#each arrayTypes as at}
-							<button
-								type="button"
-								class="type-option"
-								class:type-option-active={at.type === arrayType}
-								onclick={() => selectArrayType(at.type)}>
-								<span>{t(at.labelKey)}</span>
-							</button>
-						{/each}
-					</div>
-				{/if}
+				<button
+					type="button"
+					class="shuffle-button"
+					onclick={onShuffle}
+					aria-label={t('sorting.controls.shuffle')}
+					title={t('sorting.controls.shuffle')}>
+					<img
+						class="shuffle-icon dark:invert"
+						src="/controls/shuffle.svg"
+						alt=""
+						aria-hidden="true" />
+				</button>
 			</div>
 
 			<div class="ml-4 flex items-center gap-2 max-sm:ml-0">
@@ -171,9 +123,9 @@
 			</div>
 		</div>
 
-		<div class="flex w-fit max-w-full flex-wrap items-center gap-3">
+		<div class="flex w-full flex-wrap items-center gap-3">
 			<label for={speedSliderId}>{t('common.speed')}</label>
-			<div class="flex min-w-0 items-center gap-2">
+			<div class="flex min-w-0 flex-1 items-center gap-2">
 				<img
 					class="h-[0.95rem] w-[0.95rem] dark:invert"
 					src="/controls/slow.svg"
@@ -181,7 +133,7 @@
 					aria-hidden="true" />
 				<input
 					id={speedSliderId}
-					class="speed-slider w-52 min-w-0 p-0"
+					class="speed-slider min-w-0 flex-1 p-0"
 					type="range"
 					min={minDelay}
 					max={maxDelay}
@@ -220,17 +172,9 @@
 <style lang="postcss">
 	@reference "../../../app.css";
 
-	.array-controls {
-		position: relative;
-		z-index: 50;
-	}
-
 	.array-controls-group {
-		display: inline-flex;
-		align-items: stretch;
-		border-radius: 0.5rem;
+		@apply inline-flex items-stretch rounded-lg;
 		border: 1px solid var(--color-primary-light);
-		overflow: hidden;
 		transition: border-color 140ms ease;
 	}
 
@@ -238,143 +182,70 @@
 		border-color: oklch(from var(--color-primary) calc(l - 0.08) c h);
 	}
 
-	.array-type-button {
-		display: grid;
-		grid-template-columns: 1fr auto;
-		align-items: center;
-		gap: 0.4rem;
-		padding: 0.55rem 0.7rem;
-		background: var(--color-primary-ultra-light);
+	.array-controls-group > :global(.dropdown-wrapper) {
+		@apply relative z-50;
+	}
+
+	.array-controls-group > :global(.dropdown-wrapper .dropdown-trigger) {
 		border: none;
 		border-right: 1px solid var(--color-primary-light);
-		cursor: pointer;
-		font-size: 0.8rem;
-		font-weight: 500;
-		color: var(--color-text);
-		transition: background-color 140ms ease;
+		border-radius: 0.5rem 0 0 0.5rem;
 	}
 
-	.array-type-button:hover {
-		background-color: oklch(from var(--color-primary-ultra-light) calc(l - 0.06) c h);
-	}
-
-	.array-type-button:focus,
-	.shuffle-button:focus {
-		outline: none;
+	.array-controls-group > :global(.dropdown-wrapper .dropdown-trigger:focus) {
 		box-shadow: inset 0 0 0 2px oklch(from var(--color-secondary) l c h / 0.35);
 	}
 
-	.array-type-label {
-		white-space: nowrap;
-	}
-
-	.chevron {
-		font-size: 0.55rem;
-		transition: transform 0.2s ease;
-		opacity: 0.6;
-	}
-
-	.chevron-open {
-		transform: rotate(180deg);
+	.array-controls-group > :global(.dropdown-wrapper .dropdown-panel) {
+		@apply rounded-lg;
 	}
 
 	.shuffle-button {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
+		@apply inline-flex cursor-pointer items-center justify-center rounded-r-lg;
 		padding: 0.55rem 0.6rem;
 		background: var(--color-primary-ultra-light);
 		border: none;
-		cursor: pointer;
 		transition: background-color 140ms ease;
+		border-radius: 0 0.5rem 0.5rem 0;
 	}
 
 	.shuffle-button:hover {
 		background-color: oklch(from var(--color-primary-ultra-light) calc(l - 0.06) c h);
 	}
 
+	.shuffle-button:focus {
+		@apply outline-none;
+		box-shadow: inset 0 0 0 2px oklch(from var(--color-secondary) l c h / 0.35);
+	}
+
 	.shuffle-icon {
-		height: 0.9rem;
-		width: 0.9rem;
-	}
-
-	.array-type-dropdown {
-		position: absolute;
-		top: calc(100% + 0.35rem);
-		left: 0;
-		min-width: 100%;
-		background: var(--color-gray-50);
-		border: 1px solid var(--color-gray-100);
-		border-radius: 0.5rem;
-		box-shadow:
-			0 4px 6px -1px oklch(from var(--color-gray-900) l c h / 0.1),
-			0 2px 4px -2px oklch(from var(--color-gray-900) l c h / 0.1);
-		overflow: hidden;
-	}
-
-	.type-option {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		width: 100%;
-		padding: 0.6rem 0.85rem;
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		font-size: 0.8rem;
-		font-weight: 500;
-		color: var(--color-text);
-		text-align: left;
-		transition: background-color 140ms ease;
-	}
-
-	.type-option:hover {
-		background-color: oklch(from var(--color-gray-50) calc(l - 0.06) c h);
-	}
-
-	.type-option-active {
-		background-color: oklch(from var(--color-secondary) l c h / 0.15);
-		color: var(--color-secondary-dark);
-	}
-
-	.type-option-active::after {
-		content: '\2713';
-		font-weight: bold;
-		font-size: 0.85rem;
+		@apply h-[0.9rem] w-[0.9rem];
 	}
 
 	.speed-slider {
+		@apply h-[0.48rem] rounded-full;
 		-webkit-appearance: none;
 		appearance: none;
-		height: 0.48rem;
-		border-radius: 999px;
 		background: oklch(from var(--color-secondary) l c h / 0.25);
 		direction: rtl;
 	}
 
 	.speed-slider::-webkit-slider-thumb {
+		@apply h-[0.95rem] w-[0.95rem] rounded-full bg-white;
 		-webkit-appearance: none;
 		appearance: none;
-		width: 0.95rem;
-		height: 0.95rem;
-		border-radius: 999px;
 		border: 2px solid var(--color-secondary-dark);
-		background: var(--color-white);
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 	}
 
 	.speed-slider::-moz-range-thumb {
-		width: 0.95rem;
-		height: 0.95rem;
-		border-radius: 999px;
+		@apply h-[0.95rem] w-[0.95rem] rounded-full bg-white;
 		border: 2px solid var(--color-secondary-dark);
-		background: var(--color-white);
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 	}
 
 	.speed-slider::-moz-range-track {
-		height: 0.48rem;
-		border-radius: 999px;
+		@apply h-[0.48rem] rounded-full;
 		background: oklch(from var(--color-secondary) l c h / 0.25);
 	}
 

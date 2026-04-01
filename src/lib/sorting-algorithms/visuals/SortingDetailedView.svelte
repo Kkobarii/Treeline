@@ -3,9 +3,9 @@
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 
+	import Dropdown from '$lib/components/Dropdown.svelte';
 	import { getLocale, translate } from '$lib/i18n';
 
-	import CodeLanguageSelect from '../components/CodeLanguageSelect.svelte';
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
 	import { getCodeTemplate } from '../misc/codeTemplates';
 	import { getSortingAlgorithm } from '../misc/registry';
@@ -34,6 +34,11 @@
 	const delayMaxMs = 1000;
 
 	let language = $state<CodeLanguage>('python');
+	const languageOptions: { value: CodeLanguage; label: string }[] = [
+		{ value: 'python', label: 'Python' },
+		{ value: 'javascript', label: 'JavaScript' },
+		{ value: 'c', label: 'C' },
+	];
 	let codeLines = $derived(codeTemplate[language]);
 	let highlightedCodeLines = $derived(
 		codeLines.map(line => ({
@@ -216,6 +221,7 @@
 
 	function changeArrayType(type: ArrayType) {
 		arrayType = type;
+		regenerateArray();
 	}
 
 	async function stepForward(isManualStep = false) {
@@ -375,9 +381,11 @@
 	<div class="treeline-card flex flex-col gap-[0.85rem]">
 		<div class="flex items-center justify-between border-b border-gray-200 pb-3">
 			<h2 class="text-secondary text-lg font-bold">{t('sorting.code.title')}</h2>
-			<CodeLanguageSelect
+			<Dropdown
+				options={languageOptions}
 				value={language}
-				onchange={lang => (language = lang)} />
+				onchange={lang => (language = lang)}
+				ariaLabel="Select code language" />
 		</div>
 
 		<div class="flex flex-col">
@@ -420,21 +428,18 @@
 	}
 
 	.array-grid {
-		@apply grid w-full gap-[0.35rem];
+		@apply relative grid w-full gap-[0.35rem];
 		contain: layout;
 		overflow: visible;
 		align-content: start;
-		position: relative;
 		margin: 0.35rem;
 	}
 
 	.merge-target-area {
-		@apply pointer-events-none;
-		position: absolute;
+		@apply pointer-events-none absolute z-0;
 		height: 92px;
 		background: oklch(from var(--color-secondary-light) l c h / 0.4);
 		border: 1px solid oklch(from var(--color-secondary) l c h / 0.6);
-		z-index: 0;
 	}
 
 	.array-grid-expanded {
@@ -442,32 +447,26 @@
 	}
 
 	.array-grid-quick-overlap {
+		@apply pb-[46px];
 		row-gap: 0;
 		grid-auto-rows: 46px;
-		padding-bottom: 46px;
 	}
 
 	.array-slot {
-		@apply h-[92px] min-w-0;
-		position: relative;
-		z-index: 1;
+		@apply relative z-[1] h-[92px] min-w-0;
 	}
 
 	.array-item {
-		@apply flex h-[92px] min-w-0 flex-row items-stretch gap-0 overflow-hidden border p-0;
-		background: var(--color-white);
+		@apply relative z-[1] flex h-[92px] min-w-0 flex-row items-stretch gap-0 overflow-hidden bg-white p-0;
 		border: 1px solid var(--color-primary-light);
 		transition: background-color 140ms ease;
 		will-change: transform;
 		transform: translateZ(0);
 		backface-visibility: hidden;
-		position: relative;
-		z-index: 1;
 	}
 
 	.value-marker-track {
-		@apply flex w-[10px] shrink-0 items-end overflow-hidden;
-		background: var(--color-white);
+		@apply flex w-[10px] shrink-0 items-end overflow-hidden bg-white;
 	}
 
 	.value-marker-fill {
@@ -476,38 +475,33 @@
 	}
 
 	.item-compared {
-		background: var(--color-red-300);
+		@apply bg-red-300;
 	}
 
 	.item-moved {
-		background: var(--color-blue-300);
+		@apply bg-blue-300;
 	}
 
 	.item-sorted {
-		background: var(--color-green-200);
+		@apply bg-green-200;
 	}
 
 	.item-light {
-		background: var(--color-cyan-300);
+		@apply bg-cyan-300;
 	}
 
 	.item-dark {
-		background: var(--color-purple-300);
+		@apply bg-purple-300;
 	}
 
 	.code-line {
-		@apply pr-1 pl-1 text-sm;
+		@apply flex items-center px-1 text-sm;
 		background: var(--color-tertiary-ultra-light);
-		/* min-height: 24px; */
-		display: flex;
-		align-items: center;
 		font-size: small;
 	}
 
 	.code-line code {
-		display: block;
-		width: 100%;
-		white-space: pre-wrap;
+		@apply block w-full whitespace-pre-wrap;
 	}
 
 	.code-line-active {
