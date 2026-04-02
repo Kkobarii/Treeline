@@ -91,4 +91,26 @@
 			display: none;
 		}
 	}
+
+	:global(.nav-submenu-link) {
+		text-decoration: none;
+		font-weight: 500;
+		transition: background-color 0.2s ease;
+	}
+
+	:global(.nav-submenu-link:hover) {
+		opacity: 1;
+	}
+
+	:global(.nav-separator) {
+		position: relative;
+	}
+
+	:global(.nav-separator::after) {
+		content: '';
+		position: absolute;
+		top: 50%;
+		height: 1px;
+		background: color-mix(in srgb, #ffffff 28%, transparent);
+	}
 </style>

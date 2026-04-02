@@ -11,6 +11,7 @@ const descriptions: Record<string, string> = {
 	merge: 'sorting-algorithms/merge_sort',
 	quick: 'sorting-algorithms/quick_sort',
 	selection: 'sorting-algorithms/selection_sort',
+	comparison: 'sorting-algorithms/comparison',
 };
 
 const titles: Record<string, string> = {
@@ -20,6 +21,7 @@ const titles: Record<string, string> = {
 	merge: 'sortingAlgorithms.mergeSort',
 	quick: 'sortingAlgorithms.quickSort',
 	selection: 'sortingAlgorithms.selectionSort',
+	comparison: 'sorting.comparison.title',
 };
 
 export const load: LayoutServerLoad = async ({ params, url }) => {

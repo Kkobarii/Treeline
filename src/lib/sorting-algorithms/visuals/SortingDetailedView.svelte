@@ -8,7 +8,7 @@
 
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
 	import { getCodeTemplate } from '../misc/codeTemplates';
-	import { getSortingAlgorithm } from '../misc/registry';
+	import { dataSets, getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 	import type { ArrayType } from '../misc/utils';
 	import { createArrayByType } from '../misc/utils';
@@ -182,7 +182,7 @@
 		}
 	}
 
-	const validArrayTypes: ArrayType[] = ['shuffled', 'almost-sorted', 'reverse', 'duplicates'];
+	const validArrayTypes = dataSets.map(ds => ds.type);
 
 	onMount(async () => {
 		const storedLanguage = sessionStorage.getItem(languageStorageKey);

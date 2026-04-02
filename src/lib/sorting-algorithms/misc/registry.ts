@@ -4,50 +4,58 @@ import { insertionSortDetailedSteps, insertionSortSteps } from '$lib/sorting-alg
 import { mergeSortDetailedSteps, mergeSortSteps } from '$lib/sorting-algorithms/algorithms/merge.js';
 import { quickSortDetailedSteps, quickSortSteps } from '$lib/sorting-algorithms/algorithms/quick.js';
 import { selectionSortDetailedSteps, selectionSortSteps } from '$lib/sorting-algorithms/algorithms/selection.js';
-import type { SortingAlgorithm, SortingAlgorithmId } from '$lib/sorting-algorithms/misc/types';
+import type { DataSet, SortingAlgorithm, SortingAlgorithmId } from '$lib/sorting-algorithms/misc/types';
+import {
+	createAlmostSortedArray,
+	createDuplicatesArray,
+	createPyramidArray,
+	createReverseSortedArray,
+	createSawtoothArray,
+	createShuffledArray,
+} from '$lib/sorting-algorithms/misc/utils';
 
 export const sortingAlgorithms: SortingAlgorithm[] = [
 	{
 		id: 'bubble',
-		name: 'Bubble Sort',
-		description: 'Repeatedly compares adjacent items and swaps them when they are out of order.',
+		nameKey: 'sortingAlgorithms.bubbleSort',
+		descriptionKey: 'sorting.descriptions.bubble',
 		generateSteps: bubbleSortSteps,
 		generateDetailedSteps: bubbleSortDetailedSteps,
 	},
 	{
 		id: 'selection',
-		name: 'Selection Sort',
-		description: 'Finds the minimum element in the unsorted section and moves it into place.',
+		nameKey: 'sortingAlgorithms.selectionSort',
+		descriptionKey: 'sorting.descriptions.selection',
 		generateSteps: selectionSortSteps,
 		generateDetailedSteps: selectionSortDetailedSteps,
 	},
 	{
 		id: 'insertion',
-		name: 'Insertion Sort',
-		description: 'Builds a sorted prefix by inserting each value into its correct position.',
+		nameKey: 'sortingAlgorithms.insertionSort',
+		descriptionKey: 'sorting.descriptions.insertion',
 		generateSteps: insertionSortSteps,
 		generateDetailedSteps: insertionSortDetailedSteps,
 	},
 	{
-		id: 'heap',
-		name: 'Heap Sort',
-		description: 'Builds a max heap and repeatedly extracts the largest element to the end.',
-		generateSteps: heapSortSteps,
-		generateDetailedSteps: heapSortDetailedSteps,
-	},
-	{
 		id: 'merge',
-		name: 'Merge Sort',
-		description: 'Splits the array into halves and merges sorted segments recursively.',
+		nameKey: 'sortingAlgorithms.mergeSort',
+		descriptionKey: 'sorting.descriptions.merge',
 		generateSteps: mergeSortSteps,
 		generateDetailedSteps: mergeSortDetailedSteps,
 	},
 	{
 		id: 'quick',
-		name: 'Quick Sort',
-		description: 'Partitions around a pivot and recursively sorts the partitions.',
+		nameKey: 'sortingAlgorithms.quickSort',
+		descriptionKey: 'sorting.descriptions.quick',
 		generateSteps: quickSortSteps,
 		generateDetailedSteps: quickSortDetailedSteps,
+	},
+	{
+		id: 'heap',
+		nameKey: 'sortingAlgorithms.heapSort',
+		descriptionKey: 'sorting.descriptions.heap',
+		generateSteps: heapSortSteps,
+		generateDetailedSteps: heapSortDetailedSteps,
 	},
 ];
 
@@ -58,4 +66,22 @@ export function getSortingAlgorithm(id: SortingAlgorithmId): SortingAlgorithm {
 	}
 
 	return algorithm;
+}
+
+export const dataSets: DataSet[] = [
+	{ type: 'shuffled', labelKey: 'sorting.arrayTypes.shuffled', generate: createShuffledArray },
+	{ type: 'almost-sorted', labelKey: 'sorting.arrayTypes.almostSorted', generate: createAlmostSortedArray },
+	{ type: 'reverse', labelKey: 'sorting.arrayTypes.reverse', generate: createReverseSortedArray },
+	{ type: 'duplicates', labelKey: 'sorting.arrayTypes.duplicates', generate: createDuplicatesArray },
+	{ type: 'sawtooth', labelKey: 'sorting.arrayTypes.sawtooth', generate: createSawtoothArray },
+	{ type: 'pyramid', labelKey: 'sorting.arrayTypes.pyramid', generate: createPyramidArray },
+];
+
+export function getDataSet(type: string): DataSet {
+	const dataSet = dataSets.find(ds => ds.type === type);
+	if (!dataSet) {
+		throw new Error(`Unknown data set type: ${type}`);
+	}
+
+	return dataSet;
 }

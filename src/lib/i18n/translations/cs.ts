@@ -247,6 +247,8 @@ const cs: Translation = {
 			almostSorted: 'Téměř seřazené',
 			reverse: 'Obráceně seřazené',
 			duplicates: 'Duplikáty',
+			sawtooth: 'Pila',
+			pyramid: 'Pyramida',
 		},
 		code: {
 			title: 'Kód algoritmu',
@@ -345,6 +347,21 @@ const cs: Translation = {
 			},
 		},
 		noSteps: 'Pro toto pole nejsou k dispozici žádné kroky.',
+		comparison: {
+			title: 'Porovnání algoritmů',
+			stop: 'Zastavit',
+			runAll: 'Spustit vše',
+			runRow: 'Spustit řádek',
+			runColumn: 'Spustit sloupec',
+		},
+		descriptions: {
+			bubble: 'Opakovaně porovnává sousední prvky a prohazuje je, pokud jsou ve špatném pořadí.',
+			selection: 'Najde minimální prvek v neseřazené části a přesune ho na spravné místo.',
+			insertion: 'Buduje seřazený prefix vkládáním každé hodnoty na správnou pozici.',
+			heap: 'Buduje max haldu a opakovaně extrahuje největší prvek na konec.',
+			merge: 'Rozděluje pole na poloviny a rekurzivně slučuje seřazené segmenty.',
+			quick: 'Rozděluje kolem pivotu a rekurzivně řadí oddíly.',
+		},
 	},
 
 	description: {

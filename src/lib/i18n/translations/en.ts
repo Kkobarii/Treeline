@@ -245,6 +245,8 @@ const en = {
 			almostSorted: 'Almost Sorted',
 			reverse: 'Reverse Sorted',
 			duplicates: 'Duplicates',
+			sawtooth: 'Sawtooth',
+			pyramid: 'Pyramid',
 		},
 		code: {
 			title: 'Algorithm Code',
@@ -343,6 +345,21 @@ const en = {
 			},
 		},
 		noSteps: 'No steps available for this array.',
+		comparison: {
+			title: 'Algorithm Comparison',
+			stop: 'Stop',
+			runAll: 'Run All',
+			runRow: 'Run row',
+			runColumn: 'Run column',
+		},
+		descriptions: {
+			bubble: 'Repeatedly compares adjacent items and swaps them when they are out of order.',
+			selection: 'Finds the minimum element in the unsorted section and moves it into place.',
+			insertion: 'Builds a sorted prefix by inserting each value into its correct position.',
+			heap: 'Builds a max heap and repeatedly extracts the largest element to the end.',
+			merge: 'Splits the array into halves and merges sorted segments recursively.',
+			quick: 'Partitions around a pivot and recursively sorts the partitions.',
+		},
 	},
 
 	description: {

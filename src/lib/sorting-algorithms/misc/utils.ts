@@ -1,4 +1,4 @@
-export type ArrayType = 'shuffled' | 'almost-sorted' | 'reverse' | 'duplicates';
+export type ArrayType = 'shuffled' | 'almost-sorted' | 'reverse' | 'duplicates' | 'sawtooth' | 'pyramid';
 
 function swapIndex(index: number, values: number[]) {
 	const swapIndex = Math.floor(Math.random() * (index + 1));
@@ -58,6 +58,38 @@ export function createDuplicatesArray(size = 100): number[] {
 	return array;
 }
 
+export function createSawtoothArray(size = 100): number[] {
+	let teeth = 5;
+	if (size % teeth !== 0) {
+		teeth = 4;
+	}
+
+	const toothSize = Math.ceil(size / teeth);
+	const values: number[] = [];
+
+	for (let t = 0; t < teeth; t += 1) {
+		for (let i = 0; i < toothSize && values.length < size; i += 1) {
+			values.push((i + 1) * teeth);
+		}
+	}
+
+	return values;
+}
+
+export function createPyramidArray(size = 100): number[] {
+	const values: number[] = [];
+	const half = Math.ceil(size / 2);
+
+	for (let i = 0; i < half; i += 1) {
+		values.push((i + 1) * 2);
+	}
+	for (let i = half; i < size; i += 1) {
+		values.push((size - i) * 2);
+	}
+
+	return values;
+}
+
 export function createArrayByType(type: ArrayType, size: number): number[] {
 	switch (type) {
 		case 'almost-sorted':
@@ -66,6 +98,10 @@ export function createArrayByType(type: ArrayType, size: number): number[] {
 			return createReverseSortedArray(size);
 		case 'duplicates':
 			return createDuplicatesArray(size);
+		case 'sawtooth':
+			return createSawtoothArray(size);
+		case 'pyramid':
+			return createPyramidArray(size);
 		default:
 			return createShuffledArray(size);
 	}

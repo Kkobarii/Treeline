@@ -3,13 +3,13 @@
 
 	import { getLocale, translate } from '$lib/i18n';
 
+	import SortingBars from '../components/SortingBars.svelte';
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
-	import { getSortingAlgorithm } from '../misc/registry';
+	import { dataSets, getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 	import { createArrayByType } from '../misc/utils';
 	import type { ArrayType } from '../misc/utils';
 	import type { SortStep } from '../steps/stepTypes';
-	import { ItemHighlightType } from '../steps/traceBuilder';
 
 	const locale = getLocale();
 	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
@@ -36,7 +36,6 @@
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
 	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : '');
 	let barTransitionMs = $derived(isPlaying ? stepDelayMs : 120);
-	let maxValue = $derived(displayedArray.length > 0 ? Math.max(...displayedArray.map(item => item.value)) : 1);
 
 	function clearTimer() {
 		if (timer) {
@@ -54,7 +53,7 @@
 			});
 		});
 
-	const validArrayTypes: ArrayType[] = ['shuffled', 'almost-sorted', 'reverse', 'duplicates'];
+	const validArrayTypes = dataSets.map(ds => ds.type);
 
 	onMount(async () => {
 		const storedDelay = Number(sessionStorage.getItem(stepDelayStorageKey));
@@ -169,47 +168,8 @@
 		onStepBackward={stepBackward}
 		onStepForward={stepForward} />
 
-	<div class="bars-wrapper">
-		{#each displayedArray as item}
-			<div
-				class="sort-bar"
-				class:bar-compared={item.highlightType === ItemHighlightType.Compare}
-				class:bar-moved={item.highlightType === ItemHighlightType.Move}
-				class:bar-sorted={item.highlightType === ItemHighlightType.Sorted}
-				style={`height: ${Math.max((item.value / maxValue) * 100, 1)}%; transform: scaleY(${hasInitialBarsReveal ? 1 : 0}); transition: transform 360ms ease-out, height ${barTransitionMs}ms linear, background-color ${barTransitionMs}ms ease;`}>
-			</div>
-		{/each}
-	</div>
+	<SortingBars
+		items={displayedArray}
+		hasReveal={hasInitialBarsReveal}
+		transitionMs={barTransitionMs} />
 </div>
-
-<style lang="postcss">
-	@reference "../../../app.css";
-
-	.bars-wrapper {
-		@apply grid h-[26rem] items-end gap-[2px] rounded-xl border border-gray-200 bg-white p-3;
-		grid-template-columns: repeat(100, minmax(0, 1fr));
-	}
-
-	.sort-bar {
-		@apply rounded-sm bg-gray-500;
-		transform-origin: bottom;
-	}
-
-	.bar-compared {
-		@apply bg-red-500;
-	}
-
-	.bar-moved {
-		@apply bg-blue-500;
-	}
-
-	.bar-sorted {
-		@apply bg-green-500;
-	}
-
-	@media (max-width: 768px) {
-		.bars-wrapper {
-			@apply h-72 gap-px;
-		}
-	}
-</style>

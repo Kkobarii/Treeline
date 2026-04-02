@@ -2,6 +2,7 @@
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import { getLocale, translate } from '$lib/i18n';
 
+	import { dataSets } from '../misc/registry';
 	import type { ArrayType } from '../misc/utils';
 
 	type SortingPlaybackControlProps = {
@@ -47,12 +48,10 @@
 	let stepProgressPct = $derived(totalSteps > 0 ? Math.max(0, Math.min(100, (currentStep / totalSteps) * 100)) : 0);
 	let sliderStep = $derived(Math.max(1, Math.round((maxDelay - minDelay) / 20)));
 
-	const arrayTypeOptions: { value: ArrayType; label: string }[] = [
-		{ value: 'shuffled', label: t('sorting.arrayTypes.shuffled') },
-		{ value: 'almost-sorted', label: t('sorting.arrayTypes.almostSorted') },
-		{ value: 'reverse', label: t('sorting.arrayTypes.reverse') },
-		{ value: 'duplicates', label: t('sorting.arrayTypes.duplicates') },
-	];
+	const arrayTypeOptions: { value: ArrayType; label: string }[] = dataSets.map(ds => ({
+		value: ds.type,
+		label: t(ds.labelKey),
+	}));
 </script>
 
 <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-4">

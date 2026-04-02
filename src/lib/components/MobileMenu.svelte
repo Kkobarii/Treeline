@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 
+	import { dataStructures } from '$lib/data-structures/registry';
 	import { getLocale, translate } from '$lib/i18n';
+	import { sortingAlgorithms } from '$lib/sorting-algorithms/misc/registry';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
@@ -22,54 +24,14 @@
 			<span class="mobile-menu-chevron transition-transform duration-200">▼</span>
 		</summary>
 		<div class="mobile-submenu">
-			<a
-				href="/{locale}/data-structures/binary-search-tree"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('dataStructures.binarySearchTree')}
-			</a>
-			<a
-				href="/{locale}/data-structures/avl-tree"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('dataStructures.avlTree')}
-			</a>
-			<a
-				href="/{locale}/data-structures/red-black-tree"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('dataStructures.redBlackTree')}
-			</a>
-			<a
-				href="/{locale}/data-structures/b-tree"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('dataStructures.bTree')}
-			</a>
-			<a
-				href="/{locale}/data-structures/heap"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('dataStructures.heap')}
-			</a>
-			<a
-				href="/{locale}/data-structures/linked-list"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('dataStructures.linkedList')}
-			</a>
-			<a
-				href="/{locale}/data-structures/stack"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('dataStructures.stack')}
-			</a>
-			<a
-				href="/{locale}/data-structures/queue"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('dataStructures.queue')}
-			</a>
+			{#each dataStructures as ds}
+				<a
+					href="/{locale}/data-structures/{ds.id}"
+					data-sveltekit-reload
+					class="mobile-submenu-link nav-submenu-link">
+					{t(ds.nameKey)}
+				</a>
+			{/each}
 		</div>
 	</details>
 
@@ -79,41 +41,20 @@
 			<span class="mobile-menu-chevron transition-transform duration-200">▼</span>
 		</summary>
 		<div class="mobile-submenu">
+			{#each sortingAlgorithms as algorithm}
+				<a
+					href="/{locale}/sorting-algorithms/{algorithm.id}{sortingDetailSuffix}"
+					data-sveltekit-reload
+					class="mobile-submenu-link nav-submenu-link">
+					{t(algorithm.nameKey)}
+				</a>
+			{/each}
+			<div class="mobile-submenu-separator nav-separator"></div>
 			<a
-				href="/{locale}/sorting-algorithms/bubble{sortingDetailSuffix}"
+				href="/{locale}/sorting-algorithms/comparison"
 				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('sortingAlgorithms.bubbleSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/selection{sortingDetailSuffix}"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('sortingAlgorithms.selectionSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/insertion{sortingDetailSuffix}"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('sortingAlgorithms.insertionSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/merge{sortingDetailSuffix}"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('sortingAlgorithms.mergeSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/quick{sortingDetailSuffix}"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('sortingAlgorithms.quickSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/heap{sortingDetailSuffix}"
-				data-sveltekit-reload
-				class="mobile-submenu-link">
-				{t('sortingAlgorithms.heapSort')}
+				class="mobile-submenu-link nav-submenu-link">
+				{t('sorting.comparison.title')}
 			</a>
 		</div>
 	</details>
@@ -214,17 +155,18 @@
 
 	.mobile-submenu-link {
 		color: white;
-		text-decoration: none;
 		padding: 0.75rem 2rem;
 		font-size: 0.9rem;
-		font-weight: 500;
-		transition: background-color 0.2s ease;
 		opacity: 0.85;
 	}
 
-	.mobile-submenu-link:hover {
-		/* background-color: color-mix(in srgb, var(--color-white) 10%, transparent); */
-		opacity: 1;
+	.mobile-submenu-separator {
+		padding: 0.25rem 2rem;
+	}
+
+	.mobile-submenu-separator::after {
+		left: 2rem;
+		right: 2rem;
 	}
 
 	@keyframes slideDown {

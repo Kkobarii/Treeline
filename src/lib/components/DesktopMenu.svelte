@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 
+	import { dataStructures } from '$lib/data-structures/registry';
 	import { getLocale, translate } from '$lib/i18n';
+	import { sortingAlgorithms } from '$lib/sorting-algorithms/misc/registry';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
@@ -23,46 +25,13 @@
 		</button>
 
 		<div class="dropdown-menu">
-			<a
-				href="/{locale}/data-structures/binary-search-tree"
-				class="dropdown-link">
-				{t('dataStructures.binarySearchTree')}
-			</a>
-			<a
-				href="/{locale}/data-structures/avl-tree"
-				class="dropdown-link">
-				{t('dataStructures.avlTree')}
-			</a>
-			<a
-				href="/{locale}/data-structures/red-black-tree"
-				class="dropdown-link">
-				{t('dataStructures.redBlackTree')}
-			</a>
-			<a
-				href="/{locale}/data-structures/b-tree"
-				class="dropdown-link">
-				{t('dataStructures.bTree')}
-			</a>
-			<a
-				href="/{locale}/data-structures/heap"
-				class="dropdown-link">
-				{t('dataStructures.heap')}
-			</a>
-			<a
-				href="/{locale}/data-structures/linked-list"
-				class="dropdown-link">
-				{t('dataStructures.linkedList')}
-			</a>
-			<a
-				href="/{locale}/data-structures/stack"
-				class="dropdown-link">
-				{t('dataStructures.stack')}
-			</a>
-			<a
-				href="/{locale}/data-structures/queue"
-				class="dropdown-link">
-				{t('dataStructures.queue')}
-			</a>
+			{#each dataStructures as ds}
+				<a
+					href="/{locale}/data-structures/{ds.id}"
+					class="dropdown-link nav-submenu-link">
+					{t(ds.nameKey)}
+				</a>
+			{/each}
 		</div>
 	</div>
 
@@ -78,35 +47,18 @@
 		</button>
 
 		<div class="dropdown-menu">
+			{#each sortingAlgorithms as algorithm}
+				<a
+					href="/{locale}/sorting-algorithms/{algorithm.id}{sortingDetailSuffix}"
+					class="dropdown-link nav-submenu-link">
+					{t(algorithm.nameKey)}
+				</a>
+			{/each}
+			<div class="dropdown-separator nav-separator"></div>
 			<a
-				href="/{locale}/sorting-algorithms/bubble{sortingDetailSuffix}"
-				class="dropdown-link">
-				{t('sortingAlgorithms.bubbleSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/selection{sortingDetailSuffix}"
-				class="dropdown-link">
-				{t('sortingAlgorithms.selectionSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/insertion{sortingDetailSuffix}"
-				class="dropdown-link">
-				{t('sortingAlgorithms.insertionSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/merge{sortingDetailSuffix}"
-				class="dropdown-link">
-				{t('sortingAlgorithms.mergeSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/quick{sortingDetailSuffix}"
-				class="dropdown-link">
-				{t('sortingAlgorithms.quickSort')}
-			</a>
-			<a
-				href="/{locale}/sorting-algorithms/heap{sortingDetailSuffix}"
-				class="dropdown-link">
-				{t('sortingAlgorithms.heapSort')}
+				href="/{locale}/sorting-algorithms/comparison"
+				class="dropdown-link nav-submenu-link">
+				{t('sorting.comparison.title')}
 			</a>
 		</div>
 	</div>
@@ -149,7 +101,6 @@
 		background-color: oklch(from var(--color-panel) l c h / 0.75);
 		border: 1px solid var(--color-panel);
 		border-radius: 0.5rem;
-		backdrop-filter: blur(6px);
 		margin-top: 0.5rem;
 		display: flex;
 		flex-direction: column;
@@ -187,17 +138,13 @@
 	}
 
 	.dropdown-link {
-		text-decoration: none;
 		padding: 0.75rem 1rem;
 		font-size: 0.95rem;
-		font-weight: 500;
-		transition: background-color 0.2s ease;
 		backdrop-filter: blur(8px);
 	}
 
 	.dropdown-link:hover {
 		background-color: color-mix(in srgb, var(--color-white) 10%, transparent);
-		opacity: 1;
 	}
 
 	.dropdown-link:first-child {
@@ -206,5 +153,15 @@
 
 	.dropdown-link:last-child {
 		border-radius: 0 0 0.5rem 0.5rem;
+	}
+
+	.dropdown-separator {
+		padding: 0.25rem 1rem;
+		backdrop-filter: blur(8px);
+	}
+
+	.dropdown-separator::after {
+		left: 1rem;
+		right: 1rem;
 	}
 </style>

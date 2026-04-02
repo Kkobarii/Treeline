@@ -88,10 +88,12 @@
 
 	.dropdown-wrapper {
 		@apply relative z-50;
+		height: stretch;
 	}
 
 	.dropdown-trigger {
 		@apply relative grid cursor-pointer items-center rounded-lg text-[0.8rem] font-medium;
+		height: 100%;
 		grid-template-columns: 1fr auto;
 		justify-items: start;
 		gap: 0.5rem;
