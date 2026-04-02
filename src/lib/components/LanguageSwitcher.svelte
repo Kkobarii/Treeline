@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 
-	import { getLocale, locales, type Locale } from '$lib/i18n';
+	import { getLocale, locales, translate, type Locale } from '$lib/i18n';
 
 	const locale = getLocale();
+	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
+
 	let isOpen = $state(false);
 
 	function selectLocale(code: Locale) {
@@ -50,12 +52,16 @@
 <div class="language-switcher relative">
 	<button
 		type="button"
-		class="language-button"
+		class="nav-icon-button"
 		onclick={toggleDropdown}
-		aria-label="Select language"
+		aria-label={t('nav.languageSwitcher')}
+		title={t('nav.languageSwitcher')}
 		aria-expanded={isOpen}>
-		<span class="flag">{currentLocale?.flag}</span>
-		<span class="language-code">{currentLocale?.code.toUpperCase()}</span>
+		<img
+			class="flag"
+			src={currentLocale?.flag}
+			alt={currentLocale?.name}
+			aria-hidden="true" />
 		<span
 			class="chevron"
 			class:chevron-open={isOpen}>▼</span>
@@ -69,7 +75,11 @@
 					class="language-option"
 					class:language-option-active={loc.code === locale}
 					onclick={() => selectLocale(loc.code)}>
-					<span class="flag">{loc.flag}</span>
+					<img
+						class="flag"
+						src={loc.flag}
+						alt={loc.name}
+						aria-hidden="true" />
 					<span class="language-name">{loc.name}</span>
 				</button>
 			{/each}
@@ -83,32 +93,10 @@
 		z-index: 100;
 	}
 
-	.language-button {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		padding: 0.4rem 0.6rem;
-		border-radius: 0.5rem;
-		background: transparent;
-		border: 1px solid transparent;
-		cursor: pointer;
-		font-size: 0.85rem;
-		color: var(--color-text);
-		transition: all 0.2s ease;
-	}
-
-	.language-button:hover {
-		background: oklch(from var(--color-gray-200) l c h / 0.5);
-		border-color: oklch(from var(--color-gray-400) l c h / 0.4);
-	}
-
 	.flag {
-		font-size: 1.1rem;
-		line-height: 1;
-	}
-
-	.language-code {
-		font-weight: 500;
+		width: 1.25rem;
+		height: auto;
+		border-radius: 0.15rem;
 	}
 
 	.chevron {
@@ -145,10 +133,9 @@
 		border: none;
 		cursor: pointer;
 		font-size: 0.9rem;
-		color: var(--color-text);
+		color: var(--color-black);
 		text-align: left;
 		transition: background 0.15s ease;
-		color: var(--color-black);
 	}
 
 	.language-option:hover {

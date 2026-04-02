@@ -1,7 +1,7 @@
 const en = {
 	meta: {
 		name: 'English',
-		flag: '🇬🇧',
+		flag: '/flags/flag-gb.svg',
 	},
 
 	common: {
@@ -24,6 +24,8 @@ const en = {
 		dataStructures: 'Data Structures',
 		sortingAlgorithms: 'Sorting Algorithms',
 		about: 'About',
+		languageSwitcher: 'Change language',
+		themeSwitcher: `Change theme`,
 	},
 
 	footer: {
@@ -238,7 +240,7 @@ const en = {
 			shuffle: 'Shuffle',
 		},
 		arrayTypes: {
-			label: 'Starting array',
+			label: 'Array Type',
 			shuffled: 'Random',
 			almostSorted: 'Almost Sorted',
 			reverse: 'Reverse Sorted',

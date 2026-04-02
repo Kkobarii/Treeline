@@ -14,15 +14,16 @@
 	<title>{page.data.pageTitle ? `${page.data.pageTitle} - Treeline` : 'Treeline'}</title>
 </svelte:head>
 
-<Nav />
+<div class="flex min-h-screen flex-col">
+	<Nav />
+	<div class="header-spacer"></div>
 
-<div class="header-spacer"></div>
+	<main class="container mx-auto flex flex-1 flex-col gap-6 px-6 py-2">
+		{@render children?.()}
+	</main>
 
-<main class="container mx-auto flex flex-col gap-6 px-6 py-2">
-	{@render children?.()}
-</main>
-
-<Footer />
+	<Footer />
+</div>
 
 <style>
 	.header-spacer {

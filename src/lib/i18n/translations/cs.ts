@@ -3,7 +3,7 @@ import type { Translation } from './en';
 const cs: Translation = {
 	meta: {
 		name: 'Čeština',
-		flag: '🇨🇿',
+		flag: '/flags/flag-cz.svg',
 	},
 
 	common: {
@@ -26,6 +26,8 @@ const cs: Translation = {
 		dataStructures: 'Datové struktury',
 		sortingAlgorithms: 'Třídicí algoritmy',
 		about: 'O aplikaci',
+		languageSwitcher: 'Změnit jazyk',
+		themeSwitcher: `Změnit barevné schéma`,
 	},
 
 	footer: {
@@ -240,7 +242,7 @@ const cs: Translation = {
 			shuffle: 'Zamíchat',
 		},
 		arrayTypes: {
-			label: 'Počáteční pole',
+			label: 'Typ pole',
 			shuffled: 'Náhodné',
 			almostSorted: 'Téměř seřazené',
 			reverse: 'Obráceně seřazené',

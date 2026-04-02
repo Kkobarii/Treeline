@@ -145,34 +145,36 @@
 	}
 </script>
 
-<div class="flex min-h-0 flex-1 flex-row gap-2 md:flex-col md:gap-6">
-	<div class="flex flex-col gap-3">
+<div class="operation-card flex flex-row gap-2 max-md:max-h-[30vh] md:min-h-0 md:flex-1 md:flex-col md:gap-6">
+	<div class="flex flex-1 flex-col gap-3 md:flex-none">
 		<h2 class="text-secondary text-lg font-bold break-words">{t('controls.operation.title')}</h2>
 		<div class="flex flex-col flex-wrap items-start gap-2 md:flex-row md:items-center">
-			<button
-				class="inline-flex w-full items-center justify-center md:w-auto"
-				type="button"
-				on:click={() => operationManager.previous()}
-				aria-label={t('common.previous')}
-				disabled={!canDoPrevious || locked}>
-				<img
-					src="/controls/previous.svg"
-					alt="previous"
-					aria-hidden="true"
-					class="h-4 w-4 dark:invert" />
-			</button>
-			<button
-				class="inline-flex w-full items-center justify-center md:w-auto"
-				type="button"
-				on:click={() => operationManager.next()}
-				aria-label={t('common.next')}
-				disabled={!canDoNext || locked}>
-				<img
-					src="/controls/next.svg"
-					alt="next"
-					aria-hidden="true"
-					class="h-4 w-4 dark:invert" />
-			</button>
+			<div class="flex w-full gap-2">
+				<button
+					class="inline-flex w-full items-center justify-center md:w-auto"
+					type="button"
+					on:click={() => operationManager.previous()}
+					aria-label={t('common.previous')}
+					disabled={!canDoPrevious || locked}>
+					<img
+						src="/controls/previous.svg"
+						alt="previous"
+						aria-hidden="true"
+						class="h-4 w-4 dark:invert" />
+				</button>
+				<button
+					class="inline-flex w-full items-center justify-center md:w-auto"
+					type="button"
+					on:click={() => operationManager.next()}
+					aria-label={t('common.next')}
+					disabled={!canDoNext || locked}>
+					<img
+						src="/controls/next.svg"
+						alt="next"
+						aria-hidden="true"
+						class="h-4 w-4 dark:invert" />
+				</button>
+			</div>
 			<PillSwitcher
 				selected={showSteps ? 1 : 0}
 				leftLabel={t('common.operation')}

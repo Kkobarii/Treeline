@@ -57,6 +57,7 @@
 		class="dropdown-trigger"
 		onclick={handleTriggerClick}
 		aria-label={ariaLabel}
+		title={ariaLabel}
 		aria-expanded={isOpen}>
 		<span class="dropdown-label">{currentLabel}</span>
 		<span

@@ -125,12 +125,14 @@ export function quickSortSteps(input: number[]): SortStep[] {
 			if (array[j].value <= pivot) {
 				i += 1;
 				swap(array, i, j);
-				trace.paint({ moved: [i, j], compared: [high], sorted: sortedIndices() });
-				trace.record({
-					codePartId: 'swap',
-					stepLabel: new StepLabel('sorting.steps.quick.basic.moveIntoLeftPartition', { j }),
-					variables: { i, j, pivot },
-				});
+				if (i !== j) {
+					trace.paint({ moved: [i, j], compared: [high], sorted: sortedIndices() });
+					trace.record({
+						codePartId: 'swap',
+						stepLabel: new StepLabel('sorting.steps.quick.basic.moveIntoLeftPartition', { j }),
+						variables: { i, j, pivot },
+					});
+				}
 			}
 		}
 

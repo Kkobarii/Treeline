@@ -57,14 +57,13 @@
 
 <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
 	<div class="flex min-w-0 flex-col gap-3">
-		<div class="flex flex-wrap items-center gap-2">
-			<div class="array-controls-group">
+		<div class="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
+			<div class="array-controls-group w-full sm:w-auto">
 				<Dropdown
 					options={arrayTypeOptions}
 					value={arrayType}
 					onchange={onArrayTypeChange}
 					ariaLabel={t('sorting.arrayTypes.label')} />
-
 				<button
 					type="button"
 					class="shuffle-button"
@@ -79,7 +78,7 @@
 				</button>
 			</div>
 
-			<div class="ml-4 flex items-center gap-2 max-sm:ml-0">
+			<div class="flex items-center gap-2 sm:ml-4">
 				<button
 					type="button"
 					class="inline-flex h-[2.35rem] w-[2.65rem] items-center justify-center !p-0"
@@ -124,7 +123,6 @@
 		</div>
 
 		<div class="flex w-full flex-wrap items-center gap-3">
-			<label for={speedSliderId}>{t('common.speed')}</label>
 			<div class="flex min-w-0 flex-1 items-center gap-2">
 				<img
 					class="h-[0.95rem] w-[0.95rem] dark:invert"
@@ -138,7 +136,9 @@
 					min={minDelay}
 					max={maxDelay}
 					step={sliderStep}
-					bind:value={delayMs} />
+					bind:value={delayMs}
+					aria-label={t('common.speed')}
+					title={t('common.speed')} />
 				<img
 					class="h-[0.95rem] w-[0.95rem] dark:invert"
 					src="/controls/fast.svg"
@@ -183,10 +183,11 @@
 	}
 
 	.array-controls-group > :global(.dropdown-wrapper) {
-		@apply relative z-50;
+		@apply relative z-50 flex-1;
 	}
 
 	.array-controls-group > :global(.dropdown-wrapper .dropdown-trigger) {
+		@apply w-full;
 		border: none;
 		border-right: 1px solid var(--color-primary-light);
 		border-radius: 0.5rem 0 0 0.5rem;

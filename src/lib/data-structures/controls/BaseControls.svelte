@@ -50,7 +50,7 @@
 		.controls-container {
 			min-width: 0;
 			width: 100%;
-			min-height: 30em;
+			height: auto;
 		}
 	}
 

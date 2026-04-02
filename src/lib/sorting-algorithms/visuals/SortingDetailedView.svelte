@@ -10,8 +10,8 @@
 	import { getCodeTemplate } from '../misc/codeTemplates';
 	import { getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
-	import { createArrayByType } from '../misc/utils';
 	import type { ArrayType } from '../misc/utils';
+	import { createArrayByType } from '../misc/utils';
 	import type { CodeLanguage, DetailedSortStep } from '../steps/stepTypes';
 	import { ItemHighlightType } from '../steps/traceBuilder';
 
@@ -336,7 +336,6 @@
 
 		<div
 			class="array-grid"
-			class:array-grid-expanded={isMergeSort}
 			class:array-grid-quick-overlap={isQuickSort}
 			style={`grid-template-columns: repeat(${gridColumns || 1}, minmax(0, 1fr));`}>
 			{#if targetAreaHighlight}
@@ -385,7 +384,7 @@
 				options={languageOptions}
 				value={language}
 				onchange={lang => (language = lang)}
-				ariaLabel="Select code language" />
+				ariaLabel={t('sorting.code.title')} />
 		</div>
 
 		<div class="flex flex-col">
@@ -432,7 +431,6 @@
 		contain: layout;
 		overflow: visible;
 		align-content: start;
-		margin: 0.35rem;
 	}
 
 	.merge-target-area {
@@ -440,10 +438,6 @@
 		height: 92px;
 		background: oklch(from var(--color-secondary-light) l c h / 0.4);
 		border: 1px solid oklch(from var(--color-secondary) l c h / 0.6);
-	}
-
-	.array-grid-expanded {
-		min-height: calc(92px * 5 + 0.35rem * 4);
 	}
 
 	.array-grid-quick-overlap {
@@ -496,7 +490,6 @@
 
 	.code-line {
 		@apply flex items-center px-1 text-sm;
-		background: var(--color-tertiary-ultra-light);
 		font-size: small;
 	}
 
@@ -505,7 +498,7 @@
 	}
 
 	.code-line-active {
-		background: oklch(from var(--color-primary-light) l c h / 0.5);
+		background: oklch(from var(--color-secondary-light) l c h / 0.5);
 	}
 
 	.line-break {
@@ -515,6 +508,7 @@
 	@media (max-width: 1040px) {
 		.detailed-layout {
 			grid-template-columns: 1fr;
+			align-items: start;
 		}
 	}
 </style>

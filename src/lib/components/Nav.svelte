@@ -23,23 +23,23 @@
 				src="/branch.svg"
 				alt="Treeline logo"
 				class="h-8 w-8" />
-			<span class="header-title">Treeline</span>
+			<span class="header-title hidden md:inline">Treeline</span>
 		</a>
 
 		<DesktopMenu />
 
 		<div class="ml-auto flex items-center gap-3">
+			<LanguageSwitcher />
+			<ThemeSwitcher />
+
 			<label
 				for="mobile-nav-toggle"
 				aria-label="Toggle menu"
-				class="header-burger-button md:hidden">
+				class="nav-icon-button header-burger flex-col gap-[0.35rem]">
 				<span class="burger-line"></span>
 				<span class="burger-line"></span>
 				<span class="burger-line"></span>
 			</label>
-
-			<LanguageSwitcher />
-			<ThemeSwitcher />
 		</div>
 	</div>
 
@@ -78,37 +78,17 @@
 		pointer-events: none;
 	}
 
-	.header-burger-button {
-		display: flex;
-		flex-direction: column;
-		gap: 0.4rem;
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 0.5rem;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.header-burger-button::-webkit-details-marker {
-		display: none;
-	}
-
-	.header-burger-button::marker {
-		content: '';
+	.burger-line {
+		display: block;
+		width: 20px;
+		height: 2px;
+		background-color: #ffffff;
+		border-radius: 1px;
 	}
 
 	@media (min-width: 768px) {
-		.header-burger-button {
+		.header-burger {
 			display: none;
 		}
-	}
-
-	.burger-line {
-		width: 24px;
-		height: 2px;
-		background-color: var(--color-black);
-		border-radius: 1px;
-		transition: all 0.3s ease;
 	}
 </style>

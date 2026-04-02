@@ -11,7 +11,7 @@
 	const t = (key: string) => translate(locale, key);
 </script>
 
-<div class="mb-3 flex items-center justify-between gap-2">
+<div class="page-header">
 	<h1 class="page-title">{t('sortingAlgorithms.quickSort')}</h1>
 	<ViewSwitcher
 		algorithmId="quick"

@@ -322,6 +322,26 @@ label {
 	color: #ffffff;
 }
 
+.nav-icon-button {
+	display: flex;
+	align-items: center;
+	height: stretch;
+	justify-content: center;
+	gap: 0.35rem;
+	padding: 0.4rem 0.6rem;
+	border-radius: 0.5rem;
+	background: oklch(from #ffffff l c h / 0.08);
+	border: 1px solid oklch(from #ffffff l c h / 0.12);
+	cursor: pointer;
+	color: #ffffff;
+	transition: all 0.2s ease;
+}
+
+.nav-icon-button:hover {
+	background: oklch(from #ffffff l c h / 0.15);
+	border-color: oklch(from #ffffff l c h / 0.25);
+}
+
 .page-title {
 	font-size: 2.25rem;
 	font-weight: 800;
@@ -336,9 +356,25 @@ label {
 	height: 75vh;
 }
 
+.page-header {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+	.page-header {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+}
+
 @media (max-width: 768px) {
 	.page-layout {
 		flex-direction: column;
-		height: 120vh;
+		height: auto;
 	}
 }
