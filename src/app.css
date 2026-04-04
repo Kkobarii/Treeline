@@ -119,6 +119,7 @@
 	--color-black: #000000;
 
 	--color-panel: var(--color-green-500);
+	--color-background: #ffffff;
 }
 
 .dark {
@@ -202,6 +203,8 @@
 
 	--color-white: #000000;
 	--color-black: #ffffff;
+
+	--color-background: #121212;
 }
 
 main button {

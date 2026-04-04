@@ -119,7 +119,7 @@
 		bind:this={overlayCanvas}
 		class="pointer-events-none absolute inset-0 z-50 rounded"></canvas>
 
-	<div class="absolute bottom-4 left-4 z-40 flex gap-2">
+	<div class="absolute bottom-4 left-4 z-60 flex gap-2">
 		<button
 			style="padding: 2px!important;"
 			aria-label="Toggle debug mode"

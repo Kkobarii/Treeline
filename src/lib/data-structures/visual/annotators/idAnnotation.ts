@@ -19,7 +19,7 @@ export class IdAnnotation extends BaseAnnotation {
 	getPosition(): { x: number; y: number } {
 		try {
 			let nodePos = this.annotator.network.getBoundingBox(this.followingNodeId as any);
-			return { x: nodePos.left - 1, y: nodePos.top + VIS_NETWORK_TOP_BB_OFFSET };
+			return { x: nodePos.left + 1.5 * VIS_NETWORK_TOP_BB_OFFSET, y: nodePos.top };
 		} catch {
 			// node might not exist
 		}

@@ -235,10 +235,10 @@
 	}
 
 	#operation-info::-webkit-scrollbar-thumb {
-		background: rgba(90, 90, 90);
+		background: var(--color-primary);
 	}
 
 	#operation-info::-webkit-scrollbar-track {
-		background: rgba(0, 0, 0, 0.2);
+		background: var(--color-primary-light);
 	}
 </style>

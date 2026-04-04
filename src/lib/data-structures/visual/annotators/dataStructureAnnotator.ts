@@ -7,6 +7,7 @@ import type { Locale } from '$lib/i18n';
 
 import { Annotation } from './annotation';
 import { IdAnnotation } from './idAnnotation';
+import { LegsAnnotation } from './legsAnnotation';
 import { ValueAnnotation } from './valueAnnotation';
 
 export interface DataStructureAnnotatorOpts {
@@ -47,19 +48,9 @@ export class DataStructureAnnotator {
 	shown: boolean = true;
 	showAnnotation: boolean = true;
 
-	public toggleDebugMode(): void {
-		this.debugMode = !this.debugMode;
-		if (this.debugMode) this.redrawCanvas();
-		else {
-			this.clearCanvas();
-			this.redrawCanvas();
-		}
-	}
-
 	public setDebugMode(v: boolean): void {
 		this.debugMode = v;
-		if (this.debugMode) this.redrawCanvas();
-		else this.clearCanvas();
+		this.redrawCanvas();
 	}
 
 	public getScale(): number {
@@ -73,23 +64,26 @@ export class DataStructureAnnotator {
 		}
 
 		this.clearCanvas();
-		// draw the normal annotation (textual) and any floating value annotation
+
+		for (const node of this.nodes.get() as Node[]) {
+			const legsAnnot = new LegsAnnotation(this, node.id!);
+			legsAnnot.draw();
+		}
+
+		if (this.debugMode) {
+			for (const node of this.nodes.get() as Node[]) {
+				if (node.id === undefined || isDummyNodeId(node.id)) continue;
+				const idAnnot = new IdAnnotation(this, node.id);
+				idAnnot.draw();
+			}
+		}
+
 		if (this.currentAnnotation) {
 			this.currentAnnotation.draw();
 		}
 
 		if (this.currentValueAnnotation) {
 			this.currentValueAnnotation.draw();
-		}
-
-		if (this.debugMode) {
-			for (const node of this.nodes.get() as Node[]) {
-				try {
-					if (isDummyNodeId(node.id!)) continue;
-					const idAnnot = new IdAnnotation(this, node.id!);
-					idAnnot.draw();
-				} catch {}
-			}
 		}
 	}
 
@@ -220,5 +214,26 @@ export class DataStructureAnnotator {
 		this.ctx.textAlign = textAlign;
 		this.ctx.textBaseline = textBaseline;
 		this.ctx.fillText(text, x, y);
+	}
+
+	public drawLine(
+		x1: number,
+		y1: number,
+		x2: number,
+		y2: number,
+		color: string,
+		lineWidth: number = 2,
+		dashed: null | { length: number; gap: number } = null,
+	) {
+		if (this.shown === false) return;
+
+		this.ctx.strokeStyle = color;
+		this.ctx.lineWidth = lineWidth;
+		this.ctx.setLineDash(dashed ? [dashed.length, dashed.gap] : []);
+		this.ctx.beginPath();
+		this.ctx.moveTo(x1, y1);
+		this.ctx.lineTo(x2, y2);
+		this.ctx.stroke();
+		this.ctx.setLineDash([]);
 	}
 }

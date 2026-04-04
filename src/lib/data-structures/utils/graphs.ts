@@ -17,7 +17,7 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 	root: T | null,
 	getLeftChild: (node: T) => T | null,
 	getRightChild: (node: T) => T | null,
-	createNodeData: (node: T, childNumber: number) => NodeData,
+	createNodeData: (node: T, childNumber: number, legs: boolean[]) => NodeData,
 	nodes: DataSet<Node> = new DataSet<Node>(),
 	edges: DataSet<Edge> = new DataSet<Edge>(),
 	successorInfo: SuccessorInfo | null = null,
@@ -29,13 +29,16 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 	log('SuccessorInfo:', successorInfo);
 
 	const nodeId = root.id;
-	const nodeData = createNodeData(root, 0);
+	const leftChild = getLeftChild(root);
+	const rightChild = getRightChild(root);
+	const legs = leftChild || rightChild ? [false, false] : [true, true];
+	const nodeData = createNodeData(root, 0, legs);
 	const nodeOverrides = createNodeOverrides ? createNodeOverrides(root, 0) : {};
 
 	nodes.add({ id: nodeId, label: root.value.toString(), title: NodeData.toTitle(nodeData), ...nodeOverrides });
 
 	if (successorInfo !== null) {
-		const parentNodeData = createNodeData(root, successorInfo.childNumber);
+		const parentNodeData = createNodeData(root, successorInfo.childNumber, legs);
 		const successorOverrides = createNodeOverrides ? createNodeOverrides(root, successorInfo.childNumber) : {};
 		nodes.update({
 			id: nodeId,
@@ -49,7 +52,6 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 	}
 
 	// Process left child
-	const leftChild = getLeftChild(root);
 	if (leftChild) {
 		const result = binaryTreeToGraph(
 			leftChild,
@@ -63,9 +65,9 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 		);
 		nodes = result.nodes;
 		edges = result.edges;
-	} else {
+	} else if (rightChild) {
 		const dummyId = getDummyNodeId(nodeId, 0);
-		const dummyNodeData = createNodeData(root, 0);
+		const dummyNodeData = createNodeData(root, 0, []);
 		nodes.add({
 			id: dummyId,
 			label: '',
@@ -78,7 +80,6 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 	}
 
 	// Process right child
-	const rightChild = getRightChild(root);
 	if (rightChild) {
 		const result = binaryTreeToGraph(
 			rightChild,
@@ -92,9 +93,9 @@ function binaryTreeToGraph<T extends { id: number; value: number }>(
 		);
 		nodes = result.nodes;
 		edges = result.edges;
-	} else {
+	} else if (leftChild) {
 		const dummyId = getDummyNodeId(nodeId, 1);
-		const dummyNodeData = createNodeData(root, 1);
+		const dummyNodeData = createNodeData(root, 1, []);
 		nodes.add({
 			id: dummyId,
 			label: '',
@@ -119,7 +120,7 @@ export function bsTreeToGraph(
 		root,
 		node => node.left,
 		node => node.right,
-		(_node, childNumber) => new NodeData(childNumber),
+		(_node, childNumber, legs) => new NodeData(childNumber, legs),
 		nodes,
 		edges,
 		successorInfo,
@@ -143,7 +144,7 @@ export function avlTreeToGraph(
 		root,
 		node => node.left,
 		node => node.right,
-		(node, childNumber) => new AVLTreeNodeData(childNumber, node.height ?? 0, getBalanceValue(node)),
+		(node, childNumber, legs) => new AVLTreeNodeData(childNumber, node.height ?? 0, getBalanceValue(node), legs),
 		nodes,
 		edges,
 		successorInfo,
@@ -160,7 +161,7 @@ export function heapToGraph(
 		root,
 		node => node.left,
 		node => node.right,
-		(_node, childNumber) => new NodeData(childNumber),
+		(_node, childNumber, legs) => new NodeData(childNumber, legs),
 		nodes,
 		edges,
 		successorInfo,
@@ -177,7 +178,7 @@ export function rbTreeToGraph(
 		root,
 		node => node.left,
 		node => node.right,
-		(node, childNumber) => new RBTreeNodeData(childNumber, node.color),
+		(node, childNumber, legs) => new RBTreeNodeData(childNumber, node.color, legs),
 		nodes,
 		edges,
 		successorInfo,
@@ -219,17 +220,24 @@ export function getEdgeId(parentId: number | string, direction: 'left' | 'right'
 }
 
 export class NodeData {
-	constructor(public childNumber: number) {}
+	constructor(
+		public childNumber: number,
+		public legs: boolean[] = [],
+	) {}
 
 	static fromNode(node: Node): NodeData {
 		let childNumber = -1;
+		let legs: boolean[] = [];
 		if (node.title && typeof node.title === 'string') {
 			let titleObj = JSON.parse(node.title);
 			if ('childNumber' in titleObj) {
 				childNumber = titleObj.childNumber;
 			}
+			if ('legs' in titleObj) {
+				legs = titleObj.legs;
+			}
 		}
-		return new NodeData(childNumber);
+		return new NodeData(childNumber, legs);
 	}
 
 	static toTitle(nodeData: NodeData): string {
@@ -259,14 +267,16 @@ export class AVLTreeNodeData extends NodeData {
 		childNumber: number,
 		public height: number,
 		public balance: number,
+		legs: boolean[] = [],
 	) {
-		super(childNumber);
+		super(childNumber, legs);
 	}
 
 	static fromNode(node: Node): AVLTreeNodeData {
 		let childNumber = -1;
 		let height = NaN;
 		let balance = NaN;
+		let legs: boolean[] = [];
 		if (node.title && typeof node.title === 'string') {
 			let titleObj = JSON.parse(node.title);
 
@@ -279,8 +289,11 @@ export class AVLTreeNodeData extends NodeData {
 			if ('balance' in titleObj) {
 				balance = titleObj.balance;
 			}
+			if ('legs' in titleObj) {
+				legs = titleObj.legs;
+			}
 		}
-		return new AVLTreeNodeData(childNumber, height, balance);
+		return new AVLTreeNodeData(childNumber, height, balance, legs);
 	}
 }
 
@@ -288,13 +301,15 @@ export class RBTreeNodeData extends NodeData {
 	constructor(
 		childNumber: number,
 		public color: RBTreeColor,
+		legs: boolean[] = [],
 	) {
-		super(childNumber);
+		super(childNumber, legs);
 	}
 
 	static fromNode(node: Node): RBTreeNodeData {
 		let childNumber = -1;
 		let color: RBTreeColor = RBTreeColor.Black;
+		let legs: boolean[] = [];
 		if (node.title && typeof node.title === 'string') {
 			let titleObj = JSON.parse(node.title);
 
@@ -304,8 +319,11 @@ export class RBTreeNodeData extends NodeData {
 			if ('color' in titleObj) {
 				color = titleObj.color;
 			}
+			if ('legs' in titleObj) {
+				legs = titleObj.legs;
+			}
 		}
-		return new RBTreeNodeData(childNumber, color);
+		return new RBTreeNodeData(childNumber, color, legs);
 	}
 }
 
@@ -346,9 +364,9 @@ export function bTreeToGraph(
 	if (!root) return { nodes, edges };
 
 	const nodeId = root.id;
-	// Display all values in the node
 	const label = root.values.join('  ') || '';
-	const nodeData = new NodeData(successorInfo?.childNumber ?? -1);
+	const legs = new Array(root.values.length + 1).fill(root.isLeaf);
+	const nodeData = new NodeData(successorInfo?.childNumber ?? -1, legs);
 
 	nodes.add({
 		id: nodeId,
@@ -376,20 +394,6 @@ export function bTreeToGraph(
 				edges = result.edges;
 			}
 		}
-	} else {
-		// For leaf nodes, add dummy children to show they have no children
-		// for (let i = 0; i < root.values.length + 1; i++) {
-		// 	const dummyId = getDummyNodeId(nodeId, i);
-		// 	nodes.add({
-		// 		id: dummyId,
-		// 		label: '',
-		// 		shape: 'point',
-		// 		size: 0.1,
-		// 		color: 'transparent',
-		// 		title: NodeData.toTitle(new NodeData(i)),
-		// 	});
-		// 	edges.add({ id: getEdgeId(nodeId, i), from: nodeId, to: dummyId, dashes: true });
-		// }
 	}
 
 	return { nodes, edges };
