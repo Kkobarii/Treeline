@@ -89,10 +89,10 @@ export class BTreeAnimator extends DataStructureAnimator {
 
 			// timer.printReport('BTreeAnimator.ensureTree: ');
 
-			console.log('BTreeAnimator.ensureWithFn completed');
-			console.log('Tree:', tree);
-			console.log('Nodes:', this.nodes.get());
-			console.log('Edges:', this.edges.get());
+			// console.log('BTreeAnimator.ensureWithFn completed');
+			// console.log('Tree:', tree);
+			// console.log('Nodes:', this.nodes.get());
+			// console.log('Edges:', this.edges.get());
 		} catch (err) {
 			console.warn('BTreeAnimator.ensureTree error', err);
 		}

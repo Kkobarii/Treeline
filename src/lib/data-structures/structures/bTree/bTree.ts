@@ -138,11 +138,11 @@ export class BTree extends DataStructure {
 
 		// Move the second half of children if not a leaf
 		if (!node.isLeaf) {
-			newNode.children = node.children.splice(t + 1);
+			newNode.children = node.children.splice(t);
 		}
 
-		// If no parent, we'll record split after creating root structure
 		if (!parent) {
+			// If no parent, we'll record split after creating root structure
 			const newRoot = new BTreeNode(this.generateId(), false);
 			newRoot.children.push(node, newNode);
 			this.root = newRoot;

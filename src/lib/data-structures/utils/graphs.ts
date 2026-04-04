@@ -13,6 +13,16 @@ function log(...args: any[]) {
 	// console.log(...args);
 }
 
+let btreeIdTranslationMap: Map<number, number> = new Map();
+
+export function getBTreeNodeId(originalId: number): number {
+	return btreeIdTranslationMap.get(originalId) ?? originalId;
+}
+
+export function clearBTreeIdTranslationMap(): void {
+	btreeIdTranslationMap.clear();
+}
+
 function binaryTreeToGraph<T extends { id: number; value: number }>(
 	root: T | null,
 	getLeftChild: (node: T) => T | null,
@@ -360,43 +370,69 @@ export function bTreeToGraph(
 	nodes: DataSet<Node> = new DataSet<Node>(),
 	edges: DataSet<Edge> = new DataSet<Edge>(),
 	successorInfo: SuccessorInfo | null = null,
-): { nodes: DataSet<Node>; edges: DataSet<Edge> } {
-	if (!root) return { nodes, edges };
+): { nodes: DataSet<Node>; edges: DataSet<Edge>; idMap: Map<number, number> } {
+	if (!root) return { nodes, edges, idMap: new Map() };
 
-	const nodeId = root.id;
-	const label = root.values.join('  ') || '';
-	const legs = new Array(root.values.length + 1).fill(root.isLeaf);
-	const nodeData = new NodeData(successorInfo?.childNumber ?? -1, legs);
+	clearBTreeIdTranslationMap();
 
-	nodes.add({
-		id: nodeId,
-		label: label,
-		title: NodeData.toTitle(nodeData),
-		shape: 'box',
-		color: Colors.Node,
-		font: { color: 'black', size: 20 },
-		widthConstraint: { minimum: 60 },
-	});
+	let postorderCounter = 0;
+	const idMap = new Map<number, number>();
 
-	// Add edge from parent if we have successor info
-	if (successorInfo !== null) {
-		const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
-		edges.add({ id: edgeId, from: successorInfo.parentId, to: nodeId });
-	}
-
-	// Process all children
-	if (!root.isLeaf) {
-		for (let i = 0; i < root.children.length; i++) {
-			const child = root.children[i];
-			if (child) {
-				const result = bTreeToGraph(child, nodes, edges, new SuccessorInfo(nodeId, i));
-				nodes = result.nodes;
-				edges = result.edges;
+	function assignPostorderIds(node: BTreeNode): void {
+		if (!node) return;
+		if (!node.isLeaf) {
+			for (const child of node.children) {
+				assignPostorderIds(child);
 			}
 		}
+		postorderCounter++;
+		idMap.set(node.id, postorderCounter);
+		btreeIdTranslationMap.set(node.id, postorderCounter);
 	}
 
-	return { nodes, edges };
+	assignPostorderIds(root);
+
+	function buildGraph(
+		node: BTreeNode,
+		nodes: DataSet<Node>,
+		edges: DataSet<Edge>,
+		successorInfo: SuccessorInfo | null,
+	): { nodes: DataSet<Node>; edges: DataSet<Edge> } {
+		const graphNodeId = idMap.get(node.id)!;
+		const label = node.values.join('  ') || '';
+		const legs = new Array(node.values.length + 1).fill(node.isLeaf);
+		const nodeData = new NodeData(successorInfo?.childNumber ?? -1, legs);
+
+		nodes.add({
+			id: graphNodeId,
+			label: label,
+			title: NodeData.toTitle(nodeData),
+			shape: 'box',
+			color: Colors.Node,
+			font: { color: 'black', size: 20 },
+			widthConstraint: { minimum: 60 },
+		});
+
+		if (successorInfo !== null) {
+			const edgeId = getEdgeId(successorInfo.parentId, successorInfo.childNumber);
+			edges.add({ id: edgeId, from: successorInfo.parentId, to: graphNodeId });
+		}
+
+		if (!node.isLeaf) {
+			for (let i = 0; i < node.children.length; i++) {
+				const child = node.children[i];
+				if (child) {
+					const result = buildGraph(child, nodes, edges, new SuccessorInfo(graphNodeId, i));
+					nodes = result.nodes;
+					edges = result.edges;
+				}
+			}
+		}
+
+		return { nodes, edges };
+	}
+
+	return { ...buildGraph(root, nodes, edges, successorInfo), idMap };
 }
 
 export function linkedListToGraph(list: any, nodes: DataSet<Node> = new DataSet<Node>(), edges: DataSet<Edge> = new DataSet<Edge>()) {

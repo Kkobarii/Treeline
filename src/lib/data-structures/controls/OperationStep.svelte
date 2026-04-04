@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { StepData } from '$lib/data-structures/operation/operationData';
+	import { getBTreeNodeId } from '$lib/data-structures/utils/graphs';
 
 	export let step: StepData;
 	export let isCurrent: boolean = false;
@@ -9,7 +10,29 @@
 
 	const ignoredKeys = new Set(['label', 'params', 'startSnapshot', 'endSnapshot']);
 
-	$: detailEntries = Object.entries((step?.data ?? {}) as Record<string, unknown>).filter(([key]) => !ignoredKeys.has(key));
+	function isBTreeStep(step: any): boolean {
+		return step.data.label.includes('bTree');
+	}
+
+	function translateIds(obj: unknown): unknown {
+		if (typeof obj !== 'object' || obj === null) return obj;
+		if (Array.isArray(obj)) return obj.map(translateIds);
+
+		const result: Record<string, unknown> = {};
+		for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+			if (key.endsWith('Id') && typeof value === 'number') {
+				result[key] = getBTreeNodeId(value);
+			} else if (typeof value === 'object') {
+				result[key] = translateIds(value);
+			} else {
+				result[key] = value;
+			}
+		}
+		return result;
+	}
+
+	$: translatedData = isBTreeStep(step) ? translateIds(step?.data ?? {}) : (step?.data ?? {});
+	$: detailEntries = Object.entries(translatedData as Record<string, unknown>).filter(([key]) => !ignoredKeys.has(key));
 	$: hasDetails = detailEntries.length > 0;
 
 	function toggleExpanded() {

@@ -43,6 +43,7 @@ export class PromoteMiddleData extends StepDetail {
 }
 
 export class ChooseBranchData extends StepDetail {
+	childIndexHumanReadable: number;
 	constructor(
 		public nodeId: number,
 		public value: number,
@@ -51,38 +52,51 @@ export class ChooseBranchData extends StepDetail {
 		public lowerBound: number | null,
 		public upperBound: number | null,
 	) {
+		const childIndexHumanReadable = childIndex + 1;
 		if (lowerBound !== null && upperBound !== null) {
 			super(StepType.BTree.ChooseBranch, 'steps.dataStructures.bTree.chooseBranchBetweenData', {
 				childIndex,
+				childIndexHumanReadable,
 				childId,
 				value,
 				lowerBound,
 				upperBound,
 			});
+			this.childIndexHumanReadable = childIndexHumanReadable;
 			return;
 		}
 
 		if (lowerBound !== null) {
 			super(StepType.BTree.ChooseBranch, 'steps.dataStructures.bTree.chooseBranchGreaterThanData', {
 				childIndex,
+				childIndexHumanReadable,
 				childId,
 				value,
 				lowerBound,
 			});
+			this.childIndexHumanReadable = childIndexHumanReadable;
 			return;
 		}
 
 		if (upperBound !== null) {
 			super(StepType.BTree.ChooseBranch, 'steps.dataStructures.bTree.chooseBranchLessThanData', {
 				childIndex,
+				childIndexHumanReadable,
 				childId,
 				value,
 				upperBound,
 			});
+			this.childIndexHumanReadable = childIndexHumanReadable;
 			return;
 		}
 
-		super(StepType.BTree.ChooseBranch, 'steps.dataStructures.bTree.chooseBranchData', { childIndex, childId, value });
+		super(StepType.BTree.ChooseBranch, 'steps.dataStructures.bTree.chooseBranchData', {
+			childIndex,
+			childIndexHumanReadable,
+			childId,
+			value,
+		});
+		this.childIndexHumanReadable = childIndexHumanReadable;
 	}
 }
 
