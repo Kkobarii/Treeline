@@ -1,5 +1,6 @@
 import type { StepLabel } from '$lib/steps/stepLabel';
 
+import type { CodeLanguage } from '../misc/registry';
 import type { SortingAlgorithmId } from '../misc/types';
 import type { Item } from './traceBuilder';
 
@@ -10,8 +11,6 @@ export interface SortStep {
 }
 
 // detailed steps
-
-export type CodeLanguage = 'python' | 'javascript' | 'c';
 
 export interface DetailedSortStep {
 	array: Item[];
@@ -31,7 +30,5 @@ export interface CodeLine {
 
 export interface DetailedCodeTemplate {
 	algorithmId: SortingAlgorithmId;
-	python: CodeLine[];
-	javascript: CodeLine[];
-	c: CodeLine[];
+	codes: Record<CodeLanguage, CodeLine[]>;
 }

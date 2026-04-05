@@ -85,3 +85,16 @@ export function getDataSet(type: string): DataSet {
 
 	return dataSet;
 }
+
+export const DEFAULT_ARRAY_TYPE = 'shuffled';
+
+const CODE_LANGUAGES = ['python', 'javascript', 'c'];
+
+export type CodeLanguage = (typeof CODE_LANGUAGES)[number];
+
+export const languageOptions: Array<{ id: CodeLanguage; labelKey: string }> = CODE_LANGUAGES.map(id => ({
+	id,
+	labelKey: `sorting.code.${id}`,
+}));
+
+export const DEFAULT_CODE_LANGUAGE: CodeLanguage = 'python';

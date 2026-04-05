@@ -1,16 +1,8 @@
 <script lang="ts">
-	import type { Item } from '../steps/traceBuilder';
 	import { ItemHighlightType } from '../steps/traceBuilder';
+	import type { SortingBarsProps } from './SortingBars.types';
 
-	type Props = {
-		items: Item[];
-		hasReveal?: boolean;
-		transitionMs?: number;
-		mini?: boolean;
-		columns?: number;
-	};
-
-	let { items, hasReveal = true, transitionMs = 120, mini = false, columns = 100 }: Props = $props();
+	let { items, hasReveal = true, transitionMs = 120, mini = false, columns = 100 }: SortingBarsProps = $props();
 
 	let maxValue = $derived(items.length > 0 ? Math.max(...items.map(item => item.value)) : 1);
 </script>

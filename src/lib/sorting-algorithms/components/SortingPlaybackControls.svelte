@@ -4,51 +4,24 @@
 
 	import { dataSets } from '../misc/registry';
 	import type { ArrayType } from '../misc/utils';
+	import type { GroupedProps } from './SortingPlaybackControls.types';
 
-	type SortingPlaybackControlProps = {
-		stepDescription: string;
-		currentStep: number;
-		totalSteps: number;
-		delayMs: number;
-		minDelay: number;
-		maxDelay: number;
-		isPlaying: boolean;
-		canStepBackward: boolean;
-		canStepForward: boolean;
-		arrayType: ArrayType;
-		onShuffle: () => void;
-		onArrayTypeChange: (type: ArrayType) => void;
-		onTogglePlay: () => void;
-		onStepBackward: () => void;
-		onStepForward: () => void;
-		onDelayChange?: (delay: number) => void;
-	};
+	let props: GroupedProps = $props();
+
+	const { stepDescription, currentStep, totalSteps, isPlaying, canStepBackward, canStepForward } = $derived(props.playbackState);
+
+	const { delayMs, minDelayMs, maxDelayMs, onDelayChange } = $derived(props.delayConfig);
+
+	const { arrayType, onArrayTypeChange, onShuffle } = $derived(props.arrayConfig);
+
+	const { onTogglePlay, onStepBackward, onStepForward } = $derived(props.navigation);
 
 	const locale = getLocale();
 	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
 
-	let {
-		stepDescription,
-		currentStep,
-		totalSteps,
-		minDelay,
-		maxDelay,
-		delayMs,
-		isPlaying,
-		canStepBackward,
-		canStepForward,
-		arrayType,
-		onShuffle,
-		onArrayTypeChange,
-		onTogglePlay,
-		onStepBackward,
-		onStepForward,
-		onDelayChange,
-	}: SortingPlaybackControlProps = $props();
-
 	const speedSliderId = 'sorting-playback-speed';
 	let stepProgressPct = $derived(totalSteps > 0 ? Math.max(0, Math.min(100, (currentStep / totalSteps) * 100)) : 0);
-	let sliderStep = $derived(Math.max(1, Math.round((maxDelay - minDelay) / 20)));
+	let sliderStep = $derived(Math.max(1, Math.round((maxDelayMs - minDelayMs) / 20)));
 
 	const arrayTypeOptions: { value: ArrayType; label: string }[] = dataSets.map(ds => ({
 		value: ds.type,
@@ -134,8 +107,8 @@
 					id={speedSliderId}
 					class="speed-slider min-w-0 flex-1 p-0"
 					type="range"
-					min={minDelay}
-					max={maxDelay}
+					min={minDelayMs}
+					max={maxDelayMs}
 					step={sliderStep}
 					value={delayMs}
 					oninput={e => onDelayChange?.(Number(e.currentTarget.value))}

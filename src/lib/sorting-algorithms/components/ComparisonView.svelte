@@ -7,24 +7,26 @@
 
 	import { dataSets, sortingAlgorithms } from '../misc/registry';
 	import type { ArrayType } from '../misc/utils';
-	import type { SortStep } from '../steps/stepTypes';
+	import { createWaitForPaint } from '../misc/visualUtils';
 	import type { Item } from '../steps/traceBuilder';
+	import type { CellState } from './ComparisonView.types';
 	import SortingBars from './SortingBars.svelte';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
 
+	const stepDelayMs = 15;
+	const arraySize = 32;
+
 	const arrayTypeOptions = dataSets.map(ds => ({
 		type: ds.type,
 		labelKey: ds.labelKey,
 	}));
-
-	const stepDelayMs = 15;
-	const arraySize = 32;
-
-	type CellState = { steps: SortStep[]; currentStepIndex: number };
-
 	const initialArrays = dataSets.map(ds => ds.generate(arraySize));
+	const dropdownOptions = arrayTypeOptions.map(o => ({
+		value: o.type,
+		label: t(o.labelKey),
+	}));
 
 	let cellStates = $state<CellState[][]>(sortingAlgorithms.map(() => arrayTypeOptions.map(() => ({ steps: [], currentStepIndex: 0 }))));
 	let playingCells: boolean[][] = $state(sortingAlgorithms.map(() => arrayTypeOptions.map(() => false)));
@@ -36,37 +38,8 @@
 	let selectedColumnType: ArrayType = $state('shuffled');
 	let selectedTypeIndex = $derived(arrayTypeOptions.findIndex(o => o.type === selectedColumnType));
 
-	const dropdownOptions = arrayTypeOptions.map(o => ({
-		value: o.type,
-		label: t(o.labelKey),
-	}));
-
-	const waitForPaint = () =>
-		new Promise<void>(resolve => {
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => {
-					resolve();
-				});
-			});
-		});
-
-	onMount(async () => {
-		await tick();
-		await waitForPaint();
-		hasReveal = true;
-	});
-
-	function getDisplayedItems(algoIndex: number, typeIndex: number): Item[] {
-		const state = cellStates[algoIndex][typeIndex];
-		return state.steps[state.currentStepIndex]?.array ?? [];
-	}
-
-	function getSaturationStyle(algoIndex: number, typeIndex: number): string {
-		const order = finishOrder[algoIndex][typeIndex];
-		if (!showBadges || order === null) return '';
-		const sat = Math.max(0.2, 1 - (order - 1) * 0.15);
-		return sat < 1 ? `filter: saturate(${sat});` : '';
-	}
+	let isAnyPlaying = $derived(playingCells.some(row => row.some(Boolean)));
+	const timer = createTimer('interval');
 
 	function resetCell(algoIndex: number, typeIndex: number) {
 		const algorithm = sortingAlgorithms[algoIndex];
@@ -90,10 +63,6 @@
 		finishOrder = sortingAlgorithms.map(() => arrayTypeOptions.map(() => null));
 		columnFinishCounters = arrayTypeOptions.map(() => 0);
 		playMode = null;
-	}
-
-	function stopAll() {
-		clearAll();
 	}
 
 	function setPlayingAll(value: boolean) {
@@ -130,7 +99,12 @@
 		}
 	}
 
-	function tickCell(algoIndex: number, typeIndex: number) {
+	function getDisplayedItems(algoIndex: number, typeIndex: number): Item[] {
+		const state = cellStates[algoIndex][typeIndex];
+		return state.steps[state.currentStepIndex]?.array ?? [];
+	}
+
+	function tickCell(algoIndex: number, typeIndex: number): boolean {
 		const state = cellStates[algoIndex][typeIndex];
 		if (state.currentStepIndex < state.steps.length - 1) {
 			cellStates[algoIndex][typeIndex] = {
@@ -141,9 +115,6 @@
 		}
 		return false;
 	}
-
-	let isAnyPlaying = $derived(playingCells.some(row => row.some(Boolean)));
-	const timer = createTimer('interval');
 
 	function tickAllCells() {
 		for (let a = 0; a < sortingAlgorithms.length; a++) {
@@ -166,16 +137,20 @@
 			timer.stop();
 			return;
 		}
-
 		timer.start(stepDelayMs, tickAllCells);
 		return () => timer.stop();
+	});
+
+	onMount(async () => {
+		await tick();
+		await createWaitForPaint();
+		hasReveal = true;
 	});
 
 	clearAll();
 </script>
 
 <div class="flex flex-col gap-4">
-	<!-- Desktop grid -->
 	<div
 		class="comparison-grid hidden lg:grid"
 		style="grid-template-columns: auto repeat({arrayTypeOptions.length}, 1fr);">
@@ -183,7 +158,7 @@
 			{#if isAnyPlaying}
 				<button
 					class="comparison-control-btn"
-					onclick={stopAll}>
+					onclick={clearAll}>
 					<img
 						class="h-4 w-4 dark:invert"
 						src="/controls/stop.svg"
@@ -204,6 +179,7 @@
 				</button>
 			{/if}
 		</div>
+
 		{#each arrayTypeOptions as arrayType, typeIndex}
 			<div class="comparison-header-cell">
 				<span class="text-[0.75rem] font-semibold">{t(arrayType.labelKey)}</span>
@@ -261,13 +237,12 @@
 		{/each}
 	</div>
 
-	<!-- Mobile single-column view -->
 	<div class="flex flex-col gap-3 lg:hidden">
 		<div class="flex items-center gap-2">
 			{#if isAnyPlaying}
 				<button
 					class="mobile-run-btn"
-					onclick={stopAll}>
+					onclick={clearAll}>
 					<img
 						class="h-4 w-4 dark:invert"
 						src="/controls/stop.svg"
@@ -306,9 +281,7 @@
 					{#if finishOrder[algoIndex][selectedTypeIndex] !== null}
 						<span class="finish-badge">{finishOrder[algoIndex][selectedTypeIndex]}</span>
 					{/if}
-					<div
-						class="h-full"
-						style={getSaturationStyle(algoIndex, selectedTypeIndex)}>
+					<div class="h-full">
 						<SortingBars
 							items={getDisplayedItems(algoIndex, selectedTypeIndex)}
 							{hasReveal}
@@ -323,7 +296,7 @@
 </div>
 
 <style lang="postcss">
-	@reference "../../../app.css";
+	@reference '../../../app.css';
 
 	.comparison-grid {
 		gap: 0.5rem;

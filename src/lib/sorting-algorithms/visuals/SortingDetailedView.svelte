@@ -8,13 +8,16 @@
 	import { getStoredStringOption, saveStringToStorage } from '$lib/utils/storageUtils';
 
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
+	import type { ArrayConfig, DelayConfig, NavigationCallbacks, PlaybackState } from '../components/SortingPlaybackControls.types';
 	import { getCodeTemplate } from '../misc/codeTemplates';
-	import { dataSets, getSortingAlgorithm } from '../misc/registry';
+	import type { CodeLanguage } from '../misc/registry';
+	import { dataSets, DEFAULT_ARRAY_TYPE, DEFAULT_CODE_LANGUAGE, getSortingAlgorithm, languageOptions } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 	import type { ArrayType } from '../misc/utils';
 	import { createArrayByType } from '../misc/utils';
+	import { computeTargetAreaHighlight, DEFAULT_PLAYBACK_ANIMATION } from '../misc/visualUtils';
 	import { StepManager } from '../steps/stepManager.svelte';
-	import type { CodeLanguage, DetailedSortStep } from '../steps/stepTypes';
+	import type { DetailedSortStep } from '../steps/stepTypes';
 	import { ItemHighlightType } from '../steps/traceBuilder';
 
 	const locale = getLocale();
@@ -27,23 +30,26 @@
 		algorithmId: SortingAlgorithmId;
 		initialArray?: number[];
 	} = $props();
+
 	const algorithm = getSortingAlgorithm(algorithmId);
 	const codeTemplate = getCodeTemplate(algorithmId);
-	const languageStorageKey = 'sortingDetailedViewCodeLanguage';
-	const arrayTypeStorageKey = 'sortingArrayType';
-	const delayMinMs = 200;
-	const delayMaxMs = 1000;
 
-	let language = $state<CodeLanguage>('python');
-	const languageOptions: { value: CodeLanguage; label: string }[] = [
-		{ value: 'python', label: 'Python' },
-		{ value: 'javascript', label: 'JavaScript' },
-		{ value: 'c', label: 'C' },
-	];
-	const validLanguageOptions = languageOptions.map(o => o.value) as readonly CodeLanguage[];
-	const validArrayTypes = dataSets.map(ds => ds.type) as readonly ArrayType[];
+	const playback = DEFAULT_PLAYBACK_ANIMATION;
+	const languageConfig = {
+		storageKey: 'sortingDetailedViewCodeLanguage',
+		options: languageOptions.map(opt => ({
+			value: opt.id,
+			label: t(opt.labelKey),
+		})),
+		validValues: languageOptions.map(o => o.id),
+	};
+	const arrayConfig = {
+		storageKey: 'sortingArrayType',
+		validTypes: dataSets.map(ds => ds.type) as readonly ArrayType[],
+	};
 
-	let codeLines = $derived(codeTemplate[language]);
+	let language = $state<CodeLanguage>(DEFAULT_CODE_LANGUAGE);
+	let codeLines = $derived(codeTemplate.codes[language] || []);
 	let highlightedCodeLines = $derived(
 		codeLines.map(line => ({
 			...line,
@@ -51,73 +57,43 @@
 		})),
 	);
 
-	const startingArray = initialArray?.length ? [...initialArray] : createArrayByType('shuffled', 16);
+	const startingArray = initialArray?.length ? [...initialArray] : createArrayByType(DEFAULT_ARRAY_TYPE, 16);
 	let baseArray = $state(startingArray);
-	let arrayType = $state<ArrayType>('shuffled');
-	let hasHydratedPreferences = $state(false);
+	let arrayType = $state<ArrayType>(DEFAULT_ARRAY_TYPE);
+	let hasHydrated = $state(false);
 	let lastStepAdvanceAt = $state(0);
 	let fastAnimation = $state(false);
 
 	const stepManager = new StepManager<DetailedSortStep>(algorithm.generateDetailedSteps(startingArray), {
-		minDelay: delayMinMs,
-		maxDelay: delayMaxMs,
-		defaultDelay: 450,
-		delayStorageKey: 'sortingDetailedViewDelayMs',
+		minDelay: playback.minDelayMs,
+		maxDelay: playback.maxDelayMs,
+		defaultDelay: playback.defaultDelayMs,
+		delayStorageKey: playback.storageKey,
 		timerType: 'animation',
 	});
 
 	let delayMs = $state(stepManager.delayMs);
 	let currentStep = $derived(stepManager.steps[stepManager.currentStepIndex]);
-	let currentArray = $derived(currentStep ? currentStep.array : []);
+	let currentArray = $derived(currentStep?.array ?? []);
 	let currentRows = $derived(currentStep?.rows?.length ? currentStep.rows : currentArray.length ? [currentArray] : []);
 	let gridColumns = $derived(currentArray.length);
 	let gridCells = $derived(
 		currentRows.flatMap((row, rowIndex) =>
-			row.map((item: (typeof currentRows)[0][number], colIndex: number) => ({
+			row.map((item, colIndex) => ({
 				item,
 				key: item ? `item-${item.id}` : `slot-${rowIndex}-${colIndex}`,
-				indexLabel: item ? currentArray.findIndex(candidate => candidate.id === item.id) : -1,
+				indexLabel: item ? currentArray.findIndex(c => c.id === item.id) : -1,
 			})),
 		),
 	);
-	let currentCodePartId = $derived(currentStep ? currentStep.codePartId : '');
+	let currentCodePartId = $derived(currentStep?.codePartId ?? '');
 	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : '');
-	let variables = $derived(currentStep ? currentStep.variables : {});
+	let variables = $derived(currentStep?.variables ?? {});
+
 	let isMergeSort = $derived(algorithmId === 'merge');
 	let isQuickSort = $derived(algorithmId === 'quick');
-
 	let useExpandedAnimationArea = $derived(isMergeSort || isQuickSort);
-	let targetAreaHighlight = $derived.by(() => {
-		if (!useExpandedAnimationArea || gridColumns <= 0) {
-			return null;
-		}
-
-		const targetAreaLeft = Number((variables as Record<string, unknown>).targetAreaLeft);
-		const targetAreaRight = Number((variables as Record<string, unknown>).targetAreaRight);
-		const targetAreaRow = Number((variables as Record<string, unknown>).targetAreaRow);
-
-		if (!Number.isFinite(targetAreaLeft) || !Number.isFinite(targetAreaRight) || !Number.isFinite(targetAreaRow)) {
-			return null;
-		}
-
-		const leftColumn = Math.max(0, Math.min(gridColumns - 1, Math.floor(targetAreaLeft)));
-		const rightColumn = Math.max(leftColumn, Math.min(gridColumns - 1, Math.floor(targetAreaRight)));
-		const targetRow = Math.max(0, Math.floor(targetAreaRow));
-		const spanColumns = rightColumn - leftColumn + 1;
-		const totalGapRem = (gridColumns - 1) * 0.35;
-		const spanGapRem = (spanColumns - 1) * 0.35;
-		const leftOffsetGapsRem = leftColumn * 0.35;
-		const trackWidthExpression = `(100% - ${totalGapRem}rem) / ${gridColumns}`;
-		const targetAreaExpandPx = 3;
-		const rowStepExpression = isQuickSort ? '46px' : '(92px + 0.35rem)';
-
-		return {
-			left: `calc(${leftColumn} * (${trackWidthExpression}) + ${leftOffsetGapsRem}rem - ${targetAreaExpandPx}px)`,
-			width: `calc(${spanColumns} * (${trackWidthExpression}) + ${spanGapRem}rem + ${targetAreaExpandPx * 2}px)`,
-			top: `calc(${targetRow} * ${rowStepExpression} - ${targetAreaExpandPx}px)`,
-			height: `calc(92px + ${targetAreaExpandPx * 2}px)`,
-		};
-	});
+	let targetAreaHighlight = $derived(useExpandedAnimationArea ? computeTargetAreaHighlight(variables, gridColumns, algorithmId) : null);
 
 	let normalFlipDurationMs = $derived(stepManager.isPlaying ? Math.max(100, Math.floor(delayMs * 0.85)) : 300);
 	let activeFlipDurationMs = $derived(fastAnimation ? Math.max(35, Math.floor(normalFlipDurationMs * 0.22)) : normalFlipDurationMs);
@@ -128,14 +104,9 @@
 		let isAnimating = false;
 
 		const resizeObserver = new ResizeObserver(() => {
-			if (isAnimating) {
-				return;
-			}
-
+			if (isAnimating) return;
 			const nextHeight = node.offsetHeight;
-			if (Math.abs(nextHeight - previousHeight) < 1) {
-				return;
-			}
+			if (Math.abs(nextHeight - previousHeight) < 1) return;
 
 			isAnimating = true;
 			node.style.overflow = 'hidden';
@@ -159,13 +130,7 @@
 	function curvedFlip(
 		_: Element,
 		{ from, to }: { from: DOMRect; to: DOMRect },
-		{
-			duration,
-			easing,
-		}: {
-			duration: number;
-			easing: (t: number) => number;
-		},
+		{ duration, easing }: { duration: number; easing: (t: number) => number },
 	) {
 		const dx = from.left - to.left;
 		const dy = from.top - to.top;
@@ -183,9 +148,7 @@
 	}
 
 	async function stepForwardWithAnimation(isManualStep = false) {
-		if (!stepManager.steps.length) {
-			return;
-		}
+		if (!stepManager.steps.length) return;
 		if (stepManager.currentStepIndex < stepManager.steps.length - 1) {
 			const now = performance.now();
 			fastAnimation = isManualStep && now - lastStepAdvanceAt < normalFlipDurationMs;
@@ -220,24 +183,22 @@
 	}
 
 	onMount(async () => {
-		language = getStoredStringOption(languageStorageKey, validLanguageOptions, 'python');
-		arrayType = getStoredStringOption(arrayTypeStorageKey, validArrayTypes, 'shuffled');
+		language = getStoredStringOption(languageConfig.storageKey, languageConfig.validValues, DEFAULT_CODE_LANGUAGE);
+		arrayType = getStoredStringOption(arrayConfig.storageKey, arrayConfig.validTypes, DEFAULT_ARRAY_TYPE);
 		delayMs = stepManager.delayMs;
 
 		await tick();
 
-		const nextArray = createArrayByType(arrayType, startingArray.length);
-		baseArray = nextArray;
-		stepManager.setSteps(algorithm.generateDetailedSteps(nextArray));
+		baseArray = createArrayByType(arrayType, startingArray.length);
+		stepManager.setSteps(algorithm.generateDetailedSteps(baseArray));
 
-		hasHydratedPreferences = true;
+		hasHydrated = true;
 	});
 
 	function regenerateArray() {
 		stepManager.stop();
-		const nextArray = createArrayByType(arrayType, currentArray.length);
-		baseArray = nextArray;
-		stepManager.setSteps(algorithm.generateDetailedSteps(nextArray));
+		baseArray = createArrayByType(arrayType, currentArray.length);
+		stepManager.setSteps(algorithm.generateDetailedSteps(baseArray));
 	}
 
 	function changeArrayType(type: ArrayType) {
@@ -245,19 +206,18 @@
 		regenerateArray();
 	}
 
-	$effect(() => {
-		if (!hasHydratedPreferences || typeof window === 'undefined') {
-			return;
-		}
+	function onDelayChange(newDelay: number) {
+		delayMs = newDelay;
+		stepManager.setDelay(newDelay);
+	}
 
-		saveStringToStorage(languageStorageKey, language);
-		saveStringToStorage(arrayTypeStorageKey, arrayType);
+	$effect(() => {
+		if (!hasHydrated) return;
+		saveStringToStorage(languageConfig.storageKey, language);
+		saveStringToStorage(arrayConfig.storageKey, arrayType);
 	});
 </script>
 
-<!-- <link
-	rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css" /> -->
 <link
 	rel="stylesheet"
 	href="//unpkg.com/@catppuccin/highlightjs@1.0.1/css/catppuccin-latte.css" />
@@ -267,25 +227,17 @@
 		class="treeline-card flex flex-col gap-[0.85rem]"
 		use:animateCardHeight>
 		<SortingPlaybackControls
-			stepDescription={stepLabel}
-			currentStep={stepManager.steps.length ? stepManager.currentStepIndex + 1 : 0}
-			totalSteps={stepManager.steps.length}
-			isPlaying={stepManager.isPlaying}
-			canStepBackward={stepManager.steps.length > 0 && stepManager.currentStepIndex > 0}
-			canStepForward={stepManager.steps.length > 0 && stepManager.currentStepIndex < stepManager.steps.length - 1}
-			minDelay={delayMinMs}
-			maxDelay={delayMaxMs}
-			{delayMs}
-			onDelayChange={newDelay => {
-				delayMs = newDelay;
-				stepManager.setDelay(newDelay);
+			playbackState={{
+				stepDescription: stepLabel,
+				currentStep: stepManager.steps.length ? stepManager.currentStepIndex + 1 : 0,
+				totalSteps: stepManager.steps.length,
+				isPlaying: stepManager.isPlaying,
+				canStepBackward: stepManager.steps.length > 0 && stepManager.currentStepIndex > 0,
+				canStepForward: stepManager.steps.length > 0 && stepManager.currentStepIndex < stepManager.steps.length - 1,
 			}}
-			{arrayType}
-			onShuffle={regenerateArray}
-			onArrayTypeChange={changeArrayType}
-			onTogglePlay={() => stepManager.toggle()}
-			onStepBackward={stepBackManual}
-			onStepForward={stepForwardManual} />
+			delayConfig={{ ...playback, delayMs, onDelayChange }}
+			arrayConfig={{ arrayType, onArrayTypeChange: changeArrayType, onShuffle: regenerateArray }}
+			navigation={{ onTogglePlay: () => stepManager.toggle(), onStepBackward: stepBackManual, onStepForward: stepForwardManual }} />
 
 		<div
 			class="array-grid"
@@ -334,7 +286,7 @@
 		<div class="flex items-center justify-between border-b border-gray-200 pb-3">
 			<h2 class="text-secondary text-lg font-bold">{t('sorting.code.title')}</h2>
 			<Dropdown
-				options={languageOptions}
+				options={languageConfig.options}
 				value={language}
 				onchange={lang => (language = lang)}
 				ariaLabel={t('sorting.code.title')} />
@@ -352,27 +304,11 @@
 				</div>
 			{/each}
 		</div>
-
-		<!-- <div class="pt-[0.3rem]">
-			<h3>Variables</h3>
-			{#if Object.keys(variables).length === 0}
-				<div class="text-sm">No tracked variables for this step.</div>
-			{:else}
-				<div class="grid grid-cols-2 gap-[0.45rem]">
-					{#each Object.entries(variables) as [key, value]}
-						<div class="variable-entry">
-							<span class="variable-key">{key}</span>
-							<span class="variable-value">{value}</span>
-						</div>
-					{/each}
-				</div>
-			{/if}
-		</div> -->
 	</div>
 </div>
 
 <style lang="postcss">
-	@reference "../../../app.css";
+	@reference '../../../app.css';
 
 	.detailed-layout {
 		@apply grid gap-4;
@@ -424,19 +360,15 @@
 	.item-compared {
 		@apply bg-red-300;
 	}
-
 	.item-moved {
 		@apply bg-blue-300;
 	}
-
 	.item-sorted {
 		@apply bg-green-200;
 	}
-
 	.item-light {
 		@apply bg-cyan-300;
 	}
-
 	.item-dark {
 		@apply bg-purple-300;
 	}
