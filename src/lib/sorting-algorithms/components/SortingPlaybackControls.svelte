@@ -21,6 +21,7 @@
 		onTogglePlay: () => void;
 		onStepBackward: () => void;
 		onStepForward: () => void;
+		onDelayChange?: (delay: number) => void;
 	};
 
 	const locale = getLocale();
@@ -32,7 +33,7 @@
 		totalSteps,
 		minDelay,
 		maxDelay,
-		delayMs = $bindable(),
+		delayMs,
 		isPlaying,
 		canStepBackward,
 		canStepForward,
@@ -42,6 +43,7 @@
 		onTogglePlay,
 		onStepBackward,
 		onStepForward,
+		onDelayChange,
 	}: SortingPlaybackControlProps = $props();
 
 	const speedSliderId = 'sorting-playback-speed';
@@ -135,7 +137,8 @@
 					min={minDelay}
 					max={maxDelay}
 					step={sliderStep}
-					bind:value={delayMs}
+					value={delayMs}
+					oninput={e => onDelayChange?.(Number(e.currentTarget.value))}
 					aria-label={t('common.speed')}
 					title={t('common.speed')} />
 				<img

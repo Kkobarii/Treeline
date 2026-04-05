@@ -1,6 +1,6 @@
 import { getDummyNodeId, NodeData } from '$lib/data-structures/utils/graphs';
 import { deepEqual } from '$lib/data-structures/utils/utils';
-import { Timer } from '$lib/utils/timer';
+import { CheckpointTimer } from '$lib/utils/checkpointTimer';
 
 import { DataStructureAnimator, type DataStructureAnimatorOpts } from './dataStructureAnimator';
 
@@ -102,7 +102,7 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 
 	protected ensureWithFn(tree: any, toGraphFn: (root: any) => { nodes: any; edges: any }) {
 		try {
-			const timer = new Timer();
+			const timer = new CheckpointTimer();
 			const newData = toGraphFn(tree.root ?? null);
 			const expectedNodes = newData.nodes.get();
 			const expectedEdges = newData.edges.get();

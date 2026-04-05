@@ -1,10 +1,11 @@
 <script lang="ts">
 	import hljs from 'highlight.js';
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import { getLocale, translate } from '$lib/i18n';
+	import { getStoredStringOption, saveStringToStorage } from '$lib/utils/storageUtils';
 
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
 	import { getCodeTemplate } from '../misc/codeTemplates';
@@ -12,6 +13,7 @@
 	import type { SortingAlgorithmId } from '../misc/types';
 	import type { ArrayType } from '../misc/utils';
 	import { createArrayByType } from '../misc/utils';
+	import { StepManager } from '../steps/stepManager.svelte';
 	import type { CodeLanguage, DetailedSortStep } from '../steps/stepTypes';
 	import { ItemHighlightType } from '../steps/traceBuilder';
 
@@ -28,7 +30,6 @@
 	const algorithm = getSortingAlgorithm(algorithmId);
 	const codeTemplate = getCodeTemplate(algorithmId);
 	const languageStorageKey = 'sortingDetailedViewCodeLanguage';
-	const delayStorageKey = 'sortingDetailedViewDelayMs';
 	const arrayTypeStorageKey = 'sortingArrayType';
 	const delayMinMs = 200;
 	const delayMaxMs = 1000;
@@ -39,6 +40,9 @@
 		{ value: 'javascript', label: 'JavaScript' },
 		{ value: 'c', label: 'C' },
 	];
+	const validLanguageOptions = languageOptions.map(o => o.value) as readonly CodeLanguage[];
+	const validArrayTypes = dataSets.map(ds => ds.type) as readonly ArrayType[];
+
 	let codeLines = $derived(codeTemplate[language]);
 	let highlightedCodeLines = $derived(
 		codeLines.map(line => ({
@@ -49,24 +53,27 @@
 
 	const startingArray = initialArray?.length ? [...initialArray] : createArrayByType('shuffled', 16);
 	let baseArray = $state(startingArray);
-	let steps = $state<DetailedSortStep[]>(algorithm.generateDetailedSteps(startingArray));
-	let currentStepIndex = $state(0);
-	let isPlaying = $state(false);
-	let delayMs = $state(450);
 	let arrayType = $state<ArrayType>('shuffled');
-	let timer: number | null = null;
 	let hasHydratedPreferences = $state(false);
-	let nextRunAt = $state(0);
 	let lastStepAdvanceAt = $state(0);
 	let fastAnimation = $state(false);
 
-	let currentStep = $derived(steps[currentStepIndex]);
+	const stepManager = new StepManager<DetailedSortStep>(algorithm.generateDetailedSteps(startingArray), {
+		minDelay: delayMinMs,
+		maxDelay: delayMaxMs,
+		defaultDelay: 450,
+		delayStorageKey: 'sortingDetailedViewDelayMs',
+		timerType: 'animation',
+	});
+
+	let delayMs = $state(stepManager.delayMs);
+	let currentStep = $derived(stepManager.steps[stepManager.currentStepIndex]);
 	let currentArray = $derived(currentStep ? currentStep.array : []);
 	let currentRows = $derived(currentStep?.rows?.length ? currentStep.rows : currentArray.length ? [currentArray] : []);
 	let gridColumns = $derived(currentArray.length);
 	let gridCells = $derived(
 		currentRows.flatMap((row, rowIndex) =>
-			row.map((item, colIndex) => ({
+			row.map((item: (typeof currentRows)[0][number], colIndex: number) => ({
 				item,
 				key: item ? `item-${item.id}` : `slot-${rowIndex}-${colIndex}`,
 				indexLabel: item ? currentArray.findIndex(candidate => candidate.id === item.id) : -1,
@@ -112,7 +119,7 @@
 		};
 	});
 
-	let normalFlipDurationMs = $derived(isPlaying ? Math.max(100, Math.floor(delayMs * 0.85)) : 300);
+	let normalFlipDurationMs = $derived(stepManager.isPlaying ? Math.max(100, Math.floor(delayMs * 0.85)) : 300);
 	let activeFlipDurationMs = $derived(fastAnimation ? Math.max(35, Math.floor(normalFlipDurationMs * 0.22)) : normalFlipDurationMs);
 	let arcHeightFactor = $state(0.1);
 
@@ -175,85 +182,31 @@
 		};
 	}
 
-	function clearTimer() {
-		if (timer !== null) {
-			cancelAnimationFrame(timer);
-			timer = null;
-		}
-	}
-
-	const validArrayTypes = dataSets.map(ds => ds.type);
-
-	onMount(async () => {
-		const storedLanguage = sessionStorage.getItem(languageStorageKey);
-		if (storedLanguage === 'python' || storedLanguage === 'javascript' || storedLanguage === 'c') {
-			language = storedLanguage;
-		}
-
-		const storedDelay = Number(sessionStorage.getItem(delayStorageKey));
-		if (Number.isFinite(storedDelay) && storedDelay >= delayMinMs && storedDelay <= delayMaxMs) {
-			delayMs = storedDelay;
-		}
-
-		const storedArrayType = sessionStorage.getItem(arrayTypeStorageKey);
-		if (storedArrayType && validArrayTypes.includes(storedArrayType as ArrayType)) {
-			arrayType = storedArrayType as ArrayType;
-		}
-
-		await tick();
-
-		const nextArray = createArrayByType(arrayType, startingArray.length);
-		baseArray = nextArray;
-		steps = algorithm.generateDetailedSteps(nextArray);
-		currentStepIndex = 0;
-
-		hasHydratedPreferences = true;
-	});
-
-	function regenerateArray() {
-		clearTimer();
-		isPlaying = false;
-		const nextArray = createArrayByType(arrayType, currentArray.length);
-		baseArray = nextArray;
-		steps = algorithm.generateDetailedSteps(nextArray);
-		currentStepIndex = 0;
-	}
-
-	function changeArrayType(type: ArrayType) {
-		arrayType = type;
-		regenerateArray();
-	}
-
-	async function stepForward(isManualStep = false) {
-		if (!steps.length) {
+	async function stepForwardWithAnimation(isManualStep = false) {
+		if (!stepManager.steps.length) {
 			return;
 		}
-		if (currentStepIndex < steps.length - 1) {
+		if (stepManager.currentStepIndex < stepManager.steps.length - 1) {
 			const now = performance.now();
 			fastAnimation = isManualStep && now - lastStepAdvanceAt < normalFlipDurationMs;
-			currentStepIndex += 1;
+			await stepManager.stepForward(isManualStep);
 			lastStepAdvanceAt = now;
 			if (fastAnimation) {
 				await tick();
 				fastAnimation = false;
 			}
-		} else {
-			isPlaying = false;
-			clearTimer();
 		}
 	}
 
 	function stepForwardManual() {
-		void stepForward(true);
+		void stepForwardWithAnimation(true);
 	}
 
-	async function stepBack(isManualStep = false) {
-		clearTimer();
-		isPlaying = false;
-		if (currentStepIndex > 0) {
+	async function stepBackWithAnimation(isManualStep = false) {
+		await stepManager.stepBackward(isManualStep);
+		if (isManualStep) {
 			const now = performance.now();
-			fastAnimation = isManualStep && now - lastStepAdvanceAt < normalFlipDurationMs;
-			currentStepIndex -= 1;
+			fastAnimation = now - lastStepAdvanceAt < normalFlipDurationMs;
 			lastStepAdvanceAt = now;
 			if (fastAnimation) {
 				await tick();
@@ -263,47 +216,43 @@
 	}
 
 	function stepBackManual() {
-		void stepBack(true);
+		void stepBackWithAnimation(true);
 	}
 
-	function runOrPause() {
-		isPlaying = !isPlaying;
-	}
+	onMount(async () => {
+		language = getStoredStringOption(languageStorageKey, validLanguageOptions, 'python');
+		arrayType = getStoredStringOption(arrayTypeStorageKey, validArrayTypes, 'shuffled');
+		delayMs = stepManager.delayMs;
 
-	$effect(() => {
-		if (!isPlaying) {
-			clearTimer();
-			return;
-		}
-		clearTimer();
-		nextRunAt = performance.now() + delayMs;
+		await tick();
 
-		const runLoop = (now: number) => {
-			if (!isPlaying) {
-				return;
-			}
-			if (now >= nextRunAt) {
-				void stepForward(false);
-				nextRunAt = now + delayMs;
-			}
-			timer = requestAnimationFrame(runLoop);
-		};
+		const nextArray = createArrayByType(arrayType, startingArray.length);
+		baseArray = nextArray;
+		stepManager.setSteps(algorithm.generateDetailedSteps(nextArray));
 
-		timer = requestAnimationFrame(runLoop);
-		return () => clearTimer();
+		hasHydratedPreferences = true;
 	});
+
+	function regenerateArray() {
+		stepManager.stop();
+		const nextArray = createArrayByType(arrayType, currentArray.length);
+		baseArray = nextArray;
+		stepManager.setSteps(algorithm.generateDetailedSteps(nextArray));
+	}
+
+	function changeArrayType(type: ArrayType) {
+		arrayType = type;
+		regenerateArray();
+	}
 
 	$effect(() => {
 		if (!hasHydratedPreferences || typeof window === 'undefined') {
 			return;
 		}
 
-		sessionStorage.setItem(languageStorageKey, language);
-		sessionStorage.setItem(delayStorageKey, String(delayMs));
-		sessionStorage.setItem(arrayTypeStorageKey, arrayType);
+		saveStringToStorage(languageStorageKey, language);
+		saveStringToStorage(arrayTypeStorageKey, arrayType);
 	});
-
-	onDestroy(() => clearTimer());
 </script>
 
 <!-- <link
@@ -319,18 +268,22 @@
 		use:animateCardHeight>
 		<SortingPlaybackControls
 			stepDescription={stepLabel}
-			currentStep={steps.length ? currentStepIndex + 1 : 0}
-			totalSteps={steps.length}
-			{isPlaying}
-			canStepBackward={steps.length > 0 && currentStepIndex > 0}
-			canStepForward={steps.length > 0 && currentStepIndex < steps.length - 1}
+			currentStep={stepManager.steps.length ? stepManager.currentStepIndex + 1 : 0}
+			totalSteps={stepManager.steps.length}
+			isPlaying={stepManager.isPlaying}
+			canStepBackward={stepManager.steps.length > 0 && stepManager.currentStepIndex > 0}
+			canStepForward={stepManager.steps.length > 0 && stepManager.currentStepIndex < stepManager.steps.length - 1}
 			minDelay={delayMinMs}
 			maxDelay={delayMaxMs}
-			bind:delayMs
+			{delayMs}
+			onDelayChange={newDelay => {
+				delayMs = newDelay;
+				stepManager.setDelay(newDelay);
+			}}
 			{arrayType}
 			onShuffle={regenerateArray}
 			onArrayTypeChange={changeArrayType}
-			onTogglePlay={runOrPause}
+			onTogglePlay={() => stepManager.toggle()}
 			onStepBackward={stepBackManual}
 			onStepForward={stepForwardManual} />
 

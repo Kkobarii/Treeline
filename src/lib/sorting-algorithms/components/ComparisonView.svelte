@@ -3,6 +3,7 @@
 
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import { getLocale, translate } from '$lib/i18n';
+	import { createTimer } from '$lib/utils/timer';
 
 	import { dataSets, sortingAlgorithms } from '../misc/registry';
 	import type { ArrayType } from '../misc/utils';
@@ -141,40 +142,33 @@
 		return false;
 	}
 
-	let timer: ReturnType<typeof setInterval> | null = null;
 	let isAnyPlaying = $derived(playingCells.some(row => row.some(Boolean)));
+	const timer = createTimer('interval');
 
-	function clearTimer() {
-		if (timer) {
-			clearInterval(timer);
-			timer = null;
+	function tickAllCells() {
+		for (let a = 0; a < sortingAlgorithms.length; a++) {
+			for (let t = 0; t < arrayTypeOptions.length; t++) {
+				if (playingCells[a][t]) {
+					if (!tickCell(a, t)) {
+						playingCells[a][t] = false;
+						if (showBadges) {
+							columnFinishCounters[t] += 1;
+							finishOrder[a][t] = columnFinishCounters[t];
+						}
+					}
+				}
+			}
 		}
 	}
 
 	$effect(() => {
 		if (!isAnyPlaying) {
-			clearTimer();
+			timer.stop();
 			return;
 		}
 
-		clearTimer();
-		timer = setInterval(() => {
-			for (let a = 0; a < sortingAlgorithms.length; a++) {
-				for (let t = 0; t < arrayTypeOptions.length; t++) {
-					if (playingCells[a][t]) {
-						if (!tickCell(a, t)) {
-							playingCells[a][t] = false;
-							if (showBadges) {
-								columnFinishCounters[t] += 1;
-								finishOrder[a][t] = columnFinishCounters[t];
-							}
-						}
-					}
-				}
-			}
-		}, stepDelayMs);
-
-		return () => clearTimer();
+		timer.start(stepDelayMs, tickAllCells);
+		return () => timer.stop();
 	});
 
 	clearAll();

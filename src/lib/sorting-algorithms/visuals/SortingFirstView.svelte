@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	import { getLocale, translate } from '$lib/i18n';
+	import { getStoredStringOption, saveStringToStorage } from '$lib/utils/storageUtils';
 
 	import SortingBars from '../components/SortingBars.svelte';
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
@@ -9,6 +10,7 @@
 	import type { SortingAlgorithmId } from '../misc/types';
 	import { createArrayByType } from '../misc/utils';
 	import type { ArrayType } from '../misc/utils';
+	import { StepManager } from '../steps/stepManager.svelte';
 	import type { SortStep } from '../steps/stepTypes';
 
 	const locale = getLocale();
@@ -21,28 +23,27 @@
 	const algorithm = getSortingAlgorithm(algorithmId);
 
 	let baseArray = $state<number[]>([]);
-	let steps = $state<SortStep[]>([]);
-	let currentStepIndex = $state(0);
-	let isPlaying = $state(false);
-	let stepDelayMs = $state(40);
 	let arrayType = $state<ArrayType>('shuffled');
-	let timer: ReturnType<typeof setInterval> | null = null;
 	const stepDelayStorageKey = 'sortingFirstViewStepDelayMs';
 	const arrayTypeStorageKey = 'sortingArrayType';
 	let hasHydratedPreferences = $state(false);
 	let hasInitialBarsReveal = $state(false);
 
-	let currentStep = $derived(steps[currentStepIndex]);
+	const validArrayTypes = dataSets.map(ds => ds.type) as readonly ArrayType[];
+
+	const stepManager = new StepManager<SortStep>([], {
+		minDelay: stepDelayMinMs,
+		maxDelay: stepDelayMaxMs,
+		defaultDelay: 40,
+		delayStorageKey: stepDelayStorageKey,
+		timerType: 'interval',
+	});
+
+	let delayMs = $state(stepManager.delayMs);
+	let currentStep = $derived(stepManager.steps[stepManager.currentStepIndex]);
 	let displayedArray = $derived(currentStep ? currentStep.array : []);
 	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : '');
-	let barTransitionMs = $derived(isPlaying ? stepDelayMs : 120);
-
-	function clearTimer() {
-		if (timer) {
-			clearInterval(timer);
-			timer = null;
-		}
-	}
+	let barTransitionMs = $derived(stepManager.isPlaying ? delayMs : 120);
 
 	const waitForHydrationPaint = () =>
 		new Promise<void>(resolve => {
@@ -53,23 +54,13 @@
 			});
 		});
 
-	const validArrayTypes = dataSets.map(ds => ds.type);
-
 	onMount(async () => {
-		const storedDelay = Number(sessionStorage.getItem(stepDelayStorageKey));
-		if (Number.isFinite(storedDelay) && storedDelay >= stepDelayMinMs && storedDelay <= stepDelayMaxMs) {
-			stepDelayMs = storedDelay;
-		}
-
-		const storedArrayType = sessionStorage.getItem(arrayTypeStorageKey);
-		if (storedArrayType && validArrayTypes.includes(storedArrayType as ArrayType)) {
-			arrayType = storedArrayType as ArrayType;
-		}
+		arrayType = getStoredStringOption(arrayTypeStorageKey, validArrayTypes, 'shuffled');
+		delayMs = stepManager.delayMs;
 
 		const nextArray = createArrayByType(arrayType, arraySize);
 		baseArray = nextArray;
-		steps = algorithm.generateSteps(nextArray);
-		currentStepIndex = 0;
+		stepManager.setSteps(algorithm.generateSteps(nextArray));
 
 		await tick();
 		await waitForHydrationPaint();
@@ -79,12 +70,10 @@
 	});
 
 	function regenerateArray() {
-		clearTimer();
-		isPlaying = false;
+		stepManager.stop();
 		const nextArray = createArrayByType(arrayType, arraySize);
 		baseArray = nextArray;
-		steps = algorithm.generateSteps(nextArray);
-		currentStepIndex = 0;
+		stepManager.setSteps(algorithm.generateSteps(nextArray));
 	}
 
 	function changeArrayType(type: ArrayType) {
@@ -92,81 +81,37 @@
 		regenerateArray();
 	}
 
-	function tickForward() {
-		if (!steps.length) {
-			return;
-		}
-
-		if (currentStepIndex >= steps.length - 1) {
-			isPlaying = false;
-			clearTimer();
-			return;
-		}
-
-		currentStepIndex += 1;
+	function onDelayChange(newDelay: number) {
+		delayMs = newDelay;
+		stepManager.setDelay(newDelay);
 	}
-
-	function runOrPause() {
-		isPlaying = !isPlaying;
-	}
-
-	function stepForward() {
-		clearTimer();
-		isPlaying = false;
-		tickForward();
-	}
-
-	function stepBackward() {
-		clearTimer();
-		isPlaying = false;
-		currentStepIndex = Math.max(0, currentStepIndex - 1);
-	}
-
-	$effect(() => {
-		if (!isPlaying) {
-			clearTimer();
-			return;
-		}
-
-		clearTimer();
-		timer = setInterval(() => {
-			tickForward();
-		}, stepDelayMs);
-
-		return () => clearTimer();
-	});
 
 	$effect(() => {
 		if (!hasHydratedPreferences || typeof window === 'undefined') {
 			return;
 		}
-
-		sessionStorage.setItem(stepDelayStorageKey, String(stepDelayMs));
-		sessionStorage.setItem(arrayTypeStorageKey, arrayType);
-	});
-
-	onDestroy(() => {
-		clearTimer();
+		saveStringToStorage(arrayTypeStorageKey, arrayType);
 	});
 </script>
 
 <div class="treeline-card flex flex-col gap-4">
 	<SortingPlaybackControls
 		stepDescription={stepLabel}
-		currentStep={steps.length ? currentStepIndex + 1 : 0}
-		totalSteps={steps.length}
-		{isPlaying}
-		canStepBackward={steps.length > 0 && currentStepIndex > 0}
-		canStepForward={steps.length > 0 && currentStepIndex < steps.length - 1}
+		currentStep={stepManager.steps.length ? stepManager.currentStepIndex + 1 : 0}
+		totalSteps={stepManager.steps.length}
+		isPlaying={stepManager.isPlaying}
+		canStepBackward={stepManager.steps.length > 0 && stepManager.currentStepIndex > 0}
+		canStepForward={stepManager.steps.length > 0 && stepManager.currentStepIndex < stepManager.steps.length - 1}
 		minDelay={stepDelayMinMs}
 		maxDelay={stepDelayMaxMs}
-		bind:delayMs={stepDelayMs}
+		{delayMs}
+		{onDelayChange}
 		{arrayType}
 		onShuffle={regenerateArray}
 		onArrayTypeChange={changeArrayType}
-		onTogglePlay={runOrPause}
-		onStepBackward={stepBackward}
-		onStepForward={stepForward} />
+		onTogglePlay={() => stepManager.toggle()}
+		onStepBackward={() => void stepManager.stepBackward()}
+		onStepForward={() => void stepManager.stepForward()} />
 
 	<SortingBars
 		items={displayedArray}
