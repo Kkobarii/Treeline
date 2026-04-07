@@ -8,8 +8,8 @@
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
 	import { dataSets, DEFAULT_ARRAY_TYPE, getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
-	import { createArrayByType } from '../misc/utils';
 	import type { ArrayType } from '../misc/utils';
+	import { createArrayByType } from '../misc/utils';
 	import { createWaitForPaint, DEFAULT_PLAYBACK_INTERVAL } from '../misc/visualUtils';
 	import { StepManager } from '../steps/stepManager.svelte';
 	import type { SortStep } from '../steps/stepTypes';
@@ -20,7 +20,12 @@
 	let { algorithmId }: { algorithmId: SortingAlgorithmId } = $props();
 
 	const algorithm = getSortingAlgorithm(algorithmId);
-	const arraySize = 100;
+	let arraySize = $state(100);
+
+	function updateArraySize() {
+		arraySize = window.matchMedia('(max-width: 640px)').matches ? 50 : 100;
+		regenerateArray();
+	}
 
 	const arrayConfig = {
 		storageKey: 'sortingArrayType',
@@ -41,7 +46,11 @@
 	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : '');
 	let barTransitionMs = $derived((stepManager?.isPlaying ?? false) ? delayMs : 120);
 
-	onMount(async () => {
+	onMount(() => {
+		updateArraySize();
+		const mediaQuery = window.matchMedia('(max-width: 640px)');
+		mediaQuery.addEventListener('change', updateArraySize);
+
 		stepManager = new StepManager<SortStep>([], {
 			minDelay: playback.minDelayMs,
 			maxDelay: playback.maxDelayMs,
@@ -56,10 +65,14 @@
 		baseArray = createArrayByType(arrayType, arraySize);
 		stepManager.setSteps(algorithm.generateSteps(baseArray));
 
-		await tick();
-		await createWaitForPaint();
-		hasInitialBarsReveal = true;
-		hasHydrated = true;
+		void tick().then(() => {
+			void createWaitForPaint().then(() => {
+				hasInitialBarsReveal = true;
+				hasHydrated = true;
+			});
+		});
+
+		return () => mediaQuery.removeEventListener('change', updateArraySize);
 	});
 
 	function regenerateArray() {

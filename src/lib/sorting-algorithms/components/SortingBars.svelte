@@ -2,9 +2,10 @@
 	import { ItemHighlightType } from '../steps/traceBuilder';
 	import type { SortingBarsProps } from './SortingBars.types';
 
-	let { items, hasReveal = true, transitionMs = 120, mini = false, columns = 100 }: SortingBarsProps = $props();
+	let { items, hasReveal = true, transitionMs = 120, mini = false }: SortingBarsProps = $props();
 
 	let maxValue = $derived(items.length > 0 ? Math.max(...items.map(item => item.value)) : 1);
+	let columns = $derived(items.length);
 </script>
 
 <div
@@ -60,7 +61,7 @@
 
 	@media (max-width: 768px) {
 		.bars-wrapper {
-			@apply h-72 gap-px;
+			@apply h-36 gap-px;
 		}
 
 		.bars-mini {

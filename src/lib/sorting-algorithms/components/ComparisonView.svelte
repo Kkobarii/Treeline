@@ -141,6 +141,13 @@
 		return () => timer.stop();
 	});
 
+	$effect(() => {
+		void selectedColumnType;
+		clearAll();
+		finishOrder = sortingAlgorithms.map(() => arrayTypeOptions.map(() => null));
+		columnFinishCounters = arrayTypeOptions.map(() => 0);
+	});
+
 	onMount(async () => {
 		await tick();
 		await createWaitForPaint();
@@ -229,8 +236,7 @@
 							items={getDisplayedItems(algoIndex, typeIndex)}
 							{hasReveal}
 							transitionMs={stepDelayMs}
-							mini={true}
-							columns={arraySize} />
+							mini={true} />
 					</div>
 				</div>
 			{/each}
@@ -286,8 +292,7 @@
 							items={getDisplayedItems(algoIndex, selectedTypeIndex)}
 							{hasReveal}
 							transitionMs={stepDelayMs}
-							mini={true}
-							columns={arraySize} />
+							mini={true} />
 					</div>
 				</div>
 			</div>

@@ -8,7 +8,6 @@
 	import { getStoredStringOption, saveStringToStorage } from '$lib/utils/storageUtils';
 
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
-	import type { ArrayConfig, DelayConfig, NavigationCallbacks, PlaybackState } from '../components/SortingPlaybackControls.types';
 	import { getCodeTemplate } from '../misc/codeTemplates';
 	import type { CodeLanguage } from '../misc/registry';
 	import { dataSets, DEFAULT_ARRAY_TYPE, DEFAULT_CODE_LANGUAGE, getSortingAlgorithm, languageOptions } from '../misc/registry';
@@ -58,11 +57,19 @@
 	);
 
 	const startingArray = initialArray?.length ? [...initialArray] : createArrayByType(DEFAULT_ARRAY_TYPE, 16);
+	let detailArraySize = $state(16);
 	let baseArray = $state(startingArray);
 	let arrayType = $state<ArrayType>(DEFAULT_ARRAY_TYPE);
 	let hasHydrated = $state(false);
 	let lastStepAdvanceAt = $state(0);
 	let fastAnimation = $state(false);
+	let cellHeight = $state(92);
+
+	function updateSizes() {
+		detailArraySize = window.matchMedia('(max-width: 425px)').matches ? 8 : 16;
+		cellHeight = window.matchMedia('(max-width: 640px)').matches ? 52 : 92;
+		regenerateArray();
+	}
 
 	const stepManager = new StepManager<DetailedSortStep>(algorithm.generateDetailedSteps(startingArray), {
 		minDelay: playback.minDelayMs,
@@ -93,7 +100,9 @@
 	let isMergeSort = $derived(algorithmId === 'merge');
 	let isQuickSort = $derived(algorithmId === 'quick');
 	let useExpandedAnimationArea = $derived(isMergeSort || isQuickSort);
-	let targetAreaHighlight = $derived(useExpandedAnimationArea ? computeTargetAreaHighlight(variables, gridColumns, algorithmId) : null);
+	let targetAreaHighlight = $derived(
+		useExpandedAnimationArea ? computeTargetAreaHighlight(variables, gridColumns, algorithmId, cellHeight) : null,
+	);
 
 	let normalFlipDurationMs = $derived(stepManager.isPlaying ? Math.max(100, Math.floor(delayMs * 0.85)) : 300);
 	let activeFlipDurationMs = $derived(fastAnimation ? Math.max(35, Math.floor(normalFlipDurationMs * 0.22)) : normalFlipDurationMs);
@@ -147,12 +156,12 @@
 		};
 	}
 
-	async function stepForwardWithAnimation(isManualStep = false) {
+	async function stepWithAnimation(stepFn: () => Promise<void>, canStep: () => boolean, isManualStep = false) {
 		if (!stepManager.steps.length) return;
-		if (stepManager.currentStepIndex < stepManager.steps.length - 1) {
+		if (canStep()) {
 			const now = performance.now();
 			fastAnimation = isManualStep && now - lastStepAdvanceAt < normalFlipDurationMs;
-			await stepManager.stepForward(isManualStep);
+			await stepFn();
 			lastStepAdvanceAt = now;
 			if (fastAnimation) {
 				await tick();
@@ -162,42 +171,45 @@
 	}
 
 	function stepForwardManual() {
-		void stepForwardWithAnimation(true);
-	}
-
-	async function stepBackWithAnimation(isManualStep = false) {
-		await stepManager.stepBackward(isManualStep);
-		if (isManualStep) {
-			const now = performance.now();
-			fastAnimation = now - lastStepAdvanceAt < normalFlipDurationMs;
-			lastStepAdvanceAt = now;
-			if (fastAnimation) {
-				await tick();
-				fastAnimation = false;
-			}
-		}
+		void stepWithAnimation(
+			() => stepManager.stepForward(true),
+			() => stepManager.currentStepIndex < stepManager.steps.length - 1,
+			true,
+		);
 	}
 
 	function stepBackManual() {
-		void stepBackWithAnimation(true);
+		void stepWithAnimation(
+			() => stepManager.stepBackward(true),
+			() => stepManager.currentStepIndex > 0,
+			true,
+		);
 	}
 
-	onMount(async () => {
+	onMount(() => {
+		updateSizes();
+		const mediaQuery = window.matchMedia('(max-width: 640px)');
+		const handleChange = () => {
+			updateSizes();
+		};
+		mediaQuery.addEventListener('change', handleChange);
+
 		language = getStoredStringOption(languageConfig.storageKey, languageConfig.validValues, DEFAULT_CODE_LANGUAGE);
 		arrayType = getStoredStringOption(arrayConfig.storageKey, arrayConfig.validTypes, DEFAULT_ARRAY_TYPE);
 		delayMs = stepManager.delayMs;
 
-		await tick();
+		void tick().then(() => {
+			baseArray = createArrayByType(arrayType, detailArraySize);
+			stepManager.setSteps(algorithm.generateDetailedSteps(baseArray));
+			hasHydrated = true;
+		});
 
-		baseArray = createArrayByType(arrayType, startingArray.length);
-		stepManager.setSteps(algorithm.generateDetailedSteps(baseArray));
-
-		hasHydrated = true;
+		return () => mediaQuery.removeEventListener('change', handleChange);
 	});
 
 	function regenerateArray() {
 		stepManager.stop();
-		baseArray = createArrayByType(arrayType, currentArray.length);
+		baseArray = createArrayByType(arrayType, detailArraySize);
 		stepManager.setSteps(algorithm.generateDetailedSteps(baseArray));
 	}
 
@@ -317,6 +329,8 @@
 
 	.array-grid {
 		@apply relative grid w-full gap-[0.35rem];
+		--cell-height: 92px;
+		--cell-height-half: 46px;
 		contain: layout;
 		overflow: visible;
 		align-content: start;
@@ -324,24 +338,26 @@
 
 	.merge-target-area {
 		@apply pointer-events-none absolute z-0;
-		height: 92px;
+		height: var(--cell-height);
 		background: oklch(from var(--color-secondary-light) l c h / 0.4);
 		border: 1px solid oklch(from var(--color-secondary) l c h / 0.6);
 	}
 
 	.array-grid-quick-overlap {
-		@apply pb-[46px];
 		row-gap: 0;
-		grid-auto-rows: 46px;
+		padding-bottom: var(--cell-height-half);
+		grid-auto-rows: var(--cell-height-half);
 	}
 
 	.array-slot {
-		@apply relative z-[1] h-[92px] min-w-0;
+		@apply relative z-[1] min-w-0;
+		height: var(--cell-height);
 	}
 
 	.array-item {
-		@apply relative z-[1] flex h-[92px] min-w-0 flex-row items-stretch gap-0 overflow-hidden bg-white p-0;
-		border: 1px solid var(--color-primary-light);
+		@apply relative z-[1] flex min-w-0 flex-row items-stretch gap-0 overflow-hidden bg-white p-0;
+		height: var(--cell-height);
+		border: 1px solid var(--color-primary-ultra-light);
 		transition: background-color 140ms ease;
 		will-change: transform;
 		transform: translateZ(0);
@@ -349,12 +365,12 @@
 	}
 
 	.value-marker-track {
-		@apply flex w-[10px] shrink-0 items-end overflow-hidden bg-white;
+		@apply flex w-[10px] shrink-0 items-end overflow-hidden;
 	}
 
 	.value-marker-fill {
 		@apply w-full;
-		background: var(--color-secondary);
+		background: var(--color-primary-dark);
 	}
 
 	.item-compared {
@@ -394,6 +410,13 @@
 		.detailed-layout {
 			grid-template-columns: 1fr;
 			align-items: start;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.array-grid {
+			--cell-height: 52px;
+			--cell-height-half: 26px;
 		}
 	}
 </style>

@@ -123,7 +123,7 @@
 		</div>
 	</div>
 
-	<div class="step-status flex min-h-[5.5rem] min-w-0 flex-col gap-[0.2rem] rounded-xl border px-3 py-2 lg:w-[17rem]">
+	<div class="step-status flex min-h-[5.5rem] min-w-0 flex-col gap-[0.2rem] rounded-xl border px-3 py-2 lg:w-[17rem] order-first lg:order-none">
 		<div class="step-number text-[0.66rem] font-semibold tracking-[0.05em] uppercase">
 			{t('common.step')}
 			{currentStep}/{totalSteps}
