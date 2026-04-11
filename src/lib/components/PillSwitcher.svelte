@@ -3,6 +3,9 @@
 	export let rightLabel: string;
 	export let selected: 0 | 1 = 0;
 
+	export let leftIcon: string | undefined = undefined;
+	export let rightIcon: string | undefined = undefined;
+
 	export let leftHref: string | undefined = undefined;
 	export let rightHref: string | undefined = undefined;
 
@@ -12,6 +15,8 @@
 	export let disabled: boolean = false;
 	export let className: string = '';
 	export let size: 'md' | 'sm' = 'md';
+
+	export let hasIcons: boolean = !!leftIcon || !!rightIcon;
 
 	function handleLeftClick() {
 		if (disabled) return;
@@ -26,6 +31,7 @@
 
 <div
 	class={`pill-switcher pill-switcher-${size} ${className}`.trim()}
+	class:has-icons={hasIcons}
 	style={`--pill-x: ${selected};`}>
 	<div
 		class="switcher-pill"
@@ -33,12 +39,20 @@
 	</div>
 
 	{#if selected === 0}
-		<span class="switcher-option switcher-active">{leftLabel}</span>
+		<span class="switcher-option switcher-active">
+			{#if leftIcon}<img
+					src={leftIcon}
+					alt=""
+					class="switcher-icon" />{/if}<span class="switcher-label">{leftLabel}</span>
+		</span>
 	{:else if leftHref}
 		<a
 			href={leftHref}
 			class="switcher-option switcher-inactive">
-			{leftLabel}
+			{#if leftIcon}<img
+					src={leftIcon}
+					alt=""
+					class="switcher-icon" />{/if}<span class="switcher-label">{leftLabel}</span>
 		</a>
 	{:else}
 		<button
@@ -46,17 +60,28 @@
 			class="switcher-option switcher-inactive"
 			on:click={handleLeftClick}
 			{disabled}>
-			{leftLabel}
+			{#if leftIcon}<img
+					src={leftIcon}
+					alt=""
+					class="switcher-icon" />{/if}<span class="switcher-label">{leftLabel}</span>
 		</button>
 	{/if}
 
 	{#if selected === 1}
-		<span class="switcher-option switcher-active">{rightLabel}</span>
+		<span class="switcher-option switcher-active">
+			{#if rightIcon}<img
+					src={rightIcon}
+					alt=""
+					class="switcher-icon" />{/if}<span class="switcher-label">{rightLabel}</span>
+		</span>
 	{:else if rightHref}
 		<a
 			href={rightHref}
 			class="switcher-option switcher-inactive">
-			{rightLabel}
+			{#if rightIcon}<img
+					src={rightIcon}
+					alt=""
+					class="switcher-icon" />{/if}<span class="switcher-label">{rightLabel}</span>
 		</a>
 	{:else}
 		<button
@@ -64,12 +89,17 @@
 			class="switcher-option switcher-inactive"
 			on:click={handleRightClick}
 			{disabled}>
-			{rightLabel}
+			{#if rightIcon}<img
+					src={rightIcon}
+					alt=""
+					class="switcher-icon" />{/if}<span class="switcher-label">{rightLabel}</span>
 		</button>
 	{/if}
 </div>
 
 <style>
+	@reference "../../app.css";
+
 	.pill-switcher {
 		--switcher-padding: 0.4rem;
 		--switcher-gap: 0.25rem;
@@ -149,5 +179,43 @@
 
 	.switcher-inactive:hover:not(:disabled) {
 		background-color: oklch(from var(--color-gray-200) l c h / 0.8);
+	}
+
+	.switcher-icon {
+		@apply dark:invert;
+		display: none;
+		width: 1.2em;
+		height: 1.2em;
+		object-fit: contain;
+	}
+
+	.switcher-label {
+		display: inline;
+		line-height: 1;
+	}
+
+	@media (max-width: 768px) {
+		.pill-switcher.has-icons {
+			--switcher-padding: 0.2rem;
+			--switcher-gap: 0.1rem;
+			--switcher-radius: 0.5rem;
+			--option-radius: 0.35rem;
+			--option-y-padding: 0.2rem;
+			--option-x-padding: 0.4rem;
+		}
+
+		.pill-switcher.has-icons .switcher-option {
+			padding: var(--option-y-padding) var(--option-x-padding);
+		}
+
+		.pill-switcher.has-icons .switcher-icon {
+			display: block;
+			width: 1.4em;
+			height: 1.4em;
+		}
+
+		.pill-switcher.has-icons .switcher-label {
+			display: none;
+		}
 	}
 </style>

@@ -21,6 +21,6 @@
 		<img
 			src="/moon.svg"
 			alt="Switch to dark mode"
-			class="h-5 w-5" />
+			class="h-5 w-5 invert" />
 	{/if}
 </button>

@@ -15,5 +15,8 @@
 	selected={view === 'big-picture' ? 0 : 1}
 	leftLabel={t('sorting.views.bigPicture')}
 	rightLabel={t('sorting.views.detailed')}
+	leftIcon="/big.svg"
+	rightIcon="/small.svg"
+	hasIcons={true}
 	leftHref={view === 'detailed' ? basePath : undefined}
 	rightHref={view === 'big-picture' ? `${basePath}/detail` : undefined} />

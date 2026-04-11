@@ -5,17 +5,30 @@
 	import { getLocale, translate } from '$lib/i18n';
 	import { sortingAlgorithms } from '$lib/sorting-algorithms/registry';
 
+	interface Props {
+		menuOpen?: boolean;
+	}
+
+	let { menuOpen = false }: Props = $props();
+
+	$effect(() => {
+		const toggle = document.getElementById('mobile-nav-toggle') as HTMLInputElement | null;
+		if (toggle) toggle.checked = menuOpen;
+	});
+
+	$effect(() => {
+		if (!menuOpen) {
+			const details = document.querySelectorAll('.mobile-menu details') as NodeListOf<HTMLDetailsElement>;
+			details.forEach(d => d.removeAttribute('open'));
+		}
+	});
+
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
 	const sortingDetailSuffix = $derived(
 		page.url.pathname.startsWith(`/${locale}/sorting-algorithms/`) && page.url.pathname.endsWith('/detail') ? '/detail' : '',
 	);
 </script>
-
-<label
-	for="mobile-nav-toggle"
-	class="mobile-menu-overlay md:hidden"
-	aria-label="Close menu"></label>
 
 <div class="mobile-menu md:hidden">
 	<details class="mobile-menu-section">
@@ -86,24 +99,6 @@
 	:global(.mobile-menu-toggle:checked) ~ .mobile-menu {
 		opacity: 1;
 		transform: translateY(0);
-		visibility: visible;
-		pointer-events: auto;
-	}
-
-	.mobile-menu-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 99;
-		opacity: 0;
-		visibility: hidden;
-		pointer-events: none;
-	}
-
-	:global(.mobile-menu-toggle:checked) ~ .mobile-menu-overlay {
-		opacity: 1;
 		visibility: visible;
 		pointer-events: auto;
 	}

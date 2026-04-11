@@ -6,15 +6,79 @@
 	import { getLocale } from '$lib/i18n';
 
 	const locale = getLocale();
+
+	let lastScrollY = $state(0);
+	let isHidden = $state(false);
+	let isMobile = $state(false);
+	let menuOpen = $state(false);
+
+	function handleScroll() {
+		if (!isMobile) return;
+		const currentScrollY = window.scrollY;
+		if (currentScrollY <= 50) {
+			isHidden = false;
+		} else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+			isHidden = true;
+		} else if (lastScrollY - currentScrollY > 20) {
+			isHidden = false;
+		}
+		lastScrollY = currentScrollY;
+	}
+
+	$effect(() => {
+		if (typeof window !== 'undefined') {
+			isMobile = window.innerWidth < 768;
+		}
+	});
+
+	function toggleMenu() {
+		menuOpen = !menuOpen;
+	}
+
+	function handleClickOutside(event: MouseEvent) {
+		if (!isMobile) return;
+		const target = event.target as HTMLElement;
+		if (!target.closest('.mobile-menu-btn') && !target.closest('.mobile-menu')) {
+			menuOpen = false;
+		}
+	}
+
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+		document.addEventListener('click', handleClickOutside);
+		return () => document.removeEventListener('click', handleClickOutside);
+	});
+
+	function toggleNav(e: MouseEvent) {
+		if (!isMobile || window.scrollY <= 50) return;
+		const target = e.target as HTMLElement;
+		if (target.classList.contains('header-nav-container')) {
+			isHidden = !isHidden;
+		}
+	}
+
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		return () => window.removeEventListener('scroll', handleScroll);
+	});
 </script>
 
-<nav class="header-nav">
+<nav
+	class="header-nav"
+	style={isMobile
+		? `transform: translateY(${isHidden ? '-100%' : '0'}); transition: transform 0.3s ease-in-out; will-change: transform;`
+		: ''}>
 	<input
 		id="mobile-nav-toggle"
 		type="checkbox"
 		class="mobile-menu-toggle" />
 
-	<div class="primary-chrome-panel container mx-auto flex items-center gap-8 px-6 py-4">
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="primary-chrome-panel header-nav-container container mx-auto flex items-center gap-8 px-6 py-4"
+		onclick={toggleNav}>
 		<a
 			href="/{locale}"
 			class="flex items-center gap-3 no-underline"
@@ -32,18 +96,19 @@
 			<LanguageSwitcher />
 			<ThemeSwitcher />
 
-			<label
-				for="mobile-nav-toggle"
+			<button
+				type="button"
 				aria-label="Toggle menu"
-				class="nav-icon-button header-burger flex-col gap-[0.35rem]">
+				class="nav-icon-button header-burger mobile-menu-btn flex-col gap-[0.35rem]"
+				onclick={toggleMenu}>
 				<span class="burger-line"></span>
 				<span class="burger-line"></span>
 				<span class="burger-line"></span>
-			</label>
+			</button>
 		</div>
 	</div>
 
-	<MobileMenu />
+	<MobileMenu {menuOpen} />
 </nav>
 
 <style>
@@ -89,6 +154,13 @@
 	@media (min-width: 768px) {
 		.header-burger {
 			display: none;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.header-nav {
+			margin: 1rem;
+			will-change: transform;
 		}
 	}
 

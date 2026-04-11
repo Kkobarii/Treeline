@@ -84,4 +84,18 @@
 	:global(.treeline-card .prose tbody tr:hover) {
 		background-color: var(--color-gray-100);
 	}
+
+	@media (max-width: 768px) {
+		:global(.treeline-card .prose h1) {
+			font-size: 1.5rem;
+		}
+
+		:global(.treeline-card .prose h2) {
+			font-size: 1.25rem;
+		}
+
+		:global(.treeline-card .prose h3) {
+			font-size: 1.1rem;
+		}
+	}
 </style>

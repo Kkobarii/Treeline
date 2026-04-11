@@ -18,7 +18,7 @@
 	<Nav />
 	<div class="header-spacer"></div>
 
-	<main class="container mx-auto flex flex-1 flex-col gap-6 px-6 py-2">
+	<main class="container mx-auto flex flex-1 flex-col gap-3 px-6 py-2 md:gap-6">
 		{@render children?.()}
 	</main>
 
@@ -28,5 +28,11 @@
 <style>
 	.header-spacer {
 		height: 120px;
+	}
+
+	@media (max-width: 768px) {
+		.header-spacer {
+			height: 90px;
+		}
 	}
 </style>

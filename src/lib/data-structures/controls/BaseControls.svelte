@@ -29,14 +29,18 @@
 </script>
 
 <div class="controls-container treeline-card flex flex-col gap-6">
-	<div class="flex flex-col gap-4">
-		<h2 class="text-secondary text-lg font-bold">{title}</h2>
+	<div class="controls-children">
 		<div class="flex flex-col gap-4">
-			{@render children?.()}
+			<h2 class="text-secondary text-lg font-bold">{title}</h2>
+			<div class="flex flex-col gap-4">
+				{@render children?.()}
+			</div>
 		</div>
 	</div>
 
-	<OperationControls {operationManager} />
+	<div class="controls-operations">
+		<OperationControls {operationManager} />
+	</div>
 </div>
 
 <style>
@@ -51,6 +55,14 @@
 			min-width: 0;
 			width: 100%;
 			height: auto;
+		}
+
+		.controls-operations {
+			order: -1;
+		}
+
+		.controls-children {
+			order: 0;
 		}
 	}
 

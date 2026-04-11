@@ -352,6 +352,12 @@ label {
 	letter-spacing: -0.025em;
 }
 
+@media (max-width: 768px) {
+	.page-title {
+		font-size: 1.75rem;
+	}
+}
+
 .page-layout {
 	display: flex;
 	flex-direction: row;
@@ -361,17 +367,25 @@ label {
 
 .page-header {
 	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
 	gap: 0.5rem;
 	margin-bottom: 0.75rem;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 768px) {
 	.page-header {
+		display: flex;
+		flex-wrap: wrap;
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
+		gap: 0.5rem;
+	}
+
+	.page-title {
+		flex: 1;
 	}
 }
 
@@ -379,5 +393,9 @@ label {
 	.page-layout {
 		flex-direction: column;
 		height: auto;
+	}
+
+	.treeline-card {
+		padding: 1rem;
 	}
 }
