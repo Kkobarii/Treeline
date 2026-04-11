@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Colors } from '$lib/assets/colors';
-	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+	import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 	import StructureVisual from '$lib/data-structures/visual/StructureVisual.svelte';
+	import { Colors } from '$lib/utils/colors';
 
 	import { HeapAnimator } from './heapAnimator';
 	import { HeapAnnotator } from './heapAnnotator';

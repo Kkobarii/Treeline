@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+	import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 	import StructureVisual from '$lib/data-structures/visual/StructureVisual.svelte';
 
 	import { RBTreeAnimator } from './rbTreeAnimator';

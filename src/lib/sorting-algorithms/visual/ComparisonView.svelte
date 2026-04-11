@@ -3,20 +3,25 @@
 
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import { getLocale, translate } from '$lib/i18n';
+	import { dataSets, sortingAlgorithms } from '$lib/sorting-algorithms/registry';
 	import { createTimer } from '$lib/utils/timer';
 
-	import { dataSets, sortingAlgorithms } from '../misc/registry';
 	import type { ArrayType } from '../misc/utils';
 	import { createWaitForPaint } from '../misc/visualUtils';
+	import type { SortStep } from '../steps/stepTypes';
 	import type { Item } from '../steps/traceBuilder';
-	import type { CellState } from './ComparisonView.types';
-	import SortingBars from './SortingBars.svelte';
+	import SortingBars from '../components/SortingBars.svelte';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
 
 	const stepDelayMs = 15;
 	const arraySize = 32;
+
+	interface CellState {
+		steps: SortStep[];
+		currentStepIndex: number;
+	}
 
 	const arrayTypeOptions = dataSets.map(ds => ({
 		type: ds.type,

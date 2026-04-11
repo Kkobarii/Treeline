@@ -1,5 +1,5 @@
 import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
-import { StepLabel, type StepLabelParams } from '$lib/steps/stepLabel';
+import { StepLabel, type StepLabelParams } from '$lib/utils/stepLabel';
 
 export class StepDetail extends StepLabel {
 	constructor(

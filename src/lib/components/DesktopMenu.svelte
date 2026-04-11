@@ -3,7 +3,7 @@
 
 	import { dataStructures } from '$lib/data-structures/registry';
 	import { getLocale, translate } from '$lib/i18n';
-	import { sortingAlgorithms } from '$lib/sorting-algorithms/misc/registry';
+	import { sortingAlgorithms } from '$lib/sorting-algorithms/registry';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);

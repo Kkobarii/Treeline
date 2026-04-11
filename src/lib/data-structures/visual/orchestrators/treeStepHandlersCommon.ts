@@ -1,5 +1,4 @@
-import { Colors } from '$lib/assets/colors';
-import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 import type { AVLTreeAnimator } from '$lib/data-structures/structures/avlTree/avlTreeAnimator';
 import type { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
 import type { BTreeAnimator } from '$lib/data-structures/structures/bTree/bTreeAnimator';
@@ -11,6 +10,7 @@ import type { RBTreeAnimator } from '$lib/data-structures/structures/rbTree/rbTr
 import type { StackAnimator } from '$lib/data-structures/structures/stack/stackAnimator';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { translate as t, type Locale } from '$lib/i18n';
+import { Colors } from '$lib/utils/colors';
 
 import type {
 	CaseAnalysisData,
@@ -26,7 +26,7 @@ import type {
 	ReplaceWithChildData,
 	ReplaceWithInorderSuccessorData,
 	TraverseData,
-} from '../../operation/stepData';
+} from '../../operations/stepData';
 
 type CommonAnimator =
 	| BSTreeAnimator

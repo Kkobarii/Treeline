@@ -1,4 +1,4 @@
-import { StepLabel } from '$lib/steps/stepLabel';
+import { StepLabel } from '$lib/utils/stepLabel';
 
 import type { DetailedSortStep } from './stepTypes';
 

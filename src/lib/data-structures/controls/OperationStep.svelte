@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StepData } from '$lib/data-structures/operation/operationData';
+	import type { StepData } from '$lib/data-structures/operations/operationDataa';
 	import { getBTreeNodeId } from '$lib/data-structures/utils/graphs';
 
 	export let step: StepData;

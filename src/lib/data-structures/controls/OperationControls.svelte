@@ -3,16 +3,17 @@
 
 	import PillSwitcher from '$lib/components/PillSwitcher.svelte';
 	import OperationStep from '$lib/data-structures/controls/OperationStep.svelte';
-	import { getStoredDebugMode, subscribeToDebugMode } from '$lib/data-structures/debugMode';
-	import type { OperationData } from '$lib/data-structures/operation/operationData';
+	import type { OperationData } from '$lib/data-structures/operations/operationData';
 	import {
 		CurrentOperationChangedEvent,
 		CurrentStepChangedEvent,
 		EventType,
 		OperationManager,
-	} from '$lib/data-structures/operation/operationManager';
+	} from '$lib/data-structures/operations/operationManager';
 	import { OperationType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
 	import { getLocale, translate } from '$lib/i18n';
+
+	import { getStoredDebugMode, subscribeToDebugMode } from '../utils/debugMode';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);

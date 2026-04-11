@@ -1,6 +1,6 @@
 import { range, swap } from '$lib/sorting-algorithms/misc/utils';
 import { detailedStepsToSortSteps } from '$lib/sorting-algorithms/steps/stepAdapters';
-import { StepLabel } from '$lib/steps/stepLabel';
+import { StepLabel } from '$lib/utils/stepLabel';
 
 import { type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';

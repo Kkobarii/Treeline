@@ -8,7 +8,7 @@ export function computeTargetAreaHighlight(
 	variables: Record<string, unknown>,
 	gridColumns: number,
 	algorithmId: SortingAlgorithmId,
-	cellHeight = 92,
+	cellHeight: number,
 ): { left: string; width: string; top: string; height: string } | null {
 	if (gridColumns <= 0) return null;
 
@@ -29,7 +29,7 @@ export function computeTargetAreaHighlight(
 	const spanGapRem = (spanColumns - 1) * GAP_REM;
 	const leftOffsetGapsRem = leftColumn * GAP_REM;
 	const trackWidthExpression = `(100% - ${totalGapRem}rem) / ${gridColumns}`;
-	const rowStepExpression = algorithmId === 'quick' ? `${cellHeight}px` : `(${cellHeight}px + 0.35rem)`;
+	const rowStepExpression = algorithmId === 'quick' ? `${cellHeight / 2}px` : `(${cellHeight}px + 0.35rem)`;
 
 	return {
 		left: `calc(${leftColumn} * (${trackWidthExpression}) + ${leftOffsetGapsRem}rem - ${EXPAND_PX}px)`,

@@ -1,5 +1,5 @@
-import type { StepData } from '$lib/data-structures/operation/operationData';
-import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+import type { StepData } from '$lib/data-structures/operations/operationData';
+import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 import type { BSTreeAnimator } from '$lib/data-structures/structures/bsTree/bsTreeAnimator';
 import { StepType, type StepTypeValue } from '$lib/data-structures/structures/dataStructure';
 import type { DataStructureAnimator } from '$lib/data-structures/visual/animators/dataStructureAnimator';

@@ -1,4 +1,4 @@
-import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
+import { OperationData, StepData } from '$lib/data-structures/operations/operationData';
 import {
 	CASE_LEAF_NODE,
 	CASE_SINGLE_CHILD,
@@ -22,7 +22,7 @@ import {
 	RBTREE_UNCLE_BLACK_TRIANGLE_INSERT_SYM,
 	RBTREE_UNCLE_RED_INSERT,
 	RBTREE_UNCLE_RED_INSERT_SYM,
-} from '$lib/data-structures/operation/stepConstants';
+} from '$lib/data-structures/operations/stepConstants';
 import {
 	CaseAnalysisData,
 	CompareData,
@@ -36,7 +36,7 @@ import {
 	ReplaceWithChildData,
 	ReplaceWithInorderSuccessorData,
 	TraverseData,
-} from '$lib/data-structures/operation/stepData';
+} from '$lib/data-structures/operations/stepData';
 import { getDummyNodeId } from '$lib/data-structures/utils/graphs';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 

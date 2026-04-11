@@ -1,11 +1,11 @@
-import type { StepData } from '$lib/data-structures/operation/operationData';
+import type { StepData } from '$lib/data-structures/operations/operationData';
 import {
 	ChangeDirection,
 	EventType,
 	type CurrentOperationChangedEvent,
 	type CurrentStepChangedEvent,
 	type OperationManager,
-} from '$lib/data-structures/operation/operationManager';
+} from '$lib/data-structures/operations/operationManager';
 import { clearAnimations, DEFAULT_ANIMATION_DURATION_MS, FAST_PLAYBACK_DURATION_MS, setGlobalAnimationDuration } from '$lib/utils/animator';
 
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';

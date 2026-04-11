@@ -1,12 +1,12 @@
 import { DataSet } from 'vis-data';
 import { type Edge, type Node } from 'vis-network';
 
-import { Colors, shadeColor } from '$lib/assets/colors';
 import type { AVLTreeNode } from '$lib/data-structures/structures/avlTree/avlTree';
 import type { BSTreeNode } from '$lib/data-structures/structures/bsTree/bsTree';
 import type { BTreeNode } from '$lib/data-structures/structures/bTree/bTree';
 import type { HeapNode } from '$lib/data-structures/structures/heap/heap';
 import { RBTreeColor, type RBTreeNode } from '$lib/data-structures/structures/rbTree/rbTree';
+import { Colors, shadeColor } from '$lib/utils/colors';
 
 function log(...args: any[]) {
 	// Uncomment the next line to enable logging

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+	import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 	import { OperationType } from '$lib/data-structures/structures/dataStructure';
 	import { getLocale, translate } from '$lib/i18n';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
 	import HeapControls from '$lib/data-structures/controls/specific/HeapControls.svelte';
-	import { OperationManager } from '$lib/data-structures/operation/operationManager';
+	import { OperationManager } from '$lib/data-structures/operations/operationManager';
 	import { StructureType } from '$lib/data-structures/structures/dataStructure';
 	import HeapVisual from '$lib/data-structures/structures/heap/HeapVisual.svelte';
 	import { getLocale, translate } from '$lib/i18n';

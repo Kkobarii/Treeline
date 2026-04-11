@@ -1,8 +1,8 @@
 <script lang="ts">
 	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
 	import { getLocale, translate } from '$lib/i18n';
-	import SortingDetailedView from '$lib/sorting-algorithms/visuals/SortingDetailedView.svelte';
-	import ViewSwitcher from '$lib/sorting-algorithms/visuals/ViewSwitcher.svelte';
+	import SortingDetailedView from '$lib/sorting-algorithms/visual/SortingDetailedView.svelte';
+	import ViewSwitcher from '$lib/sorting-algorithms/visual/ViewSwitcher.svelte';
 
 	import type { PageData } from './$types';
 

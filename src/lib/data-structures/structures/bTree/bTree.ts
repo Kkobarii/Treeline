@@ -1,4 +1,4 @@
-import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
+import { OperationData, StepData } from '$lib/data-structures/operations/operationData';
 import {
 	BTREE_BORROW_FROM_LEFT_SIBLING,
 	BTREE_BORROW_FROM_RIGHT_SIBLING,
@@ -11,10 +11,10 @@ import {
 	DROP_REASON_DUPLICATE_VALUE,
 	DROP_REASON_NOT_FOUND,
 	DROP_REASON_UNKNOWN,
-} from '$lib/data-structures/operation/stepConstants';
+} from '$lib/data-structures/operations/stepConstants';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
-import { CaseAnalysisData, CreateRootData, DropData, FoundData, MarkToDeleteData } from '../../operation/stepData';
+import { CaseAnalysisData, CreateRootData, DropData, FoundData, MarkToDeleteData } from '../../operations/stepData';
 import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';
 import { insertChild, insertNonFull, removeAt, removeChild } from './bTreeNodeUtils';
 import {

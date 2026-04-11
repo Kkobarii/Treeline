@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
 	import TreeControls from '$lib/data-structures/controls/specific/TreeControls.svelte';
-	import { OperationManager } from '$lib/data-structures/operation/operationManager';
+	import { OperationManager } from '$lib/data-structures/operations/operationManager';
 	import { StructureType } from '$lib/data-structures/structures/dataStructure';
 	import RBTreeVisual from '$lib/data-structures/structures/rbTree/RBTreeVisual.svelte';
 	import { getLocale, translate } from '$lib/i18n';

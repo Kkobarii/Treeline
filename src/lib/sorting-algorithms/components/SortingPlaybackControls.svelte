@@ -2,8 +2,8 @@
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import { getLocale, translate } from '$lib/i18n';
 
-	import { dataSets } from '../misc/registry';
 	import type { ArrayType } from '../misc/utils';
+	import { dataSets } from '../registry';
 	import type { GroupedProps } from './SortingPlaybackControls.types';
 
 	let props: GroupedProps = $props();
@@ -123,7 +123,8 @@
 		</div>
 	</div>
 
-	<div class="step-status flex min-h-[5.5rem] min-w-0 flex-col gap-[0.2rem] rounded-xl border px-3 py-2 lg:w-[17rem] order-first lg:order-none">
+	<div
+		class="step-status order-first flex min-h-[5.5rem] min-w-0 flex-col gap-[0.2rem] rounded-xl border px-3 py-2 lg:order-none lg:w-[17rem]">
 		<div class="step-number text-[0.66rem] font-semibold tracking-[0.05em] uppercase">
 			{t('common.step')}
 			{currentStep}/{totalSteps}

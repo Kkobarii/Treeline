@@ -1,7 +1,7 @@
-import { Colors } from '$lib/assets/colors';
 import { addAnimation, getGlobalAnimationDuration } from '$lib/utils/animator';
+import { Colors } from '$lib/utils/colors';
 
-import { BaseAnnotation } from './baseAnnotation';
+import { BaseAnnotation } from './annotation';
 import type { DataStructureAnnotator } from './dataStructureAnnotator';
 
 export class ValueAnnotation extends BaseAnnotation {

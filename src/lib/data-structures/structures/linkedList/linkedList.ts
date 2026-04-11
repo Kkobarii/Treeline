@@ -1,4 +1,4 @@
-import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
+import { OperationData, StepData } from '$lib/data-structures/operations/operationData';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
 import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';

@@ -1,8 +1,8 @@
-import { Colors } from '$lib/assets/colors';
 import { LinkedListNodeData } from '$lib/data-structures/utils/graphs';
-import { BaseAnnotation } from '$lib/data-structures/visual/annotators/baseAnnotation';
+import BaseAnnotation from '$lib/data-structures/visual/annotators/annotations/annotation';
 import { VIS_NETWORK_TOP_BB_OFFSET } from '$lib/data-structures/visual/annotators/constants';
 import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
+import { Colors } from '$lib/utils/colors';
 
 class HeadTailAnnotation extends BaseAnnotation {
 	color: string = Colors.Info;

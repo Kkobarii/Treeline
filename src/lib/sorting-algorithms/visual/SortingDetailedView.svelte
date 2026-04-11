@@ -9,8 +9,8 @@
 
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
 	import { getCodeTemplate } from '../misc/codeTemplates';
-	import type { CodeLanguage } from '../misc/registry';
-	import { dataSets, DEFAULT_ARRAY_TYPE, DEFAULT_CODE_LANGUAGE, getSortingAlgorithm, languageOptions } from '../misc/registry';
+	import type { CodeLanguage } from '../registry';
+	import { dataSets, DEFAULT_ARRAY_TYPE, DEFAULT_CODE_LANGUAGE, getSortingAlgorithm, languageOptions } from '../registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 	import type { ArrayType } from '../misc/utils';
 	import { createArrayByType } from '../misc/utils';

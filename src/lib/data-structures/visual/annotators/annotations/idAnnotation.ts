@@ -1,8 +1,8 @@
-import { Colors } from '$lib/assets/colors';
+import { Colors } from '$lib/utils/colors';
 
-import { BaseAnnotation } from './baseAnnotation';
-import { VIS_NETWORK_TOP_BB_OFFSET } from './constants';
-import type { DataStructureAnnotator } from './dataStructureAnnotator';
+import { VIS_NETWORK_TOP_BB_OFFSET } from '../constants';
+import type { DataStructureAnnotator } from '../dataStructureAnnotator';
+import { BaseAnnotation } from './annotation';
 
 export class IdAnnotation extends BaseAnnotation {
 	color: string = Colors.Id;

@@ -3,11 +3,12 @@
 	import { DataSet } from 'vis-data';
 	import { Network, type Edge, type Node, type Options } from 'vis-network';
 
-	import { Colors } from '$lib/assets/colors';
-	import { getStoredDebugMode, setStoredDebugMode, subscribeToDebugMode } from '$lib/data-structures/debugMode';
-	import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+	import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
 	import { getLocale } from '$lib/i18n';
+	import { Colors } from '$lib/utils/colors';
+
+	import { getStoredDebugMode, setStoredDebugMode, subscribeToDebugMode } from '../utils/debugMode';
 
 	export let Animator: any;
 	export let Annotator: any;

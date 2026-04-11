@@ -1,5 +1,5 @@
-import type { StepData } from '$lib/data-structures/operation/operationData';
-import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+import type { StepData } from '$lib/data-structures/operations/operationData';
+import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 import { StepType, type StepTypeValue } from '$lib/data-structures/structures/dataStructure';
 import type { RBTree } from '$lib/data-structures/structures/rbTree/rbTree';
 import type { RBTreeAnimator } from '$lib/data-structures/structures/rbTree/rbTreeAnimator';

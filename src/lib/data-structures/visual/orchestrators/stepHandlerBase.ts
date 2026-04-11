@@ -1,5 +1,5 @@
-import type { StepData } from '$lib/data-structures/operation/operationData';
-import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+import type { StepData } from '$lib/data-structures/operations/operationData';
+import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 
 import type { DataStructureAnimator } from '../animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '../annotators/dataStructureAnnotator';

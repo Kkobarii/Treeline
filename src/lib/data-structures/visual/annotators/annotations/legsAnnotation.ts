@@ -1,12 +1,12 @@
 import type { Node } from 'vis-network';
 
-import { Colors, shadeColor } from '$lib/assets/colors';
 import { RBTreeColor } from '$lib/data-structures/structures/rbTree/rbTree';
 import { NodeData } from '$lib/data-structures/utils/graphs';
-import { BaseAnnotation } from '$lib/data-structures/visual/annotators/baseAnnotation';
 import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
+import { Colors, shadeColor } from '$lib/utils/colors';
 
-import { VIS_NETWORK_TOP_BB_OFFSET } from './constants';
+import { VIS_NETWORK_TOP_BB_OFFSET } from '../constants';
+import BaseAnnotation from './annotation';
 
 const LEG_LENGTH = 16;
 const DASH_LENGTH = 4;

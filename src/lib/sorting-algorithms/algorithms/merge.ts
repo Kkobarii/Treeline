@@ -1,5 +1,5 @@
 import { range, shift } from '$lib/sorting-algorithms/misc/utils';
-import { StepLabel } from '$lib/steps/stepLabel';
+import { StepLabel } from '$lib/utils/stepLabel';
 
 import { LineBreak, type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';

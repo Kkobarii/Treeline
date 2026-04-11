@@ -1,4 +1,4 @@
-import { StepDetail } from '$lib/data-structures/operation/stepData';
+import { StepDetail } from '$lib/data-structures/operations/stepData';
 import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
 
 export class AppendData extends StepDetail {

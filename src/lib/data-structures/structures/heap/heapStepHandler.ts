@@ -1,6 +1,5 @@
-import { Colors } from '$lib/assets/colors';
-import type { StepData } from '$lib/data-structures/operation/operationData';
-import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+import type { StepData } from '$lib/data-structures/operations/operationData';
+import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 import { StepType, type StepTypeValue } from '$lib/data-structures/structures/dataStructure';
 import type { HeapAnimator } from '$lib/data-structures/structures/heap/heapAnimator';
 import type {
@@ -16,6 +15,7 @@ import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotat
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
 import { translate as t } from '$lib/i18n';
+import { Colors } from '$lib/utils/colors';
 
 async function handleSwapForward(animator: HeapAnimator, annotator: DataStructureAnnotator, data: SwapData) {
 	const info = t((annotator as any).locale, 'steps.dataStructures.heap.swapData', {

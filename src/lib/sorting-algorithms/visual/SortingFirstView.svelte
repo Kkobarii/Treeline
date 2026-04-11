@@ -6,11 +6,11 @@
 
 	import SortingBars from '../components/SortingBars.svelte';
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
-	import { dataSets, DEFAULT_ARRAY_TYPE, getSortingAlgorithm } from '../misc/registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 	import type { ArrayType } from '../misc/utils';
 	import { createArrayByType } from '../misc/utils';
 	import { createWaitForPaint, DEFAULT_PLAYBACK_INTERVAL } from '../misc/visualUtils';
+	import { dataSets, DEFAULT_ARRAY_TYPE, getSortingAlgorithm } from '../registry';
 	import { StepManager } from '../steps/stepManager.svelte';
 	import type { SortStep } from '../steps/stepTypes';
 

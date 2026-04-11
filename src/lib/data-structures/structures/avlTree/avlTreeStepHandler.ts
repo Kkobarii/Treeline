@@ -1,5 +1,5 @@
-import type { StepData } from '$lib/data-structures/operation/operationData';
-import type { OperationManager } from '$lib/data-structures/operation/operationManager';
+import type { StepData } from '$lib/data-structures/operations/operationData';
+import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 import type { AVLTree } from '$lib/data-structures/structures/avlTree/avlTree';
 import type { AVLTreeAnimator } from '$lib/data-structures/structures/avlTree/avlTreeAnimator';
 import type { RotateLeftData, RotateRightData, UpdateHeightBalanceData } from '$lib/data-structures/structures/avlTree/avlTreeSteps';

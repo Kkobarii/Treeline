@@ -1,4 +1,4 @@
-import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
+import { OperationData, StepData } from '$lib/data-structures/operations/operationData';
 import {
 	CASE_LEAF_NODE,
 	CASE_LEFT_LEFT_ROTATE_RIGHT,
@@ -11,7 +11,7 @@ import {
 	DIRECTION_RIGHT,
 	DROP_REASON_DUPLICATE_VALUE,
 	DROP_REASON_NOT_FOUND,
-} from '$lib/data-structures/operation/stepConstants';
+} from '$lib/data-structures/operations/stepConstants';
 import {
 	CaseAnalysisData,
 	CompareData,
@@ -26,7 +26,7 @@ import {
 	ReplaceWithChildData,
 	ReplaceWithInorderSuccessorData,
 	TraverseData,
-} from '$lib/data-structures/operation/stepData';
+} from '$lib/data-structures/operations/stepData';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
 import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';

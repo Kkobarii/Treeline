@@ -1,6 +1,6 @@
-import { OperationData, StepData } from '$lib/data-structures/operation/operationData';
-import { DROP_REASON_HEAP_EMPTY } from '$lib/data-structures/operation/stepConstants';
-import { CreateRootData, DeleteData, DropData, MarkToDeleteData } from '$lib/data-structures/operation/stepData';
+import { OperationData, StepData } from '$lib/data-structures/operations/operationData';
+import { DROP_REASON_HEAP_EMPTY } from '$lib/data-structures/operations/stepConstants';
+import { CreateRootData, DeleteData, DropData, MarkToDeleteData } from '$lib/data-structures/operations/stepData';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
 import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';

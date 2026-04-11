@@ -1,14 +1,14 @@
 import type { DataSet } from 'vis-data';
 import type { Edge, Network, Node } from 'vis-network';
 
-import { shadeColor } from '$lib/assets/colors';
 import { isDummyNodeId } from '$lib/data-structures/utils/graphs';
 import type { Locale } from '$lib/i18n';
+import { shadeColor } from '$lib/utils/colors';
 
-import { Annotation } from './annotation';
-import { IdAnnotation } from './idAnnotation';
-import { LegsAnnotation } from './legsAnnotation';
-import { ValueAnnotation } from './valueAnnotation';
+import { IdAnnotation } from './annotations/idAnnotation';
+import { Annotation } from './annotations/infoAnnotation';
+import { LegsAnnotation } from './annotations/legsAnnotation';
+import { ValueAnnotation } from './annotations/valueAnnotation';
 
 export interface DataStructureAnnotatorOpts {
 	canvas: HTMLCanvasElement;
@@ -58,12 +58,11 @@ export class DataStructureAnnotator {
 	}
 
 	public redrawCanvas() {
+		this.clearCanvas();
+
 		if (!this.shown) {
-			this.clearCanvas();
 			return;
 		}
-
-		this.clearCanvas();
 
 		for (const node of this.nodes.get() as Node[]) {
 			const legsAnnot = new LegsAnnotation(this, node.id!);

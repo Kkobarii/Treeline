@@ -1,7 +1,7 @@
-import type { StepLabel } from '$lib/steps/stepLabel';
+import type { StepLabel } from '$lib/utils/stepLabel';
 
-import type { CodeLanguage } from '../misc/registry';
 import type { SortingAlgorithmId } from '../misc/types';
+import type { CodeLanguage } from '../registry';
 import type { Item } from './traceBuilder';
 
 // basic steps

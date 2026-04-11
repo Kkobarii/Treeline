@@ -1,4 +1,4 @@
-import { OperationData } from '$lib/data-structures/operation/operationData';
+import { OperationData } from '$lib/data-structures/operations/operationData';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
 export enum StructureType {

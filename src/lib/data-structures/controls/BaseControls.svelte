@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
 
-	import { EventType, InputValueChangedEvent, type OperationManager } from '$lib/data-structures/operation/operationManager';
+	import { EventType, InputValueChangedEvent, type OperationManager } from '$lib/data-structures/operations/operationManager';
 
 	import OperationControls from './OperationControls.svelte';
 
