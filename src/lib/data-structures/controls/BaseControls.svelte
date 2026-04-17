@@ -50,6 +50,11 @@
 		height: 100%;
 	}
 
+	.controls-operations {
+		height: 100%;
+		overflow: hidden;
+	}
+
 	@media (max-width: 768px) {
 		.controls-container {
 			min-width: 0;
@@ -59,6 +64,8 @@
 
 		.controls-operations {
 			order: -1;
+			height: auto;
+			overflow: visible;
 		}
 
 		.controls-children {

@@ -31,16 +31,11 @@
 	let annotator: any;
 
 	let overlayCanvas: HTMLCanvasElement | null = null;
-	let showOverlay: boolean = true;
 	let debugMode: boolean = false;
 	let unsubscribeDebugMode: (() => void) | null = null;
 
 	function setDebugMode(value: boolean) {
 		debugMode = value;
-		if (!debugMode) {
-			showOverlay = true;
-		}
-
 		if (annotator) {
 			annotator.setDebugMode(debugMode);
 		}
@@ -94,12 +89,10 @@
 		});
 
 		network.on('afterDrawing', () => {
-			if (showOverlay) {
-				overlayCanvas!.height = container!.clientHeight;
-				overlayCanvas!.width = container!.clientWidth;
+			overlayCanvas!.height = container!.clientHeight;
+			overlayCanvas!.width = container!.clientWidth;
 
-				annotator.redrawCanvas();
-			}
+			annotator.redrawCanvas();
 		});
 
 		return () => {
@@ -136,16 +129,6 @@
 						mask: url('/bug.svg') no-repeat center / contain; -->
 					"></span>
 			</span>
-		</button>
-
-		<button
-			class="py-2"
-			hidden={!debugMode}
-			on:click={() => {
-				showOverlay = !showOverlay;
-				annotator.toggleShown();
-			}}>
-			{showOverlay ? 'Hide' : 'Show'} Overlay
 		</button>
 	</div>
 </div>

@@ -146,7 +146,7 @@
 	}
 </script>
 
-<div class="operation-card flex flex-row gap-2 max-md:max-h-[30vh] md:min-h-0 md:flex-1 md:flex-col md:gap-6">
+<div class="operation-card flex flex-row gap-2 max-md:max-h-[30vh] md:h-full md:min-h-0 md:flex-1 md:flex-col md:gap-6">
 	<div class="flex flex-1 flex-col gap-3 md:flex-none">
 		<h2 class="text-secondary text-lg font-bold break-words">{t('controls.operation.title')}</h2>
 		<div class="flex flex-col flex-wrap items-start gap-2 md:flex-row md:items-center">

@@ -6,11 +6,11 @@
 	import { dataSets, sortingAlgorithms } from '$lib/sorting-algorithms/registry';
 	import { createTimer } from '$lib/utils/timer';
 
+	import SortingBars from '../components/SortingBars.svelte';
 	import type { ArrayType } from '../misc/utils';
 	import { createWaitForPaint } from '../misc/visualUtils';
 	import type { SortStep } from '../steps/stepTypes';
 	import type { Item } from '../steps/traceBuilder';
-	import SortingBars from '../components/SortingBars.svelte';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
@@ -88,17 +88,13 @@
 		clearAll();
 		playMode = 'row';
 		for (let t = 0; t < arrayTypeOptions.length; t++) {
-			resetCell(algoIndex, t);
+			playingCells[algoIndex][t] = true;
 		}
-		playingCells[algoIndex] = arrayTypeOptions.map(() => true);
 	}
 
 	function runColumn(typeIndex: number) {
 		clearAll();
 		playMode = 'column';
-		for (let a = 0; a < sortingAlgorithms.length; a++) {
-			resetCell(a, typeIndex);
-		}
 		for (let a = 0; a < sortingAlgorithms.length; a++) {
 			playingCells[a][typeIndex] = true;
 		}
@@ -232,7 +228,7 @@
 				{@const sat = showBadges && order !== null ? Math.max(0.2, 1 - (order - 1) * 0.15) : 1}
 				<div class="comparison-cell">
 					{#if order !== null}
-						<span class="finish-badge">{order}</span>
+						<span class="finish-badge {order <= 3 ? 'finish-badge-top' : 'finish-badge-other'}">{order}</span>
 					{/if}
 					<div
 						class="h-full"
@@ -290,7 +286,8 @@
 				</div>
 				<div class="comparison-cell">
 					{#if finishOrder[algoIndex][selectedTypeIndex] !== null}
-						<span class="finish-badge">{finishOrder[algoIndex][selectedTypeIndex]}</span>
+						{@const order = finishOrder[algoIndex][selectedTypeIndex]}
+						<span class="finish-badge {order <= 3 ? 'finish-badge-top' : ''}">{order}</span>
 					{/if}
 					<div class="h-full">
 						<SortingBars
@@ -358,9 +355,14 @@
 	}
 
 	.finish-badge {
-		@apply absolute top-0 left-0 z-10 flex h-5 w-5 items-center justify-center rounded-br-md text-[0.65rem] font-bold;
-		background: var(--color-secondary);
-		color: #ffffff;
+		@apply absolute top-0 left-0 z-10 flex items-center justify-center rounded-br-lg px-2 py-1 text-sm;
+		background-color: oklch(from var(--color-secondary-light) l c h / 0.5);
+		color: var(--color-primary-ultra-dark);
+		min-width: 2rem;
+	}
+
+	.finish-badge-top {
+		@apply font-bold;
 	}
 
 	@media (max-width: 768px) {
