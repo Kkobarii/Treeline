@@ -18,6 +18,8 @@ const en = {
 		remove: 'Remove',
 		find: 'Find',
 		operation: 'Operation',
+		clear: 'Clear',
+		rebuild: 'Randomize',
 	},
 
 	nav: {
@@ -55,6 +57,10 @@ const en = {
 	controls: {
 		common: {
 			initial: 'Initial',
+			title: 'Controls',
+			structure: 'Structure',
+			nodes: 'Nodes',
+			operations: 'Operations',
 		},
 		tree: {
 			title: 'Tree Controls',

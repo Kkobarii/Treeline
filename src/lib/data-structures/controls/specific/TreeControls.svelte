@@ -17,21 +17,14 @@
 
 <BaseControls
 	{operationManager}
-	title={t('controls.tree.title')}
 	bind:manualValue
 	bind:locked>
-	<div class="buttons-in-col">
-		<button
-			on:click={() => operationManager.operation(OperationType.Tree.Insert, Math.floor(Math.random() * 1000))}
-			disabled={locked}>
-			{t('controls.tree.insertRandom')}
-		</button>
-		<button
-			on:click={() => operationManager.reset()}
-			disabled={locked}>
-			{t('common.reset')}
-		</button>
-	</div>
+	<button
+		on:click={() => operationManager.operation(OperationType.Tree.Insert, Math.floor(Math.random() * 1000))}
+		disabled={locked}>
+		{t('controls.tree.insertRandom')}
+	</button>
+
 	<div class="buttons-in-row">
 		<input
 			type="number"

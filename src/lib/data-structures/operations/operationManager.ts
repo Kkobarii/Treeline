@@ -129,6 +129,14 @@ export class OperationManager {
 		return data;
 	}
 
+	private prepareEmptyData(structureType: StructureType): OperationData {
+		const structure = createEmptyStructure(structureType);
+		const snapshot = deepCopyStructure(structureType, structure);
+		const data = new OperationData(OperationType.Empty, null, snapshot);
+		data.end(snapshot);
+		return data;
+	}
+
 	private generateInitialValues(count: number): number[] {
 		const maxUnique = 1000;
 		const target = Math.min(Math.max(count, 0), maxUnique);
@@ -351,8 +359,19 @@ export class OperationManager {
 		);
 	}
 
-	reset() {
-		console.log('Resetting operation manager');
+	clear() {
+		console.log('Clearing operation manager');
+
+		// const data = this.prepareStartData(this.structureType);
+		const data = this.prepareEmptyData(this.structureType);
+		this.operations = [data];
+
+		this.setCurrentOperation(0);
+		this.emit(EventType.OperationListChanged);
+	}
+
+	rebuild() {
+		console.log('Rebuilding operation manager');
 
 		const data = this.prepareStartData(this.structureType);
 		this.operations = [data];

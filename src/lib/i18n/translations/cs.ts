@@ -20,6 +20,8 @@ const cs: Translation = {
 		remove: 'Odebrat',
 		find: 'Najít',
 		operation: 'Operace',
+		clear: 'Vyčistit',
+		rebuild: 'Randomizovat',
 	},
 
 	nav: {
@@ -57,6 +59,10 @@ const cs: Translation = {
 	controls: {
 		common: {
 			initial: 'Počáteční',
+			title: 'Ovládání',
+			structure: 'Struktura',
+			nodes: 'Uzly',
+			operations: 'Operace',
 		},
 		tree: {
 			title: 'Ovládání stromu',

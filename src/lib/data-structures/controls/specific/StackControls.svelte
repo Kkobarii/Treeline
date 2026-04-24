@@ -16,23 +16,13 @@
 
 <BaseControls
 	{operationManager}
-	title={t('controls.stack.title')}
 	bind:manualValue
 	bind:locked>
-	<div class="buttons-in-col">
-		<div class="buttons-in-row">
-			<button
-				on:click={() => operationManager.operation(OperationType.Stack.Push, Math.floor(Math.random() * 1000))}
-				disabled={locked}>
-				{t('controls.stack.pushRandom')}
-			</button>
-		</div>
-		<button
-			on:click={() => operationManager.reset()}
-			disabled={locked}>
-			{t('common.reset')}
-		</button>
-	</div>
+	<button
+		on:click={() => operationManager.operation(OperationType.Stack.Push, Math.floor(Math.random() * 1000))}
+		disabled={locked}>
+		{t('controls.stack.pushRandom')}
+	</button>
 
 	<div class="buttons-in-row">
 		<input

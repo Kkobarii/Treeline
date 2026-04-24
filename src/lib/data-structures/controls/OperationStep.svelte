@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StepData } from '$lib/data-structures/operations/operationDataa';
+	import type { StepData } from '$lib/data-structures/operations/operationData';
 	import { getBTreeNodeId } from '$lib/data-structures/utils/graphs';
 
 	export let step: StepData;
@@ -103,6 +103,7 @@
 		cursor: pointer;
 		justify-content: space-between;
 		align-items: start;
+		min-height: auto;
 	}
 
 	.operation-step-trigger:hover {

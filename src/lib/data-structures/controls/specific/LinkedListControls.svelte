@@ -16,26 +16,18 @@
 
 <BaseControls
 	{operationManager}
-	title={t('controls.linkedList.title')}
 	bind:manualValue
 	bind:locked>
-	<div class="buttons-in-col">
-		<div class="buttons-in-row">
-			<button
-				on:click={() => operationManager.operation(OperationType.LinkedList.InsertHead, Math.floor(Math.random() * 1000))}
-				disabled={locked}>
-				{t('controls.linkedList.insertRandomHead')}
-			</button>
-			<button
-				on:click={() => operationManager.operation(OperationType.LinkedList.InsertTail, Math.floor(Math.random() * 1000))}
-				disabled={locked}>
-				{t('controls.linkedList.insertRandomTail')}
-			</button>
-		</div>
+	<div class="buttons-in-row">
 		<button
-			on:click={() => operationManager.reset()}
+			on:click={() => operationManager.operation(OperationType.LinkedList.InsertHead, Math.floor(Math.random() * 1000))}
 			disabled={locked}>
-			{t('common.reset')}
+			{t('controls.linkedList.insertRandomHead')}
+		</button>
+		<button
+			on:click={() => operationManager.operation(OperationType.LinkedList.InsertTail, Math.floor(Math.random() * 1000))}
+			disabled={locked}>
+			{t('controls.linkedList.insertRandomTail')}
 		</button>
 	</div>
 

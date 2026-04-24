@@ -148,9 +148,8 @@
 
 <div class="operation-card flex flex-row gap-2 max-md:max-h-[30vh] md:h-full md:min-h-0 md:flex-1 md:flex-col md:gap-6">
 	<div class="flex flex-1 flex-col gap-3 md:flex-none">
-		<h2 class="text-secondary text-lg font-bold break-words">{t('controls.operation.title')}</h2>
-		<div class="flex flex-col flex-wrap items-start gap-2 md:flex-row md:items-center">
-			<div class="flex w-full gap-2">
+		<div class="flex flex-col flex-wrap items-start justify-center gap-2 md:flex-row md:items-center">
+			<div class="flex w-full justify-center gap-2">
 				<button
 					class="inline-flex w-full items-center justify-center md:w-auto"
 					type="button"
@@ -194,8 +193,6 @@
 
 	{#if debugMode}
 		<div class="flex min-h-0 flex-1 flex-col gap-3">
-			<h2 class="text-secondary text-lg font-bold break-words">{t('controls.operation.info')}</h2>
-
 			<div
 				class="min-h-0 flex-1 overflow-y-auto"
 				id="operation-info">
@@ -241,5 +238,9 @@
 
 	#operation-info::-webkit-scrollbar-track {
 		background: var(--color-primary-light);
+	}
+
+	.operation-card button {
+		padding: 0.4rem 0.8rem;
 	}
 </style>
