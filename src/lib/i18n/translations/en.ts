@@ -358,6 +358,8 @@ const en = {
 			runAll: 'Run All',
 			runRow: 'Run row',
 			runColumn: 'Run column',
+			swaps: 'Swaps',
+			comparisons: 'Comparisons',
 		},
 		descriptions: {
 			bubble: 'Repeatedly compares adjacent items and swaps them when they are out of order.',

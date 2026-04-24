@@ -2,7 +2,7 @@ import { range, swap } from '$lib/sorting-algorithms/misc/utils';
 import { detailedStepsToSortSteps } from '$lib/sorting-algorithms/steps/stepAdapters';
 import { StepLabel } from '$lib/utils/stepLabel';
 
-import type { DetailedCodeTemplate, DetailedSortStep, SortStep } from '../steps/stepTypes';
+import type { DetailedCodeTemplate, DetailedSortStepResult, SortStepResult } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
 
 export enum InsertionSortPartId {
@@ -52,11 +52,11 @@ export const insertionSortTemplate: DetailedCodeTemplate = {
 	},
 };
 
-export function insertionSortSteps(input: number[]): SortStep[] {
+export function insertionSortSteps(input: number[]): SortStepResult {
 	return detailedStepsToSortSteps(insertionSortDetailedSteps(input));
 }
 
-export function insertionSortDetailedSteps(input: number[]): DetailedSortStep[] {
+export function insertionSortDetailedSteps(input: number[]): DetailedSortStepResult {
 	const trace = new DetailedTraceBuilder(input);
 	const array = trace.workingArray;
 	const n = array.length;
@@ -85,8 +85,9 @@ export function insertionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 				variables: { i, j },
 			});
 
+			trace.counters.compare();
 			if (array[j - 1].value > array[j].value) {
-				swap(array, j - 1, j);
+				swap(array, j - 1, j, trace.counters);
 				trace.paint({ moved: [j, j - 1], sorted: range(0, i) });
 				trace.record({
 					codePartId: InsertionSortPartId.Swap,

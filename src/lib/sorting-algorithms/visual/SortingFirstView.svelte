@@ -63,7 +63,7 @@
 		delayMs = stepManager.delayMs;
 
 		baseArray = createArrayByType(arrayType, arraySize);
-		stepManager.setSteps(algorithm.generateSteps(baseArray));
+		stepManager.setSteps(algorithm.generateSteps(baseArray).steps);
 
 		void tick().then(() => {
 			void createWaitForPaint().then(() => {
@@ -78,7 +78,7 @@
 	function regenerateArray() {
 		stepManager?.stop();
 		baseArray = createArrayByType(arrayType, arraySize);
-		stepManager?.setSteps(algorithm.generateSteps(baseArray));
+		stepManager?.setSteps(algorithm.generateSteps(baseArray).steps);
 	}
 
 	function changeArrayType(type: ArrayType) {

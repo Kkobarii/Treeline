@@ -1,124 +1,100 @@
 # B-Tree
 
-A **B-Tree** is a self-balancing tree data structure that maintains sorted data and allows searches, sequential access, insertions, and deletions in logarithmic time. Unlike binary trees where each node has at most two children, B-Trees can have many more children per node, making them particularly efficient for systems that read and write large blocks of data, such as databases and file systems.
+A B-Tree is a complex, self-balancing search tree designed to handle massive amounts of data efficiently. Unlike typical binary search trees where each node holds a single value and two pointers, a B-Tree node is designed to hold multiple values and point to many children. This wide, shallow structure makes it uniquely suited for systems that read and write large blocks of data, such as databases and file systems.
 
-### Key Properties
+### Key Concepts
 
-Every B-Tree is defined by an **order** value, which determines the maximum number of children a node can have:
+- **Order:** The order of a B-Tree defines its overall capacity. In this implementation, the order `m` represents the maximum number of children a single node can have. It is worth noting that some texts define order as the minimum number of children instead, but the maximum child definition is used here.
+- **Node Structure:** Each node contains an array of sorted values and an array of child pointers. A node with `k` children will always contain `k - 1` values. The values act as dividers that separate the child pointers into specific ranges.
+- **Internal vs. Leaf Nodes:** Internal nodes contain both values and pointers to children, serving as routing points. Leaf nodes contain only values and reside at the very bottom of the tree, possessing no child pointers.
 
-- Each node can contain at most **order - 1** keys
-- Each node (except root) must contain at least **⌈order/2⌉ - 1** keys
-- Each internal node (except root) has at least **⌈order/2⌉** children
-- All leaf nodes appear at the same level
+### Rules
 
-This structure ensures the tree remains balanced, with all paths from root to leaf having the same length.
+- **Capacity Limits:** A node can have at most `m` children and `m - 1` values.
+- **Minimum Limits:** Every internal node (except the root) must have at least `Math.ceil(m / 2)` children, ensuring the tree remains dense.
+- **Sorted Values:** The values within a single node are stored in strictly increasing order.
+- **Search Tree Property:** For any value `V` in a node, all values in the child subtree to its left are strictly less than `V`, and all values in the child subtree to its right are strictly greater than `V`.
+- **Uniform Depth:** All leaf nodes must exist at the exact same depth, guaranteeing perfect balance across the entire structure.
 
-### Node Structure
+### Complexity Analysis
 
-Unlike binary trees, B-Tree nodes contain:
+Because a B-Tree is perfectly balanced and each node stores multiple values, the height of the tree is significantly reduced compared to standard binary trees. The height remains at `O(log n)`, and because the base of the logarithm is large (based on the order `m`), the tree stays incredibly shallow even with millions of records.
 
-- **Multiple values**: An array of sorted keys (up to order - 1)
-- **Multiple children**: An array of child pointers (up to order)
-- **Leaf flag**: Indicates whether the node is a leaf or internal node
+| Operation  | Worst Case |
+| :--------- | :--------- |
+| **Insert** | `O(log n)` |
+| **Find**   | `O(log n)` |
+| **Delete** | `O(log n)` |
 
-Internal nodes have one more child than they have keys, with keys acting as separators between child subtrees.
+## Insert
 
-## Complexity Analysis
+Insertion always happens at the leaf level. Instead of growing downwards like a standard binary tree, a B-Tree grows upwards when nodes run out of space.
 
-B-Trees maintain excellent performance by keeping the tree height minimal through multi-way branching:
+### Phase 1: Search and Insert
 
-| Operation | Worst Case |
-| --------- | ---------- |
-| Find      | O(log n)   |
-| Insert    | O(log n)   |
-| Delete    | O(log n)   |
+1. **Compare:** Start at the root and navigate down the tree to find the appropriate leaf node by scanning the sorted values.
+2. **Traverse:** Decide the path based on the comparison:
+    - If the new value is smaller than a given value, follow the child pointer to the left of that value.
+    - If the new value is larger than all values in the node, follow the rightmost child pointer.
+3. **Insert Value:** Once the correct leaf is found, insert the new value into the node's array of values, ensuring the array remains perfectly sorted.
 
-The logarithm base is determined by the order value, making B-Trees with larger order values shorter and wider.
+### Phase 2: Split and Promote
 
-## Search (Find)
+1. **Mark Overfull:** If the insertion causes the node to exceed its maximum allowed values, the node is marked as overfull and must be divided.
+2. **Split:** The overfull node is split down the middle into two separate, smaller nodes:
+    - A left node to hold the smaller half of the values.
+    - A right node to hold the larger half of the values.
+3. **Promote Middle:** The median value of the original overfull node is pushed up (promoted) into the parent node.
+    - This promoted value acts as a new divider between the two newly split nodes.
+    - If no parent exists (meaning the split occurred at the root), a new root is created, which increases the overall height of the tree.
+4. **Propagate:** If promoting the middle value causes the parent node to become overfull, the split and promote process is repeated on the parent.
+    - This operation can cascade upwards, potentially reaching all the way to the root.
 
-Searching in a B-Tree is similar to binary search but extended to multiple keys per node:
+## Find
 
-1. **Search within node**: Compare the target with keys in the current node
-2. **Match found**: If a key matches, return success
-3. **Navigate to child**: If no match and not a leaf, determine which child subtree should contain the target based on key comparisons
-4. **Repeat**: Continue recursively until found or reaching a leaf
+Searching a B-Tree relies on a generalized search logic, checking multiple values per node.
 
-If we reach a leaf without finding the target, it doesn't exist in the tree.
+1. **Compare:** Start at the root and scan through the sorted values in the current node.
+2. **Found:** If the target matches a value, the node is successfully found.
+3. **Traverse:** Decide the path based on the comparison:
+    - If the target is smaller than a given value, follow the child pointer to the left of that value.
+    - If the target is larger than all values in the node, follow the rightmost child pointer.
+4. **Not Found:** If a leaf node is reached and the value is not present, the search ends, meaning the value does not exist in the tree.
 
-## Insertion
+## Delete
 
-Insertion maintains the B-Tree properties by splitting full nodes proactively:
+Deletion is highly complex because it must maintain the minimum value requirements and the uniform depth of the tree without breaking the sorting rules.
 
-### Phase 1: Navigate to insertion point
+### Phase 1: Location and Removal
 
-- Traverse from root to the appropriate leaf node
-- If a full node (order - 1 keys) is encountered, **split it** before descending
+The first step is finding the value and safely removing it, which differs based on where the value is located.
 
-### Phase 2: Node splitting
+1. **Case 1: Value in Leaf Node:** If the target value is located in a leaf node, it is simply removed from the node's value array.
+2. **Case 2: Value in Internal Node:** If the value resides in an internal node, it cannot be simply removed without breaking the routing structure.
+    - The tree finds either its inorder predecessor (the largest value in the left child subtree) or its inorder successor (the smallest value in the right child subtree).
+    - The target value is overwritten with this predecessor or successor.
+    - The original predecessor or successor is then targeted for deletion from its respective leaf node.
 
-When a node is full:
+### Phase 2: Rebalancing (Underflow)
 
-1. **Find median**: Identify the middle key (at index ⌈order/2⌉ - 1)
-2. **Create sibling**: Create a new node for the upper half of keys
-3. **Promote median**: Move the median key up to the parent
-4. **Distribute keys**: Left node keeps lower half, right node gets upper half
-5. **Distribute children**: If not a leaf, split children accordingly
+If removing a value causes a node to drop below its minimum required number of values, an underflow occurs. The tree must pull data from surrounding nodes to restore balance.
 
-### Phase 3: Insert into non-full node
+1. **Case 1: Borrow from Left Sibling:** If the immediate left sibling has more than the minimum number of values, borrow a value to fill the gap.
+    - The largest value from the left sibling moves up into the parent.
+    - The parent's dividing value moves down into the underflowing node.
+    - If the nodes are not leaves, the rightmost child pointer of the left sibling is transferred to become the leftmost child pointer of the underflowing node.
+2. **Case 2: Borrow from Right Sibling:** If the immediate right sibling has spare values, borrow a value from it instead.
+    - The smallest value from the right sibling moves up into the parent.
+    - The parent's dividing value moves down into the underflowing node.
+    - If the nodes are not leaves, the leftmost child pointer of the right sibling is transferred to become the rightmost child pointer of the underflowing node.
+3. **Case 3: Merge Children:** If neither sibling has spare values to lend, the underflowing node must be merged with one of its siblings.
+    - The parent's dividing value is pulled down.
+    - This dividing value is combined with the values of both siblings to form a single, full node.
+    - All child pointers from both siblings are transferred and merged into this new node in their correct order.
+    - Because the parent loses a value, the parent itself might now underflow, causing the rebalancing process to cascade upward.
 
-Once at a non-full leaf:
+## Notes
 
-- Insert the new key in sorted order
-- The tree remains balanced as all modifications happen at the same level
+B-Trees are universally used in database management systems and file systems (like NTFS, ext4, or APFS).
 
-## Deletion (Remove)
-
-Deletion is the most complex operation, maintaining balance through borrowing and merging:
-
-### Case 1: Key in leaf node
-
-Simply remove the key. If this makes the node too small (< ⌈order/2⌉ - 1 keys), proceed to fix-up.
-
-### Case 2: Key in internal node
-
-Replace with either:
-
-- **Predecessor**: The largest key in the left subtree, or
-- **Successor**: The smallest key in the right subtree
-
-Then recursively delete the predecessor/successor from its original location.
-
-### Case 3: Child has minimum keys (⌈order/2⌉ - 1)
-
-Before descending to a child with only ⌈order/2⌉ - 1 keys, ensure it has at least ⌈order/2⌉ keys:
-
-**Borrow from sibling** if a neighboring sibling has ≥ ⌈order/2⌉ keys:
-
-- Move a key from parent down to the child
-- Move a key from the sibling up to the parent
-- Move a child pointer if necessary
-
-**Merge with sibling** if both siblings have exactly ⌈order/2⌉ - 1 keys:
-
-- Bring a key down from the parent
-- Combine the child, parent key, and sibling into one node
-- Remove the parent key and sibling pointer from parent
-
-### Root special case
-
-If deletion causes the root to become empty:
-
-- Make the root's only child the new root
-- This is the only way a B-Tree decreases in height
-
-## Why B-Trees?
-
-B-Trees excel in scenarios where data is stored on disk:
-
-- **Minimize disk I/O**: Each node can be sized to match a disk block
-- **Shallow height**: More keys per node means fewer levels to traverse
-- **Predictable performance**: All operations guaranteed O(log n)
-- **Range queries**: Sequential access is efficient since keys are sorted
-
-This makes B-Trees the foundation of most modern database systems and file systems.
+Because accessing secondary storage (like a hard drive or solid-state drive) is notoriously slow compared to accessing RAM, the B-Tree is explicitly designed to pack as much data as possible into a single large node. This minimizes the number of disk accesses required to find a piece of information, making it vastly superior to standard binary trees for massive, real-world datasets.

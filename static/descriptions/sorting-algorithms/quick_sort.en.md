@@ -1,66 +1,54 @@
 # Quick Sort
 
-Quick Sort is a divide-and-conquer algorithm that works by selecting a 'pivot' element and partitioning the array around it. Elements smaller than the pivot go to the left, and larger elements go to the right. The process repeats recursively on each partition. It's widely used in practice due to excellent average-case performance and low memory overhead.
+Quick Sort is a highly efficient, comparison-based sorting algorithm that uses a divide-and-conquer strategy. It works by selecting a "pivot" element from the array and partitioning the other elements into two sub-arrays, according to whether they are less than or greater than the pivot. The sub-arrays are then sorted recursively. This process results in a very fast sort on average, making it one of the most widely used sorting algorithms in modern computing.
 
-## How It Works
+### Properties
 
-1. **Partition**: Choose a pivot and partition the array
-   - Elements less than pivot → left partition
-   - Elements greater than pivot → right partition
-2. **Recursively sort**: Apply Quick Sort to both partitions
-3. **Combine**: Since partitions are sorted in-place, result is sorted array
+- **Space:** In-place. While it requires `O(log n)` auxiliary space for the recursive call stack, it does not require additional arrays to store data.
+- **Stability:** Unstable. The partitioning process involves swapping elements over large distances, which can change the relative order of equal elements.
+- **Paradigm:** Divide and Conquer.
 
-## Advantages
+### Complexity Analysis
 
-- **Fast in practice**: O(n log n) average case with good constants
-- **In-place sorting**: Only O(log n) auxiliary space for recursion
-- **Cache-friendly**: Good locality of reference for modern CPUs
-- **Adaptive**: Performs well on partially sorted data with good pivot selection
-- **Widespread**: Implemented in most standard libraries
-- **Comparison-based**: Works with any comparable data
-- **Tail recursion**: Can be optimized to use less stack space
+The performance of Quick Sort is heavily dependent on the choice of the pivot. In the best and average cases, the pivot consistently divides the array into roughly equal halves, leading to logarithmic depth. The worst-case scenario occurs when the pivot is consistently the smallest or largest element (e.g., picking the last element in an already sorted array), which results in a highly unbalanced tree with a depth of `n`.
 
-## Disadvantages
+| Best Case    | Average Case | Worst Case | Space      |
+| :----------- | :----------- | :--------- | :--------- |
+| `O(n log n)` | `O(n log n)` | `O(n^2)`   | `O(log n)` |
 
-- **Worst-case O(n²)**: Poor pivot selection (like sorted data with first element pivot)
-- **Not stable**: Equal elements may not maintain original order
-- **Unstable performance**: Depends heavily on pivot selection
-- **Complex implementation**: Correctly implementing randomization is tricky
-- **Stack space**: Recursion uses O(log n) to O(n) stack space
-- **Not guaranteed**: Must use good pivot strategy to avoid O(n²)
+## Execution
 
-## Complexity Analysis
+The execution is divided into the partitioning phase and the recursive calls.
 
-| Metric | Complexity |
-|--------|------------|
-| **Best Case Time** | O(n log n) - balanced partitions |
-| **Average Case Time** | O(n log n) - random pivot selection |
-| **Worst Case Time** | O(n²) - poor pivot selection |
-| **Space Complexity** | O(log n) - recursion stack (best), O(n) (worst) |
-| **Stable** | No - relative order of equal elements not preserved |
+### Partitioning
 
-## When to Use
+The goal of this phase is to place a chosen pivot in its final sorted position and ensure all smaller elements are to its left and all larger elements are to its right.
 
-- General-purpose sorting of large datasets
-- When average-case performance is more important than worst-case
-- When memory space is constrained
-- Embedded systems and performance-critical code
-- With randomized pivot selection for guaranteed good performance
+1.  **Select Pivot**: In this implementation, the last element of the current range is selected as the pivot.
+2.  **Initialize Boundary**: A boundary index is set to the start of the range. This index tracks the position where the next element smaller than the pivot should be placed.
+3.  **Scan**: The algorithm iterates through the range from the start to the element just before the pivot.
+4.  **Compare and Swap**: For each element in the scan:
+    - **Compare**: The element is compared with the pivot value.
+    - **Swap**: If the element is smaller than or equal to the pivot, it is swapped with the element at the boundary index, and the boundary index is incremented.
+5.  **Place Pivot**: Once the scan is complete, the pivot (currently at the end) is swapped with the element at the boundary index. The pivot is now in its final, permanently sorted position.
 
-## Pivot Selection Strategies
+### Recursion
 
-- **First element**: Simple but bad for sorted data
-- **Random element**: Good general strategy
-- **Median-of-three**: Better pivot at cost of extra comparisons
-- **Median-of-medians**: Guarantees O(n log n) but slower in practice
+1.  **Divide**: The index of the successfully placed pivot is returned to the main function.
+2.  **Recurse Left**: The Quick Sort function is called recursively for the sub-array to the left of the pivot (elements smaller than the pivot).
+3.  **Recurse Right**: The Quick Sort function is called recursively for the sub-array to the right of the pivot (elements larger than the pivot).
+4.  **Base Case**: The recursion stops when a sub-array has fewer than two elements, as it is already considered sorted.
 
-## Improvements
+## Notes
 
-- **Randomization**: Shuffle data or randomly select pivot
-- **3-way partitioning**: Better for duplicate elements
-- **Introsort**: Switches to Heap Sort if recursion depth too deep
-- **Timsort approach**: Use Insertion Sort for small subarrays
+Quick Sort is the standard sorting algorithm used in many systems; for example, the `sort()` function in many C++ and Java libraries often utilizes a variant of Quick Sort (like Dual-Pivot Quicksort).
 
-## Real-World Usage
+**When NOT to use this:** Quick Sort should be avoided if stability is required (preserving the order of equal items). Additionally, in safety-critical systems where a worst-case `O(n^2)` performance could lead to a system hang or "Denial of Service" (via a "Quick Sort Killer" dataset), a guaranteed `O(n log n)` algorithm like Merge Sort or Heap Sort is preferred.
 
-Quick Sort is the basis of `qsort()` in C, `sort()` in C++, and is often wrapped in algorithms like Introsort (C++ std::sort) that guarantee O(n log n) worst-case.
+### Optimizations
+
+Because the choice of pivot is so important, several optimizations are commonly used to avoid the `O(n^2)` worst case:
+
+- **Median-of-Three**: Instead of picking the last element, the algorithm looks at the first, middle, and last elements and chooses their median as the pivot. This significantly reduces the chance of encountering the worst-case behavior on sorted or nearly-sorted data.
+- **Randomized Pivot**: Choosing a random index for the pivot makes it mathematically impossible for a specific fixed data pattern to consistently trigger the worst-case scenario.
+- **Introsort**: Many production implementations monitor the recursion depth. If the depth exceeds a certain limit (indicating a likely `O(n^2)` path), the algorithm automatically switches to Heap Sort to guarantee `O(n log n)` completion.

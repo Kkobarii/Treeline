@@ -97,5 +97,17 @@
 		:global(.treeline-card .prose h3) {
 			font-size: 1.1rem;
 		}
+
+		:global(.treeline-card .prose table) {
+			font-size: 0.7rem;
+		}
+
+		:global(.treeline-card .prose th) {
+			padding: 0.3rem 0.3rem;
+		}
+
+		:global(.treeline-card .prose td) {
+			padding: 0.3rem 0.3rem;
+		}
 	}
 </style>

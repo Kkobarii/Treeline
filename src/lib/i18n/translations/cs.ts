@@ -360,6 +360,8 @@ const cs: Translation = {
 			runAll: 'Spustit vše',
 			runRow: 'Spustit řádek',
 			runColumn: 'Spustit sloupec',
+			swaps: 'Prohození',
+			comparisons: 'Porovnání',
 		},
 		descriptions: {
 			bubble: 'Opakovaně porovnává sousední prvky a prohazuje je, pokud jsou ve špatném pořadí.',

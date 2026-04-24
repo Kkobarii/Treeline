@@ -1,6 +1,6 @@
 import { StepLabel } from '$lib/utils/stepLabel';
 
-import type { DetailedSortStep } from './stepTypes';
+import { Counters, type DetailedSortStep, type DetailedSortStepResult } from './stepTypes';
 
 export enum ItemHighlightType {
 	Compare = 'compare',
@@ -59,6 +59,7 @@ export class DetailedTraceBuilder {
 	private readonly rowById = new Map<string, number>();
 	private readonly columnById = new Map<string, number>();
 	private readonly useRows: boolean;
+	public counters = new Counters();
 
 	constructor(initialArray: number[], options: DetailedTraceBuilderOptions = {}) {
 		this.useRows = options.useRows ?? false;
@@ -240,7 +241,7 @@ export class DetailedTraceBuilder {
 		});
 	}
 
-	build(): DetailedSortStep[] {
+	build(): DetailedSortStepResult {
 		this.paint({ sorted: this.array.map((_, index) => index) });
 		this.record({
 			codePartId: 'final',
@@ -248,6 +249,9 @@ export class DetailedTraceBuilder {
 			variables: {},
 		});
 
-		return this.steps;
+		return {
+			steps: this.steps,
+			counters: this.counters,
+		};
 	}
 }

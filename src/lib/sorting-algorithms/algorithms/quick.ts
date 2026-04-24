@@ -1,7 +1,7 @@
 import { range, swap, uniqueSorted } from '$lib/sorting-algorithms/misc/utils';
 import { StepLabel } from '$lib/utils/stepLabel';
 
-import { LineBreak, type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
+import { LineBreak, type DetailedCodeTemplate, type DetailedSortStepResult, type SortStepResult } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
 
 export enum QuickSortPartId {
@@ -105,7 +105,7 @@ export const quickSortTemplate: DetailedCodeTemplate = {
 	},
 };
 
-export function quickSortSteps(input: number[]): SortStep[] {
+export function quickSortSteps(input: number[]): SortStepResult {
 	const trace = new DetailedTraceBuilder(input, { useRows: true });
 	const array = trace.workingArray;
 	const n = array.length;
@@ -123,11 +123,12 @@ export function quickSortSteps(input: number[]): SortStep[] {
 				stepLabel: new StepLabel('sorting.steps.quick.basic.compareWithPivot', { j }),
 				variables: { j, pivot, low, high },
 			});
+			trace.counters.compare();
 
 			if (array[j].value <= pivot) {
 				i += 1;
-				swap(array, i, j);
 				if (i !== j) {
+					swap(array, i, j, trace.counters);
 					trace.paint({ moved: [i, j], compared: [high], sorted: sortedIndices() });
 					trace.record({
 						codePartId: 'swap',
@@ -138,7 +139,7 @@ export function quickSortSteps(input: number[]): SortStep[] {
 			}
 		}
 
-		swap(array, i + 1, high);
+		swap(array, i + 1, high, trace.counters);
 		trace.paint({ moved: [i + 1, high], sorted: sortedIndices() });
 		trace.record({
 			codePartId: 'swap-pivot',
@@ -169,7 +170,7 @@ export function quickSortSteps(input: number[]): SortStep[] {
 	return trace.build();
 }
 
-export function quickSortDetailedSteps(input: number[]): DetailedSortStep[] {
+export function quickSortDetailedSteps(input: number[]): DetailedSortStepResult {
 	const trace = new DetailedTraceBuilder(input, { useRows: true });
 	const array = trace.workingArray;
 	const n = array.length;

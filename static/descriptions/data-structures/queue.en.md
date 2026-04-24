@@ -1,40 +1,46 @@
-# Queue (FIFO)
+# Queue
 
-A **Queue** is a linear data structure that operates on the **First-In, First-Out (FIFO)** principle. This means that the first element added to the queue will be the first one to be removed. It functions exactly like a real-life waiting line: the person at the front of the line is served first, and new people join the line at the back.
+A Queue is a linear data structure that operates on the First-In-First-Out (FIFO) principle. It is designed so that elements are added to one end and removed from the opposite end, ensuring that the oldest element in the structure is always the next one to be processed.
 
-Queues are essential in computing for managing resources shared by multiple processes, such as printer tasks, CPU scheduling, or handling requests in a web server.
+### Rules
 
-## Complexity Analysis
+- **FIFO Property:** The first element added to the queue is mathematically guaranteed to be the first one removed.
+- **Restricted Access:** Elements can only be added at the back (rear) and removed or examined at the front. Traversing or modifying the middle of the structure is not allowed.
+- **Node Structure:** Internally, this structure uses a linked list format where each node contains a value and a reference pointer directed at the next node in line. It maintains two primary pointers: the `front` (where items are removed) and the `rear` (where items are added).
 
-Similar to a Stack, a Queue is highly optimized for its specific entry and exit points. By restricting access to only the "Front" and the "Rear," we achieve constant time performance.
+### Complexity Analysis
 
-| Operation        | Time Complexity | Purpose                                          |
-| ---------------- | --------------- | ------------------------------------------------ |
-| **Enqueue**      | O(1)            | Add a new element to the back of the line.       |
-| **Dequeue**      | O(1)            | Remove the element from the front of the line.   |
-| **Peek (Front)** | O(1)            | View the front element without removing it.      |
-| **Space**        | O(n)            | Linear space relative to the number of elements. |
+Because the queue maintains direct pointers to both the front and the rear, adding and removing items does not require traversing the sequence. This results in constant-time operations.
 
-## Enqueue (Insert)
+| Operation   | Worst Case |
+| :---------- | :--------- |
+| **Enqueue** | `O(1)`     |
+| **Dequeue** | `O(1)`     |
+| **Peek**    | `O(1)`     |
 
-The enqueue operation adds an element to the "Rear" of the queue.
+## Enqueue
 
-1. **Create**: A new node or entry is created for the value.
-2. **Link to Rear**: The current "Rear" element's next pointer is updated to point to the new node.
-3. **Update Rear**: The queue's internal reference for the **Rear** is moved to this new node. If the queue was previously empty, this node also becomes the **Front**.
+Adding a new value to the queue involves attaching it to the back of the line and updating the rear pointer.
 
-## Dequeue (Extract)
+1. **Create Node:** A new node is generated containing the provided value.
+2. **Link and Update:** The linking process depends on the current state of the queue:
+    - If the queue is empty, both the front and rear pointers are set to point directly to this new node.
+    - If the queue already contains items, the current rear node's pointer is updated to reference the new node, and then the queue's primary rear pointer is shifted to the new node, making it the new back of the line.
 
-The dequeue operation removes the element currently at the "Front" of the queue.
+## Dequeue
 
-1. **Check for Empty**: If the queue is empty, the operation is dropped.
-2. **Identify Front**: The current **Front** element is targeted for removal.
-3. **Shift Front**: The queue's internal reference for the **Front** is moved to the next element in line.
-4. **Finalize**: The old front node is disconnected. If the queue becomes empty after this, the **Rear** is also set to null.
+Removing an element requires taking it from the very front of the line and shifting the front pointer backward.
 
-## Peek (Front)
+1. **Empty Check:** If the queue is completely empty, the operation halts and is dropped.
+2. **Retrieve:** The value of the current front node is retrieved to be returned.
+3. **Update Front:** The queue's primary front pointer is shifted to reference the next node in the sequence, effectively detaching the original front node. If this removal leaves the queue completely empty, the rear pointer is also cleared.
 
-This operation allows you to see who is next in line without actually removing them.
+## Peek
 
-1. **Access Front**: The algorithm looks at the value held by the **Front** reference.
-2. **Return**: The value is returned for use, but the queue remains completely unchanged.
+Retrieving the value of the next element in line simply involves inspecting the front node without making any structural changes or removing the element from the queue.
+
+## Notes
+
+Queues are fundamental for scenarios that require managing tasks in the exact order they arrive. They are the standard structure for printer task management, handling concurrent requests on a web server, and executing breadth-first searches in complex graph algorithms.
+
+**When NOT to use this:** A queue should be avoided if the application needs to prioritize certain elements over others based on value (which would require a Priority Queue or Heap), or if it needs immediate access to the most recently added items (which is better suited for a Stack). Furthermore, finding a specific random value requires systematically dequeuing and discarding elements just to reach the desired item, making it highly inefficient for general data retrieval.

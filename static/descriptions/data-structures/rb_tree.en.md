@@ -1,83 +1,78 @@
 # Red-Black Tree
 
-A **Red-Black Tree** is a sophisticated type of self-balancing Binary Search Tree. It ensures that the tree remains approximately balanced, preventing it from becoming a "flat" list and maintaining efficient performance for all operations.
+A Red-Black Tree is a self-balancing Binary Search Tree. While AVL Trees maintain strict balance by checking the height of subtrees, Red-Black Trees maintain a looser balance by assigning a color (red or black) to each node and enforcing a specific set of rules regarding how those colors can be arranged. This approach guarantees that no path from the root to a leaf is more than twice as long as any other path, ensuring the tree remains approximately balanced.
 
-Unlike a standard tree, every node in a Red-Black Tree carries an extra bit of information: its **color** (either **Red** or **Black**). These colors are used to enforce a specific set of rules during insertions and deletions to guarantee the tree's balance.
+### Key Concepts
 
-### The Five Properties
+- **Colors:** The red and black designations are the primary mechanism for tracking balance. The strict rules governing their placement prevent the tree from becoming too lopsided.
+- **Rotations:** Just like AVL Trees, Red-Black Trees use Left Rotations and Right Rotations to fix structural imbalances. A rotation changes the physical arrangement of the nodes.
+- **Recoloring:** Before resorting to rotations, the tree will often attempt to fix a rule violation simply by changing the colors of the nodes involved, such as flipping a red node to black or vice versa.
 
-To be considered a valid Red-Black Tree, the structure must always satisfy these five conditions:
+### Rules
 
-1. **Color**: Every node is either red or black.
-2. **Root**: The root of the tree is always black.
-3. **Leaf**: Every leaf (null) is considered black.
-4. **Red Rule**: If a node is red, both its children must be black (no two red nodes can be adjacent).
-5. **Path Rule**: For each node, all simple paths from that node to descendant leaves must contain the same number of black nodes.
+To maintain its balanced structure, a Red-Black Tree strictly enforces five core properties:
 
-### Rebalancing Tools
+- **Color Property:** Every node is colored either red or black.
+- **Root Property:** The root of the tree is always black.
+- **Leaf Property:** All leaves (which are considered conceptual null nodes at the end of branches) are black.
+- **Red Rule:** If a node is red, both of its children must be black. This means there cannot be two consecutive red nodes on any path.
+- **Black Rule:** Every simple path from a given node to any of its descendant leaves must contain the exact same number of black nodes.
 
-To maintain these properties during insertions and deletions, Red-Black Trees use two primary operations:
+### Complexity Analysis
 
-- **Recoloring**: Changing nodes between Red and Black to satisfy the Path and Red rules.
-- **Left/Right Rotations**: Moving nodes vertically to change the structure of the tree without breaking the Binary Search order.
+Because a Red-Black Tree guarantees that the longest path is never more than twice the length of the shortest path, its height is guaranteed to remain at `O(log n)`. While it might be slightly taller than a strictly balanced AVL Tree, its operations remain logarithmically fast.
 
-## Complexity Analysis
+| Operation  | Worst Case |
+| :--------- | :--------- |
+| **Insert** | `O(log n)` |
+| **Find**   | `O(log n)` |
+| **Delete** | `O(log n)` |
 
-The Red-Black Tree provides excellent performance guarantees. By ensuring the longest path from the root to a leaf is no more than twice as long as the shortest path, it keeps operations logarithmic.
+## Insert
 
-| Operation | Worst Case |
-| --------- | ---------- |
-| Find      | O(log n)   |
-| Insert    | O(log n)   |
-| Delete    | O(log n)   |
+Insertion is divided into two phases: placing the node, and then fixing any rules that the new node might have broken.
 
-## Search (Find)
+### Phase 1: BST Insertion
 
-The search process is identical to a standard Binary Search Tree.
+1.  **Insert:** The new node is inserted into the tree using the standard Binary Search Tree traversal logic.
+2.  **Color Red:** Every newly inserted node is initially colored red. This is done because adding a red node does not change the black-height (The Black Rule), which is the hardest rule to fix. However, adding a red node might violate the Red Rule if the new node's parent is also red.
 
-1. **Compare**: The algorithm starts at the root and compares the target value to the current node's value.
-2. **Traverse**:
-    - If the target is **smaller**, it moves to the **left child**.
-    - If the target is **larger**, it moves to the **right child**.
+### Phase 2: Fixup
 
-3. **Outcome**: If a match is found, the node is returned. If the search reaches a null leaf, the value is not in the tree.
+If the new red node's parent is also red, a double-red violation has occurred. The tree looks at the new node's uncle (the sibling of its parent) to determine how to fix the violation.
 
-## Insertion
+1.  **Case 1 (Uncle is Red):** If the uncle is red, the tree performs a simple recoloring. The parent and uncle are painted black, and the grandparent is painted red. The focus then shifts up to the grandparent to ensure painting it red did not cause a new violation higher up.
+2.  **Case 2 (Uncle is Black, Triangle Shape):** If the new node, its parent, and its grandparent form a triangle (for example, the parent is a left child, and the new node is a right child), a rotation is performed on the parent to align them into a straight line. This transitions the tree into Case 3.
+3.  **Case 3 (Uncle is Black, Line Shape):** If the nodes form a straight line, the tree paints the parent black, the grandparent red, and performs a rotation on the grandparent. This fixes the violation.
+4.  **Enforce Root Rule:** After all fixups are complete, the root is always forced back to black, just in case it was painted red during the process.
 
-Inserting into a Red-Black Tree involves placing the new data and then performing a "fix-up" to restore any violated properties.
+## Find
 
-### Phase 1: Placement
+Searching the tree uses the exact same traversal logic as a standard Binary Search Tree. The colors are completely ignored during a search.
 
-- The tree is navigated as a standard BST to find the correct empty spot.
-- A **New Red Node** is created at that spot.
-- If the tree was empty, this node becomes the root and is colored **Black** to satisfy the Root Property.
+## Delete
 
-### Phase 2: Restoring Properties (Fix-up)
+Deletion is the most complex operation, as removing a node can disrupt the strict color properties, particularly the black-height.
 
-If the new node's parent is also red, the "Red Rule" is violated. The algorithm looks at the **Uncle** (the parent's sibling) to decide how to fix it:
+### Phase 1: BST Deletion
 
-- **Case 1: Red Uncle**: If the uncle is red, the algorithm **recolors** the parent and uncle to black and the grandparent to red. The check then moves up to the grandparent.
-- **Case 2: Black Uncle (Triangle)**: If the uncle is black and the new node forms a "triangle" shape with its parent and grandparent, a **rotation** is performed on the parent to turn it into a "line".
-- **Case 3: Black Uncle (Line)**: If the uncle is black and the nodes form a straight line, the algorithm **recolors** the parent to black and the grandparent to red, then performs a **rotation** on the grandparent to balance the tree.
+1.  **Delete:** Find the target node and remove it or replace it using standard BST rules (handling the leaf, single child, or two children cases).
+2.  **Track the Color:** If the deleted (or moved) node was red, no rules were broken, as red nodes do not affect the black-height, and removing one cannot create a double-red. However, if the removed node was black, the Black Rule has been violated, as one path now has fewer black nodes than the others.
 
-## Deletion (Remove)
+### Phase 2: Fixup
 
-Deletion is the most complex operation because removing a black node can disrupt the "Path Rule" (the black height of the tree).
+If a black node was removed, the tree must undergo a fixup process to restore the black-height. The tree looks at the sibling of the node that replaced the deleted node.
 
-### Phase 1: Search and Standard Removal
+1.  **Case 1 (Sibling is Red):** The sibling is painted black, the parent is painted red, and a rotation is performed on the parent. This does not fix the black-height, but it changes the structure so that the new sibling is guaranteed to be black, allowing the tree to move to one of the next cases.
+2.  **Case 2 (Sibling is Black, Both Children Black):** The sibling is painted red, and the focus shifts up to the parent.
+3.  **Case 3 (Sibling is Black, Near Child is Red):** The tree paints the near child black, paints the sibling red, and rotates the sibling. This transitions the tree into Case 4.
+4.  **Case 4 (Sibling is Black, Far Child is Red):** The sibling takes the parent's color, the parent is painted black, the far child is painted black, and a rotation is performed on the parent. This successfully restores the black-height.
+5.  **Double Black Violation:** In specific scenarios, a conceptual null node must temporarily hold an extra black weight to maintain balance, triggering a specific fixup to resolve this double-black violation.
 
-1. **Locate**: The target node is found using the search logic.
-2. **Mark**: The node is marked for deletion.
-3. **Physical Removal**:
-    - **Leaf or One Child**: The node is removed, and its child (if any) is "transplanted" into its position.
-    - **Two Children**: The **Inorder Successor** (smallest node in the right subtree) is found. Its value is copied to the target node, and the original successor node is removed instead.
+## Notes
 
-### Phase 2: Restoring Properties (Fix-up)
+Red-Black Trees are highly practical and are incredibly common in real-world systems, often used to implement associative arrays and sets in standard programming libraries.
 
-If the node removed was **Black**, it creates a "Double Black" violation, meaning one path now has fewer black nodes than others. The algorithm fixes this by examining the **Sibling** of the current node:
+**Fun fact:** A Red-Black Tree is actually a clever binary representation of a 2-3-4 tree, which itself is a specific type of B-tree where nodes can hold up to three values and have up to four children, using red links to conceptually bind standard binary nodes together to simulate those larger multi-value nodes.
 
-- **Case 0: Null Leaf**: If the violation occurs at a conceptual empty leaf, the algorithm prepares to fix the balance starting from the parent.
-- **Case 1: Red Sibling**: The sibling is recolored black and the parent red, followed by a **rotation** at the parent to bring a black node into the path.
-- **Case 2: Black Sibling with Two Black Children**: The sibling is recolored **Red**, and the "Double Black" status moves up to the parent to be solved there.
-- **Case 3: Black Sibling with Near Red Child**: The sibling and its red child are **recolored and rotated** to transform this into Case 4.
-- **Case 4: Black Sibling with Far Red Child**: The sibling takes the parent's color, the parent and the far child are colored **Black**, and a **rotation** is performed at the parent to perfectly restore the black height.
+**When NOT to use this:** While Red-Black trees are excellent general-purpose structures, if an application is extremely read-heavy and requires the absolute fastest possible lookups, the stricter balancing of an AVL tree might provide slightly better search performance.

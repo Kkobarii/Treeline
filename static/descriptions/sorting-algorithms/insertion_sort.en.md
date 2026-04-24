@@ -1,49 +1,39 @@
 # Insertion Sort
 
-Insertion Sort builds the sorted array one item at a time. It iterates through an input array, and for each element, finds the correct position in the sorted portion and inserts it there. Think of how you might sort playing cards in your hand—you pick up cards one at a time and insert them into the correct position.
+Insertion Sort is a simple, intuitive sorting algorithm that builds the final sorted array one item at a time. It conceptually divides the array into a sorted and an unsorted part. Values from the unsorted part are picked and placed at the correct position in the sorted part, much like sorting a hand of playing cards.
 
-## How It Works
+### Properties
 
-1. Start with the second element (first element is considered sorted)
-2. Compare it with elements before it
-3. Shift larger elements one position to the right
-4. Insert the current element in its correct position
-5. Move to the next element and repeat
+- **Space:** In-place. It only requires a constant amount of additional memory to perform its operations.
+- **Stability:** Stable. If two elements have equal values, their relative order is strictly preserved because the algorithm stops shifting an element backward as soon as it encounters a value that is smaller or equal.
+- **Paradigm:** Incremental.
 
-## Advantages
+### Complexity Analysis
 
-- **Simple and intuitive**: Easy to understand and implement
-- **Efficient for small datasets**: Very fast for lists under 50 elements
-- **Online algorithm**: Can sort data as it receives it
-- **Stable sort**: Maintains relative order of equal elements
-- **In-place**: Requires only O(1) extra space
-- **Adaptive**: Very efficient on nearly sorted data (near O(n))
-- **Good cache locality**: Sequential memory access patterns
+The worst-case scenario occurs when the array is sorted in completely reverse order. In this state, every single newly selected element must be compared and swapped all the way to the very front of the array, maximizing the number of operations. Conversely, if the array is already sorted, the inner loop immediately breaks on the first comparison for every element, granting a highly efficient linear best-case time.
 
-## Disadvantages
+| Best Case | Average Case | Worst Case | Space  |
+| :-------- | :----------- | :--------- | :----- |
+| `O(n)`    | `O(n^2)`     | `O(n^2)`   | `O(1)` |
 
-- **O(n²) in general case**: Too slow for large datasets
-- **Shifting overhead**: Moving elements is more expensive than swapping
-- **Not suitable for external sorting**: Requires contiguous array access
+## Execution
 
-## Complexity Analysis
+The execution relies on iterating through the list and continuously pushing elements backward into their correct spot within the growing sorted section.
 
-| Metric | Complexity |
-|--------|------------|
-| **Best Case Time** | O(n) - already sorted data |
-| **Average Case Time** | O(n²) - random data |
-| **Worst Case Time** | O(n²) - reverse sorted data |
-| **Space Complexity** | O(1) - constant extra space |
-| **Stable** | Yes |
+1. **Outer Iteration**: The algorithm begins its pass starting from the second element in the array. Everything to the left of the current index is considered the "sorted" portion, while the current element and everything to its right are the "unsorted" portion.
+2. **Compare**: The currently selected element is compared with its immediate predecessor to the left.
+3. **Swap**: Decide the action based on the comparison:
+    - If the selected element is strictly smaller than its predecessor, the two values are swapped.
+    - The focus then shifts one position to the left, and the comparison repeats. This backward bubbling continues until the element encounters a predecessor that is smaller or equal, or until it hits the very beginning of the array. At this point, the element has found its correct sorted position, and the outer iteration moves forward to the next unsorted element.
 
-## When to Use
+## Notes
 
-- Sorting small datasets or subarrays
-- Nearly sorted data where performance matters
-- Online sorting scenarios
-- Hybrid sorting as part of algorithms like Timsort or Introsort
-- When simplicity and memory efficiency are priorities
+Insertion Sort is highly efficient for very small datasets or arrays that are already substantially sorted. In practice, advanced, production-grade sorting algorithms like TimSort (used in Python and Java) or Introsort actually switch to a localized Insertion Sort when their unsorted partitions become small enough.
 
-## Real-World Usage
+**When NOT to use this:** Insertion Sort should be avoided for large, completely random datasets, as its quadratic time complexity makes it far too slow compared to divide-and-conquer algorithms.
 
-Insertion Sort is frequently used in practice as a base case for divide-and-conquer algorithms. Many efficient algorithms like Timsort and Introsort switch to Insertion Sort for small subarrays because it's faster than more complex algorithms on tiny datasets.
+### Optimizations
+
+The standard implementation continuously swaps elements to move a value backward. A standard array swap requires three operations (using a temporary holding variable).
+
+A common optimization is to use a "shift" technique instead of a strict "swap." The algorithm copies the target element into a temporary variable, shifts all strictly greater elements one position to the right to make room, and then drops the target element directly into the final opened slot. This accomplishes the exact same sorting logic but significantly reduces the total number of memory write operations.

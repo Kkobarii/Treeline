@@ -1,3 +1,5 @@
+import type { Counters } from '../steps/stepTypes';
+
 export type ArrayType = 'shuffled' | 'almost-sorted' | 'reverse' | 'duplicates' | 'sawtooth' | 'pyramid';
 
 function swapIndex(index: number, values: number[]) {
@@ -119,15 +121,18 @@ export function uniqueSorted(values: Iterable<number>): number[] {
 	return [...new Set(values)].sort((left, right) => left - right);
 }
 
-export function swap<T>(array: T[], leftIndex: number, rightIndex: number): void {
+export function swap<T>(array: T[], leftIndex: number, rightIndex: number, counters?: Counters): void {
 	if (leftIndex === rightIndex) {
 		return;
 	}
 
 	[array[leftIndex], array[rightIndex]] = [array[rightIndex], array[leftIndex]];
+	if (counters) {
+		counters.swap();
+	}
 }
 
-export function shift<T>(array: T[], fromIndex: number, toIndex: number): void {
+export function shift<T>(array: T[], fromIndex: number, toIndex: number, counters?: Counters): void {
 	if (fromIndex === toIndex) {
 		return;
 	}
@@ -135,12 +140,12 @@ export function shift<T>(array: T[], fromIndex: number, toIndex: number): void {
 	if (fromIndex < toIndex) {
 		// Moving right: repeatedly swap right
 		for (let i = fromIndex; i < toIndex; i += 1) {
-			swap(array, i, i + 1);
+			swap(array, i, i + 1, counters);
 		}
 	} else {
 		// Moving left: repeatedly swap left
 		for (let i = fromIndex; i > toIndex; i -= 1) {
-			swap(array, i, i - 1);
+			swap(array, i, i - 1, counters);
 		}
 	}
 }

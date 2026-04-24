@@ -9,8 +9,8 @@
 	import SortingBars from '../components/SortingBars.svelte';
 	import type { ArrayType } from '../misc/utils';
 	import { createWaitForPaint } from '../misc/visualUtils';
-	import type { SortStep } from '../steps/stepTypes';
 	import type { Item } from '../steps/traceBuilder';
+	import type { SortStep } from '../steps/stepTypes';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
@@ -20,6 +20,7 @@
 
 	interface CellState {
 		steps: SortStep[];
+		counters: { comparisons: number; swaps: number };
 		currentStepIndex: number;
 	}
 
@@ -33,9 +34,13 @@
 		label: t(o.labelKey),
 	}));
 
-	let cellStates = $state<CellState[][]>(sortingAlgorithms.map(() => arrayTypeOptions.map(() => ({ steps: [], currentStepIndex: 0 }))));
+	let cellStates = $state<CellState[][]>(sortingAlgorithms.map(() => arrayTypeOptions.map(() => ({ steps: [], counters: { comparisons: 0, swaps: 0 }, currentStepIndex: 0 }))));
 	let playingCells: boolean[][] = $state(sortingAlgorithms.map(() => arrayTypeOptions.map(() => false)));
+	let finishedCells: boolean[][] = $state(sortingAlgorithms.map(() => arrayTypeOptions.map(() => false)));
 	let finishOrder: (number | null)[][] = $state(sortingAlgorithms.map(() => arrayTypeOptions.map(() => null)));
+	let runStats: { comparisons: number; swaps: number }[][] = $state(
+		sortingAlgorithms.map(() => arrayTypeOptions.map(() => ({ comparisons: 0, swaps: 0 }))),
+	);
 	let columnFinishCounters: number[] = $state(arrayTypeOptions.map(() => 0));
 	let playMode: 'all' | 'column' | 'row' | null = $state(null);
 	let showBadges = $derived(playMode === 'all' || playMode === 'column');
@@ -48,8 +53,10 @@
 
 	function resetCell(algoIndex: number, typeIndex: number) {
 		const algorithm = sortingAlgorithms[algoIndex];
+		const result = algorithm.generateSteps(initialArrays[typeIndex]);
 		cellStates[algoIndex][typeIndex] = {
-			steps: algorithm.generateSteps(initialArrays[typeIndex]),
+			steps: result.steps,
+			counters: { comparisons: result.counters.comparisons, swaps: result.counters.swaps },
 			currentStepIndex: 0,
 		};
 	}
@@ -65,7 +72,9 @@
 	function clearAll() {
 		setPlayingAll(false);
 		resetAllCells();
+		finishedCells = sortingAlgorithms.map(() => arrayTypeOptions.map(() => false));
 		finishOrder = sortingAlgorithms.map(() => arrayTypeOptions.map(() => null));
+		runStats = sortingAlgorithms.map(() => arrayTypeOptions.map(() => ({ comparisons: 0, swaps: 0 })));
 		columnFinishCounters = arrayTypeOptions.map(() => 0);
 		playMode = null;
 	}
@@ -123,6 +132,8 @@
 				if (playingCells[a][t]) {
 					if (!tickCell(a, t)) {
 						playingCells[a][t] = false;
+						finishedCells[a][t] = true;
+						runStats[a][t] = cellStates[a][t].counters;
 						if (showBadges) {
 							columnFinishCounters[t] += 1;
 							finishOrder[a][t] = columnFinishCounters[t];
@@ -145,7 +156,9 @@
 	$effect(() => {
 		void selectedColumnType;
 		clearAll();
+		finishedCells = sortingAlgorithms.map(() => arrayTypeOptions.map(() => false));
 		finishOrder = sortingAlgorithms.map(() => arrayTypeOptions.map(() => null));
+		runStats = sortingAlgorithms.map(() => arrayTypeOptions.map(() => ({ comparisons: 0, swaps: 0 })));
 		columnFinishCounters = arrayTypeOptions.map(() => 0);
 	});
 
@@ -226,9 +239,19 @@
 			{#each arrayTypeOptions as arrayType, typeIndex}
 				{@const order = finishOrder[algoIndex][typeIndex]}
 				{@const sat = showBadges && order !== null ? Math.max(0.2, 1 - (order - 1) * 0.15) : 1}
+				{@const stats = runStats[algoIndex][typeIndex]}
+				{@const finished = finishedCells[algoIndex][typeIndex]}
 				<div class="comparison-cell">
-					{#if order !== null}
+					{#if showBadges && order !== null}
 						<span class="finish-badge {order <= 3 ? 'finish-badge-top' : 'finish-badge-other'}">{order}</span>
+					{/if}
+					{#if finished}
+						<div class="run-stats">
+							<span class="run-stats-label">{t('sorting.comparison.swaps')}</span>
+							<span class="run-stats-num">{stats.swaps}</span>
+							<span class="run-stats-label">{t('sorting.comparison.comparisons')}</span>
+							<span class="run-stats-num">{stats.comparisons}</span>
+						</div>
 					{/if}
 					<div
 						class="h-full"
@@ -285,9 +308,18 @@
 					</a>
 				</div>
 				<div class="comparison-cell">
-					{#if finishOrder[algoIndex][selectedTypeIndex] !== null}
+					{#if showBadges && finishOrder[algoIndex][selectedTypeIndex] !== null}
 						{@const order = finishOrder[algoIndex][selectedTypeIndex]}
 						<span class="finish-badge {order <= 3 ? 'finish-badge-top' : ''}">{order}</span>
+					{/if}
+					{#if finishedCells[algoIndex][selectedTypeIndex]}
+						{@const stats = runStats[algoIndex][selectedTypeIndex]}
+						<div class="run-stats">
+							<span class="run-stats-label">{t('sorting.comparison.swaps')}</span>
+							<span class="run-stats-num">{stats.swaps}</span>
+							<span class="run-stats-label">{t('sorting.comparison.comparisons')}</span>
+							<span class="run-stats-num">{stats.comparisons}</span>
+						</div>
 					{/if}
 					<div class="h-full">
 						<SortingBars
@@ -363,6 +395,18 @@
 
 	.finish-badge-top {
 		@apply font-bold;
+	}
+
+	.run-stats {
+		@apply absolute right-2 bottom-2 z-10 grid grid-cols-[auto_auto] gap-x-2 text-[0.6rem] leading-tight font-bold text-gray-50;
+	}
+
+	.run-stats-label {
+		@apply text-right;
+	}
+
+	.run-stats-num {
+		@apply text-right tabular-nums;
 	}
 
 	@media (max-width: 768px) {

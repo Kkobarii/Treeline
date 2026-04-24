@@ -1,7 +1,7 @@
 import { range, swap } from '$lib/sorting-algorithms/misc/utils';
 import { StepLabel } from '$lib/utils/stepLabel';
 
-import { LineBreak, type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
+import { LineBreak, type DetailedCodeTemplate, type DetailedSortStepResult, type SortStepResult } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
 
 export enum HeapSortPartId {
@@ -132,7 +132,7 @@ export const heapSortTemplate: DetailedCodeTemplate = {
 	},
 };
 
-export function heapSortSteps(input: number[]): SortStep[] {
+export function heapSortSteps(input: number[]): SortStepResult {
 	const trace = new DetailedTraceBuilder(input);
 	const array = trace.workingArray;
 	const n = array.length;
@@ -145,6 +145,7 @@ export function heapSortSteps(input: number[]): SortStep[] {
 		const left = 2 * root + 1;
 		const right = 2 * root + 2;
 
+		trace.counters.compare(2);
 		if (left < heapSize && right < heapSize) {
 			trace.paint({ compared: [root, left, right], sorted: sortedIndices() });
 			trace.record({
@@ -168,15 +169,17 @@ export function heapSortSteps(input: number[]): SortStep[] {
 			});
 		}
 
+		trace.counters.compare();
 		if (left < heapSize && array[left].value > array[largest].value) {
 			largest = left;
 		}
+		trace.counters.compare();
 		if (right < heapSize && array[right].value > array[largest].value) {
 			largest = right;
 		}
 
 		if (largest !== root) {
-			swap(array, root, largest);
+			swap(array, root, largest, trace.counters);
 			trace.paint({ moved: [root, largest], sorted: sortedIndices() });
 			trace.record({
 				codePartId: 'swap',
@@ -192,7 +195,7 @@ export function heapSortSteps(input: number[]): SortStep[] {
 	}
 
 	for (let end = n - 1; end > 0; end -= 1) {
-		swap(array, 0, end);
+		swap(array, 0, end, trace.counters);
 		sortedStart = end;
 		trace.paint({ moved: [0, end], sorted: sortedIndices() });
 		trace.record({
@@ -206,7 +209,7 @@ export function heapSortSteps(input: number[]): SortStep[] {
 	return trace.build();
 }
 
-export function heapSortDetailedSteps(input: number[]): DetailedSortStep[] {
+export function heapSortDetailedSteps(input: number[]): DetailedSortStepResult {
 	const trace = new DetailedTraceBuilder(input);
 	const array = trace.workingArray;
 	const n = array.length;

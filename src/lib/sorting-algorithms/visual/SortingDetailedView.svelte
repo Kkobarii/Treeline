@@ -9,12 +9,12 @@
 
 	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
 	import { getCodeTemplate } from '../misc/codeTemplates';
-	import type { CodeLanguage } from '../registry';
-	import { dataSets, DEFAULT_ARRAY_TYPE, DEFAULT_CODE_LANGUAGE, getSortingAlgorithm, languageOptions } from '../registry';
 	import type { SortingAlgorithmId } from '../misc/types';
 	import type { ArrayType } from '../misc/utils';
 	import { createArrayByType } from '../misc/utils';
 	import { computeTargetAreaHighlight, DEFAULT_PLAYBACK_ANIMATION } from '../misc/visualUtils';
+	import type { CodeLanguage } from '../registry';
+	import { dataSets, DEFAULT_ARRAY_TYPE, DEFAULT_CODE_LANGUAGE, getSortingAlgorithm, languageOptions } from '../registry';
 	import { StepManager } from '../steps/stepManager.svelte';
 	import type { DetailedSortStep } from '../steps/stepTypes';
 	import { ItemHighlightType } from '../steps/traceBuilder';
@@ -71,7 +71,7 @@
 		regenerateArray();
 	}
 
-	const stepManager = new StepManager<DetailedSortStep>(algorithm.generateDetailedSteps(startingArray), {
+	const stepManager = new StepManager<DetailedSortStep>(algorithm.generateDetailedSteps(startingArray).steps, {
 		minDelay: playback.minDelayMs,
 		maxDelay: playback.maxDelayMs,
 		defaultDelay: playback.defaultDelayMs,
@@ -200,7 +200,7 @@
 
 		void tick().then(() => {
 			baseArray = createArrayByType(arrayType, detailArraySize);
-			stepManager.setSteps(algorithm.generateDetailedSteps(baseArray));
+			stepManager.setSteps(algorithm.generateDetailedSteps(baseArray).steps);
 			hasHydrated = true;
 		});
 
@@ -210,7 +210,7 @@
 	function regenerateArray() {
 		stepManager.stop();
 		baseArray = createArrayByType(arrayType, detailArraySize);
-		stepManager.setSteps(algorithm.generateDetailedSteps(baseArray));
+		stepManager.setSteps(algorithm.generateDetailedSteps(baseArray).steps);
 	}
 
 	function changeArrayType(type: ArrayType) {

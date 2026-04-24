@@ -1,47 +1,41 @@
 # Bubble Sort
 
-Bubble Sort is one of the simplest sorting algorithms. It repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order. This process continues until the list is sorted. The algorithm gets its name because smaller elements "bubble" to the top (beginning) of the list with each pass.
+Bubble Sort is a straightforward, comparison-based sorting algorithm. It works by repeatedly stepping through the sequence, comparing adjacent elements, and swapping them if they are in the wrong order. This process is repeated until the entire list is fully sorted. The algorithm derives its name from the way larger elements conceptually "bubble" up to the end of the list with each subsequent pass.
 
-## How It Works
+### Properties
 
-1. Compare the first two elements
-2. If the first is greater than the second, swap them
-3. Move to the next pair and repeat
-4. After each complete pass, the largest unsorted element is in its final position
-5. Repeat until no more swaps are needed
+- **Space:** In-place. It only requires a constant amount of additional memory for the temporary variable used during swapping.
+- **Stability:** Stable. If two elements have equal values, their relative order is strictly preserved because the algorithm only swaps when an element is strictly greater than its neighbor.
+- **Paradigm:** Brute Force / Incremental.
 
-## Advantages
+### Complexity Analysis
 
-- **Simple to understand and implement**: Perfect for learning sorting concepts
-- **No extra space required**: Sorts in-place with O(1) additional space
-- **Stable sort**: Maintains the relative order of equal elements
-- **Adaptive**: Can be optimized to detect already-sorted data
-- **Comparison-based**: Works with any comparable data
+The worst-case scenario occurs when the array is sorted in completely reverse order. In this state, every single element must be compared and swapped across the entire length of the array, maximizing the number of operations. The best case of `O(n)` is only achievable with a specific optimization flag; without it, the algorithm performs `O(n^2)` comparisons regardless of the initial order.
 
-## Disadvantages
+| Best Case | Average Case | Worst Case | Space  |
+| :-------- | :----------- | :--------- | :----- |
+| `O(n)`    | `O(n^2)`     | `O(n^2)`   | `O(1)` |
 
-- **Very slow on large datasets**: O(n²) time complexity makes it impractical for real-world use
-- **Many unnecessary comparisons**: Even after the list is mostly sorted, it continues comparing
-- **Poor cache performance**: Random memory access patterns hurt modern CPU performance
-- **Not used in practice**: Better algorithms exist for nearly all scenarios
+## Execution
 
-## Complexity Analysis
+The execution relies on two nested loops to systematically push the highest unsorted values to the back of the array.
 
-| Metric | Complexity |
-|--------|------------|
-| **Best Case Time** | O(n) - already sorted with optimization |
-| **Average Case Time** | O(n²) - typical random data |
-| **Worst Case Time** | O(n²) - reverse sorted data |
-| **Space Complexity** | O(1) - constant extra space |
-| **Stable** | Yes |
+1. **Outer Iteration**: The algorithm begins a pass through the array. With each full pass, the largest remaining unsorted element is guaranteed to move to its correct final position at the end of the sequence.
+2. **Inner Iteration**: Within the current pass, the algorithm selects an element and establishes a boundary for the current unsorted portion. The range of this inner iteration shrinks by one with each outer pass, as the end of the array progressively becomes fully sorted.
+3. **Compare**: Compare the currently selected element with its immediate adjacent neighbor to the right.
+4. **Swap**: Decide the action based on the comparison:
+    - If the current element is strictly greater than its neighbor, the two values are swapped.
+    - If the current element is smaller or equal, they are left in their current positions.
+    - The process then shifts one position to the right and repeats the compare and swap logic until the unsorted portion of the array is fully traversed.
 
-## When to Use
+## Notes
 
-- Educational purposes and learning sorting concepts
-- Extremely small datasets (< 10 elements)
-- Nearly sorted data with optimizations
+Bubble Sort is primarily used as an educational tool to introduce the concepts of algorithmic sorting and time complexity.
 
-## Optimizations
+**When NOT to use this:** Bubble Sort should essentially never be used in a production environment for large datasets. Its quadratic time complexity makes it drastically inefficient compared to advanced algorithms like Quick Sort or Merge Sort.
 
-- **Early termination**: Stop if no swaps occur in a pass
-- **Reduced range**: Track the last swap position to avoid redundant comparisons
+### Optimizations
+
+The standard implementation of Bubble Sort will naively complete every single pass even if the array becomes completely sorted halfway through the process.
+
+A common optimization is to introduce a boolean `swapped` flag. At the start of each outer iteration, this flag is set to false. If any swap occurs during the inner iteration, the flag is flipped to true. If an entire outer iteration completes without a single swap happening, it mathematically proves the array is fully sorted. The algorithm can then safely break out of the loop early, granting it that `O(n)` best-case time complexity on already sorted lists.

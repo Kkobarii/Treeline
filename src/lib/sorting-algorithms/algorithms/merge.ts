@@ -1,7 +1,8 @@
 import { range, shift } from '$lib/sorting-algorithms/misc/utils';
 import { StepLabel } from '$lib/utils/stepLabel';
 
-import { LineBreak, type DetailedCodeTemplate, type DetailedSortStep, type SortStep } from '../steps/stepTypes';
+import { detailedStepsToSortSteps } from '../steps/stepAdapters';
+import { LineBreak, type DetailedCodeTemplate, type DetailedSortStepResult, type SortStepResult } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
 
 export enum MergeSortPartId {
@@ -154,7 +155,7 @@ export const mergeSortTemplate: DetailedCodeTemplate = {
 	},
 };
 
-export function mergeSortSteps(input: number[]): SortStep[] {
+export function mergeSortSteps(input: number[]): SortStepResult {
 	const trace = new DetailedTraceBuilder(input);
 	const array = trace.workingArray;
 	const n = array.length;
@@ -163,6 +164,7 @@ export function mergeSortSteps(input: number[]): SortStep[] {
 		let leftEnd = mid;
 		let rightStart = mid + 1;
 
+		trace.counters.compare();
 		if (array[leftEnd].value <= array[rightStart].value) {
 			return;
 		}
@@ -177,16 +179,17 @@ export function mergeSortSteps(input: number[]): SortStep[] {
 				variables: {},
 			});
 
+			trace.counters.compare();
 			if (array[leftPos].value <= array[rightStart].value) {
 				leftPos += 1;
 			} else {
-				shift(array, rightStart, leftPos);
+				shift(array, rightStart, leftPos, trace.counters);
 
 				trace.paint({ moved: [leftPos] });
 				trace.record({
 					codePartId: MergeSortPartId.Shift,
 					stepLabel: new StepLabel('sorting.steps.merge.basic.shift', { from: rightStart, to: leftPos }),
-					variables: {},
+					variables: { count: 1 },
 				});
 				leftPos += 1;
 				leftEnd += 1;
@@ -209,10 +212,10 @@ export function mergeSortSteps(input: number[]): SortStep[] {
 
 	mergeSort(0, n - 1, 0);
 
-	return trace.build();
+	return detailedStepsToSortSteps(trace.build());
 }
 
-export function mergeSortDetailedSteps(input: number[]): DetailedSortStep[] {
+export function mergeSortDetailedSteps(input: number[]): DetailedSortStepResult {
 	const trace = new DetailedTraceBuilder(input, { useRows: true });
 	const array = trace.workingArray;
 	const n = array.length;

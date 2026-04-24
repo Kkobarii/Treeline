@@ -2,7 +2,7 @@ import { range, swap } from '$lib/sorting-algorithms/misc/utils';
 import { detailedStepsToSortSteps } from '$lib/sorting-algorithms/steps/stepAdapters';
 import { StepLabel } from '$lib/utils/stepLabel';
 
-import type { DetailedCodeTemplate, DetailedSortStep, SortStep } from '../steps/stepTypes';
+import type { DetailedCodeTemplate, DetailedSortStepResult, SortStepResult } from '../steps/stepTypes';
 import { DetailedTraceBuilder } from '../steps/traceBuilder';
 
 export enum SelectionSortPartId {
@@ -59,11 +59,11 @@ export const selectionSortTemplate: DetailedCodeTemplate = {
 	},
 };
 
-export function selectionSortSteps(input: number[]): SortStep[] {
+export function selectionSortSteps(input: number[]): SortStepResult {
 	return detailedStepsToSortSteps(selectionSortDetailedSteps(input));
 }
 
-export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] {
+export function selectionSortDetailedSteps(input: number[]): DetailedSortStepResult {
 	const trace = new DetailedTraceBuilder(input);
 	const array = trace.workingArray;
 	const n = array.length;
@@ -100,6 +100,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 				variables: { i, j, minIndex },
 			});
 
+			trace.counters.compare();
 			if (array[j].value < array[minIndex].value) {
 				minIndex = j;
 				trace.paint({ dark: [minIndex], sorted: sortedIndices });
@@ -112,7 +113,7 @@ export function selectionSortDetailedSteps(input: number[]): DetailedSortStep[] 
 		}
 
 		if (minIndex !== i) {
-			swap(array, i, minIndex);
+			swap(array, i, minIndex, trace.counters);
 			trace.paint({ moved: [i, minIndex], sorted: sortedIndices });
 			trace.record({
 				codePartId: SelectionSortPartId.Swap,

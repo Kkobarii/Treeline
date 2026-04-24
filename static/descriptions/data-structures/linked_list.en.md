@@ -1,127 +1,60 @@
 # Linked List
 
-A **Linked List** is a fundamental linear data structure consisting of a sequence of nodes, where each node contains a value and a reference (or "link") to the next node in the sequence. Unlike arrays, linked lists do not store elements in contiguous memory locations, making them highly dynamic and efficient for certain operations.
+A Linked List is a linear data structure where elements are not stored in contiguous memory locations. Instead, each element is an independent object that points to the next one in the sequence. This structure allows for dynamic memory allocation, meaning the list can grow and shrink in size easily without needing to copy elements into a new block of memory, which is a common limitation of standard arrays.
 
-The key characteristics of a singly linked list are:
+### Rules
 
-- Each **node** contains a data value and a pointer to the **next node**.
-- The first node is called the **head**.
-- The last node points to `null`, indicating the end of the list.
-- Elements can be efficiently inserted or removed without reorganizing the entire structure.
+- **Node Structure:** Each individual element in the list is called a node. A node contains two pieces of information: the actual stored value, and a reference pointer to the next node in the sequence.
+- **List Structure:** The list itself is defined by a single starting pointer called the `head`, which points to the very first node. The final node in the sequence has a pointer that points to a null value, indicating the end of the list.
+- **Tail Pointer:** While a basic linked list only requires a head pointer, this implementation also maintains a `tail` pointer that directly references the very last node. This addition allows for immediate access to the end of the list.
 
-This structure allows for dynamic memory allocation, making it particularly useful when the size of the data structure is unknown or frequently changes.
+### Complexity Analysis
 
-## Complexity Analysis
+The efficiency of a linked list is highly dependent on where the operation occurs. Accessing elements at the beginning or the end is incredibly fast. However, because there is no way to jump directly to a specific index, finding or modifying an element in the middle requires a step-by-step walk from the start, resulting in linear time complexity.
 
-The efficiency of linked list operations depends on the position of the element being accessed or modified:
+| Operation          | Worst Case |
+| :----------------- | :--------- |
+| **Insert at Head** | `O(1)`     |
+| **Insert at Tail** | `O(1)`\*   |
+| **Find**         | `O(n)`     |
+| **Remove**         | `O(n)`     |
 
-| Operation      | Average Case | Worst Case |
-| -------------- | ------------ | ---------- |
-| Access         | O(n)         | O(n)       |
-| Search (Find)  | O(n)         | O(n)       |
-| Insert at Head | O(1)         | O(1)       |
-| Insert at Tail | O(1)\*       | O(1)\*     |
-| Delete         | O(n)         | O(n)       |
+_\*This constant time complexity only holds when a tail pointer is maintained. If no tail pointer is kept, the operation requires traversing the entire list, resulting in `O(n)` complexity._
 
-_\*With tail pointer maintained. Without it, insertion at tail requires O(n) traversal._
+## Insert at Head
 
-## Node Structure
+Inserting a new value at the beginning of the list requires only a few pointer updates and does not require shifting any other elements.
 
-Each node in a singly linked list contains:
+1. **Create Node:** A new node is generated containing the provided value.
+2. **Link Next:** The new node's pointer is set to reference the current head of the list.
+3. **Update Head:** The list's primary head pointer is updated to point to the newly created node. If the list was previously empty, the tail pointer is also updated to point to this single node.
 
-- **Value**: The data stored in the node
-- **Next**: A reference/pointer to the next node in the sequence
+## Insert at Tail
 
-The list itself maintains:
+Appending a new value to the end of the list is optimized to constant time `O(1)` because the structure maintains a direct tail pointer.
 
-- **Head**: A reference to the first node
-- **Tail**: (Optional) A reference to the last node for O(1) tail insertions
-- **Size**: (Optional) The number of nodes in the list
+1. **Create Node:** A new node is generated containing the provided value.
+    - If a tail pointer is not maintained, the list must first be traversed from the head to find the current final node before insertion can occur.
+2. **Link Next:** If the list is empty, both the head and tail pointers are set to this new node. Otherwise, the current tail node's pointer is updated to reference the new node.
+3. **Update Tail:** The list's primary tail pointer is updated to point to the newly created node.
 
-## Insertion at Head
+## Find
 
-Inserting at the head of a linked list is a constant-time operation (O(1)) because it doesn't require traversing the list.
+Searching for a specific value involves a linear scan starting from the head node, stepping through each consecutive pointer and comparing the target value with the value inside each node along the path until a match is found or the null terminator at the end of the list is reached.
 
-1. **Create New Node**: Allocate a new node with the given value.
-2. **Check for Empty List**:
-    - If the list is empty (head is `null`), set both head and tail to the new node.
-    - If the list is not empty, proceed to step 3.
-3. **Link New Node**: Set the new node's `next` pointer to the current head.
-4. **Update Head**: Update the head reference to point to the new node.
+## Remove
 
-The new node becomes the first element in the list, and all existing nodes shift one position down.
+Removing a node requires locating the target and carefully relinking the surrounding nodes to bypass the deleted element without breaking the chain.
 
-## Insertion at Tail
+1. **Empty Check:** If the list is empty, the operation halts.
+2. **Remove Head:** If the target value is located at the head node, the head pointer is updated to reference the second node in the sequence, and the original head is discarded. If this removal leaves the list completely empty, the tail pointer is also cleared.
+3. **Traverse and Remove:** If the target is not the head, the list iterates through the nodes while keeping track of both the current node and the previous node:
+    - If the target matches the current node, the previous node's pointer is updated to bypass the current node and point directly to the next node. If the removed node happened to be the tail, the list's tail pointer is updated to reference the previous node.
+    - If the target does not match, both the previous and current pointers move one step forward down the sequence.
+4. **Not Found:** If the end of the list is reached without finding a matching value, the operation concludes without making any structural changes.
 
-Inserting at the tail can be optimized to O(1) when maintaining a tail pointer.
+## Notes
 
-1. **Create New Node**: Allocate a new node with the given value.
-2. **Check for Empty List**:
-    - If the list is empty (head is `null`), set both head and tail to the new node.
-    - If the list is not empty, proceed to step 3.
-3. **Link from Current Tail**: Set the current tail's `next` pointer to the new node.
-4. **Update Tail**: Update the tail reference to point to the new node.
+The standard linked list described here is singly linked, meaning navigation can only flow in one direction from head to tail.
 
-Without a tail pointer, this operation requires O(n) time to traverse to the end of the list.
-
-## Search (Find)
-
-Searching in a linked list requires sequential access from the head.
-
-1. **Start at Head**: Begin traversal at the head node.
-2. **Check Empty List**: If the list is empty, return not found.
-3. **Compare Values**: Compare the target value with the current node's value.
-4. **Match Found**: If values match, return the node (success).
-5. **Traverse Next**: If no match and a next node exists, move to the next node and repeat from step 3.
-6. **End of List**: If the end is reached without finding the value, return not found.
-
-Unlike binary search trees, linked lists require linear search because they don't maintain sorted order or allow random access.
-
-## Deletion (Remove)
-
-Removing a node from a linked list requires finding the node and updating pointers.
-
-### Special Case: Removing the Head
-
-1. **Check Head Match**: If the head node contains the target value.
-2. **Update Head**: Set head to head's next node.
-3. **Update Tail**: If the list becomes empty, also set tail to `null`.
-
-### General Case: Removing from Middle or Tail
-
-1. **Traverse**: Start from head, keeping track of the previous node.
-2. **Compare**: Check each node's value against the target.
-3. **Found**: When found:
-    - Update the previous node's `next` pointer to skip over the current node (point to current.next).
-    - If removing the tail, update the tail reference to the previous node.
-4. **Not Found**: If traversal completes without finding the value, report not found.
-
-The key to deletion is maintaining the link chain by having the previous node "skip over" the node being removed.
-
-## Advantages
-
-- **Dynamic Size**: Can grow or shrink during execution without pre-allocation.
-- **Efficient Insertions/Deletions**: Adding or removing elements at the head is O(1).
-- **Memory Efficient**: Only allocates memory as needed for each element.
-- **No Wasted Space**: Unlike arrays, doesn't reserve unused capacity.
-
-## Disadvantages
-
-- **No Random Access**: Cannot directly access the nth element; requires O(n) traversal.
-- **Extra Memory**: Each node requires additional memory for the next pointer.
-- **Sequential Access**: Poor cache locality compared to arrays.
-- **Cannot Search Efficiently**: No binary search capability even if sorted.
-
-## Variations
-
-- **Doubly Linked List**: Each node has both `next` and `previous` pointers, allowing bidirectional traversal.
-- **Circular Linked List**: The last node points back to the first node instead of `null`.
-- **Doubly Circular Linked List**: Combines both variations for bidirectional circular traversal.
-
-## Common Use Cases
-
-- **Dynamic Memory Allocation**: When the number of elements is unknown or varies significantly.
-- **Implementation of Stacks and Queues**: Efficient for push/pop operations.
-- **Undo Functionality**: In applications where operations need to be reversed.
-- **Graph Adjacency Lists**: Representing sparse graphs efficiently.
-- **Polynomial Arithmetic**: Representing and manipulating polynomials.
+There are two highly common variations of this structure. A Doubly Linked List adds a second pointer to every node that points backwards to the previous node, allowing for traversal in both directions at the cost of slightly higher memory usage. A Circular Linked List connects the final tail node back to the head node instead of a null value, creating a closed loop that is particularly useful for continuous cycling tasks like operating system round-robin scheduling.

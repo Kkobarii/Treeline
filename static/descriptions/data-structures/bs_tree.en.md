@@ -1,66 +1,69 @@
-# Binary Search Tree (BST)
+# Binary Search Tree
 
-A **Binary Search Tree (BST)** is a fundamental hierarchical data structure used for efficient data storage and retrieval. It is composed of nodes, where each node contains a value and up to two "children," typically referred to as the left child and the right child.
+A Binary Search Tree (BST) is a hierarchical, node-based data structure that keeps data sorted as it is inserted. Each node contains a value and pointers to a maximum of two children: a left child and a right child. The defining characteristic of a BST is its strict ordering, which allows for fast data retrieval, insertion, and deletion by halving the searchable data at every step, much like a binary search on a sorted array.
 
-The defining characteristic of a BST is its ordering principle:
+### Rules
 
-- The **Left Subtree** of a node contains only values strictly less than the node's value.
-- The **Right Subtree** of a node contains only values strictly greater than the node's value.
-- Duplicate values are generally not permitted.
+- **Left Subtree Property:** All nodes in the left subtree must have values strictly less than the parent node's value.
+- **Right Subtree Property:** All nodes in the right subtree must have values strictly greater than the parent node's value.
+- **No Duplicates:** In this specific implementation, duplicate values are not allowed.
 
-This organizational structure allows the tree to act like a sorted list while maintaining the hierarchical advantages of a tree, significantly narrowing the search space during operations.
+### Complexity Analysis
 
-## Complexity Analysis
+The efficiency of a Binary Search Tree is entirely dependent on its height, denoted as `h`. In an optimal, perfectly balanced tree, the height is `log2(n)`, leading to very fast logarithmic operations. However, if data is inserted in a sorted or nearly sorted order (like 1, 2, 3, 4, 5), the tree degrades into a straight line, essentially becoming a Linked List. In this worst-case scenario, the height becomes `n`, and the performance drops significantly.
 
-The efficiency of a Binary Search Tree is directly tied to its **height** (). In a well-balanced tree, the height is logarithmic relative to the number of nodes (); however, in the worst-case scenario (such as inserting sorted data), the tree can become a "degenerate" line.
+| Operation  | Average Case | Worst Case |
+| :--------- | :----------- | :--------- |
+| **Insert** | `O(log n)`   | `O(n)`     |
+| **Find**   | `O(log n)`   | `O(n)`     |
+| **Delete** | `O(log n)`   | `O(n)`     |
 
-| Operation | Average Case | Worst Case |
-| --------- | ------------ | ---------- |
-| Find      | O(log n)     | O(n)       |
-| Insert    | O(log n)     | O(n)       |
-| Delete    | O(log n)     | O(n)       |
+## Insert
 
-## Search (Find)
+The insertion process walks down the tree to find the correct empty spot for a new value, ensuring the BST rules are preserved.
 
-To find a specific value, the process begins at the **Root** node. The algorithm performs a series of comparisons to navigate the tree:
+1. **Check for Root:** If the tree is completely empty, the new value immediately becomes the root node.
+2. **Compare:** Compare the new value with the current node's value.
+3. **Traverse:** Decide the path based on the comparison:
+    - If the new value is less than the current node, look left. If there is no left child, create a new leaf node here. Otherwise, traverse to the left child and repeat step 2.
+    - If the new value is greater than the current node, look right. If there is no right child, create a new leaf node here. Otherwise, traverse to the right child and repeat step 2.
+4. **Drop Duplicate:** If the new value equals the current node's value, the operation halts and the value is dropped, as duplicates are rejected.
 
-1. **Compare**: The target value is compared to the current node's value.
-2. **Match**: If the values are equal, the search is successful.
-3. **Traverse**:
-    - If the target value is **smaller** than the current node, the search moves to the **left child**.
-    - If the target value is **larger** than the current node, the search moves to the **right child**.
+## Find
 
-4. **Drop**: If the search reaches an empty branch (a null reference) without finding a match, the value does not exist in the tree.
+Searching the tree uses the exact same traversal logic as insertion.
 
-## Insertion
+1. **Compare:** Start at the root and compare the target value with the current node.
+2. **Found:** If the values match, the node is successfully found.
+3. **Traverse:** Decide the path based on the comparison:
+    - If the target is smaller, traverse to the left child.
+    - If the target is larger, traverse to the right child.
+4. **Not Found:** On an attempt to traverse to a child that does not exist (a null pointer), the search is dropped, meaning the value is not in the tree.
 
-Insertion follows a path similar to searching to ensure the new value is placed in the correct location to maintain the tree's properties.
+## Delete
 
-1. **Check for Empty Tree**: If the tree has no nodes, the new value is placed at the **Root**.
-2. **Comparison Loop**: If the tree is not empty, the algorithm compares the new value against the current node:
-    - **Go Left**: If the new value is smaller, it checks the left child. If the left spot is empty, it **creates a new leaf** there. Otherwise, it traverses deeper into the left subtree.
-    - **Go Right**: If the new value is larger, it checks the right child. If the right spot is empty, it **creates a new leaf** there. Otherwise, it traverses deeper into the right subtree.
+Removing a node is the most complex operation in a BST because the tree must reconnect itself without breaking the sorting rules. First, the tree searches for the target value, tracking the parent node along the way. Once found and marked for deletion, the tree analyzes the node's children to determine the removal strategy.
 
-3. **Handle Duplicates**: If the value already exists in the tree, the operation is **dropped** because BSTs typically require unique keys.
+### Case 1: Leaf Node
 
-## Deletion (Remove)
+This is the simplest case. If the node to be deleted has no children, it is simply removed by setting its parent's pointer to null.
 
-Deletion is the most complex operation because the tree must be restructured to remain valid after a node is removed. The process first involves searching for the node and then analyzing one of three cases:
+### Case 2: Single Child
 
-### Phase 1: Search and Mark
+If the node has only one child (either left or right), we bypass the node entirely. The tree replaces the deleted node by linking its parent directly to its single child.
 
-The algorithm traverses the tree to find the target value. Once found, the node is **marked for deletion**.
+### Case 3: Two Children
 
-### Phase 2: Case Analysis
+If the node has both a left and right child, we cannot simply delete it without leaving its children disconnected.
 
-Depending on the number of children the marked node has, one of the following strategies is used:
+1. **Find the In-order Successor:** The tree finds the node with the next highest value. This is done by stepping to the right child once, and then traversing as far left as possible.
+2. **Relink Successor's Child:** If the successor happens to have a right child of its own, that child is relinked to the successor's parent.
+3. **Replace:** The original target node's value is replaced with the successor's data. The original node's structural position remains intact, but the data is overwritten, effectively deleting the target value and maintaining a valid BST.
 
-- **Case 1: Leaf Node (No Children)**
-  The node is simply removed from the tree, and the parent's reference to it is cleared.
-- **Case 2: Single Child**
-  The node is removed, and its only child is promoted to take its place. The parent of the deleted node is **relinked** directly to this child.
-- **Case 3: Two Children**
-  To maintain the BST order, the node cannot simply be removed. Instead, the algorithm finds the **Inorder Successor** (the smallest value in the right subtree).
-    1. **Identify Successor**: Navigate to the right child, then move left as far as possible.
-    2. **Relink Successor Child**: If the successor has a right child, that child is relinked to the successor's parent to ensure no data is lost.
-    3. **Replace**: The value and identity of the node marked for deletion are replaced by the successor's value and identity, effectively "swapping" the successor into the target position.
+## Notes
+
+While the Binary Search Tree is a brilliant introductory structure, its fatal flaw is the lack of self-balancing.
+
+**When NOT to use this:** Standard BSTs should be avoided if the input data might be pre-sorted, as the worst-case `O(n)` complexity makes it unacceptably slow for large datasets.
+
+In the real world, standard BSTs are rarely used in production code. Instead, they serve as the foundational logic for **self-balancing trees** (like AVL Trees and Red-Black Trees). These advanced structures use the exact same insertion and deletion logic, but add complex rotations at the end of the operations to guarantee the tree remains short and wide, locking in that optimal logarithmic time complexity.
