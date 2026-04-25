@@ -6,6 +6,8 @@ import { BaseAnnotation } from './annotation';
 export class Annotation extends BaseAnnotation {
 	aboveOffset: number = -30;
 	color: string = Colors.Info;
+	frozen: boolean = false;
+	private frozenPos: { x: number; y: number } = { x: 0, y: 0 };
 
 	constructor(
 		public annotator: DataStructureAnnotator,
@@ -16,6 +18,9 @@ export class Annotation extends BaseAnnotation {
 	}
 
 	getPosition(): { x: number; y: number } {
+		if (this.frozen) {
+			return this.frozenPos;
+		}
 		if (this.followingNodeId !== null) {
 			try {
 				let nodePos = this.annotator.network.getPosition(this.followingNodeId as any);
@@ -25,6 +30,15 @@ export class Annotation extends BaseAnnotation {
 			}
 		}
 		return { x: 0, y: 0 };
+	}
+
+	freeze() {
+		this.frozenPos = this.getPosition();
+		this.frozen = true;
+	}
+
+	unfreeze() {
+		this.frozen = false;
 	}
 
 	draw() {

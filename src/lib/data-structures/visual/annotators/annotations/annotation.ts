@@ -1,4 +1,4 @@
-import type { DataStructureAnnotator } from "../dataStructureAnnotator";
+import type { DataStructureAnnotator } from '../dataStructureAnnotator';
 
 export class BaseAnnotation {
 	fontSize: number = 14;

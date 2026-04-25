@@ -9,11 +9,10 @@
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
 
-	let operationManager: OperationManager = new OperationManager(StructureType.BTree);
+	let operationManager: OperationManager = new OperationManager(StructureType.BTree, 16);
 </script>
 
 <h1 class="page-title">{t('dataStructures.bTree')}</h1>
-<p style="color: red; font-weight: bold;">This is very much broken and I know it. Will fix later.</p>
 <div class="page-layout">
 	<BTreeVisual {operationManager} />
 	<TreeControls {operationManager} />

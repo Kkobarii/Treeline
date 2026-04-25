@@ -2,16 +2,16 @@ import type { StepData } from '$lib/data-structures/operations/operationData';
 import type { OperationManager } from '$lib/data-structures/operations/operationManager';
 import type { BTreeAnimator } from '$lib/data-structures/structures/bTree/bTreeAnimator';
 import { StepType, type StepTypeValue } from '$lib/data-structures/structures/dataStructure';
-import { getBTreeNodeId } from '$lib/data-structures/utils/graphs';
 import type { DataStructureAnimator } from '$lib/data-structures/visual/animators/dataStructureAnimator';
 import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
 import { translate as t } from '$lib/i18n';
+import { Colors } from '$lib/utils/colors';
 
+import type { BTreeAnnotator } from './bTreeAnnotator';
 import type {
-	BorrowFromLeftData,
-	BorrowFromRightData,
+	BorrowFromSiblingData,
 	ChooseBranchData,
 	FindInorderReplacementData,
 	InsertValueData,
@@ -27,11 +27,9 @@ export class BTreeStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as BTreeAnimator;
 		if (isForward && currentStep.startSnapshot) {
-			console.log('setup forward');
 			animator.ensure(currentStep.startSnapshot);
 		}
 		if (!isForward && currentStep.endSnapshot) {
-			console.log('setup backward');
 			animator.ensure(currentStep.endSnapshot);
 		}
 	}
@@ -45,11 +43,9 @@ export class BTreeStepHandler extends StepHandlerBase {
 		let animator = baseAnimator as BTreeAnimator;
 
 		if (isForward && currentStep.endSnapshot) {
-			console.log('cleanup forward');
 			animator.ensure(currentStep.endSnapshot);
 		}
 		if (!isForward && currentStep.startSnapshot) {
-			console.log('cleanup backward');
 			animator.ensure(currentStep.startSnapshot);
 		}
 	}
@@ -62,7 +58,7 @@ export class BTreeStepHandler extends StepHandlerBase {
 		isForward: boolean = true,
 	) {
 		let animator = baseAnimator as BTreeAnimator;
-		let annotator = baseAnnotator as DataStructureAnnotator;
+		let annotator = baseAnnotator as BTreeAnnotator;
 		let data = this.translateStepData(currentStep.data);
 
 		switch (currentStep.type as StepTypeValue) {
@@ -126,6 +122,7 @@ export class BTreeStepHandler extends StepHandlerBase {
 				if (isForward) await Common.handleCaseAnalysisForwardCommon(animator, annotator, data);
 				else await Common.handleCaseAnalysisBackwardCommon(animator, annotator, data);
 				break;
+			// BTree-specific steps
 			case StepType.BTree.MarkOverfull:
 				if (isForward) await this.handleMarkOverfullForward(animator, annotator, data);
 				else await this.handleMarkOverfullBackward(animator, annotator, data);
@@ -154,13 +151,9 @@ export class BTreeStepHandler extends StepHandlerBase {
 				if (isForward) await this.handleReplaceValueForward(animator, annotator, data);
 				else await this.handleReplaceValueBackward(animator, annotator, data);
 				break;
-			case StepType.BTree.BorrowFromLeft:
-				if (isForward) await this.handleBorrowFromLeftForward(animator, annotator, data);
-				else await this.handleBorrowFromLeftBackward(animator, annotator, data);
-				break;
-			case StepType.BTree.BorrowFromRight:
-				if (isForward) await this.handleBorrowFromRightForward(animator, annotator, data);
-				else await this.handleBorrowFromRightBackward(animator, annotator, data);
+			case StepType.BTree.BorrowFromSibling:
+				if (isForward) await this.handleBorrowFromSiblingForward(animator, annotator, data);
+				else await this.handleBorrowFromSiblingBackward(animator, annotator, data);
 				break;
 			case StepType.BTree.MergeChildren:
 				if (isForward) await this.handleMergeChildrenForward(animator, annotator, data);
@@ -173,6 +166,7 @@ export class BTreeStepHandler extends StepHandlerBase {
 			default:
 				console.warn('Unhandled BTree step type:', currentStep.type);
 		}
+		await new Promise(resolve => setTimeout(resolve, 50)); // Small pause to ensure animations have time to start
 	}
 
 	private translateStepData(data: any): any {
@@ -181,9 +175,7 @@ export class BTreeStepHandler extends StepHandlerBase {
 
 		const result: any = Array.isArray(data) ? [] : {};
 		for (const key in data) {
-			if (key === 'nodeId' || key === 'id' || key.endsWith('Id') || key.endsWith('Id')) {
-				result[key] = getBTreeNodeId(data[key]);
-			} else if (typeof data[key] === 'object') {
+			if (typeof data[key] === 'object') {
 				result[key] = this.translateStepData(data[key]);
 			} else {
 				result[key] = data[key];
@@ -192,197 +184,186 @@ export class BTreeStepHandler extends StepHandlerBase {
 		return result;
 	}
 
-	async handleMarkOverfullForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: MarkOverfullData) {
-		animator.setNodeColor(data.nodeId, '#FF4500');
-		const info = t(annotator.locale, 'steps.dataStructures.bTree.markOverfullData', {
-			currentCount: String(data.currentCount),
-			maxCount: String(data.maxCount),
-		});
+	async handleMarkOverfullForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: MarkOverfullData) {
+		animator.setNodeColor(data.nodeId, Colors.Red);
+		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.nodeId);
 	}
 
-	async handleMarkOverfullBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: MarkOverfullData) {
+	async handleMarkOverfullBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: MarkOverfullData) {
 		animator.resetNodeColor(data.nodeId);
-		annotator.clearAnnotation();
-	}
-
-	async handleSplitForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: SplitData) {
-		animator.ensure(data.endSnapshot);
-		const info = t(annotator.locale, 'steps.dataStructures.bTree.splitData', { middleValue: String(data.middleValue) });
+		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.nodeId);
 	}
 
-	async handleSplitBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: SplitData) {
-		animator.ensure(data.startSnapshot);
-		annotator.clearAnnotation();
+	async handleSplitForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: SplitData) {
+		const promise = animator.ensureAndAnimateSplit(data.endSnapshot, data.translationMap);
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.nodeId);
+		annotator.createTransplantedValueAnnotation(data.middleValue.toString(), [data.leftNodeId, data.rightNodeId]);
+
+		await promise;
 	}
 
-	async handlePromoteMiddleForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: PromoteMiddleData) {
+	async handleSplitBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: SplitData) {
+		const reversedTranslationMap = data.translationMap.map(({ oldId, newId }) => ({ oldId: newId, newId: oldId }));
+		const promise = animator.ensureAndAnimateMerge(data.startSnapshot, reversedTranslationMap);
+
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.clearTransplantedValueAnnotation();
+
+		await promise;
+		annotator.annotateNode(info, data.nodeId);
+		animator.setNodeColor(data.nodeId, Colors.Red);
+	}
+
+	async handlePromoteMiddleForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: PromoteMiddleData) {
 		animator.ensure(data.endSnapshot);
-		const info = data.isNewRoot
-			? t(annotator.locale, 'steps.dataStructures.bTree.promoteMiddleAsNewRootData', {
-					middleValue: String(data.middleValue),
-				})
-			: t(annotator.locale, 'steps.dataStructures.bTree.promoteMiddleIntoParentData', {
-					middleValue: String(data.middleValue),
-				});
+		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.targetNodeId);
+		await annotator.moveTransplantedValueAnnotationTo([data.targetNodeId]).then(() => annotator.clearTransplantedValueAnnotation());
 	}
 
-	async handlePromoteMiddleBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: PromoteMiddleData) {
+	async handlePromoteMiddleBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: PromoteMiddleData) {
 		animator.ensure(data.startSnapshot);
-		annotator.clearAnnotation();
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.targetNodeId);
+
+		annotator.createTransplantedValueAnnotation(String(data.middleValue), [data.targetNodeId]);
+		await annotator.moveTransplantedValueAnnotationTo([data.sourceLeftId, data.sourceRightId]);
 	}
 
-	async handleChooseBranchForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: ChooseBranchData) {
-		animator.setEdgeStyle(data.nodeId, data.childId, '#FF4500', 4);
-		let info: string;
-		if (data.lowerBound !== null && data.upperBound !== null) {
-			info = t(annotator.locale, 'steps.dataStructures.bTree.chooseBranchBetweenData', {
-				childIndexHumanReadable: String(data.childIndexHumanReadable),
-				lowerBound: String(data.lowerBound),
-				value: String(data.value),
-				upperBound: String(data.upperBound),
-			});
-		} else if (data.lowerBound !== null) {
-			info = t(annotator.locale, 'steps.dataStructures.bTree.chooseBranchGreaterThanData', {
-				childIndexHumanReadable: String(data.childIndexHumanReadable),
-				value: String(data.value),
-				lowerBound: String(data.lowerBound),
-			});
-		} else if (data.upperBound !== null) {
-			info = t(annotator.locale, 'steps.dataStructures.bTree.chooseBranchLessThanData', {
-				childIndexHumanReadable: String(data.childIndexHumanReadable),
-				value: String(data.value),
-				upperBound: String(data.upperBound),
-			});
-		} else {
-			info = t(annotator.locale, 'steps.dataStructures.bTree.chooseBranchData', {
-				childIndexHumanReadable: String(data.childIndexHumanReadable),
-			});
-		}
+	async handleChooseBranchForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: ChooseBranchData) {
+		animator.setEdgeStyle(data.nodeId, data.childId, Colors.Red, 4);
+		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.nodeId);
+		annotator.moveValueAnnotationTo(data.childId);
 	}
 
-	async handleChooseBranchBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: ChooseBranchData) {
+	async handleChooseBranchBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: ChooseBranchData) {
 		animator.resetEdgeStyle(data.nodeId, data.childId);
-		annotator.clearAnnotation();
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.nodeId);
+		annotator.moveValueAnnotationTo(data.nodeId);
 	}
 
-	async handleInsertValueForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: InsertValueData) {
+	async handleInsertValueForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: InsertValueData) {
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.nodeId);
+		annotator.clearValueAnnotation();
+	}
+
+	async handleInsertValueBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: InsertValueData) {
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.nodeId);
+		annotator.createValueAnnotation(data.value.toString(), data.nodeId);
+	}
+
+	async handleRemoveValueForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: RemoveValueData) {
 		animator.ensure(data.endSnapshot);
-		animator.setNodeColor(data.nodeId, '#90EE90');
-		const info = t(annotator.locale, 'steps.dataStructures.bTree.insertValueData', { value: String(data.value) });
+		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.nodeId);
 	}
 
-	async handleInsertValueBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: InsertValueData) {
-		animator.ensure(data.startSnapshot);
-		animator.resetNodeColor(data.nodeId);
-		annotator.clearAnnotation();
-	}
-
-	async handleRemoveValueForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: RemoveValueData) {
+	async handleRemoveValueBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: RemoveValueData) {
 		animator.ensure(data.endSnapshot);
-		animator.setNodeColor(data.nodeId, '#FFB6C1');
-		const info = t(annotator.locale, 'steps.dataStructures.bTree.removeValueData', { value: String(data.value) });
+		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.nodeId);
 	}
 
-	async handleRemoveValueBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: RemoveValueData) {
-		animator.ensure(data.startSnapshot);
-		animator.resetNodeColor(data.nodeId);
-		annotator.clearAnnotation();
-	}
-
-	async handleReplaceValueForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: ReplaceValueData) {
+	async handleReplaceValueForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: ReplaceValueData) {
 		animator.ensure(data.endSnapshot);
-		animator.setNodeColor(data.nodeId, '#FFD700');
-		const info = t(annotator.locale, 'steps.dataStructures.bTree.replaceValueData', {
-			oldValue: String(data.oldValue),
-			newValue: String(data.newValue),
-			replacementSource: String(data.replacementSource),
-		});
+		animator.setNodeColor(data.nodeId, Colors.Yellow);
+		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.nodeId);
+
+		annotator.createTransplantedValueAnnotation(String(data.newValue), [data.sourceId]);
+		await annotator.moveTransplantedValueAnnotationTo([data.nodeId]).then(() => annotator.clearTransplantedValueAnnotation());
 	}
 
-	async handleReplaceValueBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: ReplaceValueData) {
+	async handleReplaceValueBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: ReplaceValueData) {
 		animator.ensure(data.startSnapshot);
 		animator.resetNodeColor(data.nodeId);
-		annotator.clearAnnotation();
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.nodeId);
+
+		annotator.createTransplantedValueAnnotation(String(data.oldValue), [data.nodeId]);
+		await annotator.moveTransplantedValueAnnotationTo([data.sourceId]).then(() => annotator.clearTransplantedValueAnnotation());
 	}
 
-	async handleBorrowFromLeftForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: BorrowFromLeftData) {
+	async handleBorrowFromSiblingForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: BorrowFromSiblingData) {
 		animator.ensure(data.endSnapshot);
-		animator.setNodeColor(data.childId, '#87CEEB');
-		animator.setNodeColor(data.siblingId, '#FFA07A');
-		const info = t(annotator.locale, 'steps.dataStructures.bTree.borrowFromLeftData', {
-			borrowedValue: String(data.borrowedValue),
-		});
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.childId);
+
+		annotator.createTransplantedValueAnnotation(String(data.borrowedValue), [data.siblingId]);
+		await annotator
+			.moveTransplantedValueAnnotationTo([data.parentId])
+			.then(() => new Promise(resolve => setTimeout(resolve, 300)))
+			.then(() => annotator.clearTransplantedValueAnnotation());
+
+		annotator.createTransplantedValueAnnotation(String(data.parentValue), [data.parentId]);
+		await annotator.moveTransplantedValueAnnotationTo([data.childId]).then(() => annotator.clearTransplantedValueAnnotation());
+	}
+
+	async handleBorrowFromSiblingBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: BorrowFromSiblingData) {
+		animator.ensure(data.startSnapshot);
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.childId);
+
+		annotator.createTransplantedValueAnnotation(String(data.parentValue), [data.childId]);
+		await annotator
+			.moveTransplantedValueAnnotationTo([data.parentId])
+			.then(() => new Promise(resolve => setTimeout(resolve, 300)))
+			.then(() => annotator.clearTransplantedValueAnnotation());
+
+		annotator.createTransplantedValueAnnotation(String(data.borrowedValue), [data.parentId]);
+		await annotator.moveTransplantedValueAnnotationTo([data.siblingId]).then(() => annotator.clearTransplantedValueAnnotation());
+	}
+
+	async handleMergeChildrenForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: MergeChildrenData) {
+		const info = t(annotator.locale, data.label, data.params);
+
+		await animator.ensureAndAnimateMergeFirstPart(data.endSnapshot, data.translationMap);
+		annotator.annotateNode(info, data.originalParentId);
+		annotator.currentAnnotation?.freeze();
+
+		let valuePromise: Promise<void> = Promise.resolve();
+		if (data.parentValue !== null) {
+			annotator.createTransplantedValueAnnotation(String(data.parentValue), [data.originalParentId]);
+			valuePromise = annotator
+				.moveTransplantedValueAnnotationTo([data.mergedNodeId])
+				.then(() => annotator.clearTransplantedValueAnnotation());
+		}
+		annotator.annotateNode(info, data.parentId);
+
+		await Promise.all([valuePromise, animator.ensureAndAnimateMergeSecondPart(data.endSnapshot, data.translationMap)]);
+	}
+
+	async handleMergeChildrenBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: MergeChildrenData) {
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.originalParentId);
+
+		let valuePromise = Promise.resolve();
+		if (data.parentValue !== null) {
+			annotator.createTransplantedValueAnnotation(String(data.parentValue), [data.mergedNodeId]);
+			valuePromise = annotator
+				.moveTransplantedValueAnnotationTo([data.originalParentId])
+				.then(() => annotator.clearTransplantedValueAnnotation());
+		}
+
+		const reversedTranslationMap = data.translationMap.map(({ oldId, newId }) => ({ oldId: newId, newId: oldId }));
+
+		await Promise.all([valuePromise, animator.ensureAndAnimateSplit(data.startSnapshot, reversedTranslationMap)]);
+	}
+
+	async handleFindInorderReplacementForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: FindInorderReplacementData) {
+		animator.setNodeColor(data.childId, Colors.Yellow);
+		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.childId);
 	}
 
-	async handleBorrowFromLeftBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: BorrowFromLeftData) {
-		animator.ensure(data.startSnapshot);
-		animator.resetNodeColor(data.childId);
-		animator.resetNodeColor(data.siblingId);
-		annotator.clearAnnotation();
-	}
-
-	async handleBorrowFromRightForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: BorrowFromRightData) {
-		animator.ensure(data.endSnapshot);
-		animator.setNodeColor(data.childId, '#87CEEB');
-		animator.setNodeColor(data.siblingId, '#FFA07A');
-		const info = t(annotator.locale, 'steps.dataStructures.bTree.borrowFromRightData', {
-			borrowedValue: String(data.borrowedValue),
-		});
-		annotator.annotateNode(info, data.childId);
-	}
-
-	async handleBorrowFromRightBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: BorrowFromRightData) {
-		animator.ensure(data.startSnapshot);
-		animator.resetNodeColor(data.childId);
-		animator.resetNodeColor(data.siblingId);
-		annotator.clearAnnotation();
-	}
-
-	async handleMergeChildrenForward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: MergeChildrenData) {
-		animator.ensure(data.endSnapshot);
-		animator.setNodeColor(data.leftChildId, '#DDA0DD');
-		const info = t(annotator.locale, 'steps.dataStructures.bTree.mergeChildrenData', {
-			parentValue: String(data.parentValue),
-		});
-		annotator.annotateNode(info, data.leftChildId);
-	}
-
-	async handleMergeChildrenBackward(animator: BTreeAnimator, annotator: DataStructureAnnotator, data: MergeChildrenData) {
-		animator.ensure(data.startSnapshot);
-		animator.resetNodeColor(data.leftChildId);
-		annotator.clearAnnotation();
-	}
-
-	async handleFindInorderReplacementForward(
-		animator: BTreeAnimator,
-		annotator: DataStructureAnnotator,
-		data: FindInorderReplacementData,
-	) {
-		animator.setNodeColor(data.childId, '#98FB98');
-		const info =
-			data.replacementType === 'predecessor'
-				? t(annotator.locale, 'steps.dataStructures.bTree.findInorderReplacementPredecessorData', {
-						replacementValue: String(data.replacementValue),
-					})
-				: t(annotator.locale, 'steps.dataStructures.bTree.findInorderReplacementSuccessorData', {
-						replacementValue: String(data.replacementValue),
-					});
-		annotator.annotateNode(info, data.childId);
-	}
-
-	async handleFindInorderReplacementBackward(
-		animator: BTreeAnimator,
-		annotator: DataStructureAnnotator,
-		data: FindInorderReplacementData,
-	) {
+	async handleFindInorderReplacementBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: FindInorderReplacementData) {
 		animator.resetNodeColor(data.childId);
 		annotator.clearAnnotation();
 	}

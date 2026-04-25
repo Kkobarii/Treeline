@@ -1,7 +1,10 @@
+import type { Position } from 'vis-network';
+
 import { bTreeToGraph, NodeData } from '$lib/data-structures/utils/graphs';
 import { CheckpointTimer } from '$lib/utils/checkpointTimer';
 
 import { DataStructureAnimator, type DataStructureAnimatorOpts } from '../../visual/animators/dataStructureAnimator';
+import type { TranslationPair } from './bTree';
 
 export class BTreeAnimator extends DataStructureAnimator {
 	constructor(opts: DataStructureAnimatorOpts) {
@@ -23,50 +26,18 @@ export class BTreeAnimator extends DataStructureAnimator {
 			const newData = toGraphFn(tree.root ?? null);
 			timer.checkpoint('graph');
 
-			// // update existing nodes or add new ones
-			// for (const n of newData.nodes.get()) {
-			// 	if (this.nodes.get(n.id!)) {
-			// 		this.updateNodeRaw(n);
-			// 	} else {
-			// 		this.addNodeRaw(n);
-			// 	}
-			// }
-
-			// // remove nodes that are no longer present
-			// const newNodeIds = new Set(newData.nodes.get().map((n: any) => n.id));
-			// for (const existingNode of this.nodes.get()) {
-			// 	if (!newNodeIds.has(existingNode.id)) {
-			// 		this.removeNodeRaw(existingNode.id!);
-			// 	}
-			// }
-			// timer.checkpoint('nodes');
-
-			// // for all new nodes, make sure they have correct order
-			// // check all parent children and reorder nodes if necessary
-			// // (vis-network does not guarantee order of nodes when multiple nodes are added at once)
-			// for (const n of newData.nodes.get()) {
-			//     const node = this.nodes.get(n.id!);
-			//     if (!node) continue;
-
-			//     const nodeData = NodeData.fromNode(n);
-			//     if (nodeData.childNumber >= 0 && tree.root) {
-			//         const parent = tree.findParentOfNode(tree.root, n.id);
-			//         if (parent) {
-			//             const correctIndex = parent.children.findIndex((child: any) => child.id === n.id);
-			//             if (correctIndex >= 0 && correctIndex !== nodeData.childNumber) {
-			//                 // reorder node by removing and re-adding with correct childNumber
-			//                 const updatedNode = { ...node };
-			//                 updatedNode.title = NodeData.toTitle(new NodeData(correctIndex));
-			//                 this.updateNodeRaw(updatedNode);
-			//             }
-			//         }
-			//     }
-			// }
+			// // perserve node colors
+			// const oldNodes = this.nodes.get();
 
 			try {
 				this.nodes.clear();
 				for (const n of newData.nodes.get()) {
 					this.addNodeRaw(n);
+
+					// const oldNode = oldNodes.find(on => on.id === n.id);
+					// if (oldNode) {
+					// 	this.setNodeColor(n.id, String(oldNode.color));
+					// }
 				}
 			} catch {}
 			timer.checkpoint('nodes');
@@ -78,14 +49,97 @@ export class BTreeAnimator extends DataStructureAnimator {
 			} catch {}
 			timer.checkpoint('edges');
 
-			// timer.printReport('BTreeAnimator.ensureTree: ');
-
-			// console.log('BTreeAnimator.ensureWithFn completed');
-			// console.log('Tree:', tree);
-			// console.log('Nodes:', this.nodes.get());
-			// console.log('Edges:', this.edges.get());
+			timer.printReport('BTreeAnimator.ensureTree: ');
 		} catch (err) {
 			console.warn('BTreeAnimator.ensureTree error', err);
 		}
+	}
+
+	async ensureAndAnimateSplit(tree: any, translationMap: Array<TranslationPair>): Promise<void> {
+		const oldPositions = this.getPositions();
+		const translatedOldPositions: { [nodeId: string]: Position } = this.translateOldPositions(translationMap, oldPositions);
+
+		this.ensure(tree);
+		const newPositions = this.getPositions();
+		await this.animateRelayout(translatedOldPositions, newPositions);
+		await Promise.resolve(new Promise(resolve => setTimeout(resolve, 50))); // this just work and i dont know why
+	}
+
+	async ensureAndAnimateMerge(tree: any, translationMap: Array<TranslationPair>): Promise<void> {
+		await this.ensureAndAnimateMergeFirstPart(tree, translationMap);
+		await this.ensureAndAnimateMergeSecondPart(tree, translationMap);
+	}
+
+	getMergedNodeId(translationMap: Array<TranslationPair>): string {
+		const newIdCounts: { [newId: number]: number } = {};
+		for (const { newId } of translationMap) {
+			newIdCounts[newId] = (newIdCounts[newId] || 0) + 1;
+		}
+		const mergedNewId = Object.entries(newIdCounts).find(([_, count]) => count > 1)?.[0];
+		if (!mergedNewId) {
+			console.warn('BTreeAnimator.ensureAndAnimateMergeFirstPart: no merged node found in translation map', translationMap);
+			return '0';
+		}
+		return mergedNewId;
+	}
+
+	getMergedOldIdsAndPositions(
+		translationMap: Array<TranslationPair>,
+		oldPositions: { [nodeId: string]: Position },
+	): { mergedOldIds: number[]; mergedOldPositions: Position[] } {
+		const mergedNewId = this.getMergedNodeId(translationMap);
+		const mergedOldIds = translationMap.filter(({ newId }) => newId.toString() === mergedNewId)?.map(({ oldId }) => oldId);
+		const mergedOldPositions = mergedOldIds.map(oldId => oldPositions[oldId]).filter(pos => pos);
+		return { mergedOldIds, mergedOldPositions };
+	}
+
+	getMiddlePosition(positions: Position[]): Position {
+		return {
+			x: positions.reduce((sum, pos) => sum + pos.x, 0) / positions.length,
+			y: positions.reduce((sum, pos) => sum + pos.y, 0) / positions.length,
+		};
+	}
+
+	async ensureAndAnimateMergeFirstPart(tree: any, translationMap: Array<TranslationPair>): Promise<void> {
+		const oldPositions = this.getPositions();
+
+		// find the new merged node
+		const mergedNewId = this.getMergedNodeId(translationMap);
+
+		// move merged nodes to the middle of their old positions before animating
+		const movePromises: Promise<void>[] = [];
+		const { mergedOldIds, mergedOldPositions } = this.getMergedOldIdsAndPositions(translationMap, oldPositions);
+
+		const middlePosition = this.getMiddlePosition(mergedOldPositions);
+		for (const oldId of mergedOldIds) {
+			movePromises.push(this.animateNodeMovement(oldId, oldPositions[oldId], middlePosition));
+		}
+		await Promise.all(movePromises);
+		await Promise.resolve(new Promise(resolve => setTimeout(resolve, 50))); // this just work and i dont know why
+	}
+
+	async ensureAndAnimateMergeSecondPart(tree: any, translationMap: Array<TranslationPair>): Promise<void> {
+		const oldPositions = this.getPositions();
+		this.ensure(tree);
+		const newPositions = this.getPositions();
+		const translatedOldPositions: { [nodeId: string]: Position } = this.translateOldPositions(translationMap, oldPositions);
+		const mergedNewId = this.getMergedNodeId(translationMap);
+		const { mergedOldPositions } = this.getMergedOldIdsAndPositions(translationMap, oldPositions);
+		const middlePosition = this.getMiddlePosition(mergedOldPositions);
+
+		translatedOldPositions[mergedNewId] = middlePosition; // ensure merged node starts from middle position
+		await this.animateRelayout(translatedOldPositions, newPositions);
+		await Promise.resolve(new Promise(resolve => setTimeout(resolve, 50))); // this just work and i dont know why
+	}
+
+	private translateOldPositions(translationMap: TranslationPair[], oldPositions: { [nodeId: string]: Position }) {
+		const translatedOldPositions: { [nodeId: string]: Position } = {};
+		for (const { newId, oldId } of translationMap) {
+			const oldPos = oldPositions[oldId];
+			if (oldPos) {
+				translatedOldPositions[newId] = oldPos;
+			}
+		}
+		return translatedOldPositions;
 	}
 }

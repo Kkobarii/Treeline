@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { StepData } from '$lib/data-structures/operations/operationData';
-	import { getBTreeNodeId } from '$lib/data-structures/utils/graphs';
 
 	export let step: StepData;
 	export let isCurrent: boolean = false;
@@ -8,7 +7,7 @@
 
 	let expanded: boolean = false;
 
-	const ignoredKeys = new Set(['label', 'params', 'startSnapshot', 'endSnapshot']);
+	const ignoredKeys = new Set(['label', 'params', 'startSnapshot', 'endSnapshot', 'translationMap']);
 
 	function isBTreeStep(step: any): boolean {
 		return step.data.label.includes('bTree');
@@ -20,9 +19,7 @@
 
 		const result: Record<string, unknown> = {};
 		for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-			if (key.endsWith('Id') && typeof value === 'number') {
-				result[key] = getBTreeNodeId(value);
-			} else if (typeof value === 'object') {
+			if (typeof value === 'object') {
 				result[key] = translateIds(value);
 			} else {
 				result[key] = value;

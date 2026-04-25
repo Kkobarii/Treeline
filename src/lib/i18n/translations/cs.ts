@@ -220,7 +220,8 @@ const cs: Translation = {
 				replaceValueData: 'Nahradit hodnotu {oldValue} s {newValue} ({replacementSource})',
 				borrowFromLeftData: 'Vypůjčit hodnotu {borrowedValue} z levého sourozence',
 				borrowFromRightData: 'Vypůjčit hodnotu {borrowedValue} z pravého sourozence',
-				mergeChildrenData: 'Sloučit potomky s rodičovskou hodnotou {parentValue}',
+				mergeChildrenData: 'Sloučit potomky',
+				mergeChildrenAndParentData: 'Sloučit potomky s rodičovskou hodnotou {parentValue}',
 				findInorderReplacementPredecessorData: 'Nalezena hodnota předchůdce {replacementValue}',
 				findInorderReplacementSuccessorData: 'Nalezena hodnota následníka {replacementValue}',
 				snippet: {

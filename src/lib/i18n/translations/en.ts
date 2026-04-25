@@ -218,7 +218,8 @@ const en = {
 				replaceValueData: 'Replace value {oldValue} with {newValue} ({replacementSource})',
 				borrowFromLeftData: 'Borrow value {borrowedValue} from left sibling',
 				borrowFromRightData: 'Borrow value {borrowedValue} from right sibling',
-				mergeChildrenData: 'Merge children with parent value {parentValue}',
+				mergeChildrenData: 'Merge children',
+				mergeChildrenAndParentData: 'Merge children with parent value {parentValue}',
 				findInorderReplacementPredecessorData: 'Found predecessor value {replacementValue}',
 				findInorderReplacementSuccessorData: 'Found successor value {replacementValue}',
 				snippet: {

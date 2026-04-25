@@ -14,7 +14,7 @@
 	const nodeOptions = {
 		shape: 'box',
 		color: Colors.Node,
-		font: { color: 'black', size: 30 },
+		font: { color: 'black', size: 20 },
 		margin: {
 			top: 10,
 			bottom: 10,
@@ -27,7 +27,7 @@
 			sortMethod: 'directed',
 			shakeTowards: 'roots',
 			levelSeparation: 100,
-			nodeSpacing: 250,
+			nodeSpacing: 210,
 		},
 	};
 </script>

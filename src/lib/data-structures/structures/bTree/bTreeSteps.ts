@@ -1,13 +1,13 @@
 import { StepDetail } from '$lib/data-structures/operations/stepData';
 import { DataStructure, StepType } from '$lib/data-structures/structures/dataStructure';
 
+import type { IdTranslationMap } from './bTree';
+
 export class MarkOverfullData extends StepDetail {
 	constructor(
 		public nodeId: number,
 		public currentCount: number,
 		public maxCount: number,
-		public startSnapshot: DataStructure,
-		public endSnapshot: DataStructure,
 	) {
 		super(StepType.BTree.MarkOverfull, 'steps.dataStructures.bTree.markOverfullData', { nodeId, currentCount, maxCount });
 	}
@@ -19,6 +19,7 @@ export class SplitData extends StepDetail {
 		public middleValue: number,
 		public leftNodeId: number,
 		public rightNodeId: number,
+		public translationMap: IdTranslationMap,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
@@ -30,13 +31,15 @@ export class PromoteMiddleData extends StepDetail {
 	constructor(
 		public middleValue: number,
 		public targetNodeId: number,
+		public sourceLeftId: number,
+		public sourceRightId: number,
 		public isNewRoot: boolean,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
 		super(
 			StepType.BTree.PromoteMiddle,
-			isNewRoot ? 'steps.dataStructures.bTree.promoteMiddleNewRootData' : 'steps.dataStructures.bTree.promoteMiddleData',
+			isNewRoot ? 'steps.dataStructures.bTree.promoteMiddleAsNewRootData' : 'steps.dataStructures.bTree.promoteMiddleIntoParentData',
 			{ middleValue, targetNodeId },
 		);
 	}
@@ -127,6 +130,7 @@ export class ReplaceValueData extends StepDetail {
 		public nodeId: number,
 		public oldValue: number,
 		public newValue: number,
+		public sourceId: number,
 		public replacementSource: string,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
@@ -140,55 +144,52 @@ export class ReplaceValueData extends StepDetail {
 	}
 }
 
-export class BorrowFromLeftData extends StepDetail {
+export class BorrowFromSiblingData extends StepDetail {
 	constructor(
 		public childId: number,
 		public siblingId: number,
+		public parentId: number,
 		public borrowedValue: number,
 		public parentValue: number,
+		public direction: 'left' | 'right',
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super(StepType.BTree.BorrowFromLeft, 'steps.dataStructures.bTree.borrowFromLeftData', {
-			childId,
-			siblingId,
-			borrowedValue,
-			parentValue,
-		});
-	}
-}
-
-export class BorrowFromRightData extends StepDetail {
-	constructor(
-		public childId: number,
-		public siblingId: number,
-		public borrowedValue: number,
-		public parentValue: number,
-		public startSnapshot: DataStructure,
-		public endSnapshot: DataStructure,
-	) {
-		super(StepType.BTree.BorrowFromRight, 'steps.dataStructures.bTree.borrowFromRightData', {
-			childId,
-			siblingId,
-			borrowedValue,
-			parentValue,
-		});
+		super(
+			StepType.BTree.BorrowFromSibling,
+			direction === 'left' ? 'steps.dataStructures.bTree.borrowFromLeftData' : 'steps.dataStructures.bTree.borrowFromRightData',
+			{
+				childId,
+				siblingId,
+				parentId,
+				borrowedValue,
+				parentValue,
+			},
+		);
 	}
 }
 
 export class MergeChildrenData extends StepDetail {
 	constructor(
-		public leftChildId: number,
-		public rightChildId: number,
+		public mergedNodeId: number,
+		public parentId: number,
+		public originalLeftChildId: number,
+		public originalRightChildId: number,
+		public originalParentId: number,
 		public parentValue: number | null,
+		public translationMap: IdTranslationMap,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super(StepType.BTree.MergeChildren, 'steps.dataStructures.bTree.mergeChildrenData', {
-			leftChildId,
-			rightChildId,
-			parentValue: parentValue ?? '',
-		});
+		super(
+			StepType.BTree.MergeChildren,
+			parentValue ? 'steps.dataStructures.bTree.mergeChildrenAndParentData' : 'steps.dataStructures.bTree.mergeChildrenData',
+			{
+				leftChildId: originalLeftChildId,
+				rightChildId: originalRightChildId,
+				parentValue: parentValue ?? '',
+			},
+		);
 	}
 }
 

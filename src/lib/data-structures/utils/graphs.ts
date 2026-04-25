@@ -13,16 +13,6 @@ function log(...args: any[]) {
 	// console.log(...args);
 }
 
-let btreeIdTranslationMap: Map<number, number> = new Map();
-
-export function getBTreeNodeId(originalId: number): number {
-	return btreeIdTranslationMap.get(originalId) ?? originalId;
-}
-
-export function clearBTreeIdTranslationMap(): void {
-	btreeIdTranslationMap.clear();
-}
-
 function binaryTreeToGraph<T extends { id: number; value: number }>(
 	root: T | null,
 	getLeftChild: (node: T) => T | null,
@@ -370,27 +360,8 @@ export function bTreeToGraph(
 	nodes: DataSet<Node> = new DataSet<Node>(),
 	edges: DataSet<Edge> = new DataSet<Edge>(),
 	successorInfo: SuccessorInfo | null = null,
-): { nodes: DataSet<Node>; edges: DataSet<Edge>; idMap: Map<number, number> } {
-	if (!root) return { nodes, edges, idMap: new Map() };
-
-	clearBTreeIdTranslationMap();
-
-	let postorderCounter = 0;
-	const idMap = new Map<number, number>();
-
-	function assignPostorderIds(node: BTreeNode): void {
-		if (!node) return;
-		if (!node.isLeaf) {
-			for (const child of node.children) {
-				assignPostorderIds(child);
-			}
-		}
-		postorderCounter++;
-		idMap.set(node.id, postorderCounter);
-		btreeIdTranslationMap.set(node.id, postorderCounter);
-	}
-
-	assignPostorderIds(root);
+): { nodes: DataSet<Node>; edges: DataSet<Edge> } {
+	if (!root) return { nodes, edges };
 
 	function buildGraph(
 		node: BTreeNode,
@@ -398,7 +369,7 @@ export function bTreeToGraph(
 		edges: DataSet<Edge>,
 		successorInfo: SuccessorInfo | null,
 	): { nodes: DataSet<Node>; edges: DataSet<Edge> } {
-		const graphNodeId = idMap.get(node.id)!;
+		const graphNodeId = node.id;
 		const label = node.values.join('  ') || '';
 		const legs = new Array(node.values.length + 1).fill(node.isLeaf);
 		const nodeData = new NodeData(successorInfo?.childNumber ?? -1, legs);
@@ -407,10 +378,6 @@ export function bTreeToGraph(
 			id: graphNodeId,
 			label: label,
 			title: NodeData.toTitle(nodeData),
-			shape: 'box',
-			color: Colors.Node,
-			font: { color: 'black', size: 20 },
-			widthConstraint: { minimum: 60 },
 		});
 
 		if (successorInfo !== null) {
@@ -432,7 +399,7 @@ export function bTreeToGraph(
 		return { nodes, edges };
 	}
 
-	return { ...buildGraph(root, nodes, edges, successorInfo), idMap };
+	return { ...buildGraph(root, nodes, edges, successorInfo) };
 }
 
 export function linkedListToGraph(list: any, nodes: DataSet<Node> = new DataSet<Node>(), edges: DataSet<Edge> = new DataSet<Edge>()) {
