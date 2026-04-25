@@ -4,7 +4,6 @@ import {
 	BTREE_BORROW_FROM_RIGHT_SIBLING,
 	BTREE_GET_PREDECESSOR,
 	BTREE_GET_SUCCESSOR,
-	BTREE_MERGE_CHILDREN,
 	BTREE_MERGE_WITH_SIBLING,
 	BTREE_VALUE_IN_INTERNAL_NODE,
 	BTREE_VALUE_IN_LEAF_NODE,
@@ -378,7 +377,7 @@ export class BTree extends DataStructure {
 			this.removeFromNode(node.children[idx], node, predecessor.value, data, true);
 		}
 		// Case 2b: Right child has at least t keys
-		else if (node.children[idx + 1].values.length >= t) {
+		else {
 			data.step(StepData.new(new CaseAnalysisData(2.2, BTREE_GET_SUCCESSOR, node.children[idx + 1].id)));
 			const successor = this.getSuccessor(node.children[idx + 1]);
 			data.step(StepData.new(new FindInorderReplacementData(node.id, successor.node.id, successor.value, 'successor')));
@@ -396,12 +395,13 @@ export class BTree extends DataStructure {
 			successor.node.values = valuesArray;
 			this.removeFromNode(node.children[idx + 1], node, successor.value, data, true);
 		}
+		// Not needed??????????
 		// Case 2c: Both children have t-1 keys, merge
-		else {
-			data.step(StepData.new(new CaseAnalysisData(2.3, BTREE_MERGE_CHILDREN, node.id)));
-			this.mergeChildren(node, idx, data, false);
-			// this.removeFromNode(node.children[idx], node, value, OperationData.Ignored());
-		}
+		// else {
+		// 	data.step(StepData.new(new CaseAnalysisData(2.3, BTREE_MERGE_CHILDREN, node.id)));
+		// 	this.mergeChildren(node, idx, data, false);
+		// 	// this.removeFromNode(node.children[idx], node, value, OperationData.Ignored());
+		// }
 	}
 
 	private getPredecessor(node: BTreeNode): { node: BTreeNode; value: number } {

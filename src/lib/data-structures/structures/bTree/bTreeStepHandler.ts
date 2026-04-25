@@ -347,8 +347,8 @@ export class BTreeStepHandler extends StepHandlerBase {
 
 		let valuePromise: Promise<void> = Promise.resolve();
 		if (data.parentValue !== null) {
-			annotator.createTransplantedValueAnnotation(String(data.parentValue), [data.originalParentId]);
 			valuePromise = new Promise(resolve => setTimeout(resolve, 50))
+				.then(() => annotator.createTransplantedValueAnnotation(String(data.parentValue), [data.parentId]))
 				.then(() => annotator.moveTransplantedValueAnnotationTo([data.mergedNodeId]))
 				.then(() => annotator.clearTransplantedValueAnnotation());
 		}
