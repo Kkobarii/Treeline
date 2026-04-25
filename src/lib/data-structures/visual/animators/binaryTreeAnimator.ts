@@ -1,4 +1,4 @@
-import { getDummyNodeId, NodeData } from '$lib/data-structures/utils/graphs';
+import { NodeData } from '$lib/data-structures/utils/graphs';
 import { deepEqual } from '$lib/data-structures/utils/utils';
 import { CheckpointTimer } from '$lib/utils/checkpointTimer';
 
@@ -49,40 +49,6 @@ export class BinaryTreeAnimator extends DataStructureAnimator {
 		}
 
 		return false;
-	}
-
-	protected async animateLegsMove(nodeId: string | number, grow: boolean) {
-		const parentPos = this.getPosition(nodeId);
-		const promises: Promise<void>[] = [];
-
-		const left = getDummyNodeId(nodeId, 0);
-		const right = getDummyNodeId(nodeId, 1);
-
-		if (grow) {
-			if (this.nodes.get(left)) {
-				const leftFinal = this.getPosition(left);
-				await this.snapNodeTo(left, parentPos.x, parentPos.y);
-				promises.push(this.animateNodeMovement(left, parentPos, leftFinal));
-			}
-			if (this.nodes.get(right)) {
-				const rightFinal = this.getPosition(right);
-				await this.snapNodeTo(right, parentPos.x, parentPos.y);
-				promises.push(this.animateNodeMovement(right, parentPos, rightFinal));
-			}
-		} else {
-			if (this.nodes.get(left)) promises.push(this.animateNodeMovement(left, this.getPosition(left), parentPos));
-			if (this.nodes.get(right)) promises.push(this.animateNodeMovement(right, this.getPosition(right), parentPos));
-		}
-
-		await Promise.all(promises);
-	}
-
-	async animateLegsGrowth(nodeId: string | number) {
-		return this.animateLegsMove(nodeId, true);
-	}
-
-	async animateLegsShrink(nodeId: string | number) {
-		return this.animateLegsMove(nodeId, false);
 	}
 
 	addNode(nodeId: number, value: number | string) {

@@ -144,13 +144,13 @@ export async function handleCreateRootForwardCommon(animator: TreeAnimator, anno
 	const info = t(annotator.locale, 'steps.dataStructures.common.createRootData', { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
 
-	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
+	await Promise.resolve(animator.animateNodeGrowth(data.nodeId));
 }
 
 export async function handleCreateRootBackwardCommon(animator: TreeAnimator, annotator: DataStructureAnnotator, data: CreateRootData) {
 	const info = t(annotator.locale, 'steps.dataStructures.common.createRootData', { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
-	await Promise.all([animator.animateNodeShrink(data.nodeId), animator.animateLegsShrink(data.nodeId)]);
+	await Promise.resolve(animator.animateNodeShrink(data.nodeId));
 	await animator.ensureAndAnimate(data.startSnapshot);
 }
 
@@ -255,7 +255,7 @@ export function handleMarkToDeleteBackwardCommon(animator: CommonAnimator, annot
 export async function handleDeleteForwardCommon(animator: TreeAnimator, annotator: DataStructureAnnotator, data: DeleteData) {
 	const info = t(annotator.locale, 'steps.dataStructures.common.deleteData', { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
-	await Promise.all([animator.animateNodeShrink(data.nodeId), animator.animateLegsShrink(data.nodeId)]);
+	await Promise.resolve(animator.animateNodeShrink(data.nodeId));
 	annotator.clearAnnotation();
 	await animator.ensureAndAnimate(data.endSnapshot);
 }
@@ -265,7 +265,7 @@ export async function handleDeleteBackwardCommon(animator: TreeAnimator, annotat
 	const info = t(annotator.locale, 'steps.dataStructures.common.deleteData', { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Red);
-	await Promise.all([animator.animateNodeGrowth(data.nodeId), animator.animateLegsGrowth(data.nodeId)]);
+	await Promise.resolve(animator.animateNodeGrowth(data.nodeId));
 }
 
 export async function handleReplaceWithChildForwardCommon(

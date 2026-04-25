@@ -8,15 +8,6 @@ export class BTreeAnimator extends DataStructureAnimator {
 		super(opts);
 	}
 
-	// B-Trees don't need special leg animations like binary trees
-	async animateLegsGrowth(nodeId: string | number) {
-		// No-op for B-Trees
-	}
-
-	async animateLegsShrink(nodeId: string | number) {
-		// No-op for B-Trees
-	}
-
 	// Add node helper for step handlers
 	addNode(nodeId: number, value: number | string) {
 		this.addNodeRaw({ id: nodeId, title: NodeData.toTitle(new NodeData(0)), label: value.toString() });
