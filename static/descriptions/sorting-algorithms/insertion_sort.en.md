@@ -10,7 +10,7 @@ Insertion Sort is a simple, intuitive sorting algorithm that builds the final so
 
 ### Complexity Analysis
 
-The worst-case scenario occurs when the array is sorted in completely reverse order. In this state, every single newly selected element must be compared and swapped all the way to the very front of the array, maximizing the number of operations. Conversely, if the array is already sorted, the inner loop immediately breaks on the first comparison for every element, granting a highly efficient linear best-case time.
+The worst-case scenario occurs when the array is sorted in reverse order. In this state, every single newly selected element must be compared and swapped all the way to the very front of the array, maximizing the number of operations. Conversely, if the array is already sorted, the inner loop immediately breaks on the first comparison for every element, granting a highly efficient linear best-case time.
 
 | Best Case | Average Case | Worst Case | Space  |
 | :-------- | :----------- | :--------- | :----- |

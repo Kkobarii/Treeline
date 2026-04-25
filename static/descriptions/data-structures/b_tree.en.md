@@ -16,6 +16,8 @@ A B-Tree is a complex, self-balancing search tree designed to handle massive amo
 - **Search Tree Property:** For any value `V` in a node, all values in the child subtree to its left are strictly less than `V`, and all values in the child subtree to its right are strictly greater than `V`.
 - **Uniform Depth:** All leaf nodes must exist at the exact same depth, guaranteeing perfect balance across the entire structure.
 
+This specific implementation shows a B-Tree of **order 5**, meaning each node can have up to **5 children** and **4 values**. The minimum number of children for internal nodes (except the root) is **3**, which ensures that the tree remains balanced and efficient even as it grows.
+
 ### Complexity Analysis
 
 Because a B-Tree is perfectly balanced and each node stores multiple values, the height of the tree is significantly reduced compared to standard binary trees. The height remains at `O(log n)`, and because the base of the logarithm is large (based on the order `m`), the tree stays incredibly shallow even with millions of records.

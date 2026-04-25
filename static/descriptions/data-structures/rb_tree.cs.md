@@ -1,83 +1,78 @@
 # Červeno-černý strom
 
-**Červeno-černý strom** je sofistikovaný typ samovyvažujícího se binárního vyhledávacího stromu. Zajišťuje, že strom zůstává přibližně vyvážený, zabraňuje tomu, aby se stal "plochým" seznamem, a udržuje efektivní výkon pro všechny operace.
+Červeno-černý strom je samovyvažující se binární vyhledávací strom. Zatímco AVL stromy udržují striktní vyvážení kontrolou výšky podstromů, červeno-černé stromy udržují volnější vyvážení přiřazením barvy (červené nebo černé) každému uzlu a vynucením specifické sady pravidel týkajících se toho, jak mohou být tyto barvy uspořádány. Tento přístup zaručuje, že žádná cesta od kořene k listu není více než dvakrát delší než jakákoli jiná cesta, což zajišťuje, že strom zůstane přibližně vyvážený.
 
-Na rozdíl od standardního stromu každý uzel v červeno-černém stromu nese další bit informace: svou **barvu** (buď **červená** nebo **černá**). Tyto barvy se používají k vynucení specifické sady pravidel během vkládání a mazání, aby byla zaručena rovnováha stromu.
+### Klíčové koncepty
 
-### Pět vlastností
+- **Barvy:** Červené a černé označení je primárním mechanismem pro sledování vyvážení. Striktní pravidla upravující jejich umístění zabraňují tomu, aby se strom stal příliš nevyváženým.
+- **Rotace:** Stejně jako AVL stromy, i červeno-černé stromy používají levé rotace a pravé rotace k opravě strukturálních nevyvážeností. Rotace mění fyzické uspořádání uzlů.
+- **Přebarvení:** Předtím, než se přistoupí k rotacím, strom se často pokusí opravit porušení pravidla jednoduše změnou barev zúčastněných uzlů, jako je například přepnutí červeného uzlu na černý nebo naopak.
 
-Aby byla struktura považována za platný červeno-černý strom, musí vždy splňovat těchto pět podmínek:
+### Pravidla
 
-1. **Barva**: Každý uzel je buď červený, nebo černý.
-2. **Kořen**: Kořen stromu je vždy černý.
-3. **List**: Každý list (null) je považován za černý.
-4. **Červené pravidlo**: Pokud je uzel červený, oba jeho potomci musí být černí (žádné dva červené uzly nemohou být vedle sebe).
-5. **Pravidlo cesty**: Pro každý uzel musí všechny jednoduché cesty od tohoto uzlu k listovým potomkům obsahovat stejný počet černých uzlů.
+Pro zachování své vyvážené struktury červeno-černý strom striktně vynucuje pět základních vlastností:
 
-### Nástroje pro vyvážení
+- **Vlastnost barvy:** Každý uzel je obarven buď červeně, nebo černě.
+- **Vlastnost kořene:** Kořen stromu je vždy černý.
+- **Vlastnost listu:** Všechny listy (myšleno konceptuální nulové uzly na konci větví) jsou černé.
+- **Červené pravidlo:** Pokud je uzel červený, oba jeho potomci musí být černí. To znamená, že na žádné cestě nemohou být dva po sobě jdoucí červené uzly.
+- **Černé pravidlo:** Každá jednoduchá cesta od daného uzlu k jakémukoli z jeho potomků (listů) musí obsahovat přesně stejný počet černých uzlů.
 
-Pro udržení těchto vlastností během vkládání a mazání červeno-černé stromy používají dvě primární operace:
+### Analýza složitosti
 
-- **Přebarvení**: Změna uzlů mezi červenou a černou pro splnění pravidla cesty a červeného pravidla.
-- **Levé/pravé rotace**: Vertikální pohyb uzlů pro změnu struktury stromu bez porušení pořadí binárního vyhledávání.
+Protože červeno-černý strom zaručuje, že nejdelší cesta není nikdy více než dvakrát delší než nejkratší cesta, je dáno, že jeho výška zůstane na `O(log n)`. Ačkoli může být o něco vyšší než striktně vyvážený AVL strom, jeho operace zůstávají logaritmicky rychlé.
 
-## Analýza složitosti
-
-Červeno-černý strom poskytuje vynikající záruky výkonu. Zajištěním, že nejdelší cesta od kořene k listu není více než dvakrát delší než nejkratší cesta, udržuje operace logaritmické.
-
-| Operace    | Nejhorší případ |
-| ---------- | --------------- |
-| Hledání    | O(log n)        |
-| Vložení    | O(log n)        |
-| Odstranění | O(log n)        |
-
-## Vyhledávání (Hledání)
-
-Proces vyhledávání je totožný se standardním binárním vyhledávacím stromem.
-
-1. **Porovnání**: Algoritmus začíná v kořeni a porovnává hledanou hodnotu s hodnotou aktuálního uzlu.
-2. **Procházení**:
-    - Pokud je hledaná hodnota **menší**, přesune se k **levému potomku**.
-    - Pokud je hledaná hodnota **větší**, přesune se k **pravému potomku**.
-
-3. **Výsledek**: Pokud je nalezena shoda, uzel je vrácen. Pokud vyhledávání dosáhne null listu, hodnota není ve stromu.
+| Operace      | Nejhorší případ |
+| :----------- | :-------------- |
+| **Vložení**  | `O(log n)`      |
+| **Nalezení** | `O(log n)`      |
+| **Odebrání** | `O(log n)`      |
 
 ## Vložení
 
-Vkládání do červeno-černého stromu zahrnuje umístění nových dat a následné provedení "opravy" pro obnovení případných porušených vlastností.
+Vkládání je rozděleno do dvou fází: umístění uzlu a následná oprava jakýchkoli pravidel, která nový uzel mohl porušit.
 
-### Fáze 1: Umístění
+### Fáze 1: Vložení podle BVS
 
-- Strom je procházen jako standardní BST pro nalezení správného prázdného místa.
-- Na tomto místě je vytvořen **nový červený uzel**.
-- Pokud byl strom prázdný, tento uzel se stává kořenem a je obarven **černě** pro splnění vlastnosti kořene.
+1.  **Vložení:** Nový uzel je vložen do stromu pomocí standardní logiky průchodu binárním vyhledávacím stromem.
+2.  **Obarvení na červeno:** Každý nově vložený uzel je zpočátku obarven červeně. Dělá se to proto, že přidání červeného uzlu nezmění černou výšku (černé pravidlo), což je nejobtížněji opravitelné pravidlo. Přidání červeného uzlu však může porušit červené pravidlo, pokud je rodič nového uzlu také červený.
 
-### Fáze 2: Obnovení vlastností (oprava)
+### Fáze 2: Oprava
 
-Pokud je rodič nového uzlu také červený, "červené pravidlo" je porušeno. Algoritmus se podívá na **strýce** (sourozence rodiče) a rozhodne, jak to opravit:
+Pokud je rodič nového červeného uzlu také červený, došlo k porušení pravidla dvou červených uzlů (dvojitá červená). Strom analyzuje strýce nového uzlu (sourozence jeho rodiče), aby se určilo, jak toto porušení opravit.
 
-- **Případ 1: Červený strýc**: Pokud je strýc červený, algoritmus **přebarví** rodiče a strýce na černou a prarodiče na červenou. Kontrola se pak přesune nahoru k prarodiči.
-- **Případ 2: Černý strýc (trojúhelník)**: Pokud je strýc černý a nový uzel tvoří "trojúhelníkový" tvar s rodičem a prarodičem, provede se **rotace** na rodiči, aby se změnil na "linii".
-- **Případ 3: Černý strýc (linie)**: Pokud je strýc černý a uzly tvoří přímou linii, algoritmus **přebarví** rodiče na černou a prarodiče na červenou, pak provede **rotaci** na prarodiči pro vyvážení stromu.
+1.  **Případ 1 (Strýc je červený):** Pokud je strýc červený, provede se jednoduché přebarvení. Rodič a strýc se obarví černě a prarodič se obarví červeně. Pozornost se poté přesune nahoru k prarodiči, aby se zajistilo, že jeho obarvení na červeno nezpůsobilo nové porušení výše ve stromu.
+2.  **Případ 2 (Strýc je černý, tvar trojúhelníku):** Pokud nový uzel, jeho rodič a jeho prarodič tvoří trojúhelník (například rodič je levý potomek a nový uzel je pravý potomek), provede se rotace na rodiči, aby se uzly zarovnaly do přímky. Tím strom přejde do případu 3.
+3.  **Případ 3 (Strýc je černý, tvar přímky):** Pokud uzly tvoří přímku, rodič se obarví černě, prarodič červeně a provede se rotace na prarodiči. Tím se porušení opraví.
+4.  **Vynucení pravidla kořene:** Po dokončení všech oprav je kořen vždy přebarven na černý, pro případ, že by byl během procesu obarven červeně.
 
-## Odstranění (Smazání)
+## Nalezení
 
-Odstranění je nejsložitější operace, protože odstranění černého uzlu může narušit "pravidlo cesty" (černá výška stromu).
+Prohledávání stromu používá naprosto stejnou logiku průchodu jako standardní binární vyhledávací strom. Barvy se během vyhledávání zcela ignorují.
 
-### Fáze 1: Vyhledání a standardní odstranění
+## Odebrání
 
-1. **Lokalizace**: Cílový uzel je nalezen pomocí logiky vyhledávání.
-2. **Označení**: Uzel je označen k odstranění.
-3. **Fyzické odstranění**:
-    - **List nebo jeden potomek**: Uzel je odstraněn a jeho potomek (pokud existuje) je "transplantován" na jeho pozici.
-    - **Dva potomci**: Je nalezen **následník v inorder pořadí** (nejmenší uzel v pravém podstromu). Jeho hodnota je zkopírována do cílového uzlu a místo něj je odstraněn původní uzel následníka.
+Odstranění je nejsložitější operací, protože smazání uzlu může narušit striktní barevné vlastnosti, zejména černou výšku.
 
-### Fáze 2: Obnovení vlastností (oprava)
+### Fáze 1: Smazání podle BVS
 
-Pokud byl odstraněný uzel **černý**, vytvoří to porušení "dvojitě černá", což znamená, že jedna cesta má nyní méně černých uzlů než ostatní. Algoritmus to opravuje zkoumáním **sourozence** aktuálního uzlu:
+1.  **Smazání:** Najde se cílový uzel a odstraní se nebo se nahradí pomocí standardních pravidel BVS (zpracování případů s listem, jedním potomkem nebo dvěma potomky).
+2.  **Sledování barvy:** Pokud byl smazaný (nebo přesunutý) uzel červený, nebyla porušena žádná pravidla, protože červené uzly neovlivňují černou výšku a odstranění jednoho z nich nemůže vytvořit dvojitou červenou. Pokud však byl odstraněný uzel černý, bylo porušeno černé pravidlo, protože jedna cesta má nyní méně černých uzlů než ostatní.
 
-- **Případ 0: Null list**: Pokud dojde k porušení na konceptuálně prázdném listu, algoritmus se připraví na opravu rovnováhy začínající od rodiče.
-- **Případ 1: Červený sourozenec**: Sourozenec je přebarven na černou a rodič na červenou, následuje **rotace** u rodiče pro přinesení černého uzlu do cesty.
-- **Případ 2: Černý sourozenec se dvěma černými potomky**: Sourozenec je přebarven na **červenou** a status "dvojitě černá" se přesune nahoru k rodiči, kde bude vyřešen.
-- **Případ 3: Černý sourozenec s blízkým červeným potomkem**: Sourozenec a jeho červený potomek jsou **přebarveni a rotováni** pro transformaci na případ 4.
-- **Případ 4: Černý sourozenec se vzdáleným červeným potomkem**: Sourozenec přebírá barvu rodiče, rodič a vzdálený potomek jsou obarveni **černě** a **rotace** je provedena u rodiče pro dokonalé obnovení černé výšky.
+### Fáze 2: Oprava
+
+Pokud byl odstraněn černý uzel, strom musí projít procesem opravy, aby se obnovila černá výška. Analyzuje se sourozenec uzlu, který nahradil smazaný uzel.
+
+1.  **Případ 1 (Sourozenec je červený):** Sourozenec se obarví černě, rodič se obarví červeně a na rodiči se provede rotace. To neopraví černou výšku, ale změní to strukturu tak, že nový sourozenec je zaručeně černý, což umožňuje přechod k jednomu z dalších případů.
+2.  **Případ 2 (Sourozenec je černý, oba potomci jsou černí):** Sourozenec se obarví červeně a pozornost se přesune nahoru k rodiči.
+3.  **Případ 3 (Sourozenec je černý, bližší potomek je červený):** Bližší potomek se obarví černě, sourozenec se obarví červeně a na sourozenci se provede rotace. Tím strom přejde do případu 4.
+4.  **Případ 4 (Sourozenec je černý, vzdálenější potomek je červený):** Sourozenec převezme barvu rodiče, rodič se obarví černě, vzdálenější potomek se obarví černě a na rodiči se provede rotace. Tím se úspěšně obnoví černá výška.
+5.  **Porušení dvojité černé:** Ve specifických scénářích musí konceptuální nulový uzel dočasně nést extra černou váhu, aby se udrželo vyvážení, což spouští specifickou opravu k vyřešení tohoto porušení dvojité černé.
+
+## Poznámky
+
+Červeno-černé stromy jsou vysoce praktické a jsou velmi běžné v reálných systémech, často se používají k implementaci asociativních polí a množin ve standardních programovacích knihovnách.
+
+**Zajímavost:** Červeno-černý strom je ve skutečnosti chytrou binární reprezentací 2-3-4 stromu, což je samo o sobě specifický typ B-stromu, kde uzly mohou pojmout až tři hodnoty a mít až čtyři potomky. Červené odkazy se zde používají ke konceptuálnímu spojení standardních binárních uzlů za účelem simulace těchto větších vícehodnotových uzlů.
+
+**Kdy toto NEPOUŽÍVAT:** Ačkoli jsou červeno-černé stromy vynikajícími strukturami pro obecné použití, pokud má aplikace extrémní převahu čtení a vyžaduje absolutně nejrychlejší možná vyhledávání, striktnější vyvažování AVL stromu by mohlo poskytnout o něco lepší výkon vyhledávání.

@@ -1,37 +1,47 @@
-# Porovnání třídících algoritmů
+# Porovnání algoritmů
 
-Tento pohled představuje porovnávací matici třídících algoritmů vyhodnocených na různých vstupních distribucích. Je navržen tak, aby ilustroval několik základních pozorování o chování třídění.
+Pohled porovnání poskytuje matici výkonnosti, umožňující pozorovat, jak různé strategie řazení reagují na specifické vzorce dat v poli o velikosti 32. Zatímco O notace poskytuje teoretickou horní mez, skutečný počet porovnání a prohození se může drasticky lišit v závislosti na počátečním stavu dat.
 
-## Účel
+### Přehled výkonnosti
 
-Matice umožňuje přímé vizuální porovnání toho, jak různé algoritmy reagují na stejné vstupy. Každý řádek představuje jeden algoritmus; každý sloupec představuje jednu třídu vstupních dat. Spuštěním všech simulací současně lze pozorovat relativní výkon a pořadí dokončení.
+Tato tabulka shrnuje teoretické časové a paměťové složitosti pro šest algoritmů poskytnutých v simulátoru.
 
-Demonstrují se následující body:
+| Algoritmus         | Nejlepší případ | Průměrný případ | Nejhorší případ | Paměť      |
+| :----------------- | :-------------- | :-------------- | :-------------- | :--------- |
+| **Bubble Sort**    | `O(n^2)`        | `O(n^2)`        | `O(n^2)`        | `O(1)`     |
+| **Insertion Sort** | `O(n)`          | `O(n^2)`        | `O(n^2)`        | `O(1)`     |
+| **Selection Sort** | `O(n^2)`        | `O(n^2)`        | `O(n^2)`        | `O(1)`     |
+| **Quick Sort**     | `O(n log n)`    | `O(n log n)`    | `O(n^2)`        | `O(log n)` |
+| **Merge Sort**     | `O(n log n)`    | `O(n log n)`    | `O(n log n)`    | `O(n)`     |
+| **Heap Sort**      | `O(n log n)`    | `O(n log n)`    | `O(n log n)`    | `O(1)`     |
 
-- **Neexistuje univerzálně optimální algoritmus.** Každý algoritmus vykazuje silné a slabé stránky v závislosti na struktuře vstupu.
-- **Asymptotická složitost není jediným kritériem.** Algoritmus s horší nejhorší složitostí může na konkrétních vstupech překonat teoreticky nadřazený algoritmus.
-- **Vstupní distribuce je stejně důležitá jako volba algoritmu.** Téměř seřazená, obráceně seřazená a data s mnoha duplikáty mohou významně změnit relativní pořadí výkonu.
-- **Stabilita je důležitá.** Algoritmy, které zachovávají relativní pořadí rovných prvků (stabilní algoritmy), jsou upřednostňovány v aplikacích, kde je třeba udržovat sekundární třídící klíče.
+## Analýza datových sad
 
-## Vlastnosti ideálního třídícího algoritmu
+Různá rozložení dat zdůrazňují silné stránky a fatální nedostatky různých algoritmů.
 
-Ideální in-place porovnávací třídění by splňovalo všechna následující kritéria:
+### Quick Sort Killer
 
-1. **Stabilní**: rovné klíče zachovávají své původní relativní pořadí.
-2. **In-place**: vyžaduje pouze O(1) pomocné paměti.
-3. **Optimální počet porovnání**: provádí O(n log n) porovnání klíčů v nejhorším případě.
-4. **Minimální přesuny dat**: provádí O(n) prohozů nebo přesunů v nejhorším případě.
-5. **Adaptivní**: dosahuje O(n) času na téměř seřazených nebo málo entropických datech.
+Quick Sort je obecně jeden z nejrychlejších algoritmů v matici, ale je vysoce citlivý na výběr pivota. Protože tato implementace vybírá jako pivota poslední prvek, datová sada **Reverse** (Reverzně setříděné) představuje jeho absolutně nejhorší případ. Místo rozdělení pole na dvě stejné poloviny pivot pouze „odloupne“ jeden prvek po druhém, následkem toho hloubka rekurze exploduje na `n` a časová složitost degraduje na `O(n^2)`. Ironicky, datová sada **Almost Sorted** (Téměř setříděné) také spouští toto chování nejhoršího případu, jelikož poslední prvek je největší a vede ke stejným nevyváženým rozdělením.
 
-Žádný známý algoritmus nesplňuje všech pět vlastností současně. Volba třídícího algoritmu je proto vždy kompromisem diktovaným omezeními dané aplikace.
+### Slepota algoritmu Selection Sort
 
-## Vstupní datové sady
+Bez ohledu na to, zda jsou data **Shuffled** (Zamíchané), **Almost Sorted** (Téměř setříděné), nebo obsahují mnoho hodnot typu **Duplicates** (Duplikáty), Selection Sort vždy provede stejný počet porovnání. Protože postrádá mechanismus pro předčasné „ukončení“ nebo „přeskočení“, naivně prohledá celou nesetříděnou část při hledání minima, které už možná je na správném místě. Z tohoto důvodu je konzistentně pomalý, avšak jeho výkonnost je velmi předvídatelná.
 
-Porovnání používá šest reprezentativních vstupních distribucí:
+### Praktický Insertion Sort
 
-- **Náhodné**: rovnoměrně zamíchané prvky.
-- **Téměř seřazené**: seřazená sekvence s malým počtem sousedních transpozic.
-- **Obráceně seřazené**: prvky v sestupném pořadí, představující běžný nejhorší případ.
-- **Duplikáty**: malý počet různých hodnot opakovaných v celém poli.
-- **Pilový**: opakující se vzestupný vzor produkující periodické lokální uspořádání.
-- **Pyramida**: hodnoty vzestupné ke středovému vrcholu a pak sestupné, vytvářející symetrickou strukturu.
+Na datech **Almost Sorted** (Téměř setříděné) (kde je mnoho prvků blízko své konečné pozice) je Insertion Sort pozoruhodně rychlý. Rychle „probublá“ prvky o několik pozic zpět a zastaví se. Je však důležité poznamenat, že ačkoliv data mohou pro pozorovatele rychle vypadat setříděně, algoritmus stále provádí nezbytná porovnání, aby se toto ověřilo.
+
+### Merge Sort vs. Paměť
+
+V pohledu porovnání zůstává Merge Sort naprosto konzistentní napříč daty **Sawtooth** (Pilovité), **Shuffled** (Zamíchané) a **Reverse** (Reverzně setříděné). Ačkoliv je neuvěřitelně spolehlivý, problémem může být významné využití pomocného prostoru. Na rozdíl od ostatních algoritmů je Merge Sort out-of-place, to znamená, že je jediný v matici vyžadující značnou dodatečnou paměť pro uložení podpolí během fáze slučování, i když toto není ve vizualizaci explicitně zobrazeno.
+
+## Poznámky
+
+Při porovnávání těchto algoritmů je nutné věnovat velkou pozornost poměru **Porovnání vs. Prohození**:
+
+- **Selection Sort** má nejméně prohození (nejvýše `n`), z toho důvodu je užitečný, pokud je zápis do paměti velmi nákladný.
+- **Bubble Sort** má vysoký počet prohození, jelikož přesouvá prvky inkrementálně.
+- **Heap Sort** a **Quick Sort** nabízejí nejlepší rovnováhu pro obecné řazení velkého rozsahu, pokud je požadováno řazení na místě (in-place) a stabilita není důležitá.
+- **Merge Sort** je primární volbou pro většinu ostatních scénářů, jelikož obvykle překonává ostatní na větších datových sadách.
+
+Pochopení těchto souvislostí je nezbytné pro inženýrství v reálném světě. Většina moderních programovacích jazyků používá „hybridní řazení“ (jako Timsort nebo Introsort). Tyto enginy sledují data a automaticky přepínají mezi těmito algoritmy, například se použije Quick Sort pro velké oddíly, ale přepne se na Insertion Sort, když se datová sada zmenší nebo je téměř setříděná.

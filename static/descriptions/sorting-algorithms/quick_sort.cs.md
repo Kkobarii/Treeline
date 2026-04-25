@@ -1,66 +1,54 @@
-# Rychlé třídění
+# Quick Sort
 
-Rychlé třídění je algoritmus typu rozděl a panuj, který funguje tak, že vybere 'pivotní' prvek a rozdělí pole kolem něj. Prvky menší než pivot jdou doleva a větší prvky jdou doprava. Proces se rekurzivně opakuje na každé části. Je široce používán v praxi díky vynikajícímu průměrnému výkonu a nízké paměťové režii.
+Quick Sort je vysoce efektivní třídicí algoritmus založený na porovnávání, který využívá strategii rozděl a panuj. Funguje tak, že se z pole vybere prvek zvaný „pivot“ a ostatní prvky se rozdělí do dvou podpolí podle toho, zda jsou menší nebo větší než pivot. Podpole se následně rekurzivně setřídí. Tento proces vede v průměru k velmi rychlému setřídění, a proto z něj činí jeden z nejpoužívanějších třídicích algoritmů v moderní informatice.
 
-## Jak to funguje
+### Vlastnosti
 
-1. **Rozdělení**: Vyberte pivot a rozdělte pole
-    - Prvky menší než pivot → levá část
-    - Prvky větší než pivot → pravá část
-2. **Rekurzivní třídění**: Aplikujte rychlé třídění na obě části
-3. **Kombinace**: Protože jsou části tříděny na místě, výsledek je seřazené pole
+- **Paměťová složitost:** In-place. Ačkoliv vyžaduje pomocný prostor `O(log n)` pro zásobník rekurzivních volání, nepotřebuje k uložení dat žádná další pole.
+- **Stabilita:** Nestabilní. Proces rozdělování zahrnuje prohazování prvků na velké vzdálenosti. To může změnit relativní pořadí stejných prvků.
+- **Paradigma:** Rozděl a panuj.
 
-## Výhody
+### Analýza složitosti
 
-- **Rychlé v praxi**: O(n log n) průměrný případ s dobrými konstantami
-- **Třídění na místě**: Pouze O(log n) pomocného prostoru pro rekurzi
-- **Přátelské k cache**: Dobrá lokalita reference pro moderní CPU
-- **Adaptivní**: Funguje dobře na částečně seřazených datech s dobrou volbou pivotu
-- **Rozšířené**: Implementováno ve většině standardních knihoven
-- **Založené na porovnávání**: Funguje s jakýmikoli porovnatelnými daty
-- **Ocasová rekurze**: Může být optimalizováno pro menší využití zásobníku
+Výkon algoritmu Quick Sort silně závisí na výběru pivota. V nejlepším a průměrném případě pivot konzistentně rozděluje pole na zhruba stejné poloviny, vedoucí k logaritmické hloubce. K nejhoršímu scénáři dochází, když je pivot neustále nejmenším nebo největším prvkem (např. při výběru posledního prvku v již setříděném poli). To vede k vysoce nevyváženému stromu s hloubkou `n`.
 
-## Nevýhody
+| Nejlepší případ | Průměrný případ | Nejhorší případ | Paměť      |
+| :-------------- | :-------------- | :-------------- | :--------- |
+| `O(n log n)`    | `O(n log n)`    | `O(n^2)`        | `O(log n)` |
 
-- **Nejhorší případ O(n²)**: Špatná volba pivotu (jako seřazená data s prvním prvkem jako pivotem)
-- **Nestabilní**: Stejné prvky nemusí zachovat původní pořadí
-- **Nestabilní výkon**: Silně závisí na volbě pivotu
-- **Složitá implementace**: Správná implementace randomizace je složitá
-- **Prostor zásobníku**: Rekurze používá O(log n) až O(n) prostoru zásobníku
-- **Nezaručeno**: Musí se použít dobrá strategie pivotu pro vyhnutí se O(n²)
+## Algoritmus
 
-## Analýza složitosti
+Algoritmus je rozdělen na fázi rozdělování a rekurzivní volání.
 
-| Metrika                       | Složitost                                               |
-| ----------------------------- | ------------------------------------------------------- |
-| **Nejlepší časová složitost** | O(n log n) - vyvážené části                             |
-| **Průměrná časová složitost** | O(n log n) - náhodná volba pivotu                       |
-| **Nejhorší časová složitost** | O(n²) - špatná volba pivotu                             |
-| **Prostorová složitost**      | O(log n) - zásobník rekurze (nejlepší), O(n) (nejhorší) |
-| **Stabilní**                  | Ne - relativní pořadí stejných prvků není zachováno     |
+### Rozdělování
 
-## Kdy použít
+Cílem této fáze je umístit zvoleného pivota na jeho konečnou setříděnou pozici a zajistit, aby všechny menší prvky byly nalevo od něj a všechny větší prvky napravo.
 
-- Obecné třídění velkých datasetů
-- Když je průměrný výkon důležitější než nejhorší případ
-- Když je paměťový prostor omezený
-- Vestavěné systémy a kód kritický na výkon
-- S randomizovanou volbou pivotu pro zaručený dobrý výkon
+1.  **Výběr pivota**: V této implementaci se jako pivot vybere poslední prvek aktuálního rozsahu.
+2.  **Inicializace hranice**: Index hranice se nastaví na začátek rozsahu. Tento index sleduje pozici, kam by měl být umístěn další prvek menší než pivot.
+3.  **Procházení**: Algoritmus iteruje rozsahem od začátku až k prvku těsně před pivotem.
+4.  **Porovnání a prohození**: Pro každý prvek při procházení:
+    - **Porovnání**: Prvek se porovná s hodnotou pivota.
+    - **Prohození**: Pokud je prvek menší nebo roven pivotovi, prohodí se s prvkem na indexu hranice a index hranice se inkrementuje.
+5.  **Umístění pivota**: Jakmile je procházení dokončeno, pivot (aktuálně na konci) se prohodí s prvkem na indexu hranice. Pivot je nyní na své konečné, trvale setříděné pozici.
 
-## Strategie volby pivotu
+### Rekurze
 
-- **První prvek**: Jednoduchý, ale špatný pro seřazená data
-- **Náhodný prvek**: Dobrá obecná strategie
-- **Medián ze tří**: Lepší pivot za cenu extra porovnání
-- **Medián mediánů**: Zaručuje O(n log n), ale pomalejší v praxi
+1.  **Rozdělení**: Index úspěšně umístěného pivota se vrátí do hlavní funkce.
+2.  **Volání vlevo**: Funkce Quick Sort se rekurzivně zavolá pro podpole nalevo od pivota (prvky menší než pivot).
+3.  **Volání vpravo**: Funkce Quick Sort se rekurzivně zavolá pro podpole napravo od pivota (prvky větší než pivot).
+4.  **Základní případ**: Rekurze se zastaví, když má podpole méně než dva prvky, protože je již považováno za setříděné.
 
-## Vylepšení
+## Poznámky
 
-- **Randomizace**: Zamíchat data nebo náhodně vybrat pivot
-- **3-cestné rozdělení**: Lepší pro duplicitní prvky
-- **Introsort**: Přepíná na třídění haldou, pokud je hloubka rekurze příliš velká
-- **Přístup Timsort**: Použití třídění vkládáním pro malá podpole
+Quick Sort je standardní třídicí algoritmus používaný v mnoha systémech. Například funkce `sort()` v mnoha knihovnách C++ a Java často využívá variantu algoritmu Quick Sort (jako je Dual-Pivot Quicksort).
 
-## Použití v reálném světě
+**Kdy toto NEPOUŽÍVAT:** Algoritmu Quick Sort je třeba se vyhnout, pokud je vyžadována stabilita (zachování pořadí stejných položek). Navíc v systémech kritických z hlediska bezpečnosti, kde by výkon v nejhorším případě `O(n^2)` mohl vést k zamrznutí systému nebo „Denial of Service“ (prostřednictvím datové sady „Quick Sort Killer“), je preferován algoritmus se zaručeným výkonem `O(n log n)`, jako je Merge Sort nebo Heap Sort.
 
-Rychlé třídění je základem `qsort()` v C, `sort()` v C++ a je často zabaleno v algoritmech jako Introsort (C++ std::sort), které zaručují O(n log n) nejhorší případ.
+### Optimalizace
+
+Protože je výběr pivota tak důležitý, běžně se používá několik optimalizací, aby se předešlo nejhoršímu případu `O(n^2)`:
+
+- **Medián ze tří (Median-of-Three)**: Místo výběru posledního prvku algoritmus zkontroluje první, prostřední a poslední prvek a jako pivota zvolí jejich medián. To výrazně snižuje šanci na výskyt chování nejhoršího případu u setříděných nebo téměř setříděných dat.
+- **Náhodný pivot**: Výběr náhodného indexu pro pivota matematicky znemožňuje, aby konkrétní pevný vzorec dat neustále vyvolával nejhorší scénář.
+- **Introsort**: Mnoho produkčních implementací sleduje hloubku rekurze. Pokud hloubka překročí určitou hranici (ukazující na pravděpodobnou cestu `O(n^2)`), algoritmus automaticky přepne na Heap Sort, aby se zaručilo dokončení v `O(n log n)`.

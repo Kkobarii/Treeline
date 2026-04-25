@@ -1,66 +1,69 @@
-# Binární vyhledávací strom (BST)
+# Binární vyhledávací strom
 
-**Binární vyhledávací strom (BST)** je základní hierarchická datová struktura používaná pro efektivní ukládání a vyhledávání dat. Skládá se z uzlů, kde každý uzel obsahuje hodnotu a až dva "potomky", typicky označované jako levý potomek a pravý potomek.
+Binární vyhledávací strom (BVS, anglicky BST) je hierarchická datová struktura založená na uzlech, která udržuje data seřazená tak, jak jsou vkládána. Každý uzel obsahuje hodnotu a ukazatele na maximálně dva potomky: levého potomka a pravého potomka. Definující charakteristikou BVS je jeho striktní uspořádání, které umožňuje rychlé vyhledávání, vkládání a mazání dat tím, že v každém kroku zmenší prohledávaná data na polovinu, podobně jako binární vyhledávání v seřazeném poli.
 
-Definující charakteristikou BST je jeho princip uspořádání:
+### Pravidla
 
-- **Levý podstrom** uzlu obsahuje pouze hodnoty striktně menší než hodnota uzlu.
-- **Pravý podstrom** uzlu obsahuje pouze hodnoty striktně větší než hodnota uzlu.
-- Duplicitní hodnoty obecně nejsou povoleny.
+- **Vlastnost levého podstromu:** Všechny uzly v levém podstromu musí mít hodnoty ostře menší, než je hodnota rodičovského uzlu.
+- **Vlastnost pravého podstromu:** Všechny uzly v pravém podstromu musí mít hodnoty ostře větší, než je hodnota rodičovského uzlu.
+- **Žádné duplicity:** V této konkrétní implementaci nejsou povoleny duplicitní hodnoty.
 
-Tato organizační struktura umožňuje stromu fungovat jako seřazený seznam při zachování hierarchických výhod stromu, což významně zužuje prohledávaný prostor během operací.
+### Analýza složitosti
 
-## Analýza složitosti
+Efektivita binárního vyhledávacího stromu je zcela závislá na jeho výšce, označované jako `h`. V optimálním, dokonale vyváženém stromu je výška `log2(n)`, což vede k velmi rychlým logaritmickým operacím. Pokud jsou však data vkládána v seřazeném nebo téměř seřazeném pořadí (jako 1, 2, 3, 4, 5), strom degraduje do rovné linie a v podstatě se stává spojovým seznamem. V tomto nejhorším případě se výška stává `n` a výkon výrazně klesá.
 
-Efektivita binárního vyhledávacího stromu přímo závisí na jeho **výšce**. Ve vyváženém stromu je výška logaritmická vzhledem k počtu uzlů; nicméně v nejhorším případě (například při vkládání seřazených dat) se strom může stát "degenerovanou" linií.
-
-| Operace    | Průměrný případ | Nejhorší případ |
-| ---------- | --------------- | --------------- |
-| Hledání    | O(log n)        | O(n)            |
-| Vložení    | O(log n)        | O(n)            |
-| Odstranění | O(log n)        | O(n)            |
-
-## Vyhledávání (Hledání)
-
-Pro nalezení konkrétní hodnoty proces začíná v **kořenovém** uzlu. Algoritmus provádí sérii porovnání pro navigaci stromem:
-
-1. **Porovnání**: Hledaná hodnota je porovnána s hodnotou aktuálního uzlu.
-2. **Shoda**: Pokud jsou hodnoty stejné, vyhledávání je úspěšné.
-3. **Procházení**:
-    - Pokud je hledaná hodnota **menší** než aktuální uzel, vyhledávání pokračuje k **levému potomku**.
-    - Pokud je hledaná hodnota **větší** než aktuální uzel, vyhledávání pokračuje k **pravému potomku**.
-
-4. **Ukončení**: Pokud vyhledávání dosáhne prázdné větve (null reference) bez nalezení shody, hodnota ve stromu neexistuje.
+| Operace      | Průměrný případ | Nejhorší případ |
+| :----------- | :-------------- | :-------------- |
+| **Vložení**  | `O(log n)`      | `O(n)`          |
+| **Nalezení** | `O(log n)`      | `O(n)`          |
+| **Odebrání** | `O(log n)`      | `O(n)`          |
 
 ## Vložení
 
-Vkládání sleduje cestu podobnou vyhledávání, aby zajistilo umístění nové hodnoty na správné místo pro zachování vlastností stromu.
+Proces vkládání prochází stromem dolů, aby našel správné prázdné místo pro novou hodnotu a zajistil, že budou zachována pravidla BVS.
 
-1. **Kontrola prázdného stromu**: Pokud strom nemá žádné uzly, nová hodnota je umístěna do **kořene**.
-2. **Porovnávací smyčka**: Pokud strom není prázdný, algoritmus porovnává novou hodnotu s aktuálním uzlem:
-    - **Jít doleva**: Pokud je nová hodnota menší, zkontroluje levého potomka. Pokud je levé místo prázdné, **vytvoří tam nový list**. Jinak prochází hlouběji do levého podstromu.
-    - **Jít doprava**: Pokud je nová hodnota větší, zkontroluje pravého potomka. Pokud je pravé místo prázdné, **vytvoří tam nový list**. Jinak prochází hlouběji do pravého podstromu.
+1. **Kontrola kořene:** Pokud je strom zcela prázdný, nová hodnota se okamžitě stává kořenovým uzlem.
+2. **Porovnání:** Porovná se nová hodnota s hodnotou aktuálního uzlu.
+3. **Průchod:** Rozhodne se o cestě na základě porovnání:
+    - Pokud je nová hodnota menší než aktuální uzel, postupuje se doleva. Pokud neexistuje žádný levý potomek, vytvoří se zde nový listový uzel. V opačném případě se přejde na levého potomka a opakuje se krok 2.
+    - Pokud je nová hodnota větší než aktuální uzel, postupuje se doprava. Pokud neexistuje žádný pravý potomek, vytvoří se zde nový listový uzel. V opačném případě se přejde na pravého potomka a opakuje se krok 2.
+4. **Zahození duplicity:** Pokud se nová hodnota rovná hodnotě aktuálního uzlu, operace se zastaví a hodnota se zahodí, protože duplicity jsou odmítány.
 
-3. **Zpracování duplicit**: Pokud hodnota již ve stromu existuje, operace je **zrušena**, protože BST typicky vyžaduje unikátní klíče.
+## Nalezení
 
-## Odstranění (Smazání)
+Prohledávání stromu používá naprosto stejnou logiku průchodu jako vkládání.
 
-Odstranění je nejsložitější operace, protože strom musí být restrukturalizován, aby zůstal platný po odstranění uzlu. Proces nejprve zahrnuje vyhledání uzlu a poté analýzu jednoho ze tří případů:
+1. **Porovnání:** Začíná se v kořeni a porovná se hledaná hodnota s aktuálním uzlem.
+2. **Nalezeno:** Pokud se hodnoty shodují, uzel byl úspěšně nalezen.
+3. **Průchod:** Rozhodne se o cestě na základě porovnání:
+    - Pokud je hledaná hodnota menší, přejde se na levého potomka.
+    - Pokud je hledaná hodnota větší, přejde se na pravého potomka.
+4. **Nenalezeno:** Při pokusu o přechod na potomka, který neexistuje (ukazatel na `null`), je hledání ukončeno, což znamená, že hodnota se ve stromu nenachází.
 
-### Fáze 1: Vyhledání a označení
+## Odebrání
 
-Algoritmus prochází strom pro nalezení cílové hodnoty. Po nalezení je uzel **označen k odstranění**.
+Odstranění uzlu je nejsložitější operací v BVS, protože strom se musí sám znovu propojit, aniž by porušil pravidla uspořádání. Strom nejprve vyhledá cílovou hodnotu a po cestě si pamatuje rodičovský uzel. Jakmile je uzel nalezen a označen ke smazání, strom analyzuje potomky uzlu, aby určil strategii odstranění.
 
-### Fáze 2: Analýza případů
+### Případ 1: Listový uzel
 
-V závislosti na počtu potomků označeného uzlu je použita jedna z následujících strategií:
+Toto je nejjednodušší případ. Pokud uzel, který má být smazán, nemá žádné potomky, je jednoduše odstraněn nastavením ukazatele jeho rodiče na `null`.
 
-- **Případ 1: Listový uzel (žádní potomci)**
-  Uzel je jednoduše odstraněn ze stromu a reference rodiče na něj je vymazána.
-- **Případ 2: Jeden potomek**
-  Uzel je odstraněn a jeho jediný potomek je povýšen na jeho místo. Rodič odstraněného uzlu je **přepojen** přímo k tomuto potomku.
-- **Případ 3: Dva potomci**
-  Pro zachování pořadí BST nelze uzel jednoduše odstranit. Místo toho algoritmus najde **následníka v inorder pořadí** (nejmenší hodnotu v pravém podstromu).
-    1. **Identifikace následníka**: Přejděte na pravého potomka, poté se pohybujte doleva jak nejdále to jde.
-    2. **Přepojení potomka následníka**: Pokud má následník pravého potomka, tento potomek je přepojen k rodiči následníka, aby se neztratila žádná data.
-    3. **Nahrazení**: Hodnota a identita uzlu označeného k odstranění jsou nahrazeny hodnotou a identitou následníka, čímž efektivně "prohodíme" následníka na cílovou pozici.
+### Případ 2: Jeden potomek
+
+Pokud má uzel pouze jednoho potomka (buď levého, nebo pravého), uzel se zcela obejde. Strom nahradí smazaný uzel tím, že propojí jeho rodiče přímo s tímto jediným potomkem.
+
+### Případ 3: Dva potomci
+
+Pokud má uzel levého i pravého potomka, nelze ho jednoduše smazat bez toho, aby jeho potomci zůstali odpojeni.
+
+1. **Nalezení in-order následníka:** Strom najde uzel s nejbližší vyšší hodnotou. To se provede tak, že se jednou přejde na pravého potomka a poté se prochází co nejdále doleva.
+2. **Přepojení potomka následníka:** Pokud má následník vlastního pravého potomka, tento potomek je přepojen k rodiči následníka.
+3. **Nahrazení:** Hodnota původního cílového uzlu je nahrazena daty následníka. Strukturální pozice původního uzlu zůstává nedotčena, ale data jsou přepsána, čímž se efektivně smaže cílová hodnota a zachová se platný BVS.
+
+## Poznámky
+
+Ačkoli je binární vyhledávací strom skvělou úvodní strukturou, jeho fatální chybou je absence samovyvažování.
+
+**Kdy toto NEPOUŽÍVAT:** Standardním BVS je vhodné se vyhnout, pokud by vstupní data mohla být předem seřazená, protože složitost `O(n)` v nejhorším případě jej činí nepřijatelně pomalým pro velké datové sady.
+
+V reálném světě se standardní BVS v produkčním kódu používají zřídka. Místo toho slouží jako základní logika pro **samovyvažující se stromy** (jako jsou AVL stromy a červeno-černé stromy). Tyto pokročilé struktury využívají stejnou logiku vkládání a mazání, ale na konci operací přidávají složité rotace, aby zaručily, že strom zůstane krátký a široký, čímž si udrží optimální logaritmickou časovou složitost.

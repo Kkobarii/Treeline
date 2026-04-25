@@ -1,40 +1,45 @@
-# Zásobník (LIFO)
+# Zásobník
 
-**Zásobník** je lineární datová struktura, která následuje princip **Poslední dovnitř, první ven (LIFO)**. To znamená, že poslední prvek přidaný do zásobníku je první, který bude odebrán. Představte si to jako fyzický stoh talířů: nový talíř přidáte na vrchol a když jeden potřebujete, vezmete ho z vrcholu.
+Zásobník je jednoduchá lineární datová struktura, která funguje na principu Last-In-First-Out (LIFO). Je navržen tak, aby se prvky přidávaly a odebíraly ze zcela stejného konce, konceptuálně označovaného jako vrchol (top). Kvůli tomuto striktnímu vzoru přístupu je vysoce efektivní, ale záměrně omezený ve své flexibilitě.
 
-Zásobníky se používají v mnoha oblastech informatiky, včetně vyhodnocování výrazů, syntaktické analýzy a správy volání funkcí v paměti programu.
+### Pravidla
 
-## Analýza složitosti
+- **Vlastnost LIFO:** Poslední prvek přidaný do zásobníku je matematicky zaručeně prvním prvkem, který bude odebrán.
+- **Přístup pouze na vrchol:** Prvky lze přidávat, odebírat nebo prohlížet pouze na samém vrcholu zásobníku. Procházení prvků uprostřed struktury není povoleno.
+- **Struktura uzlu:** Interně každý uzel obsahuje hodnotu a referenční ukazatel směřující na další uzel hned pod ním v zásobníku.
 
-Protože zásobník umožňuje přístup pouze k vrchnímu prvku, všechny primární operace jsou extrémně efektivní.
+### Analýza složitosti
 
-| Operace        | Časová složitost | Účel                                          |
-| -------------- | ---------------- | --------------------------------------------- |
-| **Push**       | O(1)             | Přidání nového prvku na vrchol.               |
-| **Pop**        | O(1)             | Odebrání vrchního prvku.                      |
-| **Nahlédnutí** | O(1)             | Zobrazení vrchního prvku bez jeho odstranění. |
-| **Prostor**    | O(n)             | Lineární prostor vzhledem k počtu prvků.      |
+Protože k veškerým úpravám a vyhledáváním dochází striktně na jediném ukazateli na vrchol, nikdy nevzniká potřeba procházet celou strukturu. Výsledkem jsou neuvěřitelně rychlé operace s konstantní časovou složitostí ve všech případech.
 
-## Push
+| Operace  | Nejhorší případ |
+| :------- | :-------------- |
+| **Push** | `O(1)`          |
+| **Pop**  | `O(1)`          |
+| **Peek** | `O(1)`          |
 
-Operace push přidává nový prvek do kolekce. V zásobníku se tento nový prvek vždy stává novým "vrcholem".
+## Push (Vložení)
 
-1. **Vytvoření**: Pro hodnotu je vytvořen nový uzel nebo záznam.
-2. **Propojení**: Nový prvek je umístěn "nad" aktuální vrchní prvek.
-3. **Aktualizace vrcholu**: Interní reference zásobníku je aktualizována tak, aby ukazovala na tento nový prvek jako aktuální **vrchol**.
+Vložení nové hodnoty do zásobníku je přímočarý proces vytvoření nového prvku na vrcholu a jeho propojení směrem dolů.
 
-## Pop
+1. **Vytvoření uzlu:** Vygeneruje se nový uzel obsahující poskytnutou hodnotu.
+2. **Propojení dalšího:** Ukazatel nového uzlu se nastaví tak, aby odkazoval na aktuální vrcholový uzel zásobníku.
+3. **Aktualizace vrcholu:** Primární ukazatel na vrchol zásobníku se aktualizuje tak, aby ukazoval na tento nově vytvořený uzel. Tím se upevní jeho místo na vrcholu.
 
-Operace pop odstraňuje prvek, který je aktuálně na vrcholu zásobníku.
+## Pop (Odebrání)
 
-1. **Kontrola prázdnosti**: Pokud zásobník nemá žádné prvky, operace je zrušena, protože není co odstranit.
-2. **Identifikace vrcholu**: Aktuální **vrcholový** prvek je cílen k odstranění.
-3. **Aktualizace vrcholu**: Interní reference zásobníku je přesunuta "dolů" na prvek bezprostředně pod aktuálním vrcholem.
-4. **Výsledek**: Odstraněný prvek je vrácen a zásobník je nyní o jeden prvek menší.
+Odstranění prvku vyžaduje posunutí ukazatele vrcholu směrem dolů a zahození naposledy přidané položky.
 
-## Nahlédnutí (Vrchol)
+1. **Kontrola prázdnoty:** Pokud je zásobník prázdný, operace se zastaví.
+2. **Získání hodnoty:** Hodnota aktuálního vrcholového uzlu se získá k navrácení.
+3. **Aktualizace vrcholu:** Primární ukazatel na vrchol zásobníku se posune dolů, aby odkazoval na další uzel v sekvenci. Tím se odpojí a odstraní původní vrcholový uzel ze struktury.
 
-Tato operace se používá k pozorování aktuálního stavu zásobníku bez jeho modifikace.
+## Peek (Nahlédnutí)
 
-1. **Přístup k vrcholu**: Algoritmus se podívá na hodnotu aktuálně drženou na referenci **vrchol**.
-2. **Vrácení**: Hodnota je zobrazena uživateli, ale struktura zásobníku zůstává přesně stejná.
+Získání hodnoty naposledy přidaného prvku jednoduše zahrnuje prozkoumání vrcholového uzlu bez provádění jakýchkoli strukturálních změn nebo odstraňování prvku ze zásobníku.
+
+## Poznámky
+
+Zásobníky jsou základním konceptem v informatice. Představují mechanismus pro správu volání funkcí v programovacích jazycích (zásobník volání, call stack), vyhodnocování složitých matematických výrazů, sledování historie prohlížeče a implementaci funkcí zpět (undo) v textových editorech.
+
+**Kdy toto NEPOUŽÍVAT:** Zásobníku je vhodné se vyhnout, pokud aplikace vyžaduje zpracování nejstarších dat jako prvních, nebo pokud potřebuje vyhledávat libovolné hodnoty v rámci kolekce. Vyhledávání v zásobníku vyžaduje systematické odebírání a zahazování prvků jen pro dosažení požadované hodnoty. Z tohoto důvodu je tato struktura pro obecné získávání dat vysoce neefektivní.

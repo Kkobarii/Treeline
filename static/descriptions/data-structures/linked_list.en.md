@@ -44,7 +44,7 @@ Searching for a specific value involves a linear scan starting from the head nod
 
 ## Remove
 
-Removing a node requires locating the target and carefully relinking the surrounding nodes to bypass the deleted element without breaking the chain.
+Removing a node requires locating the target and relinking the surrounding nodes to bypass the deleted element without breaking the chain.
 
 1. **Empty Check:** If the list is empty, the operation halts.
 2. **Remove Head:** If the target value is located at the head node, the head pointer is updated to reference the second node in the sequence, and the original head is discarded. If this removal leaves the list completely empty, the tail pointer is also cleared.

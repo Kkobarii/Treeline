@@ -29,7 +29,7 @@ Adding a new value to the queue involves attaching it to the back of the line an
 
 ## Dequeue
 
-Removing an element requires taking it from the very front of the line and shifting the front pointer backward.
+Removing an element requires taking it from the very front of the line and shifting the front pointer further.
 
 1. **Empty Check:** If the queue is completely empty, the operation halts and is dropped.
 2. **Retrieve:** The value of the current front node is retrieved to be returned.

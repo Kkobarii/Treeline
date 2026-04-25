@@ -1,47 +1,41 @@
-# Bublinkové třídění
+# Bubble Sort
 
-Bublinkové třídění je jeden z nejjednodušších třídicích algoritmů. Opakovaně prochází seznam, porovnává sousední prvky a prohodí je, pokud jsou ve špatném pořadí. Tento proces pokračuje, dokud není seznam seřazený. Algoritmus dostal své jméno, protože menší prvky "probublávají" na začátek seznamu s každým průchodem.
+Bubble Sort je přímočarý třídicí algoritmus založený na porovnávání. Pracuje opakovaným procházením sekvence, přičemž porovnává sousední prvky a prohazuje je, pokud jsou v nesprávném pořadí. Tento proces se opakuje, dokud není celý seznam plně roztříděn. Algoritmus odvozuje svůj název ze způsobu, jakým větší prvky konceptuálně „probublávají“ na konec seznamu při každém dalším průchodu.
 
-## Jak to funguje
+### Vlastnosti
 
-1. Porovnejte první dva prvky
-2. Pokud je první větší než druhý, prohoďte je
-3. Přesuňte se na další pár a opakujte
-4. Po každém úplném průchodu je největší neseřazený prvek na své konečné pozici
-5. Opakujte, dokud nejsou potřeba žádné další výměny
+- **Paměť:** In-place. Vyžaduje pouze konstantní množství dodatečné paměti pro dočasnou proměnnou použitou během prohazování.
+- **Stabilita:** Stabilní. Pokud mají dva prvky stejnou hodnotu, jejich relativní pořadí zůstává striktně zachováno, protože algoritmus provádí prohození pouze v případě, kdy je prvek ostře větší než jeho soused.
+- **Paradigma:** Hrubá síla (Brute Force) / Inkrementální.
 
-## Výhody
+### Analýza složitosti
 
-- **Jednoduché na pochopení a implementaci**: Ideální pro učení konceptů třídění
-- **Není potřeba extra prostor**: Třídí na místě s O(1) dodatečným prostorem
-- **Stabilní třídění**: Zachovává relativní pořadí stejných prvků
-- **Adaptivní**: Může být optimalizováno pro detekci již seřazených dat
-- **Založené na porovnávání**: Funguje s jakýmikoli porovnatelnými daty
+Nejhorší scénář nastává v situaci, kdy je pole seřazeno v opačném pořadí. V tomto stavu musí být každý prvek porovnán a prohozen přes celou délku pole, čímž se maximalizuje počet operací. Nejlepšího případu `O(n)` lze dosáhnout pouze se specifickým optimalizačním příznakem. Bez něj algoritmus provádí `O(n^2)` porovnání bez ohledu na počáteční uspořádání.
 
-## Nevýhody
+| Nejlepší případ | Průměrný případ | Nejhorší případ | Paměť  |
+| :-------------- | :-------------- | :-------------- | :----- |
+| `O(n)`          | `O(n^2)`        | `O(n^2)`        | `O(1)` |
 
-- **Velmi pomalé na velkých datasetech**: Časová složitost O(n²) ho činí nepraktickým pro reálné použití
-- **Mnoho zbytečných porovnání**: I když je seznam většinou seřazený, pokračuje v porovnávání
-- **Špatný výkon cache**: Náhodné přístupy do paměti škodí výkonu moderních CPU
-- **Nepoužívá se v praxi**: Pro téměř všechny scénáře existují lepší algoritmy
+## Algoritmus
 
-## Analýza složitosti
+Algoritmus spoléhá na dvě vnořené smyčky k systematickému posouvání nejvyšších netříděných hodnot na konec pole.
 
-| Metrika                       | Složitost                          |
-| ----------------------------- | ---------------------------------- |
-| **Nejlepší časová složitost** | O(n) - již seřazeno s optimalizací |
-| **Průměrná časová složitost** | O(n²) - typická náhodná data       |
-| **Nejhorší časová složitost** | O(n²) - obráceně seřazená data     |
-| **Prostorová složitost**      | O(1) - konstantní extra prostor    |
-| **Stabilní**                  | Ano                                |
+1. **Vnější smyčka**: Sleduje počet průchodů polem. Po každém úplném průchodu vnitřní smyčky je největší zbývající prvek zaručeně na své správné finální pozici.
+2. **Vnitřní smyčka**: Prochází netříděnou část pole. S každým dalším průchodem vnější smyčky se tato vnitřní cesta zkracuje o jeden prvek.
+3. **Porovnání**: V každém kroku vnitřní smyčky se porovnává aktuálně vybraný prvek s jeho bezprostředním pravým sousedem.
+4. **Prohození**: Rozhodne se o akci na základě porovnání:
+    - Pokud je aktuální prvek ostře větší než jeho soused, tyto dvě hodnoty se prohodí.
+    - Pokud je aktuální prvek menší nebo stejný, zůstávají na svých aktuálních pozicích.
+    - Proces se poté posune o jednu pozici doprava a opakuje logiku porovnání a prohození, dokud není celá netříděná část pole projita.
 
-## Kdy použít
+## Poznámky
 
-- Vzdělávací účely a učení konceptů třídění
-- Extrémně malé datasety (< 10 prvků)
-- Téměř seřazená data s optimalizacemi
+Bubble Sort se primárně používá jako vzdělávací nástroj k představení konceptů algoritmického třídění a časové složitosti.
 
-## Optimalizace
+**Kdy toto NEPOUŽÍVAT:** Bubble Sort by se v podstatě nikdy neměl používat v produkčním prostředí pro velké datové sady. Jeho kvadratická časová složitost způsobuje drastickou neefektivitu ve srovnání s pokročilými algoritmy jako Quick Sort nebo Merge Sort.
 
-- **Předčasné ukončení**: Zastavit, pokud v průchodu nedojde k žádné výměně
-- **Zmenšený rozsah**: Sledovat pozici poslední výměny pro vyhnutí se redundantním porovnáním
+### Optimalizace
+
+Standardní implementace Bubble Sort naivně dokončí každý průchod i v případě, kdy se pole stane plně roztříděným v polovině procesu.
+
+Běžnou optimalizací je zavedení boolean příznaku `swapped`. Na začátku každé vnější iterace se tento příznak nastaví na `false`. Pokud během vnitřní iterace dojde k jakémukoli prohození, příznak se změní na `true`. Pokud celá vnější iterace proběhne bez jediného prohození, matematicky to dokazuje plné setřídění pole. Algoritmus pak může bezpečně ukončit smyčku dříve, čímž v nejlepším případě dosahuje časové složitosti `O(n)` u již roztříděných seznamů.

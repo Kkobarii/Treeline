@@ -10,7 +10,7 @@ Selection Sort is a straightforward sorting algorithm that conceptually divides 
 
 ### Complexity Analysis
 
-Unlike other simple algorithms, Selection Sort is entirely blind to the existing order of the array. It must always scan the entire remaining unsorted section to mathematically guarantee it has found the true minimum value. Because it cannot break early, the best, average, and worst cases all require the exact same number of comparisons.
+Unlike other simple algorithms, Selection Sort is entirely blind to the existing order of the array. It must always scan the entire remaining unsorted section to guarantee it has found the true minimum value. Because it cannot break early, the best, average, and worst cases all require the exact same number of comparisons.
 
 | Best Case | Average Case | Worst Case | Space  |
 | :-------- | :----------- | :--------- | :----- |

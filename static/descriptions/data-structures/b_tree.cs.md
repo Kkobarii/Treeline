@@ -1,124 +1,102 @@
 # B-strom
 
-**B-strom** je samovyvažující se stromová datová struktura, která udržuje seřazená data a umožňuje vyhledávání, sekvenční přístup, vkládání a mazání v logaritmickém čase. Na rozdíl od binárních stromů, kde každý uzel má nejvýše dva potomky, B-stromy mohou mít mnohem více potomků na uzel, což je činí zvláště efektivními pro systémy, které čtou a zapisují velké bloky dat, jako jsou databáze a souborové systémy.
+B-strom je komplexní, samovyvažující se vyhledávací strom navržený pro efektivní zpracování masivních objemů dat. Na rozdíl od typických binárních vyhledávacích stromů, kde každý uzel obsahuje jedinou hodnotu a dva ukazatele, je uzel B-stromu navržen tak, aby pojal více hodnot a ukazoval na mnoho potomků. Tato široká a mělká struktura jej činí jedinečně vhodným pro systémy, které čtou a zapisují velké bloky dat, jako jsou databáze a souborové systémy.
 
-### Klíčové vlastnosti
+### Klíčové koncepty
 
-Každý B-strom je definován hodnotou **řádu**, která určuje maximální počet potomků uzlu:
+- **Řád:** Řád B-stromu definuje jeho celkovou kapacitu. V této implementaci řád `m` představuje maximální počet potomků, které může mít jediný uzel. Stojí za zmínku, že některé texty místo toho definují řád jako minimální počet potomků, ale zde se používá definice s maximálním počtem potomků.
+- **Struktura uzlu:** Každý uzel obsahuje pole seřazených hodnot a pole ukazatelů na potomky. Uzel s `k` potomky bude vždy obsahovat `k - 1` hodnot. Hodnoty fungují jako oddělovače, které rozdělují ukazatele na potomky do specifických rozsahů.
+- **Vnitřní a listové uzly:** Vnitřní uzly obsahují jak hodnoty, tak ukazatele na potomky a slouží jako směrovací body. Listové uzly obsahují pouze hodnoty, nacházejí se na samém dně stromu a nemají žádné ukazatele na potomky.
 
-- Každý uzel může obsahovat nejvýše **řád - 1** klíčů
-- Každý uzel (kromě kořene) musí obsahovat alespoň **⌈řád/2⌉ - 1** klíčů
-- Každý vnitřní uzel (kromě kořene) má alespoň **⌈řád/2⌉** potomků
-- Všechny listové uzly jsou na stejné úrovni
+### Pravidla
 
-Tato struktura zajišťuje, že strom zůstává vyvážený, přičemž všechny cesty od kořene k listu mají stejnou délku.
+- **Kapacitní limity:** Uzel může mít nejvýše `m` potomků a `m - 1` hodnot.
+- **Minimální limity:** Každý vnitřní uzel (kromě kořene) musí mít alespoň `Math.ceil(m / 2)` potomků, což zajišťuje, že strom zůstane hustý.
+- **Seřazené hodnoty:** Hodnoty uvnitř jednoho uzlu jsou uloženy ve striktně rostoucím pořadí.
+- **Vlastnost vyhledávacího stromu:** Pro jakoukoli hodnotu `V` v uzlu platí, že všechny hodnoty v podstromu potomka po její levé straně jsou ostře menší než `V` a všechny hodnoty v podstromu potomka po její pravé straně jsou ostře větší než `V`.
+- **Jednotná hloubka:** Všechny listové uzly se musí nacházet ve stejné hloubce, což zaručuje dokonalé vyvážení napříč celou strukturou.
 
-### Struktura uzlu
+Tato konkrétní implementace ukazuje B-strom **řádu 5**, což znamená, že každý uzel může mít až **5 potomků** a **4 hodnoty**. Minimální počet potomků pro vnitřní uzly (kromě kořene) je **3**. To zajišťuje, že strom zůstane vyvážený a efektivní i při svém růstu.
 
-Na rozdíl od binárních stromů uzly B-stromu obsahují:
+### Analýza složitosti
 
-- **Více hodnot**: Pole seřazených klíčů (až řád - 1)
-- **Více potomků**: Pole ukazatelů na potomky (až řád)
-- **Příznak listu**: Označuje, zda je uzel list nebo vnitřní uzel
+Vzhledem k tomu, že je B-strom dokonale vyvážený a každý uzel uchovává více hodnot, je výška stromu výrazně zredukována ve srovnání se standardními binárními stromy. Výška zůstává na `O(log n)` a protože základ logaritmu je velký (na základě řádu `m`), strom zůstává neuvěřitelně mělký i s miliony záznamů.
 
-Vnitřní uzly mají o jednoho potomka více než mají klíčů, přičemž klíče fungují jako oddělovače mezi podstromy potomků.
-
-## Analýza složitosti
-
-B-stromy udržují vynikající výkon díky minimální výšce stromu prostřednictvím vícecestného větvení:
-
-| Operace    | Nejhorší případ |
-| ---------- | --------------- |
-| Hledání    | O(log n)        |
-| Vložení    | O(log n)        |
-| Odstranění | O(log n)        |
-
-Základ logaritmu je určen hodnotou řádu, takže B-stromy s většími hodnotami řádu jsou nižší a širší.
-
-## Vyhledávání (Hledání)
-
-Vyhledávání v B-stromu je podobné binárnímu vyhledávání, ale rozšířené na více klíčů na uzel:
-
-1. **Vyhledávání v uzlu**: Porovnejte cílovou hodnotu s klíči v aktuálním uzlu
-2. **Shoda nalezena**: Pokud klíč odpovídá, vrátit úspěch
-3. **Přechod na potomka**: Pokud není shoda a nejde o list, určete, který podstrom potomka by měl obsahovat cíl na základě porovnání klíčů
-4. **Opakování**: Pokračujte rekurzivně, dokud není nalezeno nebo dosaženo listu
-
-Pokud dosáhneme listu bez nalezení cíle, ve stromu neexistuje.
+| Operace      | Nejhorší případ |
+| :----------- | :-------------- |
+| **Vložení**  | `O(log n)`      |
+| **Nalezení** | `O(log n)`      |
+| **Smazání**  | `O(log n)`      |
 
 ## Vložení
 
-Vložení udržuje vlastnosti B-stromu proaktivním rozdělováním plných uzlů:
+Vkládání vždy probíhá na úrovni listů. Místo toho, aby B-strom rostl směrem dolů jako standardní binární strom, roste směrem nahoru, když uzlům dojde místo.
 
-### Fáze 1: Navigace k místu vložení
+### Fáze 1: Hledání a vložení
 
-- Procházejte od kořene k příslušnému listovému uzlu
-- Pokud je nalezen plný uzel (řád - 1 klíčů), **rozdělte ho** před sestupem
+1. **Porovnání:** Začíná se v kořeni a postupuje se stromem dolů, aby se nalezl příslušný listový uzel skenováním seřazených hodnot.
+2. **Průchod:** Rozhodne se o cestě na základě porovnání:
+    - Pokud je nová hodnota menší než daná hodnota, sleduje se ukazatel na potomka nalevo od této hodnoty.
+    - Pokud je nová hodnota větší než všechny hodnoty v uzlu, sleduje se ukazatel na potomka nejvíce vpravo.
+3. **Vložení hodnoty:** Jakmile je nalezen správný list, nová hodnota se vloží do pole hodnot uzlu, přičemž se zajistí, že pole zůstane seřazené.
 
-### Fáze 2: Rozdělení uzlu
+### Fáze 2: Rozdělení a povýšení
 
-Když je uzel plný:
+1. **Označení přeplnění:** Pokud vložení způsobí, že uzel překročí maximální povolený počet hodnot, je uzel označen jako přeplněný a musí být rozdělen.
+2. **Rozdělení:** Přeplněný uzel je rozdělen uprostřed na dva samostatné, menší uzly:
+    - Levý uzel, který bude obsahovat menší polovinu hodnot.
+    - Pravý uzel, který bude obsahovat větší polovinu hodnot.
+3. **Povýšení středu:** Prostřední hodnota původního přeplněného uzlu je vytlačena nahoru (povýšena) do rodičovského uzlu.
+    - Tato povýšená hodnota funguje jako nový oddělovač mezi dvěma nově rozdělenými uzly.
+    - Pokud neexistuje žádný rodič (což znamená, že k rozdělení došlo v kořeni), vytvoří se nový kořen a zvýší se celková výška stromu.
+4. **Propagace:** Pokud povýšení prostřední hodnoty způsobí, že se rodičovský uzel stane přeplněným, proces rozdělení a povýšení se opakuje na rodiči.
+    - Tato operace může kaskádovitě postupovat směrem nahoru a potenciálně dosáhnout až ke kořeni.
 
-1. **Nalezení mediánu**: Identifikujte prostřední klíč (na indexu ⌈řád/2⌉ - 1)
-2. **Vytvoření sourozence**: Vytvořte nový uzel pro horní polovinu klíčů
-3. **Povýšení mediánu**: Přesuňte medián nahoru do rodiče
-4. **Distribuce klíčů**: Levý uzel si ponechá dolní polovinu, pravý uzel dostane horní polovinu
-5. **Distribuce potomků**: Pokud nejde o list, rozdělte odpovídajícím způsobem i potomky
+## Nalezení
 
-### Fáze 3: Vložení do neplného uzlu
+Prohledávání B-stromu spoléhá na zobecněnou vyhledávací logiku, která kontroluje více hodnot v jednom uzlu.
 
-Jakmile jste u neplného listu:
+1. **Porovnání:** Začíná se v kořeni a skenují se seřazené hodnoty v aktuálním uzlu.
+2. **Nalezeno:** Pokud se hledaný cíl shoduje s hodnotou, uzel byl úspěšně nalezen.
+3. **Průchod:** O cestě dál se rozhoduje na základě porovnání:
+    - Pokud je cíl menší než daná hodnota, sleduje se ukazatel na potomka nalevo od této hodnoty.
+    - Pokud je cíl větší než všechny hodnoty v uzlu, sleduje se ukazatel na potomka nejvíce vpravo.
+4. **Nenalezeno:** Pokud se dosáhne listového uzlu a hodnota v něm není přítomna, hledání končí, hodnota ve stromu neexistuje.
 
-- Vložte nový klíč v seřazeném pořadí
-- Strom zůstává vyvážený, protože všechny modifikace probíhají na stejné úrovni
+## Smazání
 
-## Odstranění (Smazání)
+Odstranění je složité, protože musí zachovat požadavky na minimální hodnoty a jednotnou hloubku stromu, aniž by došlo k porušení pravidel uspořádání.
 
-Odstranění je nejsložitější operace, udržující rovnováhu prostřednictvím půjčování a slučování:
+### Fáze 1: Nalezení a odstranění
 
-### Případ 1: Klíč v listovém uzlu
+Prvním krokem je nalezení hodnoty a její bezpečné odstranění, což se liší v závislosti na tom, kde se hodnota nachází.
 
-Jednoduše odstraňte klíč. Pokud to způsobí, že uzel má příliš málo klíčů (< ⌈řád/2⌉ - 1), přejděte k opravě.
+1. **Případ 1: Hodnota v listovém uzlu:** Pokud se cílová hodnota nachází v listovém uzlu, je jednoduše odstraněna z pole hodnot uzlu.
+2. **Případ 2: Hodnota ve vnitřním uzlu:** Pokud se hodnota nachází ve vnitřním uzlu, nelze ji jednoduše odstranit bez porušení směrovací struktury.
+    - Strom najde buď in-order předchůdce (největší hodnotu v podstromu levého potomka), nebo in-order následníka (nejmenší hodnotu v podstromu pravého potomka).
+    - Cílová hodnota je přepsána tímto předchůdcem nebo následníkem.
+    - Původní předchůdce nebo následník je poté označen ke smazání ze svého příslušného listového uzlu.
 
-### Případ 2: Klíč ve vnitřním uzlu
+### Fáze 2: Opětovné vyvážení (Podtečení)
 
-Nahraďte buď:
+Pokud odstranění hodnoty způsobí, že uzel klesne pod svůj minimální požadovaný počet hodnot, dojde k podtečení (underflow). Strom musí stáhnout data z okolních uzlů, aby obnovil vyvážení.
 
-- **Předchůdcem**: Největší klíč v levém podstromu, nebo
-- **Následníkem**: Nejmenší klíč v pravém podstromu
+1. **Případ 1: Výpůjčka od levého sourozence:** Pokud má bezprostřední levý sourozenec více než minimální počet hodnot, vypůjčí se hodnota k zaplnění mezery.
+    - Největší hodnota z levého sourozence se přesune nahoru do rodiče.
+    - Oddělující hodnota z rodiče se přesune dolů do podtékajícího uzlu.
+    - Pokud uzly nejsou listy, ukazatel na potomka nejvíce vpravo levého sourozence je převeden a stává se ukazatelem na levého potomka podtékajícího uzlu.
+2. **Případ 2: Výpůjčka od pravého sourozence:** Pokud má bezprostřední pravý sourozenec volné hodnoty, vypůjčí se hodnota od něj.
+    - Nejmenší hodnota z pravého sourozence se přesune nahoru do rodiče.
+    - Oddělující hodnota z rodiče se přesune dolů do podtékajícího uzlu.
+    - Pokud uzly nejsou listy, ukazatel na potomka nejvíce vlevo pravého sourozence je převeden a stává se ukazatelem na pravého potomka podtékajícího uzlu.
+3. **Případ 3: Sloučení potomků:** Pokud žádný ze sourozenců nemá volné hodnoty k zapůjčení, musí být podtékající uzel sloučen s jedním ze svých sourozenců.
+    - Oddělující hodnota rodiče je stažena dolů.
+    - Tato oddělující hodnota je zkombinována s hodnotami obou sourozenců a vytvoří tak jeden plný uzel.
+    - Všechny ukazatele na potomky z obou sourozenců jsou převedeny a sloučeny do tohoto nového uzlu v jejich správném pořadí.
+    - Vzhledem k tomu, že rodič ztratí hodnotu, může nyní také podtéci. To způsobí, že proces opětovného vyvažování bude kaskádovitě pokračovat nahoru.
 
-Poté rekurzivně odstraňte předchůdce/následníka z jeho původního umístění.
+## Poznámky
 
-### Případ 3: Potomek má minimální počet klíčů (⌈řád/2⌉ - 1)
+B-stromy se univerzálně používají v systémech správy databází a souborových systémech (jako NTFS, ext4 nebo APFS).
 
-Před sestupem k potomku s pouze ⌈řád/2⌉ - 1 klíči zajistěte, aby měl alespoň ⌈řád/2⌉ klíčů:
-
-**Půjčka od sourozence**, pokud má sousední sourozenec ≥ ⌈řád/2⌉ klíčů:
-
-- Přesuňte klíč od rodiče dolů k potomku
-- Přesuňte klíč od sourozence nahoru k rodiči
-- V případě potřeby přesuňte ukazatel na potomka
-
-**Sloučení se sourozencem**, pokud oba sourozenci mají přesně ⌈řád/2⌉ - 1 klíčů:
-
-- Přesuňte klíč z rodiče dolů
-- Spojte potomka, klíč rodiče a sourozence do jednoho uzlu
-- Odstraňte klíč rodiče a ukazatel na sourozence z rodiče
-
-### Speciální případ kořene
-
-Pokud odstranění způsobí, že kořen zůstane prázdný:
-
-- Udělejte jediného potomka kořene novým kořenem
-- Toto je jediný způsob, jak B-strom snižuje svou výšku
-
-## Proč B-stromy?
-
-B-stromy vynikají ve scénářích, kde jsou data uložena na disku:
-
-- **Minimalizace diskových I/O**: Každý uzel může být dimenzován tak, aby odpovídal diskovému bloku
-- **Malá výška**: Více klíčů na uzel znamená méně úrovní k procházení
-- **Předvídatelný výkon**: Všechny operace zaručeně O(log n)
-- **Rozsahové dotazy**: Sekvenční přístup je efektivní, protože klíče jsou seřazené
-
-To činí B-stromy základem většiny moderních databázových systémů a souborových systémů.
+Vzhledem k tomu, že přístup k sekundárnímu úložišti (jako je pevný disk nebo SSD) je ve srovnání s přístupem k RAM notoricky pomalý, je B-strom explicitně navržen tak, aby zabalil co nejvíce dat do jediného velkého uzlu. Tím se minimalizuje počet přístupů na disk nutných k nalezení informace, což z něj dělá pro masivní datové sady reálného světa strukturu mnohem lepší než standardní binární stromy.

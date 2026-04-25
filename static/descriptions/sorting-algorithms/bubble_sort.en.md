@@ -10,7 +10,7 @@ Bubble Sort is a straightforward, comparison-based sorting algorithm. It works b
 
 ### Complexity Analysis
 
-The worst-case scenario occurs when the array is sorted in completely reverse order. In this state, every single element must be compared and swapped across the entire length of the array, maximizing the number of operations. The best case of `O(n)` is only achievable with a specific optimization flag; without it, the algorithm performs `O(n^2)` comparisons regardless of the initial order.
+The worst-case scenario occurs when the array is sorted in reverse order. In this state, every single element must be compared and swapped across the entire length of the array, maximizing the number of operations. The best case of `O(n)` is only achievable with a specific optimization flag; without it, the algorithm performs `O(n^2)` comparisons regardless of the initial order.
 
 | Best Case | Average Case | Worst Case | Space  |
 | :-------- | :----------- | :--------- | :----- |
