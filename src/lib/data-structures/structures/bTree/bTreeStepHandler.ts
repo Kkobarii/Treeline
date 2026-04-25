@@ -13,9 +13,9 @@ import type { BTreeAnnotator } from './bTreeAnnotator';
 import type {
 	BorrowFromSiblingData,
 	ChooseBranchData,
+	CollapseRootData,
 	FindInorderReplacementData,
 	InsertValueData,
-	MarkOverfullData,
 	MergeChildrenData,
 	PromoteMiddleData,
 	RemoveValueData,
@@ -124,8 +124,9 @@ export class BTreeStepHandler extends StepHandlerBase {
 				break;
 			// BTree-specific steps
 			case StepType.BTree.MarkOverfull:
-				if (isForward) await this.handleMarkOverfullForward(animator, annotator, data);
-				else await this.handleMarkOverfullBackward(animator, annotator, data);
+			case StepType.BTree.MarkUnderfull:
+				if (isForward) await this.handleMarkForward(animator, annotator, data);
+				else await this.handleMarkBackward(animator, annotator, data);
 				break;
 			case StepType.BTree.Split:
 				if (isForward) await this.handleSplitForward(animator, annotator, data);
@@ -134,6 +135,10 @@ export class BTreeStepHandler extends StepHandlerBase {
 			case StepType.BTree.PromoteMiddle:
 				if (isForward) await this.handlePromoteMiddleForward(animator, annotator, data);
 				else await this.handlePromoteMiddleBackward(animator, annotator, data);
+				break;
+			case StepType.BTree.CollapseRoot:
+				if (isForward) await this.handleCollapseRootForward(animator, annotator, data);
+				else await this.handleCollapseRootBackward(animator, annotator, data);
 				break;
 			case StepType.BTree.ChooseBranch:
 				if (isForward) await this.handleChooseBranchForward(animator, annotator, data);
@@ -184,13 +189,13 @@ export class BTreeStepHandler extends StepHandlerBase {
 		return result;
 	}
 
-	async handleMarkOverfullForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: MarkOverfullData) {
+	async handleMarkForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: any) {
 		animator.setNodeColor(data.nodeId, Colors.Red);
 		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.nodeId);
 	}
 
-	async handleMarkOverfullBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: MarkOverfullData) {
+	async handleMarkBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: any) {
 		animator.resetNodeColor(data.nodeId);
 		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.nodeId);
@@ -238,6 +243,18 @@ export class BTreeStepHandler extends StepHandlerBase {
 		const info = t(annotator.locale, data.label, data.params);
 		annotator.annotateNode(info, data.nodeId);
 		annotator.moveValueAnnotationTo(data.childId);
+	}
+
+	async handleCollapseRootForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: CollapseRootData) {
+		animator.ensureAndAnimate(data.endSnapshot);
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.newRootId);
+	}
+
+	async handleCollapseRootBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: CollapseRootData) {
+		animator.ensureAndAnimate(data.startSnapshot);
+		const info = t(annotator.locale, data.label, data.params);
+		annotator.annotateNode(info, data.oldRootId);
 	}
 
 	async handleChooseBranchBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: ChooseBranchData) {
@@ -331,13 +348,13 @@ export class BTreeStepHandler extends StepHandlerBase {
 		let valuePromise: Promise<void> = Promise.resolve();
 		if (data.parentValue !== null) {
 			annotator.createTransplantedValueAnnotation(String(data.parentValue), [data.originalParentId]);
-			valuePromise = annotator
-				.moveTransplantedValueAnnotationTo([data.mergedNodeId])
+			valuePromise = new Promise(resolve => setTimeout(resolve, 50))
+				.then(() => annotator.moveTransplantedValueAnnotationTo([data.mergedNodeId]))
 				.then(() => annotator.clearTransplantedValueAnnotation());
 		}
 		annotator.annotateNode(info, data.parentId);
 
-		await Promise.all([valuePromise, animator.ensureAndAnimateMergeSecondPart(data.endSnapshot, data.translationMap)]);
+		await Promise.all([animator.ensureAndAnimateMergeSecondPart(data.endSnapshot, data.translationMap), valuePromise]);
 	}
 
 	async handleMergeChildrenBackward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: MergeChildrenData) {
@@ -346,9 +363,9 @@ export class BTreeStepHandler extends StepHandlerBase {
 
 		let valuePromise = Promise.resolve();
 		if (data.parentValue !== null) {
-			annotator.createTransplantedValueAnnotation(String(data.parentValue), [data.mergedNodeId]);
-			valuePromise = annotator
-				.moveTransplantedValueAnnotationTo([data.originalParentId])
+			annotator.createTransplantedValueAnnotation(String(data.parentValue), [data.originalLeftChildId, data.originalRightChildId]);
+			valuePromise = new Promise(resolve => setTimeout(resolve, 50))
+				.then(() => annotator.moveTransplantedValueAnnotationTo([data.originalParentId]))
 				.then(() => annotator.clearTransplantedValueAnnotation());
 		}
 

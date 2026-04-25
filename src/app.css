@@ -401,3 +401,9 @@ label {
 		padding: 1rem;
 	}
 }
+
+.container {
+    @media (width >= 128rem) {
+        max-width: 128rem;
+    }
+}

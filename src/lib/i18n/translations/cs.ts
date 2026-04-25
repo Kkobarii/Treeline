@@ -107,7 +107,7 @@ const cs: Translation = {
 			common: {
 				startData: 'Spuštění operace',
 				endData: 'Konec',
-				emptyData: 'Strom je prázdný',
+				emptyData: 'Počáteční stav',
 				startingOperationData: 'Zahajování operace {operation}',
 				createRootData: 'Vytvořit hlavní uzel s hodnotou {value}',
 				createLeafData: 'Vytvořit {direction} potomka s hodnotou {value}',
@@ -207,10 +207,12 @@ const cs: Translation = {
 			},
 			bTree: {
 				markOverfullData: 'Uzel je přeplněný: {currentCount} hodnot (max {maxCount})',
+				markUnderfullData: 'Uzel je podplněný: {currentCount} hodnota (min {minCount})',
 				splitData: 'Rozdělit uzel: posunout {middleValue} nahoru',
 				promoteMiddleData: 'Povýšit {middleValue} do rodiče',
 				promoteMiddleAsNewRootData: 'Povýšit {middleValue} jako nový kořen',
 				promoteMiddleIntoParentData: 'Povýšit {middleValue} do rodiče',
+				collapseRootData: 'Snížit kořen',
 				chooseBranchData: 'Vybrat {childIndexHumanReadable}. potomka',
 				chooseBranchBetweenData: 'Vybrat {childIndexHumanReadable}. potomka ({lowerBound} < {value} < {upperBound})',
 				chooseBranchGreaterThanData: 'Vybrat {childIndexHumanReadable}. potomka ({lowerBound} < {value})',

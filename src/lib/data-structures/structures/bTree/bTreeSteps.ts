@@ -13,6 +13,16 @@ export class MarkOverfullData extends StepDetail {
 	}
 }
 
+export class MarkUnderfullData extends StepDetail {
+	constructor(
+		public nodeId: number,
+		public currentCount: number,
+		public minCount: number,
+	) {
+		super(StepType.BTree.MarkUnderfull, 'steps.dataStructures.bTree.markUnderfullData', { nodeId, currentCount, minCount });
+	}
+}
+
 export class SplitData extends StepDetail {
 	constructor(
 		public nodeId: number,
@@ -42,6 +52,17 @@ export class PromoteMiddleData extends StepDetail {
 			isNewRoot ? 'steps.dataStructures.bTree.promoteMiddleAsNewRootData' : 'steps.dataStructures.bTree.promoteMiddleIntoParentData',
 			{ middleValue, targetNodeId },
 		);
+	}
+}
+
+export class CollapseRootData extends StepDetail {
+	constructor(
+		public oldRootId: number,
+		public newRootId: number,
+		public startSnapshot: DataStructure,
+		public endSnapshot: DataStructure,
+	) {
+		super(StepType.BTree.CollapseRoot, 'steps.dataStructures.bTree.collapseRootData', { oldRootId, newRootId });
 	}
 }
 

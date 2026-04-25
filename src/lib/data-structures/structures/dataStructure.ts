@@ -95,8 +95,10 @@ export const StepType = {
 	BTree: {
 		...BaseTreeSteps,
 		MarkOverfull: 'MarkOverfull',
+		MarkUnderfull: 'MarkUnderfull',
 		Split: 'Split',
 		PromoteMiddle: 'PromoteMiddle',
+		CollapseRoot: 'CollapseRoot',
 		ChooseBranch: 'ChooseBranch',
 		InsertValue: 'InsertValue',
 		RemoveValue: 'RemoveValue',

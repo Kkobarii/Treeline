@@ -105,7 +105,7 @@ const en = {
 			common: {
 				startData: 'Start operation',
 				endData: 'End',
-				emptyData: 'Tree is empty',
+				emptyData: 'Beginning state',
 				startingOperationData: 'Starting operation: {operation}',
 				createRootData: 'Create root node with value {value}',
 				createLeafData: 'Create {direction} child with value {value}',
@@ -205,10 +205,12 @@ const en = {
 			},
 			bTree: {
 				markOverfullData: 'Node is overfull: {currentCount} values (max {maxCount})',
+				markUnderfullData: 'Node is underfull: {currentCount} value (min {minCount})',
 				splitData: 'Split node: move {middleValue} up',
 				promoteMiddleData: 'Promote {middleValue} to parent',
 				promoteMiddleAsNewRootData: 'Promote {middleValue} as new root',
 				promoteMiddleIntoParentData: 'Promote {middleValue} into parent',
+				collapseRootData: 'Collapse root',
 				chooseBranchData: 'Choose {childIndexHumanReadable}. child',
 				chooseBranchBetweenData: 'Choose {childIndexHumanReadable}. child ({lowerBound} < {value} < {upperBound})',
 				chooseBranchGreaterThanData: 'Choose {childIndexHumanReadable}. child ({lowerBound} < {value})',

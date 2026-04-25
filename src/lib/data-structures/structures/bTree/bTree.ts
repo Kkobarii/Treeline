@@ -19,9 +19,11 @@ import { insertChild, insertNonFull, removeAt, removeChild } from './bTreeNodeUt
 import {
 	BorrowFromSiblingData,
 	ChooseBranchData,
+	CollapseRootData,
 	FindInorderReplacementData,
 	InsertValueData,
 	MarkOverfullData,
+	MarkUnderfullData,
 	MergeChildrenData,
 	PromoteMiddleData,
 	RemoveValueData,
@@ -555,5 +557,35 @@ export class BTree extends DataStructure {
 				),
 			),
 		);
+
+		// if parent is now underfull, we either need to call merge on it or borrow if possible
+		if (node.values.length < Math.ceil(this.order / 2) - 1) {
+			if (node === this.root) {
+				if (node.values.length === 0) {
+					let startSnapshot = this.snapshot();
+					this.root = child;
+					data.step(StepData.new(new CollapseRootData(node.id, child.id, startSnapshot, this.snapshot())));
+				}
+			} else {
+				data.step(StepData.new(new MarkUnderfullData(node.id, node.values.length, Math.ceil(this.order / 2) - 1)));
+				const parent = this.findParent(this.root, node);
+				if (parent) {
+					const parentIdx = parent.children.indexOf(node);
+					this.fillChild(parent, parentIdx, data);
+				}
+			}
+		}
+	}
+
+	private findParent(current: BTreeNode | null, target: BTreeNode): BTreeNode | null {
+		if (!current || current.isLeaf) return null;
+		for (const child of current.children) {
+			if (child === target) {
+				return current;
+			}
+			const found = this.findParent(child, target);
+			if (found) return found;
+		}
+		return null;
 	}
 }
