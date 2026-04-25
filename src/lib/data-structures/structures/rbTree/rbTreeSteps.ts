@@ -4,43 +4,52 @@ import { DataStructure, StepType } from '$lib/data-structures/structures/dataStr
 export class ColorNodeData extends StepDetail {
 	constructor(
 		public nodeId: number,
-		public color: 'red' | 'black',
+		public nodeValue: number,
+		public color: string,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super(StepType.RBTree.ColorNode, 'steps.dataStructures.rbTree.colorNodeData', { nodeId, color });
+		color = `steps.dataStructures.rbTree.snippet.${color}`;
+		super(StepType.RBTree.ColorNode, 'steps.dataStructures.rbTree.colorNodeData', { nodeValue, color });
 	}
 }
 
 export class RotateLeftData extends StepDetail {
 	constructor(
 		public oldRootId: number,
+		public oldRootValue: number,
 		public newRootId: number,
+		public newRootValue: number,
 		public adoptedChildId: number | null,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super(StepType.RBTree.RotateLeft, 'steps.dataStructures.rbTree.rotateLeftData', { oldRootId, newRootId });
+		super(StepType.RBTree.RotateLeft, 'steps.dataStructures.rbTree.rotateLeftData', { oldRootValue, newRootValue });
 	}
 }
 
 export class RotateRightData extends StepDetail {
 	constructor(
 		public oldRootId: number,
+		public oldRootValue: number,
 		public newRootId: number,
+		public newRootValue: number,
+
 		public adoptedChildId: number | null,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super(StepType.RBTree.RotateRight, 'steps.dataStructures.rbTree.rotateRightData', { oldRootId, newRootId });
+		super(StepType.RBTree.RotateRight, 'steps.dataStructures.rbTree.rotateRightData', { oldRootValue, newRootValue });
 	}
 }
 
 export class FixupData extends StepDetail {
 	constructor(
 		public nodeId: number,
-		public reason: string,
+		public nodeValue: number,
+		public fixupType: string,
+		public result: string,
 	) {
-		super(StepType.RBTree.Fixup, 'steps.dataStructures.rbTree.fixupData', { nodeId, reason });
+		super(StepType.RBTree.Fixup, fixupType, { nodeId, nodeValue, result });
 	}
 }

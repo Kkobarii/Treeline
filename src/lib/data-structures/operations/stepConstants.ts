@@ -52,3 +52,10 @@ export const RBTREE_SIBLING_BLACK_TWO_BLACK_SYM = 'steps.dataStructures.rbTree.s
 export const RBTREE_SIBLING_BLACK_NEAR_RED_SYM = 'steps.dataStructures.rbTree.snippet.siblingBlackNearRedSym';
 export const RBTREE_SIBLING_BLACK_FAR_RED_SYM = 'steps.dataStructures.rbTree.snippet.siblingBlackFarRedSym';
 export const RBTREE_FIXING_DOUBLE_BLACK = 'steps.dataStructures.rbTree.snippet.fixingDoubleBlack';
+
+// Other RB Tree snippets
+export const RBTREE_CHECK_RED_RULE = 'steps.dataStructures.rbTree.checkRedRule';
+export const RBTREE_CHECK_BLACK_RULE = 'steps.dataStructures.rbTree.checkBlackRule';
+export const RBTREE_BLACK_OKAY = 'steps.dataStructures.rbTree.blackOkay';
+export const RBTREE_CORRECT = 'steps.dataStructures.rbTree.snippet.correct';
+export const RBTREE_INCORRECT = 'steps.dataStructures.rbTree.snippet.incorrect';

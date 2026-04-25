@@ -12,38 +12,38 @@ import { translate as t } from '$lib/i18n';
 import type { AVLTreeAnnotator } from './avlTreeAnnotator';
 
 async function handleRotateLeftForward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: RotateLeftData) {
-	const info = t(annotator.locale, 'steps.dataStructures.avlTree.rotateLeftData', { oldRootId: String(data.oldRootId) });
-	annotator.annotateNode(info, data.newRootId);
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.oldRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as AVLTree);
 }
 
 async function handleRotateLeftBackward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: RotateLeftData) {
-	const info = t(annotator.locale, 'steps.dataStructures.avlTree.rotateLeftData', { oldRootId: String(data.oldRootId) });
-	annotator.annotateNode(info, data.newRootId);
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.oldRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as AVLTree);
 }
 
 async function handleRotateRightForward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: RotateRightData) {
-	const info = t(annotator.locale, 'steps.dataStructures.avlTree.rotateRightData', { oldRootId: String(data.oldRootId) });
-	annotator.annotateNode(info, data.newRootId);
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.oldRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as AVLTree);
 }
 
 async function handleRotateRightBackward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: RotateRightData) {
-	const info = t(annotator.locale, 'steps.dataStructures.avlTree.rotateRightData', { oldRootId: String(data.oldRootId) });
-	annotator.annotateNode(info, data.newRootId);
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.oldRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as AVLTree);
 }
 
 async function handleUpdateHeightBalanceForward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: UpdateHeightBalanceData) {
-	const info = t(annotator.locale, 'steps.dataStructures.avlTree.updateHeightBalanceData');
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 	annotator.highlightNodeHeightBalance(data.nodeId);
 	animator.ensure(data.endSnapshot);
 }
 
 async function handleUpdateHeightBalanceBackward(animator: AVLTreeAnimator, annotator: AVLTreeAnnotator, data: UpdateHeightBalanceData) {
-	const info = t(annotator.locale, 'steps.dataStructures.avlTree.updateHeightBalanceData');
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 	annotator.highlightNodeHeightBalance(data.nodeId);
 	animator.ensure(data.startSnapshot);
@@ -52,22 +52,21 @@ async function handleUpdateHeightBalanceBackward(animator: AVLTreeAnimator, anno
 export class AVLTreeStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: AVLTreeAnnotator, isForward: boolean) {
 		let animator = baseAnimator as AVLTreeAnimator;
-		if (isForward && currentStep.startSnapshot) {
-			await animator.ensure(currentStep.startSnapshot);
+		if (!currentStep.isTransitory && isForward && currentStep.startSnapshot) {
+			animator.ensure(currentStep.startSnapshot);
 		}
-		if (!isForward && currentStep.endSnapshot) {
-			await animator.ensure(currentStep.endSnapshot);
+		if (!currentStep.isTransitory && !isForward && currentStep.endSnapshot) {
+			animator.ensure(currentStep.endSnapshot);
 		}
 	}
 
 	async stepCleanup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: AVLTreeAnnotator, isForward: boolean) {
 		let animator = baseAnimator as AVLTreeAnimator;
-
-		if (isForward && currentStep.endSnapshot) {
-			await animator.ensure(currentStep.endSnapshot);
+		if (!currentStep.isTransitory && isForward && currentStep.endSnapshot) {
+			animator.ensure(currentStep.endSnapshot);
 		}
-		if (!isForward && currentStep.startSnapshot) {
-			await animator.ensure(currentStep.startSnapshot);
+		if (!currentStep.isTransitory && !isForward && currentStep.startSnapshot) {
+			animator.ensure(currentStep.startSnapshot);
 		}
 	}
 

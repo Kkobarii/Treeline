@@ -1,6 +1,5 @@
 import { LinkedListNodeData } from '$lib/data-structures/utils/graphs';
 import BaseAnnotation from '$lib/data-structures/visual/annotators/annotations/annotation';
-import { VIS_NETWORK_TOP_BB_OFFSET } from '$lib/data-structures/visual/annotators/constants';
 import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { Colors } from '$lib/utils/colors';
 
@@ -8,7 +7,7 @@ class FrontRearAnnotation extends BaseAnnotation {
 	color: string = Colors.Info;
 	arrowLength: number = 10;
 	arrowHeadSize: number = 8;
-	marginAboveNode: number = 15;
+	marginSide: number = 10;
 
 	constructor(
 		public annotator: DataStructureAnnotator,
@@ -23,11 +22,19 @@ class FrontRearAnnotation extends BaseAnnotation {
 	getPosition(): { x: number; y: number } {
 		try {
 			let nodePos = this.annotator.network.getBoundingBox(this.followingNodeId as any);
-			// Position above the node
-			return {
-				x: (nodePos.left + nodePos.right) / 2,
-				y: nodePos.top + VIS_NETWORK_TOP_BB_OFFSET - this.arrowLength - this.marginAboveNode,
-			};
+			const { width: textWidth } = this.measure(this.label, this.fontSize);
+			const nodeCenterY = (nodePos.top + nodePos.bottom) / 2;
+			if (this.label === 'front') {
+				return {
+					x: nodePos.left - this.marginSide - this.arrowLength - textWidth / 2,
+					y: nodeCenterY,
+				};
+			} else {
+				return {
+					x: nodePos.right + this.marginSide + this.arrowLength + textWidth / 2,
+					y: nodeCenterY,
+				};
+			}
 		} catch {
 			// node might not exist
 		}
@@ -37,10 +44,8 @@ class FrontRearAnnotation extends BaseAnnotation {
 	draw() {
 		const pos = this.getPosition();
 
-		// Draw the label text box
 		this.renderBoxedText(pos, this.label, this.fontSize, this.padding, this.color, 'center', 'middle');
 
-		// Draw arrow pointing down to the node
 		this.drawArrow(pos);
 	}
 
@@ -50,36 +55,52 @@ class FrontRearAnnotation extends BaseAnnotation {
 		const scale = this.annotator.getScale();
 		const ctx = this.annotator.ctx;
 
-		// Calculate arrow start and end positions
-		const { height: textHeight } = this.measure(this.label, this.fontSize);
-		const arrowStartY = pos.y + textHeight / 2 + this.padding + 2;
-		const arrowEndY = arrowStartY + this.arrowLength;
+		const { width: textWidth } = this.measure(this.label, this.fontSize);
+		let arrowStartX: number;
+		let arrowEndX: number;
 
-		// Convert to DOM coordinates
-		const domStart = this.annotator.network.canvasToDOM({ x: pos.x, y: arrowStartY });
-		const domEnd = this.annotator.network.canvasToDOM({ x: pos.x, y: arrowEndY });
+		if (this.label === 'front') {
+			arrowStartX = pos.x + textWidth / 2 + this.padding + 2;
+			arrowEndX = arrowStartX + this.arrowLength;
+		} else {
+			arrowStartX = pos.x - textWidth / 2 - this.padding - 2;
+			arrowEndX = arrowStartX - this.arrowLength;
+		}
 
-		// Draw the arrow line
+		const domStart = this.annotator.network.canvasToDOM({ x: arrowStartX, y: pos.y });
+		const domEnd = this.annotator.network.canvasToDOM({ x: arrowEndX, y: pos.y });
+
 		ctx.beginPath();
 		ctx.strokeStyle = this.color;
 		ctx.lineWidth = 2 * scale;
 		ctx.moveTo(domStart.x, domStart.y);
-		ctx.lineTo(domEnd.x, domEnd.y - (this.arrowHeadSize * scale) / 2);
+		ctx.lineTo(domEnd.x, domEnd.y);
 		ctx.stroke();
 
-		// Draw the arrowhead
 		const arrowHeadSize = this.arrowHeadSize * scale;
 		ctx.beginPath();
 		ctx.fillStyle = this.color;
-		ctx.moveTo(domEnd.x, domEnd.y + arrowHeadSize / 2 - 2 * scale);
-		ctx.lineTo(domEnd.x - arrowHeadSize / 2, domEnd.y - arrowHeadSize + 2);
-		ctx.lineTo(domEnd.x + arrowHeadSize / 2, domEnd.y - arrowHeadSize + 2);
+		if (this.label === 'front') {
+			ctx.moveTo(domEnd.x - arrowHeadSize / 2 + 2 * scale, domEnd.y - arrowHeadSize / 2);
+			ctx.lineTo(domEnd.x + arrowHeadSize - 2 * scale, domEnd.y);
+			ctx.lineTo(domEnd.x - arrowHeadSize / 2 + 2 * scale, domEnd.y + arrowHeadSize / 2);
+		} else {
+			ctx.moveTo(domEnd.x + arrowHeadSize / 2 - 2 * scale, domEnd.y - arrowHeadSize / 2);
+			ctx.lineTo(domEnd.x - arrowHeadSize + 2 * scale, domEnd.y);
+			ctx.lineTo(domEnd.x + arrowHeadSize / 2 - 2 * scale, domEnd.y + arrowHeadSize / 2);
+		}
 		ctx.closePath();
 		ctx.fill();
 	}
 }
 
 export class QueueAnnotator extends DataStructureAnnotator {
+	// findRootNodeId(): string | number | null {
+	// 	// returns the rear id
+	// 	const { rearId } = this.getFrontRear();
+	// 	return rearId;
+	// }
+
 	getFrontRear(): { frontId: string | number | null; rearId: string | number | null } {
 		let frontId: string | number | null = null;
 		let rearId: string | number | null = null;

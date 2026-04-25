@@ -41,6 +41,7 @@ export class StepData {
 	data: object = {};
 	startSnapshot: DataStructure | null = null;
 	endSnapshot: DataStructure | null = null;
+	isTransitory: boolean = false;
 
 	constructor(
 		id: number,
@@ -48,12 +49,14 @@ export class StepData {
 		data: object,
 		startSnapshot: DataStructure | null = null,
 		endSnapshot: DataStructure | null = null,
+		isTransitory: boolean = false,
 	) {
 		this.id = id;
 		this.type = type;
 		this.data = data;
 		this.startSnapshot = startSnapshot;
 		this.endSnapshot = endSnapshot;
+		this.isTransitory = isTransitory;
 	}
 
 	static new(data: object, startSnapshot: DataStructure | null = null, endSnapshot: DataStructure | null = null): StepData {
@@ -64,6 +67,6 @@ export class StepData {
 		if (!endSnapshot && (data as any).endSnapshot) {
 			endSnapshot = (data as any).endSnapshot;
 		}
-		return new StepData(0, type, data, startSnapshot, endSnapshot);
+		return new StepData(0, type, data, startSnapshot, endSnapshot, (data as any).isTransitory);
 	}
 }

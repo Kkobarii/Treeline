@@ -2,10 +2,10 @@ import type { Node } from 'vis-network';
 
 import { RBTreeColor } from '$lib/data-structures/structures/rbTree/rbTree';
 import { NodeData } from '$lib/data-structures/utils/graphs';
-import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/dataStructureAnnotator';
 import { Colors, shadeColor } from '$lib/utils/colors';
 
 import { VIS_NETWORK_TOP_BB_OFFSET } from '../constants';
+import { DataStructureAnnotator } from '../dataStructureAnnotator';
 import BaseAnnotation from './annotation';
 
 const LEG_LENGTH = 16;

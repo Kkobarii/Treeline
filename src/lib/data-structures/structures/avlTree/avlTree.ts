@@ -110,7 +110,7 @@ export class AVLTree extends DataStructure {
 			parent.right = x;
 		}
 
-		data.step(StepData.new(new RotateRightData(y.id, x.id, T2 ? T2.id : null, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new RotateRightData(y.id, y.value, x.id, x.value, T2 ? T2.id : null, startSnapshot, this.snapshot())));
 	}
 
 	//
@@ -143,7 +143,7 @@ export class AVLTree extends DataStructure {
 			parent.right = y;
 		}
 
-		data.step(StepData.new(new RotateLeftData(x.id, y.id, T2 ? T2.id : null, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new RotateLeftData(x.id, x.value, y.id, y.value, T2 ? T2.id : null, startSnapshot, this.snapshot())));
 	}
 
 	insert(value: number, data: OperationData): AVLTreeNode | null {

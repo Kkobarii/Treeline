@@ -1,7 +1,7 @@
 import { Colors } from '$lib/utils/colors';
 
+import type { DataStructureAnnotator } from '../dataStructureAnnotator';
 import { BaseAnnotation } from './annotation';
-import type { DataStructureAnnotator } from './dataStructureAnnotator';
 
 export class Annotation extends BaseAnnotation {
 	aboveOffset: number = -30;

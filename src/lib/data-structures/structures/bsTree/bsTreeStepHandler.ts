@@ -10,12 +10,10 @@ import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandl
 export class BSTreeStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as BSTreeAnimator;
-		if (isForward && currentStep.startSnapshot) {
-			console.log('setup forward');
+		if (!currentStep.isTransitory && isForward && currentStep.startSnapshot) {
 			animator.ensure(currentStep.startSnapshot);
 		}
-		if (!isForward && currentStep.endSnapshot) {
-			console.log('setup backward');
+		if (!currentStep.isTransitory && !isForward && currentStep.endSnapshot) {
 			animator.ensure(currentStep.endSnapshot);
 		}
 	}
@@ -27,13 +25,10 @@ export class BSTreeStepHandler extends StepHandlerBase {
 		isForward: boolean,
 	) {
 		let animator = baseAnimator as BSTreeAnimator;
-
-		if (isForward && currentStep.endSnapshot) {
-			console.log('cleanup forward');
+		if (!currentStep.isTransitory && isForward && currentStep.endSnapshot) {
 			animator.ensure(currentStep.endSnapshot);
 		}
-		if (!isForward && currentStep.startSnapshot) {
-			console.log('cleanup backward');
+		if (!currentStep.isTransitory && !isForward && currentStep.startSnapshot) {
 			animator.ensure(currentStep.startSnapshot);
 		}
 	}

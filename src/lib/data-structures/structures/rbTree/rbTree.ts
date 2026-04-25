@@ -7,7 +7,11 @@ import {
 	DIRECTION_RIGHT,
 	DROP_REASON_DUPLICATE_VALUE,
 	DROP_REASON_NOT_FOUND,
-	RBTREE_FIXING_DOUBLE_BLACK,
+	RBTREE_BLACK_OKAY,
+	RBTREE_CHECK_BLACK_RULE,
+	RBTREE_CHECK_RED_RULE,
+	RBTREE_CORRECT,
+	RBTREE_INCORRECT,
 	RBTREE_SIBLING_BLACK_FAR_RED,
 	RBTREE_SIBLING_BLACK_FAR_RED_SYM,
 	RBTREE_SIBLING_BLACK_NEAR_RED,
@@ -41,7 +45,7 @@ import { getDummyNodeId } from '$lib/data-structures/utils/graphs';
 import { deepCopy } from '$lib/data-structures/utils/utils';
 
 import { DataNode, DataStructure, OperationType, type OperationTypeValue } from '../dataStructure';
-import { ColorNodeData, RotateLeftData, RotateRightData } from './rbTreeSteps';
+import { ColorNodeData, FixupData, RotateLeftData, RotateRightData } from './rbTreeSteps';
 
 export enum RBTreeColor {
 	Red = 'red',
@@ -110,7 +114,7 @@ export class RBTree extends DataStructure {
 		if (node.color === color) return;
 		const startSnapshot = this.snapshot();
 		node.color = color;
-		data.step(StepData.new(new ColorNodeData(node.id, color, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new ColorNodeData(node.id, node.value, color, startSnapshot, this.snapshot())));
 	}
 
 	private leftRotate(x: RBTreeNode, data: OperationData): void {
@@ -137,7 +141,7 @@ export class RBTree extends DataStructure {
 			xParent.right = y;
 		}
 
-		data.step(StepData.new(new RotateLeftData(x.id, y.id, T2 ? T2.id : null, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new RotateLeftData(x.id, x.value, y.id, y.value, T2 ? T2.id : null, startSnapshot, this.snapshot())));
 	}
 
 	private rightRotate(y: RBTreeNode, data: OperationData): void {
@@ -164,7 +168,7 @@ export class RBTree extends DataStructure {
 			yParent.right = x;
 		}
 
-		data.step(StepData.new(new RotateRightData(y.id, x.id, T2 ? T2.id : null, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new RotateRightData(y.id, y.value, x.id, x.value, T2 ? T2.id : null, startSnapshot, this.snapshot())));
 	}
 
 	insert(value: number, data: OperationData): RBTreeNode | null {
@@ -177,7 +181,7 @@ export class RBTree extends DataStructure {
 			data.step(StepData.new(new CreateRootData(newNode.id, value, startSnapshot, this.snapshot())));
 			let colorSnapshot = this.snapshot();
 			newNode.color = RBTreeColor.Black;
-			data.step(StepData.new(new ColorNodeData(newNode.id, RBTreeColor.Black, colorSnapshot, this.snapshot())));
+			data.step(StepData.new(new ColorNodeData(newNode.id, newNode.value, RBTreeColor.Black, colorSnapshot, this.snapshot())));
 			return newNode;
 		}
 
@@ -224,7 +228,13 @@ export class RBTree extends DataStructure {
 
 		while (current.parentId !== null) {
 			const parent = this.getParent(current)!;
-			if (parent.color !== RBTreeColor.Red) break;
+			const violation = parent.color === RBTreeColor.Red;
+			data.step(
+				StepData.new(
+					new FixupData(current.id, current.value, RBTREE_CHECK_RED_RULE, violation ? RBTREE_INCORRECT : RBTREE_CORRECT),
+				),
+			);
+			if (!violation) break; // no double-red violation, tree is valid
 
 			const grandparent = this.getGrandparent(current);
 			if (!grandparent) break;
@@ -235,26 +245,28 @@ export class RBTree extends DataStructure {
 
 				if (uncle && uncle.color === RBTreeColor.Red) {
 					// Insert Case 1: uncle is red
-					data.step(StepData.new(new CaseAnalysisData(1, RBTREE_UNCLE_RED_INSERT, grandparent.id)));
+					data.step(StepData.new(new CaseAnalysisData(1, RBTREE_UNCLE_RED_INSERT, current.id)));
 					this.setColor(parent, RBTreeColor.Black, data);
 					this.setColor(uncle, RBTreeColor.Black, data);
 					this.setColor(grandparent, RBTreeColor.Red, data);
 					current = grandparent;
+					continue; // may have caused double-red violation at grandparent, need to check up the tree
 				} else {
 					// Case 2: uncle is black
 					if (current === parent.right) {
 						// Insert Case 2: uncle is black, triangle case
-						data.step(StepData.new(new CaseAnalysisData(2, RBTREE_UNCLE_BLACK_TRIANGLE_INSERT, grandparent.id)));
+						data.step(StepData.new(new CaseAnalysisData(2, RBTREE_UNCLE_BLACK_TRIANGLE_INSERT, current.id)));
 						current = parent;
 						this.leftRotate(current, data);
 					}
 					// Insert Case 3: uncle is black, line case
 					const currentParent = this.getParent(current)!;
 					const currentGrandparent = this.getGrandparent(current)!;
-					data.step(StepData.new(new CaseAnalysisData(3, RBTREE_UNCLE_BLACK_LINE_INSERT, currentGrandparent.id)));
+					data.step(StepData.new(new CaseAnalysisData(3, RBTREE_UNCLE_BLACK_LINE_INSERT, current.id)));
 					this.setColor(currentParent, RBTreeColor.Black, data);
 					this.setColor(currentGrandparent, RBTreeColor.Red, data);
 					this.rightRotate(currentGrandparent, data);
+					break;
 				}
 			} else {
 				// parent is right child of grandparent (symmetric)
@@ -262,26 +274,28 @@ export class RBTree extends DataStructure {
 
 				if (uncle && uncle.color === RBTreeColor.Red) {
 					// Insert Case 1 (symmetric): uncle is red
-					data.step(StepData.new(new CaseAnalysisData(1, RBTREE_UNCLE_RED_INSERT_SYM, grandparent.id)));
+					data.step(StepData.new(new CaseAnalysisData(1, RBTREE_UNCLE_RED_INSERT_SYM, current.id)));
 					this.setColor(parent, RBTreeColor.Black, data);
 					this.setColor(uncle, RBTreeColor.Black, data);
 					this.setColor(grandparent, RBTreeColor.Red, data);
 					current = grandparent;
+					continue; // may have caused double-red violation at grandparent, need to check up the tree
 				} else {
 					// Case 2: uncle is black
 					if (current === parent.left) {
 						// Insert Case 2 (symmetric): uncle is black, triangle case
-						data.step(StepData.new(new CaseAnalysisData(2, RBTREE_UNCLE_BLACK_TRIANGLE_INSERT_SYM, grandparent.id)));
+						data.step(StepData.new(new CaseAnalysisData(2, RBTREE_UNCLE_BLACK_TRIANGLE_INSERT_SYM, current.id)));
 						current = parent;
 						this.rightRotate(current, data);
 					}
 					// Insert Case 3 (symmetric): uncle is black, line case
 					const currentParent = this.getParent(current)!;
 					const currentGrandparent = this.getGrandparent(current)!;
-					data.step(StepData.new(new CaseAnalysisData(3, RBTREE_UNCLE_BLACK_LINE_INSERT_SYM, currentGrandparent.id)));
+					data.step(StepData.new(new CaseAnalysisData(3, RBTREE_UNCLE_BLACK_LINE_INSERT_SYM, current.id)));
 					this.setColor(currentParent, RBTreeColor.Black, data);
 					this.setColor(currentGrandparent, RBTreeColor.Red, data);
 					this.leftRotate(currentGrandparent, data);
+					break;
 				}
 			}
 		}
@@ -377,6 +391,8 @@ export class RBTree extends DataStructure {
 			}
 			data.step(StepData.new(new FoundInorderSuccessorData(current.id, successor.id, successor.value)));
 
+			let startSnapshot = this.snapshot();
+
 			const successorOriginalColor = successor.color;
 			nodeToFixId = successor.right?.id ?? null;
 			nodeToFixParentId = successor.id;
@@ -386,17 +402,16 @@ export class RBTree extends DataStructure {
 			} else {
 				const succParent = this.getParent(successor);
 				nodeToFixParentId = successor.parentId;
-				this.transplant(successor, successor.right, data);
+				this.transplant(successor, successor.right, data, false);
 				successor.right = current.right;
 				if (successor.right) successor.right.parentId = successor.id;
 			}
 
-			this.transplant(current, successor, data);
+			this.transplant(current, successor, data, false);
 			successor.left = current.left;
 			if (successor.left) successor.left.parentId = successor.id;
 
 			// copy color from deleted node to successor
-			let startSnapshot = this.snapshot();
 			successor.color = current.color;
 			data.step(
 				StepData.new(
@@ -432,7 +447,10 @@ export class RBTree extends DataStructure {
 		if (originalColor == RBTreeColor.Black) {
 			if (nodeToFixId) {
 				const nodeToFix = this.findNodeById(nodeToFixId);
-				if (nodeToFix) this.removeFixup(nodeToFix, data);
+				if (nodeToFix) {
+					data.step(StepData.new(new FixupData(nodeToFixId, nodeToFix.value, RBTREE_CHECK_BLACK_RULE, RBTREE_INCORRECT)));
+					this.removeFixup(nodeToFix, data);
+				}
 			} else if (nodeToFixParentId) {
 				const nodeToFixParent = this.findNodeById(nodeToFixParentId);
 				if (nodeToFixParent) {
@@ -440,12 +458,14 @@ export class RBTree extends DataStructure {
 					this.removeFixupNull(nodeToFixParent, wasLeft, data);
 				}
 			}
+		} else {
+			data.step(StepData.new(new FixupData(-1, value, RBTREE_BLACK_OKAY, RBTREE_CORRECT)));
 		}
 
 		return true;
 	}
 
-	private transplant(u: RBTreeNode, v: RBTreeNode | null, data: OperationData): void {
+	private transplant(u: RBTreeNode, v: RBTreeNode | null, data: OperationData, log: boolean = true): void {
 		const startSnapshot = this.snapshot();
 		const uParent = this.getParent(u);
 
@@ -460,7 +480,7 @@ export class RBTree extends DataStructure {
 			v.parentId = u.parentId;
 		}
 
-		if (v) {
+		if (v && log) {
 			data.step(
 				StepData.new(
 					new ReplaceWithChildData(
@@ -473,7 +493,7 @@ export class RBTree extends DataStructure {
 					),
 				),
 			);
-		} else {
+		} else if (log) {
 			data.step(StepData.new(new DeleteData(u.id, u.value, startSnapshot, this.snapshot())));
 		}
 	}
@@ -578,10 +598,9 @@ export class RBTree extends DataStructure {
 
 	private removeFixupNull(parent: RBTreeNode, isLeftChild: boolean, data: OperationData): void {
 		// This handles a double-black violation on a conceptual null node.
-		data.step(StepData.new(new CaseAnalysisData(0, RBTREE_FIXING_DOUBLE_BLACK, parent.id)));
-
 		let sibling = isLeftChild ? parent.right : parent.left;
 		if (sibling?.color === RBTreeColor.Red) {
+			data.step(StepData.new(new FixupData(parent.id, parent.value, RBTREE_CHECK_BLACK_RULE, RBTREE_INCORRECT)));
 			this.setColor(sibling, RBTreeColor.Black, data);
 			this.setColor(parent, RBTreeColor.Red, data);
 			if (isLeftChild) {

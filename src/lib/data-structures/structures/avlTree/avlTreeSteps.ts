@@ -16,23 +16,27 @@ export class UpdateHeightBalanceData extends StepDetail {
 export class RotateLeftData extends StepDetail {
 	constructor(
 		public oldRootId: number,
+		public oldRootValue: number,
 		public newRootId: number,
+		public newRootValue: number,
 		public adoptedChildId: number | null,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super(StepType.AVLTree.RotateLeft, 'steps.dataStructures.avlTree.rotateLeftData', { oldRootId, newRootId });
+		super(StepType.AVLTree.RotateLeft, 'steps.dataStructures.avlTree.rotateLeftData', { oldRootValue, newRootValue });
 	}
 }
 
 export class RotateRightData extends StepDetail {
 	constructor(
 		public oldRootId: number,
+		public oldRootValue: number,
 		public newRootId: number,
+		public newRootValue: number,
 		public adoptedChildId: number | null,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super(StepType.AVLTree.RotateRight, 'steps.dataStructures.avlTree.rotateRightData', { oldRootId, newRootId });
+		super(StepType.AVLTree.RotateRight, 'steps.dataStructures.avlTree.rotateRightData', { oldRootValue, newRootValue });
 	}
 }

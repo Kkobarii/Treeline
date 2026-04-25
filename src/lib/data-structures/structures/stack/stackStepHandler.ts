@@ -8,6 +8,7 @@ import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandl
 import { translate as t } from '$lib/i18n';
 
 import { StackAnimator } from './stackAnimator';
+import type { EmptyData, PeekData, PopData, PushData } from './stackSteps';
 
 // Start / End handlers
 async function handleStartForward(animator: StackAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
@@ -27,57 +28,56 @@ async function handleEndBackward(animator: StackAnimator, annotator: DataStructu
 }
 
 // Push handlers
-async function handlePushForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handlePushForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: PushData) {
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.topId);
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.stack.pushData', { value: String(data.value) });
-	annotator.annotateNode(info, data.nodeId);
 }
 
-async function handlePushBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handlePushBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: PushData) {
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.topId);
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.stack.pushData', { value: String(data.value) });
-	annotator.annotateNode(info, data.nodeId);
 }
 
 // Pop handlers
-async function handlePopForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handlePopForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: PopData) {
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.topId);
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.stack.popData', { value: String(data.value) });
-	annotator.annotateNode(info, null);
 }
 
-async function handlePopBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handlePopBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: PopData) {
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.topId);
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.stack.popData', { value: String(data.value) });
-	annotator.annotateNode(info, data.nodeId);
 }
 
 // Peek handlers
-async function handlePeekForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.stack.peekData', { value: String(data.value) });
+async function handlePeekForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: PeekData) {
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 }
 
-async function handlePeekBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.stack.peekData', { value: String(data.value) });
+async function handlePeekBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: PeekData) {
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 }
 
 // Empty handlers
-async function handleEmptyForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.stack.emptyData');
+async function handleEmptyForward(animator: StackAnimator, annotator: DataStructureAnnotator, data: EmptyData) {
+	const info = t(annotator.locale, data.label);
 	annotator.annotateNode(info, null);
 }
 
-async function handleEmptyBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.stack.emptyData');
+async function handleEmptyBackward(animator: StackAnimator, annotator: DataStructureAnnotator, data: EmptyData) {
+	const info = t(annotator.locale, data.label);
 	annotator.annotateNode(info, null);
 }
 
 export class StackStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as StackAnimator;
-
 		if (isForward && currentStep.startSnapshot) {
 			await animator.ensure(currentStep.startSnapshot);
 		}
@@ -93,7 +93,6 @@ export class StackStepHandler extends StepHandlerBase {
 		isForward: boolean,
 	) {
 		let animator = baseAnimator as StackAnimator;
-
 		if (isForward && currentStep.endSnapshot) {
 			await animator.ensure(currentStep.endSnapshot);
 		}
@@ -122,23 +121,24 @@ export class StackStepHandler extends StepHandlerBase {
 				else await handleEndBackward(animator, annotator, operationManager);
 				break;
 			case StepType.Stack.Push:
-				if (isForward) await handlePushForward(animator, annotator, currentStep.data);
-				else await handlePushBackward(animator, annotator, currentStep.data);
+				if (isForward) await handlePushForward(animator, annotator, currentStep.data as any);
+				else await handlePushBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.Stack.Pop:
-				if (isForward) await handlePopForward(animator, annotator, currentStep.data);
-				else await handlePopBackward(animator, annotator, currentStep.data);
+				if (isForward) await handlePopForward(animator, annotator, currentStep.data as any);
+				else await handlePopBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.Stack.Peek:
-				if (isForward) await handlePeekForward(animator, annotator, currentStep.data);
-				else await handlePeekBackward(animator, annotator, currentStep.data);
+				if (isForward) await handlePeekForward(animator, annotator, currentStep.data as any);
+				else await handlePeekBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.Stack.Empty:
-				if (isForward) await handleEmptyForward(animator, annotator, currentStep.data);
-				else await handleEmptyBackward(animator, annotator, currentStep.data);
+				if (isForward) await handleEmptyForward(animator, annotator, currentStep.data as any);
+				else await handleEmptyBackward(animator, annotator, currentStep.data as any);
 				break;
 			default:
 				console.warn('Unhandled Stack step type:', currentStep.type);
 		}
+		await new Promise(resolve => setTimeout(resolve, 50));
 	}
 }

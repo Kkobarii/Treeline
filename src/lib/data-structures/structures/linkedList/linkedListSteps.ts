@@ -16,6 +16,7 @@ export class InsertAtHeadData extends StepDetail {
 	constructor(
 		public nodeId: number,
 		public value: number,
+		public headId: number,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
@@ -27,6 +28,7 @@ export class InsertAtTailData extends StepDetail {
 	constructor(
 		public nodeId: number,
 		public value: number,
+		public tailId: number,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
@@ -41,27 +43,35 @@ export class CompareData extends StepDetail {
 		public currentValue: number,
 		public position: number,
 	) {
-		super(StepType.LinkedList.Compare, 'steps.dataStructures.linkedList.compareData', {
-			searchValue,
-			currentId,
-			currentValue,
-			position,
-		});
+		super(
+			StepType.LinkedList.Compare,
+			`steps.dataStructures.linkedList.compare${searchValue === currentValue ? 'Equal' : 'NotEqual'}Data`,
+			{
+				searchValue,
+				currentId,
+				currentValue,
+				position,
+			},
+		);
 	}
 }
 
 export class TraverseNextData extends StepDetail {
 	constructor(
 		public fromId: number,
+		public fromValue: number,
 		public toId: number,
+		public toValue: number,
 	) {
-		super(StepType.LinkedList.TraverseNext, 'steps.dataStructures.linkedList.traverseNextData', { fromId, toId });
+		super(StepType.LinkedList.TraverseNext, 'steps.dataStructures.linkedList.traverseNextData', { fromId, fromValue, toId, toValue });
 	}
 }
 
 export class TraverseToTailData extends StepDetail {
-	constructor(public fromId: number) {
-		super(StepType.LinkedList.TraverseToTail, 'steps.dataStructures.linkedList.traverseToTailData', { fromId });
+	constructor(public tailId: number) {
+		super(StepType.LinkedList.TraverseToTail, 'steps.dataStructures.linkedList.traverseToTailData', {
+			tailId,
+		});
 	}
 }
 
@@ -76,8 +86,11 @@ export class FoundData extends StepDetail {
 }
 
 export class NotFoundData extends StepDetail {
-	constructor(public value: number) {
-		super(StepType.LinkedList.NotFound, 'steps.dataStructures.linkedList.notFoundData', { value });
+	constructor(
+		public value: number,
+		public position: number,
+	) {
+		super(StepType.LinkedList.NotFound, 'steps.dataStructures.linkedList.notFoundData', { value, position });
 	}
 }
 
@@ -92,6 +105,8 @@ export class MarkToDeleteData extends StepDetail {
 
 export class RemoveHeadData extends StepDetail {
 	constructor(
+		public nodeId: number,
+		public value: number,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
@@ -102,10 +117,11 @@ export class RemoveHeadData extends StepDetail {
 export class RemoveNodeData extends StepDetail {
 	constructor(
 		public nodeId: number,
+		public value: number,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
-		super(StepType.LinkedList.RemoveNode, 'steps.dataStructures.linkedList.removeNodeData', { nodeId });
+		super(StepType.LinkedList.RemoveNode, 'steps.dataStructures.linkedList.removeNodeData', { nodeId, value });
 	}
 }
 

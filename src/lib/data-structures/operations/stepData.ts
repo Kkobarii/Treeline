@@ -109,6 +109,7 @@ export class DeleteData extends StepDetail {
 		public value: number,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
+		public isTransitory: boolean = true,
 	) {
 		super(StepType.BSTree.Delete, 'steps.dataStructures.common.deleteData', { nodeId, value });
 	}
@@ -141,6 +142,7 @@ export class ReplaceWithInorderSuccessorData extends StepDetail {
 		public relinkedChildId: number | null,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
+		public isTransitory: boolean = true,
 	) {
 		super(StepType.BSTree.ReplaceWithInorderSuccessor, 'steps.dataStructures.common.replaceWithInorderSuccessorData', {
 			oldNodeId,
@@ -160,6 +162,7 @@ export class RelinkSuccessorChildData extends StepDetail {
 		public successorValue: number,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
+		public isTransitory: boolean = true,
 	) {
 		super(StepType.BSTree.RelinkSuccessorChild, 'steps.dataStructures.common.relinkSuccessorChildData', {
 			childNodeId,

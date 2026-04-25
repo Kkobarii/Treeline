@@ -154,14 +154,6 @@ export class DataStructureAnnotator {
 		this.currentValueAnnotation.draw();
 	}
 
-	public removeValueAnnotation() {
-		if (this.currentValueAnnotation) {
-			this.currentValueAnnotation.clear();
-			this.currentValueAnnotation = null;
-			this.redrawCanvas();
-		}
-	}
-
 	public async moveValueAnnotationTo(nodeId: string | number) {
 		if (!this.currentValueAnnotation) return;
 		await this.currentValueAnnotation.moveToNode(nodeId);

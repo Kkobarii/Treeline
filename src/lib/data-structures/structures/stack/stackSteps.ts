@@ -5,6 +5,7 @@ export class PushData extends StepDetail {
 	constructor(
 		public nodeId: number,
 		public value: number,
+		public topId: number | null,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
@@ -16,6 +17,7 @@ export class PopData extends StepDetail {
 	constructor(
 		public nodeId: number,
 		public value: number,
+		public topId: number | null,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {

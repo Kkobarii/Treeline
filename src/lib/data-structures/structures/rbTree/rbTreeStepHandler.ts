@@ -13,70 +13,62 @@ import { translate as t } from '$lib/i18n';
 import type { RBTreeAnnotator } from './rbTreeAnnotator';
 
 async function handleColorNodeForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: ColorNodeData) {
-	const info = t(annotator.locale, 'steps.dataStructures.rbTree.colorNodeData', { color: data.color });
+	const color = t(annotator.locale, data.color);
+	const info = t(annotator.locale, data.label, { ...data.params, color });
 	annotator.annotateNode(info, data.nodeId);
 	animator.ensure(data.endSnapshot! as RBTree);
 }
 
 async function handleColorNodeBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: ColorNodeData) {
-	const info = t(annotator.locale, 'steps.dataStructures.rbTree.colorNodeData', { color: data.color });
+	const color = t(annotator.locale, data.color);
+	const info = t(annotator.locale, data.label, { ...data.params, color });
 	annotator.annotateNode(info, data.nodeId);
 	animator.ensure(data.startSnapshot! as RBTree);
 }
 
 async function handleRotateLeftForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateLeftData) {
-	const info = t(annotator.locale, 'steps.dataStructures.rbTree.rotateLeftData', {
-		oldRootId: String(data.oldRootId),
-		newRootId: String(data.newRootId),
-	});
-	annotator.annotateNode(info, data.newRootId);
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.oldRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as RBTree);
 }
 
 async function handleRotateLeftBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateLeftData) {
-	const info = t(annotator.locale, 'steps.dataStructures.rbTree.rotateLeftData', {
-		oldRootId: String(data.oldRootId),
-		newRootId: String(data.newRootId),
-	});
-	annotator.annotateNode(info, data.newRootId);
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.oldRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as RBTree);
 }
 
 async function handleRotateRightForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateRightData) {
-	const info = t(annotator.locale, 'steps.dataStructures.rbTree.rotateRightData', {
-		oldRootId: String(data.oldRootId),
-		newRootId: String(data.newRootId),
-	});
-	annotator.annotateNode(info, data.newRootId);
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.oldRootId);
 	await animator.ensureAndAnimate(data.endSnapshot! as RBTree);
 }
 
 async function handleRotateRightBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: RotateRightData) {
-	const info = t(annotator.locale, 'steps.dataStructures.rbTree.rotateRightData', {
-		oldRootId: String(data.oldRootId),
-		newRootId: String(data.newRootId),
-	});
-	annotator.annotateNode(info, data.newRootId);
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.oldRootId);
 	await animator.ensureAndAnimate(data.startSnapshot! as RBTree);
 }
 
 async function handleFixupForward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: FixupData) {
-	const info = t(annotator.locale, 'steps.dataStructures.rbTree.fixupData');
+	const result = t(annotator.locale, data.result, data.params);
+	const info = t(annotator.locale, data.fixupType, { ...data.params, result });
 	annotator.annotateNode(info, data.nodeId);
 }
 
 async function handleFixupBackward(animator: RBTreeAnimator, annotator: RBTreeAnnotator, data: FixupData) {
-	const info = t(annotator.locale, 'steps.dataStructures.rbTree.fixupData');
+	const result = t(annotator.locale, data.result, data.params);
+	const info = t(annotator.locale, data.fixupType, { ...data.params, result });
 	annotator.annotateNode(info, data.nodeId);
 }
 
 export class RBTreeStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as RBTreeAnimator;
-		if (isForward && currentStep.startSnapshot) {
+		if (!currentStep.isTransitory && isForward && currentStep.startSnapshot) {
 			animator.ensure(currentStep.startSnapshot);
 		}
-		if (!isForward && currentStep.endSnapshot) {
+		if (!currentStep.isTransitory && !isForward && currentStep.endSnapshot) {
 			animator.ensure(currentStep.endSnapshot);
 		}
 	}
@@ -88,10 +80,10 @@ export class RBTreeStepHandler extends StepHandlerBase {
 		isForward: boolean,
 	) {
 		let animator = baseAnimator as RBTreeAnimator;
-		if (isForward && currentStep.endSnapshot) {
+		if (!currentStep.isTransitory && isForward && currentStep.endSnapshot) {
 			animator.ensure(currentStep.endSnapshot);
 		}
-		if (!isForward && currentStep.startSnapshot) {
+		if (!currentStep.isTransitory && !isForward && currentStep.startSnapshot) {
 			animator.ensure(currentStep.startSnapshot);
 		}
 	}

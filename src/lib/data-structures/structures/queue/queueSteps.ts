@@ -5,6 +5,7 @@ export class EnqueueData extends StepDetail {
 	constructor(
 		public nodeId: number,
 		public value: number,
+		public rearId: number | null,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {
@@ -16,6 +17,7 @@ export class DequeueData extends StepDetail {
 	constructor(
 		public nodeId: number,
 		public value: number,
+		public frontId: number | null,
 		public startSnapshot: DataStructure,
 		public endSnapshot: DataStructure,
 	) {

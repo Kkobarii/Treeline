@@ -51,6 +51,7 @@ export class Queue extends DataStructure {
 	enqueue(value: number, data: OperationData): QueueNode {
 		const newNode = new QueueNode(this.generateId(), value);
 		let startSnapshot = this.snapshot();
+		let originalRearId = this.rear ? this.rear.id : null;
 
 		if (!this.rear) {
 			// Empty queue
@@ -67,8 +68,11 @@ export class Queue extends DataStructure {
 			this.rear = newNode;
 		}
 
+		if (originalRearId === null) {
+			originalRearId = this.rear ? this.rear.id : null;
+		}
 		this.size++;
-		data.step(StepData.new(new EnqueueData(newNode.id, value, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new EnqueueData(newNode.id, value, originalRearId, startSnapshot, this.snapshot())));
 		return newNode;
 	}
 
@@ -79,6 +83,7 @@ export class Queue extends DataStructure {
 		}
 
 		let startSnapshot = this.snapshot();
+		const newFrontId = this.front.next ? this.front.next.id : null;
 		const value = this.front.value;
 		const nodeId = this.front.id;
 
@@ -88,7 +93,7 @@ export class Queue extends DataStructure {
 		}
 
 		this.size--;
-		data.step(StepData.new(new DequeueData(nodeId, value, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new DequeueData(nodeId, value, newFrontId, startSnapshot, this.snapshot())));
 		return value;
 	}
 

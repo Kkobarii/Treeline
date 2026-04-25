@@ -6,8 +6,10 @@ import { DataStructureAnnotator } from '$lib/data-structures/visual/annotators/d
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
 import { translate as t } from '$lib/i18n';
+import { Colors } from '$lib/utils/colors';
 
 import { QueueAnimator } from './queueAnimator';
+import type { DequeueData, EmptyData, EnqueueData, PeekData } from './queueSteps';
 
 // Start / End handlers
 async function handleStartForward(animator: QueueAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
@@ -27,57 +29,58 @@ async function handleEndBackward(animator: QueueAnimator, annotator: DataStructu
 }
 
 // Enqueue handlers
-async function handleEnqueueForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleEnqueueForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: EnqueueData) {
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.rearId);
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.queue.enqueueData', { value: String(data.value) });
-	annotator.annotateNode(info, data.nodeId);
 }
 
-async function handleEnqueueBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleEnqueueBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: EnqueueData) {
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.rearId);
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.queue.enqueueData', { value: String(data.value) });
-	annotator.annotateNode(info, data.nodeId);
 }
 
 // Dequeue handlers
-async function handleDequeueForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleDequeueForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: DequeueData) {
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.frontId);
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.queue.dequeueData', { value: String(data.value) });
-	annotator.annotateNode(info, null);
 }
 
-async function handleDequeueBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleDequeueBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: DequeueData) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.queue.dequeueData', { value: String(data.value) });
-	annotator.annotateNode(info, data.nodeId);
+	const info = t(annotator.locale, data.label, data.params);
+	annotator.annotateNode(info, data.frontId);
 }
 
 // Peek handlers
-async function handlePeekForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.queue.peekData', { value: String(data.value) });
+async function handlePeekForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: PeekData) {
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
+	animator.setNodeColor(data.nodeId, Colors.Blue);
 }
 
-async function handlePeekBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.queue.peekData', { value: String(data.value) });
+async function handlePeekBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: PeekData) {
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
+	animator.resetNodeColor(data.nodeId);
 }
 
 // Empty handlers
-async function handleEmptyForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.queue.emptyData');
+async function handleEmptyForward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: EmptyData) {
+	const info = t(annotator.locale, data.label);
 	annotator.annotateNode(info, null);
 }
 
-async function handleEmptyBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.queue.emptyData');
+async function handleEmptyBackward(animator: QueueAnimator, annotator: DataStructureAnnotator, data: EmptyData) {
+	const info = t(annotator.locale, data.label);
 	annotator.annotateNode(info, null);
 }
 
 export class QueueStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as QueueAnimator;
-
 		if (isForward && currentStep.startSnapshot) {
 			await animator.ensure(currentStep.startSnapshot);
 		}
@@ -93,7 +96,6 @@ export class QueueStepHandler extends StepHandlerBase {
 		isForward: boolean,
 	) {
 		let animator = baseAnimator as QueueAnimator;
-
 		if (isForward && currentStep.endSnapshot) {
 			await animator.ensure(currentStep.endSnapshot);
 		}
@@ -122,23 +124,24 @@ export class QueueStepHandler extends StepHandlerBase {
 				else await handleEndBackward(animator, annotator, operationManager);
 				break;
 			case StepType.Queue.Enqueue:
-				if (isForward) await handleEnqueueForward(animator, annotator, currentStep.data);
-				else await handleEnqueueBackward(animator, annotator, currentStep.data);
+				if (isForward) await handleEnqueueForward(animator, annotator, currentStep.data as any);
+				else await handleEnqueueBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.Queue.Dequeue:
-				if (isForward) await handleDequeueForward(animator, annotator, currentStep.data);
-				else await handleDequeueBackward(animator, annotator, currentStep.data);
+				if (isForward) await handleDequeueForward(animator, annotator, currentStep.data as any);
+				else await handleDequeueBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.Queue.Peek:
-				if (isForward) await handlePeekForward(animator, annotator, currentStep.data);
-				else await handlePeekBackward(animator, annotator, currentStep.data);
+				if (isForward) await handlePeekForward(animator, annotator, currentStep.data as any);
+				else await handlePeekBackward(animator, annotator, currentStep.data as any);
 				break;
 			case StepType.Queue.Empty:
-				if (isForward) await handleEmptyForward(animator, annotator, currentStep.data);
-				else await handleEmptyBackward(animator, annotator, currentStep.data);
+				if (isForward) await handleEmptyForward(animator, annotator, currentStep.data as any);
+				else await handleEmptyBackward(animator, annotator, currentStep.data as any);
 				break;
 			default:
 				console.warn('Unhandled Queue step type:', currentStep.type);
 		}
+		await new Promise(resolve => setTimeout(resolve, 50));
 	}
 }

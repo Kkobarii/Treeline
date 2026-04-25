@@ -41,12 +41,17 @@ export class Stack extends DataStructure {
 	push(value: number, data: OperationData): StackNode {
 		const newNode = new StackNode(this.generateId(), value);
 		let startSnapshot = this.snapshot();
+		let originalTopId = this.top ? this.top.id : null;
 
 		newNode.next = this.top;
 		this.top = newNode;
 		this.size++;
 
-		data.step(StepData.new(new PushData(newNode.id, value, startSnapshot, this.snapshot())));
+		if (originalTopId === null) {
+			originalTopId = this.top ? this.top.id : null;
+		}
+
+		data.step(StepData.new(new PushData(newNode.id, value, originalTopId, startSnapshot, this.snapshot())));
 		return newNode;
 	}
 
@@ -62,8 +67,9 @@ export class Stack extends DataStructure {
 
 		this.top = this.top.next;
 		this.size--;
+		const newTopId = this.top ? this.top.id : nodeId;
 
-		data.step(StepData.new(new PopData(nodeId, value, startSnapshot, this.snapshot())));
+		data.step(StepData.new(new PopData(nodeId, value, newTopId, startSnapshot, this.snapshot())));
 		return value;
 	}
 

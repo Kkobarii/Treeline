@@ -7,6 +7,22 @@ import type { DataStructureAnnotator } from '$lib/data-structures/visual/annotat
 import { StepHandlerBase } from '$lib/data-structures/visual/orchestrators/stepHandlerBase';
 import * as Common from '$lib/data-structures/visual/orchestrators/treeStepHandlersCommon';
 import { translate as t } from '$lib/i18n';
+import { Colors } from '$lib/utils/colors';
+
+import type {
+	CompareData,
+	CreateHeadData,
+	EmptyListData,
+	FoundData,
+	InsertAtHeadData,
+	InsertAtTailData,
+	MarkToDeleteData,
+	NotFoundData,
+	RemoveHeadData,
+	RemoveNodeData,
+	TraverseNextData,
+	TraverseToTailData,
+} from './linkedListSteps';
 
 // Start / End handlers
 async function handleStartForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, operationManager: OperationManager) {
@@ -26,47 +42,53 @@ async function handleEndBackward(animator: LinkedListAnimator, annotator: DataSt
 }
 
 // CreateHead handlers
-async function handleCreateHeadForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleCreateHeadForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: CreateHeadData) {
+	annotator.clearValueAnnotation();
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.createHeadData', { value: String(data.value) });
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
 }
 
-async function handleCreateHeadBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleCreateHeadBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: CreateHeadData) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.createHeadData', { value: String(data.value) });
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
+	annotator.createValueAnnotation(String(data.value), data.nodeId);
 }
 
 // InsertAtHead handlers
-async function handleInsertAtHeadForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleInsertAtHeadForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: InsertAtHeadData) {
+	annotator.clearValueAnnotation();
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.insertAtHeadData', { value: String(data.value) });
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
 }
 
-async function handleInsertAtHeadBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleInsertAtHeadBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: InsertAtHeadData) {
+	annotator.createValueAnnotation(String(data.value), data.headId);
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
+	annotator.annotateNode(info, data.headId);
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.insertAtHeadData', { value: String(data.value) });
-	annotator.annotateNode(info, data.nodeId);
 }
 
 // InsertAtTail handlers
-async function handleInsertAtTailForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleInsertAtTailForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: InsertAtTailData) {
+	annotator.clearValueAnnotation();
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.insertAtTailData', { value: String(data.value) });
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
 }
 
-async function handleInsertAtTailBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleInsertAtTailBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: InsertAtTailData) {
+	annotator.createValueAnnotation(String(data.value), data.tailId);
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
+	annotator.annotateNode(info, data.tailId);
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.insertAtTailData', { value: String(data.value) });
-	annotator.annotateNode(info, data.nodeId);
 }
 
 // Compare handlers
-async function handleCompareForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.compareData', {
+async function handleCompareForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: CompareData) {
+	const info = t((annotator as any).locale, data.label, {
 		searchValue: String(data.searchValue),
 		currentValue: String(data.currentValue),
 		position: String(data.position),
@@ -74,8 +96,8 @@ async function handleCompareForward(animator: LinkedListAnimator, annotator: Dat
 	annotator.annotateNode(info, data.currentId);
 }
 
-async function handleCompareBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.compareData', {
+async function handleCompareBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: CompareData) {
+	const info = t((annotator as any).locale, data.label, {
 		searchValue: String(data.searchValue),
 		currentValue: String(data.currentValue),
 		position: String(data.position),
@@ -84,106 +106,123 @@ async function handleCompareBackward(animator: LinkedListAnimator, annotator: Da
 }
 
 // TraverseNext handlers
-async function handleTraverseNextForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.traverseNextData', { value: String(data.value) });
+async function handleTraverseNextForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: TraverseNextData) {
+	const info = t((annotator as any).locale, data.label, { value: String(data.toValue) });
 	annotator.annotateNode(info, data.toId);
+	annotator.moveValueAnnotationTo(data.toId);
 }
 
-async function handleTraverseNextBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.traverseNextData', { value: String(data.value) });
-	annotator.annotateNode(info, data.fromId);
+async function handleTraverseNextBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: TraverseNextData) {
+	const info = t((annotator as any).locale, data.label, { value: String(data.toValue) });
+	annotator.annotateNode(info, data.toId);
+	annotator.moveValueAnnotationTo(data.fromId);
 }
 
 // TraverseToTail handlers
-async function handleTraverseToTailForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.traverseToTailData');
-	annotator.annotateNode(info, null);
+async function handleTraverseToTailForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: TraverseToTailData) {
+	const info = t((annotator as any).locale, data.label);
+	annotator.annotateNode(info, data.tailId);
+	annotator.moveValueAnnotationTo(data.tailId);
 }
 
-async function handleTraverseToTailBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.traverseToTailData');
-	annotator.annotateNode(info, null);
+async function handleTraverseToTailBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: TraverseToTailData) {
+	const info = t((annotator as any).locale, data.label);
+	annotator.annotateNode(info, data.tailId);
+	annotator.moveValueAnnotationTo(data.tailId);
 }
 
 // Found handlers
-async function handleFoundForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.foundData', { value: String(data.value) });
+async function handleFoundForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: FoundData) {
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
+	annotator.clearValueAnnotation();
+	animator.setNodeColor(data.nodeId, Colors.Blue);
 }
 
-async function handleFoundBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.foundData', { value: String(data.value) });
+async function handleFoundBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: FoundData) {
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
+	annotator.createValueAnnotation(String(data.value), data.nodeId);
+	animator.resetNodeColor(data.nodeId);
 }
 
 // NotFound handlers
-async function handleNotFoundForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.notFoundData', { value: String(data.value) });
+async function handleNotFoundForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: NotFoundData) {
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, null);
+	annotator.clearValueAnnotation();
 }
 
-async function handleNotFoundBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.notFoundData', { value: String(data.value) });
+async function handleNotFoundBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: NotFoundData) {
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, null);
+	annotator.createValueAnnotation(String(data.value), data.position);
 }
 
 // MarkToDelete handlers
-async function handleMarkToDeleteForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.markToDeleteData', { value: String(data.value) });
+async function handleMarkToDeleteForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: MarkToDeleteData) {
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
+	animator.setNodeColor(data.nodeId, Colors.Red);
 }
 
-async function handleMarkToDeleteBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.markToDeleteData', { value: String(data.value) });
+async function handleMarkToDeleteBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: MarkToDeleteData) {
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
 	annotator.annotateNode(info, data.nodeId);
+	animator.resetNodeColor(data.nodeId);
 }
 
 // RemoveHead handlers
-async function handleRemoveHeadForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleRemoveHeadForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: RemoveHeadData) {
+	annotator.clearAnnotation();
+	annotator.clearValueAnnotation();
+	await animator.animateNodeShrink(data.nodeId);
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.removeHeadData');
-	annotator.annotateNode(info, null);
 }
 
-async function handleRemoveHeadBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleRemoveHeadBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: RemoveHeadData) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.removeHeadData');
-	annotator.annotateNode(info, null);
+	const info = t((annotator as any).locale, data.label);
+	annotator.annotateNode(info, data.nodeId);
+	animator.setNodeColor(data.nodeId, Colors.Red);
+	annotator.createValueAnnotation(String(data.value), data.nodeId);
 }
 
 // RemoveNode handlers
-async function handleRemoveNodeForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleRemoveNodeForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: RemoveNodeData) {
+	annotator.clearAnnotation();
+	annotator.clearValueAnnotation();
+	await animator.animateNodeShrink(data.nodeId);
 	await animator.ensureAndAnimate(data.endSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.removeNodeData', { value: String(data.value) });
-	annotator.annotateNode(info, null);
 }
 
-async function handleRemoveNodeBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
+async function handleRemoveNodeBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: RemoveNodeData) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.removeNodeData', { value: String(data.value) });
-	annotator.annotateNode(info, null);
+	const info = t((annotator as any).locale, data.label, { value: String(data.value) });
+	annotator.annotateNode(info, data.nodeId);
+	animator.setNodeColor(data.nodeId, Colors.Red);
+	annotator.createValueAnnotation(String(data.value), data.nodeId);
 }
 
 // EmptyList handlers
-async function handleEmptyListForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.emptyListData');
+async function handleEmptyListForward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: EmptyListData) {
+	const info = t((annotator as any).locale, data.label);
 	annotator.annotateNode(info, null);
 }
 
-async function handleEmptyListBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: any) {
-	const info = t((annotator as any).locale, 'steps.dataStructures.linkedList.emptyListData');
+async function handleEmptyListBackward(animator: LinkedListAnimator, annotator: DataStructureAnnotator, data: EmptyListData) {
+	const info = t((annotator as any).locale, data.label);
 	annotator.annotateNode(info, null);
 }
 
 export class LinkedListStepHandler extends StepHandlerBase {
 	async stepSetup(currentStep: StepData, baseAnimator: DataStructureAnimator, baseAnnotator: DataStructureAnnotator, isForward: boolean) {
 		let animator = baseAnimator as LinkedListAnimator;
-
 		if (isForward && currentStep.startSnapshot) {
-			await animator.ensure(currentStep.startSnapshot);
+			animator.ensure(currentStep.startSnapshot);
 		}
 		if (!isForward && currentStep.endSnapshot) {
-			await animator.ensure(currentStep.endSnapshot);
+			animator.ensure(currentStep.endSnapshot);
 		}
 	}
 
@@ -194,12 +233,11 @@ export class LinkedListStepHandler extends StepHandlerBase {
 		isForward: boolean,
 	) {
 		let animator = baseAnimator as LinkedListAnimator;
-
 		if (isForward && currentStep.endSnapshot) {
-			await animator.ensure(currentStep.endSnapshot);
+			animator.ensure(currentStep.endSnapshot);
 		}
 		if (!isForward && currentStep.startSnapshot) {
-			await animator.ensure(currentStep.startSnapshot);
+			animator.ensure(currentStep.startSnapshot);
 		}
 	}
 
@@ -273,5 +311,6 @@ export class LinkedListStepHandler extends StepHandlerBase {
 			default:
 				console.warn('Unhandled LinkedList step type:', currentStep.type);
 		}
+		await new Promise(resolve => setTimeout(resolve, 50));
 	}
 }

@@ -66,9 +66,10 @@ export class LinkedList extends DataStructure {
 			data.step(StepData.new(new CreateHeadData(newNode.id, value, startSnapshot, this.snapshot())));
 		} else {
 			// Non-empty list
+			const oldHeadId = this.head.id;
 			newNode.next = this.head;
 			this.head = newNode;
-			data.step(StepData.new(new InsertAtHeadData(newNode.id, value, startSnapshot, this.snapshot())));
+			data.step(StepData.new(new InsertAtHeadData(newNode.id, value, oldHeadId, startSnapshot, this.snapshot())));
 		}
 
 		this.size++;
@@ -87,7 +88,7 @@ export class LinkedList extends DataStructure {
 		} else {
 			// Non-empty list - traverse to tail or use tail reference
 			if (this.tail) {
-				data.step(StepData.new(new TraverseToTailData(this.head.id)));
+				data.step(StepData.new(new TraverseToTailData(this.tail.id)));
 
 				let realTail = this.head;
 				while (realTail.next) {
@@ -95,9 +96,10 @@ export class LinkedList extends DataStructure {
 				}
 				realTail.next = newNode;
 
+				const oldTailId = this.tail.id;
 				this.tail = newNode;
 
-				data.step(StepData.new(new InsertAtTailData(newNode.id, value, startSnapshot, this.snapshot())));
+				data.step(StepData.new(new InsertAtTailData(newNode.id, value, oldTailId, startSnapshot, this.snapshot())));
 			}
 		}
 
@@ -123,16 +125,16 @@ export class LinkedList extends DataStructure {
 			}
 
 			if (current.next) {
-				data.step(StepData.new(new TraverseNextData(current.id, current.next.id)));
+				data.step(StepData.new(new TraverseNextData(current.id, current.value, current.next.id, current.next.value)));
 				current = current.next;
 				position++;
 			} else {
-				data.step(StepData.new(new NotFoundData(value)));
+				data.step(StepData.new(new NotFoundData(value, position)));
 				return null;
 			}
 		}
 
-		data.step(StepData.new(new NotFoundData(value)));
+		data.step(StepData.new(new NotFoundData(value, position)));
 		return null;
 	}
 
@@ -147,12 +149,14 @@ export class LinkedList extends DataStructure {
 			data.step(StepData.new(new MarkToDeleteData(this.head.id, value)));
 			let startSnapshot = this.snapshot();
 
+			const oldHeadId = this.head.id;
+			const oldHeadValue = this.head.value;
 			this.head = this.head.next;
 			if (!this.head) {
 				this.tail = null; // List is now empty
 			}
 
-			data.step(StepData.new(new RemoveHeadData(startSnapshot, this.snapshot())));
+			data.step(StepData.new(new RemoveHeadData(oldHeadId, oldHeadValue, startSnapshot, this.snapshot())));
 			this.size--;
 			return true;
 		}
@@ -170,29 +174,31 @@ export class LinkedList extends DataStructure {
 				let startSnapshot = this.snapshot();
 
 				if (prev) {
+					console.log(`Removing node with id ${current.id} and value ${current.value}, previous node id ${prev.id}`);
 					prev.next = current.next;
-					if (current === this.tail) {
+					if (this.tail && current.id === this.tail.id) {
+						console.log(`Removed node was tail, updating tail to id ${prev.id}`);
 						this.tail = prev;
 					}
 				}
 
-				data.step(StepData.new(new RemoveNodeData(current.id, startSnapshot, this.snapshot())));
+				data.step(StepData.new(new RemoveNodeData(current.id, current.value, startSnapshot, this.snapshot())));
 				this.size--;
 				return true;
 			}
 
 			if (current.next) {
-				data.step(StepData.new(new TraverseNextData(current.id, current.next.id)));
+				data.step(StepData.new(new TraverseNextData(current.id, current.value, current.next.id, current.next.value)));
 				prev = current;
 				current = current.next;
 				position++;
 			} else {
-				data.step(StepData.new(new NotFoundData(value)));
+				data.step(StepData.new(new NotFoundData(value, position)));
 				return false;
 			}
 		}
 
-		data.step(StepData.new(new NotFoundData(value)));
+		data.step(StepData.new(new NotFoundData(value, position)));
 		return false;
 	}
 }

@@ -208,7 +208,7 @@ export class DataStructureAnimator {
 		for (const [nodeId, fromPos] of Object.entries(fromPositions)) {
 			try {
 				if (!newPositions[nodeId]) continue; // node is gone
-				await this.snapNodeTo(nodeId, fromPos.x, fromPos.y);
+				this.snapNodeTo(nodeId, fromPos.x, fromPos.y);
 			} catch {}
 		}
 
@@ -220,7 +220,7 @@ export class DataStructureAnimator {
 				anims.push(this.animateNodeMovement(nodeId, fromPos, newPos));
 			} else {
 				// new node, just snap
-				await this.snapNodeTo(nodeId, newPos.x, newPos.y);
+				this.snapNodeTo(nodeId, newPos.x, newPos.y);
 			}
 		}
 		await Promise.all(anims);
@@ -233,6 +233,7 @@ export class DataStructureAnimator {
 
 	async ensureAndAnimate(tree: any) {
 		const oldPositions = this.getPositions();
+		await Promise.resolve(new Promise(resolve => setTimeout(resolve, 50))); // this just work and i dont know why
 		this.ensure(tree);
 		const newPositions = this.getPositions();
 		return this.animateRelayout(oldPositions, newPositions);

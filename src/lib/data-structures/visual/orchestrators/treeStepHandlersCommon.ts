@@ -91,7 +91,13 @@ export async function handleStartForwardCommon(
 	if (animator.hasNodes()) {
 		const value = operationManager.getCurrentOperation().value;
 		if (value !== null && value !== undefined) {
-			annotator.createValueAnnotation(String(value), null);
+			if (
+				!(operationManager.getCurrentOperation().type === OperationType.Queue.Enqueue) &&
+				!(operationManager.getCurrentOperation().type === OperationType.Stack.Push)
+			) {
+				// if queue or stack, ignore
+				annotator.createValueAnnotation(String(value), null);
+			}
 		}
 	}
 	const endPositions = animator.getPositions();
@@ -112,7 +118,7 @@ export async function handleStartBackwardCommon(
 	const operationLabel = getOperationLabel(operationManager, annotator.locale);
 	const info = t(annotator.locale, 'steps.dataStructures.common.startingOperationData', { operation: operationLabel });
 	annotator.annotateNode(info, null);
-	annotator.removeValueAnnotation();
+	annotator.clearValueAnnotation();
 }
 
 export async function handleEndForwardCommon(
@@ -141,14 +147,14 @@ export async function handleEndBackwardCommon(
 
 export async function handleCreateRootForwardCommon(animator: TreeAnimator, annotator: DataStructureAnnotator, data: CreateRootData) {
 	animator.ensure(data.endSnapshot);
-	const info = t(annotator.locale, 'steps.dataStructures.common.createRootData', { value: String(data.value) });
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 
 	await Promise.resolve(animator.animateNodeGrowth(data.nodeId));
 }
 
 export async function handleCreateRootBackwardCommon(animator: TreeAnimator, annotator: DataStructureAnnotator, data: CreateRootData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.createRootData', { value: String(data.value) });
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 	await Promise.resolve(animator.animateNodeShrink(data.nodeId));
 	await animator.ensureAndAnimate(data.startSnapshot);
@@ -156,10 +162,7 @@ export async function handleCreateRootBackwardCommon(animator: TreeAnimator, ann
 
 export async function handleCreateLeafForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CreateLeafData) {
 	const direction = t(annotator.locale, data.direction);
-	const info = t(annotator.locale, 'steps.dataStructures.common.createLeafData', {
-		direction,
-		value: String(data.value),
-	});
+	const info = t(annotator.locale, data.label, { ...data.params, direction });
 	annotator.annotateNode(info, data.parentId);
 
 	annotator.clearValueAnnotation();
@@ -168,10 +171,7 @@ export async function handleCreateLeafForwardCommon(animator: CommonAnimator, an
 
 export async function handleCreateLeafBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CreateLeafData) {
 	const direction = t(annotator.locale, data.direction);
-	const info = t(annotator.locale, 'steps.dataStructures.common.createLeafData', {
-		direction,
-		value: String(data.value),
-	});
+	const info = t(annotator.locale, data.label, { ...data.params, direction });
 	annotator.annotateNode(info, data.parentId);
 
 	await animator.ensureAndAnimate(data.startSnapshot);
@@ -179,26 +179,18 @@ export async function handleCreateLeafBackwardCommon(animator: CommonAnimator, a
 }
 
 export async function handleCompareForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CompareData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.compareData', {
-		value: String(data.value),
-		comparisonSymbol: data.comparisonSymbol,
-		comparisonValue: String(data.comparisonValue),
-	});
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.comparisonId);
 }
 
 export async function handleCompareBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CompareData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.compareData', {
-		value: String(data.value),
-		comparisonSymbol: data.comparisonSymbol,
-		comparisonValue: String(data.comparisonValue),
-	});
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.comparisonId);
 }
 
 export async function handleTraverseForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: TraverseData) {
 	const direction = t(annotator.locale, data.direction);
-	const info = t(annotator.locale, 'steps.dataStructures.common.traverseData', { direction });
+	const info = t(annotator.locale, data.label, { ...data.params, direction });
 	annotator.annotateNode(info, data.fromId);
 	await annotator.moveValueAnnotationTo(data.toId);
 }
@@ -206,54 +198,54 @@ export async function handleTraverseForwardCommon(animator: CommonAnimator, anno
 export async function handleTraverseBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: TraverseData) {
 	await annotator.moveValueAnnotationTo(data.fromId);
 	const direction = t(annotator.locale, data.direction);
-	const info = t(annotator.locale, 'steps.dataStructures.common.traverseData', { direction });
+	const info = t(annotator.locale, data.label, { ...data.params, direction });
 	annotator.annotateNode(info, data.fromId);
 }
 
 export async function handleDropForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: DropData) {
 	const reason = t(annotator.locale, data.reason);
-	const info = t(annotator.locale, 'steps.dataStructures.common.dropData', { value: String(data.value), reason, fromId: data.fromId });
+	const info = t(annotator.locale, data.label, { ...data.params, reason });
 	annotator.annotateNode(info, data.fromId);
 	annotator.clearValueAnnotation();
 }
 
 export async function handleDropBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: DropData) {
 	const reason = t(annotator.locale, data.reason);
-	const info = t(annotator.locale, 'steps.dataStructures.common.dropData', { value: String(data.value), reason, fromId: data.fromId });
+	const info = t(annotator.locale, data.label, { ...data.params, reason });
 	annotator.annotateNode(info, data.fromId);
 	annotator.createValueAnnotation(String(data.value), data.fromId);
 }
 
 export function handleFoundForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: FoundData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.foundData', { value: String(data.value) });
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Blue);
 	annotator.clearValueAnnotation();
 }
 
 export function handleFoundBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: FoundData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.foundData', { value: String(data.value) });
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 	animator.resetNodeColor(data.nodeId);
 	annotator.createValueAnnotation(String(data.value), data.nodeId);
 }
 
 export function handleMarkToDeleteForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: MarkToDeleteData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.markToDeleteData', { value: String(data.value) });
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Red);
 	annotator.clearValueAnnotation();
 }
 
 export function handleMarkToDeleteBackwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: MarkToDeleteData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.markToDeleteData', { value: String(data.value) });
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 	animator.resetNodeColor(data.nodeId);
 	annotator.createValueAnnotation(String(data.value), data.nodeId);
 }
 
 export async function handleDeleteForwardCommon(animator: TreeAnimator, annotator: DataStructureAnnotator, data: DeleteData) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.deleteData', { value: String(data.value) });
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 	await Promise.resolve(animator.animateNodeShrink(data.nodeId));
 	annotator.clearAnnotation();
@@ -262,10 +254,9 @@ export async function handleDeleteForwardCommon(animator: TreeAnimator, annotato
 
 export async function handleDeleteBackwardCommon(animator: TreeAnimator, annotator: DataStructureAnnotator, data: DeleteData) {
 	await animator.ensureAndAnimate(data.startSnapshot);
-	const info = t(annotator.locale, 'steps.dataStructures.common.deleteData', { value: String(data.value) });
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.nodeId);
 	animator.setNodeColor(data.nodeId, Colors.Red);
-	await Promise.resolve(animator.animateNodeGrowth(data.nodeId));
 }
 
 export async function handleReplaceWithChildForwardCommon(
@@ -273,10 +264,13 @@ export async function handleReplaceWithChildForwardCommon(
 	annotator: DataStructureAnnotator,
 	data: ReplaceWithChildData,
 ) {
-	await animator.ensureAndAnimate(data.endSnapshot);
 	const direction = t(annotator.locale, data.direction);
-	const info = t(annotator.locale, 'steps.dataStructures.common.replaceWithChildData', { direction });
+	const info = t(annotator.locale, data.label, { ...data.params, direction });
 	annotator.annotateNode(info, data.newNodeId);
+
+	animator.setNodeColor(data.newNodeId, Colors.Blue);
+
+	await animator.ensureAndAnimate(data.endSnapshot);
 }
 
 export async function handleReplaceWithChildBackwardCommon(
@@ -284,13 +278,15 @@ export async function handleReplaceWithChildBackwardCommon(
 	annotator: DataStructureAnnotator,
 	data: ReplaceWithChildData,
 ) {
-	await animator.ensureAndAnimate(data.startSnapshot);
 	const direction = t(annotator.locale, data.direction);
-	const info = t(annotator.locale, 'steps.dataStructures.common.replaceWithChildData', { direction });
-	annotator.annotateNode(info, data.oldNodeId);
+	const info = t(annotator.locale, data.label, { ...data.params, direction });
+	annotator.annotateNode(info, data.newNodeId);
+
+	animator.setNodeColor(data.newNodeId, Colors.Blue);
+
+	await animator.ensureAndAnimate(data.startSnapshot);
 
 	animator.setNodeColor(data.oldNodeId, Colors.Red);
-	animator.setNodeColor(data.newNodeId, Colors.Blue);
 }
 
 export async function handleFoundInorderSuccessorForwardCommon(
@@ -298,7 +294,7 @@ export async function handleFoundInorderSuccessorForwardCommon(
 	annotator: DataStructureAnnotator,
 	data: FoundInorderSuccessorData,
 ) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.foundInorderSuccessorData');
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.successorId);
 	animator.setNodeColor(data.successorId, Colors.Blue);
 }
@@ -308,7 +304,7 @@ export async function handleFoundInorderSuccessorBackwardCommon(
 	annotator: DataStructureAnnotator,
 	data: FoundInorderSuccessorData,
 ) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.foundInorderSuccessorData');
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.successorId);
 	animator.resetNodeColor(data.successorId);
 }
@@ -318,7 +314,7 @@ export async function handleRelinkSuccessorChildForwardCommon(
 	annotator: DataStructureAnnotator,
 	data: RelinkSuccessorChildData,
 ) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.relinkSuccessorChildData');
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.childNodeId);
 
 	const oldPositions = animator.getPositions();
@@ -341,8 +337,9 @@ export async function handleRelinkSuccessorChildBackwardCommon(
 	annotator: DataStructureAnnotator,
 	data: RelinkSuccessorChildData,
 ) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.relinkSuccessorChildData');
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.childNodeId);
+	// animator.setNodeColor(data.successorNodeId, Colors.Blue);
 	await animator.ensureAndAnimate(data.startSnapshot);
 }
 
@@ -351,7 +348,7 @@ export async function handleReplaceWithInorderSuccessorForwardCommon(
 	annotator: DataStructureAnnotator,
 	data: ReplaceWithInorderSuccessorData,
 ) {
-	const info = t(annotator.locale, 'steps.dataStructures.common.replaceWithInorderSuccessorData');
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.successorNodeId);
 	animator.setNodeColor(data.successorNodeId, Colors.Blue);
 	animator.setNodeColor(data.oldNodeId, Colors.Red);
@@ -381,17 +378,14 @@ export async function handleReplaceWithInorderSuccessorBackwardCommon(
 	animator.setNodeColor(data.successorNodeId, Colors.Blue);
 	animator.setNodeColor(data.oldNodeId, Colors.Red);
 
-	const info = t(annotator.locale, 'steps.dataStructures.common.replaceWithInorderSuccessorData');
+	const info = t(annotator.locale, data.label, data.params);
 	annotator.annotateNode(info, data.successorNodeId);
 }
 
 export async function handleCaseAnalysisForwardCommon(animator: CommonAnimator, annotator: DataStructureAnnotator, data: CaseAnalysisData) {
 	const description = t(annotator.locale, data.description);
-	const info = t(annotator.locale, 'steps.dataStructures.common.caseAnalysisData', {
-		caseNumber: String(data.caseNumber),
-		description,
-	});
-	annotator.annotateNode(info, data.nodeId || null);
+	const info = t(annotator.locale, data.label, { ...data.params, description });
+	annotator.annotateNode(info, data.nodeId === undefined ? null : data.nodeId);
 }
 
 export async function handleCaseAnalysisBackwardCommon(
@@ -400,9 +394,6 @@ export async function handleCaseAnalysisBackwardCommon(
 	data: CaseAnalysisData,
 ) {
 	const description = t(annotator.locale, data.description);
-	const info = t(annotator.locale, 'steps.dataStructures.common.caseAnalysisData', {
-		caseNumber: String(data.caseNumber),
-		description,
-	});
-	annotator.annotateNode(info, data.nodeId || null);
+	const info = t(annotator.locale, data.label, { ...data.params, description });
+	annotator.annotateNode(info, data.nodeId === undefined ? null : data.nodeId);
 }
