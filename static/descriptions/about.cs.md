@@ -25,14 +25,16 @@ V současnosti Treeline podporuje následující datové struktury:
 - Zásobník
 - Fronta
 
-Nově jsem také přidala třídicí algoritmy:
+A také třídicí algoritmy:
 
-- Bublinkové třídění
-- Třídění výběrem
-- Třídění vkládáním
-- Třídění slučováním
-- Rychlé třídění
-- Třídění haldou
+- Bubble sort
+- Selection sort
+- Insertion sort
+- Merge sort
+- Quick sort
+- Heap sort
+
+A k tomu je zde i stránka s porovnáním těchto algoritmů, kde si můžete prohlédnout, jak se chovají na různých typech datových sad a jaké jsou jejich teoretické složitosti versus praktický výkon.
 
 ## Technologie
 

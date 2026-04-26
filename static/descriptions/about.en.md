@@ -25,7 +25,7 @@ Currently, Treeline supports the following data structures:
 - Stack
 - Queue
 
-Recently, I also added sorting algorithms:
+And also sorting algorithms:
 
 - Bubble Sort
 - Insertion Sort
@@ -33,6 +33,8 @@ Recently, I also added sorting algorithms:
 - Merge Sort
 - Quick Sort
 - Heap Sort
+
+What's more, there is also a page comparing these algorithms, where you can see how they perform on different types of datasets and what their theoretical complexities are versus their practical performance.
 
 ## Technologies
 
