@@ -43,7 +43,7 @@
 	{/if}
 	{#each gridCells as cell (cell.key)}
 		<div
-			class={cell.item ? `array-item ${onItemClick ? 'cursor-pointer' : ''} ${onItemClick ? 'default' : 'searching'}` : 'array-slot'}
+			class={cell.item ? `array-item ${onItemClick ? 'cursor-pointer' : ''} ${onItemClick ? 'searching' : 'default'}` : 'array-slot'}
 			class:item-compared={cell.item?.highlightType === ItemHighlightType.Compare}
 			class:item-moved={cell.item?.highlightType === ItemHighlightType.Move}
 			class:item-sorted={cell.item?.highlightType === ItemHighlightType.Sorted}
