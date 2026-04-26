@@ -80,7 +80,7 @@
 					<div>
 						<label
 							for="target-input"
-							class="text-sm font-medium text-gray-700 select-none dark:text-gray-300">
+							class="text-sm font-medium text-gray-700 select-none">
 							{t('sorting.search.targetLabel')}
 						</label>
 						<input

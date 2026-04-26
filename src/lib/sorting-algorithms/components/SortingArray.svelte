@@ -69,11 +69,11 @@
 					</div>
 				</div>
 				<div class="flex min-w-0 flex-1 flex-col p-[0.45rem] pl-[0.55rem]">
-					<div class="flex items-center justify-center text-[0.78rem] opacity-90">
+					<div class="flex items-center justify-center text-[0.78rem] opacity-90 select-none">
 						[{cell.indexLabel}]
 					</div>
 					<div class="flex w-full flex-1 items-center justify-center">
-						<div class="text-base font-bold">{cell.item.value}</div>
+						<div class="text-base font-bold select-none">{cell.item.value}</div>
 					</div>
 				</div>
 			{/if}

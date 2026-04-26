@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	import DescriptionCard from '$lib/components/DescriptionCard.svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
-	import { onMount } from 'svelte';
 	import { getLocale, translate } from '$lib/i18n';
-	import { getStoredStringOption, saveStringToStorage } from '$lib/utils/storageUtils';
-	import SearchingDetailedView from '$lib/sorting-algorithms/visual/SearchingDetailedView.svelte';
 	import type { SearchingAlgorithmId } from '$lib/sorting-algorithms/misc/types';
+	import SearchingDetailedView from '$lib/sorting-algorithms/visual/SearchingDetailedView.svelte';
+	import { getStoredStringOption, saveStringToStorage } from '$lib/utils/storageUtils';
 
 	import type { PageData } from './$types';
 
@@ -21,11 +22,7 @@
 	let selectedAlgorithm = $state<SearchingAlgorithmId>('linear');
 
 	onMount(() => {
-		const stored = getStoredStringOption(
-			'searchingAlgorithm',
-			['linear', 'binary'] as const,
-			'linear',
-		);
+		const stored = getStoredStringOption('searchingAlgorithm', ['linear', 'binary'] as const, 'linear');
 		selectedAlgorithm = stored;
 	});
 
@@ -35,7 +32,7 @@
 	}
 </script>
 
-<div class="page-header">
+<div class="page-header justify-start! gap-8!">
 	<h1 class="page-title">{t('sortingAlgorithms.searching')}</h1>
 	<div class="searching-dropdown-wrapper">
 		<Dropdown
