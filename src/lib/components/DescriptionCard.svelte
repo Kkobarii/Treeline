@@ -98,6 +98,11 @@
 			font-size: 1.1rem;
 		}
 
+		:global(.treeline-card .prose p),
+		:global(.treeline-card .prose li) {
+			font-size: 0.9rem;
+		}
+
 		:global(.treeline-card .prose table) {
 			font-size: 0.7rem;
 		}

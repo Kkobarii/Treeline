@@ -75,4 +75,4 @@ Pokud byl odstraněn černý uzel, strom musí projít procesem opravy, aby se o
 
 **Zajímavost:** Červeno-černý strom je ve skutečnosti chytrou binární reprezentací 2-3-4 stromu, což je samo o sobě specifický typ B-stromu, kde uzly mohou pojmout až tři hodnoty a mít až čtyři potomky. Červené odkazy se zde používají ke konceptuálnímu spojení standardních binárních uzlů za účelem simulace těchto větších vícehodnotových uzlů.
 
-**Kdy toto NEPOUŽÍVAT:** Ačkoli jsou červeno-černé stromy vynikajícími strukturami pro obecné použití, pokud má aplikace extrémní převahu čtení a vyžaduje absolutně nejrychlejší možná vyhledávání, striktnější vyvažování AVL stromu by mohlo poskytnout o něco lepší výkon vyhledávání.
+**Kdy toto nepoužívat:** Ačkoli jsou červeno-černé stromy vynikajícími strukturami pro obecné použití, pokud má aplikace extrémní převahu čtení a vyžaduje absolutně nejrychlejší možná vyhledávání, striktnější vyvažování AVL stromu by mohlo poskytnout o něco lepší výkon vyhledávání.

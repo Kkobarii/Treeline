@@ -42,4 +42,4 @@ Získání hodnoty naposledy přidaného prvku jednoduše zahrnuje prozkoumání
 
 Zásobníky jsou základním konceptem v informatice. Představují mechanismus pro správu volání funkcí v programovacích jazycích (zásobník volání, call stack), vyhodnocování složitých matematických výrazů, sledování historie prohlížeče a implementaci funkcí zpět (undo) v textových editorech.
 
-**Kdy toto NEPOUŽÍVAT:** Zásobníku je vhodné se vyhnout, pokud aplikace vyžaduje zpracování nejstarších dat jako prvních, nebo pokud potřebuje vyhledávat libovolné hodnoty v rámci kolekce. Vyhledávání v zásobníku vyžaduje systematické odebírání a zahazování prvků jen pro dosažení požadované hodnoty. Z tohoto důvodu je tato struktura pro obecné získávání dat vysoce neefektivní.
+**Kdy toto nepoužívat:** Zásobníku je vhodné se vyhnout, pokud aplikace vyžaduje zpracování nejstarších dat jako prvních, nebo pokud potřebuje vyhledávat libovolné hodnoty v rámci kolekce. Vyhledávání v zásobníku vyžaduje systematické odebírání a zahazování prvků jen pro dosažení požadované hodnoty. Z tohoto důvodu je tato struktura pro obecné získávání dat vysoce neefektivní.

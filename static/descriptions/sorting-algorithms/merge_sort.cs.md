@@ -41,7 +41,7 @@ Jakmile jsou podpole rozdělena, sloučí se zpět dohromady v setříděném po
 
 Merge Sort je preferovaným algoritmem, když je požadavkem stabilita nebo při práci se spojovými seznamy, kde může být implementován efektivněji než Quick Sort. Je základem pro **Timsort**, výchozí třídicí algoritmus v jazycích Python, Java a v systému Android.
 
-**Kdy toto NEPOUŽÍVAT:** Algoritmu Merge Sort je třeba se vyhnout v prostředích s omezenou pamětí, jako jsou vestavěné systémy, protože paměťový požadavek `O(n)` může být poměrně nákladný ve srovnání s algoritmy pracujícími na místě (in-place), jako jsou Quick Sort nebo Heap Sort.
+**Kdy toto nepoužívat:** Algoritmu Merge Sort je třeba se vyhnout v prostředích s omezenou pamětí, jako jsou vestavěné systémy, protože paměťový požadavek `O(n)` může být poměrně nákladný ve srovnání s algoritmy pracujícími na místě (in-place), jako jsou Quick Sort nebo Heap Sort.
 
 ### Optimalizace
 

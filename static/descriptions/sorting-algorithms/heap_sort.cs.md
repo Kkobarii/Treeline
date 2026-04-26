@@ -43,7 +43,7 @@ Jakmile je Max-Heap vybudována, největší prvek se nachází na indexu 0.
 
 Heap Sort je vysoce ceněn v systémech, kde je vyžadován zaručený výkon v nejhorším případě a paměť je omezená. Často se používá ve vestavěných (embedded) systémech nebo pro třídění velkých datových sad, které se nevejdou celé do mezipaměti (cache).
 
-**Kdy toto NEPOUŽÍVAT:** Protože má Heap Sort relativně vysoký konstantní faktor ve své časové složitosti, je v praxi u průměrných případů často pomalejší než Quick Sort. Je také vhodné se mu vyhnout v případech, kdy je vyžadováno stabilní třídění.
+**Kdy toto nepoužívat:** Protože má Heap Sort relativně vysoký konstantní faktor ve své časové složitosti, je v praxi u průměrných případů často pomalejší než Quick Sort. Je také vhodné se mu vyhnout v případech, kdy je vyžadováno stabilní třídění.
 
 ### Optimalizace
 

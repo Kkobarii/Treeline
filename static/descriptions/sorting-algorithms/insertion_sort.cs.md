@@ -30,7 +30,7 @@ Algoritmus spočívá v iteraci přes seznam a neustálém posouvání prvků vz
 
 Insertion Sort je vysoce efektivní pro velmi malé datové sady nebo pole, která jsou již z velké části setříděna. V praxi pokročilé produkční třídicí algoritmy jako TimSort (používaný v Pythonu a Javě) nebo Introsort ve skutečnosti přepínají na lokalizovaný Insertion Sort v momentě, kdy se jejich netříděné oddíly dostatečně zmenší.
 
-**Kdy toto NEPOUŽÍVAT:** Algoritmu Insertion Sort je vhodné se vyhnout u velkých, zcela náhodných datových sad. Jeho kvadratická časová složitost ho činí příliš pomalým ve srovnání s algoritmy typu rozděl a panuj (divide-and-conquer).
+**Kdy toto nepoužívat:** Algoritmu Insertion Sort je vhodné se vyhnout u velkých, zcela náhodných datových sad. Jeho kvadratická časová složitost ho činí příliš pomalým ve srovnání s algoritmy typu rozděl a panuj (divide-and-conquer).
 
 ### Optimalizace
 

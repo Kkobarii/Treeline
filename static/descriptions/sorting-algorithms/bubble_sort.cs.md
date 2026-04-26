@@ -32,7 +32,7 @@ Algoritmus spoléhá na dvě vnořené smyčky k systematickému posouvání nej
 
 Bubble Sort se primárně používá jako vzdělávací nástroj k představení konceptů algoritmického třídění a časové složitosti.
 
-**Kdy toto NEPOUŽÍVAT:** Bubble Sort by se v podstatě nikdy neměl používat v produkčním prostředí pro velké datové sady. Jeho kvadratická časová složitost způsobuje drastickou neefektivitu ve srovnání s pokročilými algoritmy jako Quick Sort nebo Merge Sort.
+**Kdy toto nepoužívat:** Bubble Sort by se v podstatě nikdy neměl používat v produkčním prostředí pro velké datové sady. Jeho kvadratická časová složitost způsobuje drastickou neefektivitu ve srovnání s pokročilými algoritmy jako Quick Sort nebo Merge Sort.
 
 ### Optimalizace
 

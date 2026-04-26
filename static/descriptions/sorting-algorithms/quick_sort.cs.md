@@ -43,7 +43,7 @@ Cílem této fáze je umístit zvoleného pivota na jeho konečnou setříděnou
 
 Quick Sort je standardní třídicí algoritmus používaný v mnoha systémech. Například funkce `sort()` v mnoha knihovnách C++ a Java často využívá variantu algoritmu Quick Sort (jako je Dual-Pivot Quicksort).
 
-**Kdy toto NEPOUŽÍVAT:** Algoritmu Quick Sort je třeba se vyhnout, pokud je vyžadována stabilita (zachování pořadí stejných položek). Navíc v systémech kritických z hlediska bezpečnosti, kde by výkon v nejhorším případě `O(n^2)` mohl vést k zamrznutí systému nebo „Denial of Service“ (prostřednictvím datové sady „Quick Sort Killer“), je preferován algoritmus se zaručeným výkonem `O(n log n)`, jako je Merge Sort nebo Heap Sort.
+**Kdy toto nepoužívat:** Algoritmu Quick Sort je třeba se vyhnout, pokud je vyžadována stabilita (zachování pořadí stejných položek). Navíc v systémech kritických z hlediska bezpečnosti, kde by výkon v nejhorším případě `O(n^2)` mohl vést k zamrznutí systému nebo „Denial of Service“ (prostřednictvím datové sady „Quick Sort Killer“), je preferován algoritmus se zaručeným výkonem `O(n log n)`, jako je Merge Sort nebo Heap Sort.
 
 ### Optimalizace
 

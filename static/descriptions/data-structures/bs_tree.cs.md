@@ -64,6 +64,6 @@ Pokud má uzel levého i pravého potomka, nelze ho jednoduše smazat bez toho, 
 
 Ačkoli je binární vyhledávací strom skvělou úvodní strukturou, jeho fatální chybou je absence samovyvažování.
 
-**Kdy toto NEPOUŽÍVAT:** Standardním BVS je vhodné se vyhnout, pokud by vstupní data mohla být předem seřazená, protože složitost `O(n)` v nejhorším případě jej činí nepřijatelně pomalým pro velké datové sady.
+**Kdy toto nepoužívat:** Standardním BVS je vhodné se vyhnout, pokud by vstupní data mohla být předem seřazená, protože složitost `O(n)` v nejhorším případě jej činí nepřijatelně pomalým pro velké datové sady.
 
 V reálném světě se standardní BVS v produkčním kódu používají zřídka. Místo toho slouží jako základní logika pro **samovyvažující se stromy** (jako jsou AVL stromy a červeno-černé stromy). Tyto pokročilé struktury využívají stejnou logiku vkládání a mazání, ale na konci operací přidávají složité rotace, aby zaručily, že strom zůstane krátký a široký, čímž si udrží optimální logaritmickou časovou složitost.
