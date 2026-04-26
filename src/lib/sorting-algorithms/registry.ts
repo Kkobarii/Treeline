@@ -1,12 +1,21 @@
+import { binarySearchDetailedSteps, binarySearchSteps } from '$lib/sorting-algorithms/algorithms/binary.js';
 import { bubbleSortDetailedSteps, bubbleSortSteps } from '$lib/sorting-algorithms/algorithms/bubble.js';
 import { heapSortDetailedSteps, heapSortSteps } from '$lib/sorting-algorithms/algorithms/heap.js';
 import { insertionSortDetailedSteps, insertionSortSteps } from '$lib/sorting-algorithms/algorithms/insertion.js';
+import { linearSearchDetailedSteps, linearSearchSteps } from '$lib/sorting-algorithms/algorithms/linear.js';
 import { mergeSortDetailedSteps, mergeSortSteps } from '$lib/sorting-algorithms/algorithms/merge.js';
 import { quickSortDetailedSteps, quickSortSteps } from '$lib/sorting-algorithms/algorithms/quick.js';
 import { selectionSortDetailedSteps, selectionSortSteps } from '$lib/sorting-algorithms/algorithms/selection.js';
-import type { DataSet, SortingAlgorithm, SortingAlgorithmId } from '$lib/sorting-algorithms/misc/types';
+import type {
+	DataSet,
+	SearchingAlgorithm,
+	SearchingAlgorithmId,
+	SortingAlgorithm,
+	SortingAlgorithmId,
+} from '$lib/sorting-algorithms/misc/types';
 import {
 	createAlmostSortedArray,
+	createDiscontinuousArray,
 	createDuplicatesArray,
 	createPyramidArray,
 	createReverseSortedArray,
@@ -75,6 +84,7 @@ export const dataSets: DataSet[] = [
 	{ type: 'duplicates', labelKey: 'sorting.arrayTypes.duplicates', generate: createDuplicatesArray },
 	{ type: 'sawtooth', labelKey: 'sorting.arrayTypes.sawtooth', generate: createSawtoothArray },
 	{ type: 'pyramid', labelKey: 'sorting.arrayTypes.pyramid', generate: createPyramidArray },
+	{ type: 'discontinuous', labelKey: 'sorting.arrayTypes.discontinuous', generate: createDiscontinuousArray },
 ];
 
 export function getDataSet(type: string): DataSet {
@@ -98,3 +108,29 @@ export const languageOptions: Array<{ id: CodeLanguage; labelKey: string }> = CO
 }));
 
 export const DEFAULT_CODE_LANGUAGE: CodeLanguage = 'python';
+
+export const searchingAlgorithms: SearchingAlgorithm[] = [
+	{
+		id: 'linear',
+		nameKey: 'sortingAlgorithms.linearSearch',
+		descriptionKey: 'sorting.descriptions.linear',
+		generateSteps: linearSearchSteps,
+		generateDetailedSteps: linearSearchDetailedSteps,
+	},
+	{
+		id: 'binary',
+		nameKey: 'sortingAlgorithms.binarySearch',
+		descriptionKey: 'sorting.descriptions.binary',
+		generateSteps: binarySearchSteps,
+		generateDetailedSteps: binarySearchDetailedSteps,
+	},
+];
+
+export function getSearchingAlgorithm(id: SearchingAlgorithmId): SearchingAlgorithm {
+	const algorithm = searchingAlgorithms.find(entry => entry.id === id);
+	if (!algorithm) {
+		throw new Error(`Unknown searching algorithm: ${id}`);
+	}
+
+	return algorithm;
+}

@@ -1,6 +1,7 @@
 import type { Counters } from '../steps/stepTypes';
+import type { DataSetType } from './types';
 
-export type ArrayType = 'shuffled' | 'almost-sorted' | 'reverse' | 'duplicates' | 'sawtooth' | 'pyramid';
+export type ArrayType = DataSetType;
 
 function swapIndex(index: number, values: number[]) {
 	const swapIndex = Math.floor(Math.random() * (index + 1));
@@ -92,6 +93,14 @@ export function createPyramidArray(size = 100): number[] {
 	return values;
 }
 
+export function createDiscontinuousArray(size = 100): number[] {
+	const values: Set<number> = new Set();
+	while (values.size < size) {
+		values.add(Math.floor(Math.random() * size * 2) + 1);
+	}
+	return [...values];
+}
+
 export function createArrayByType(type: ArrayType, size: number): number[] {
 	switch (type) {
 		case 'almost-sorted':
@@ -104,6 +113,8 @@ export function createArrayByType(type: ArrayType, size: number): number[] {
 			return createSawtoothArray(size);
 		case 'pyramid':
 			return createPyramidArray(size);
+		case 'discontinuous':
+			return createDiscontinuousArray(size);
 		default:
 			return createShuffledArray(size);
 	}

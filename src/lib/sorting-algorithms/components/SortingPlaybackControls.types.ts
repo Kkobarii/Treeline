@@ -22,6 +22,13 @@ export interface ArrayConfig {
 	onShuffle: () => void;
 }
 
+export interface TargetConfig {
+	targetValue: number;
+	minTargetValue: number;
+	maxTargetValue: number;
+	onTargetChange: (value: number) => void;
+}
+
 export interface NavigationCallbacks {
 	onTogglePlay: () => void;
 	onStepBackward: () => void;
@@ -33,4 +40,5 @@ export type GroupedProps = {
 	delayConfig: DelayConfig;
 	arrayConfig: ArrayConfig;
 	navigation: NavigationCallbacks;
+	targetConfig?: TargetConfig;
 };

@@ -52,6 +52,9 @@ const en = {
 		mergeSort: 'Merge Sort',
 		quickSort: 'Quick Sort',
 		heapSort: 'Heap Sort',
+		linearSearch: 'Linear Search',
+		binarySearch: 'Binary Search',
+		searching: 'Searching Algorithms',
 	},
 
 	controls: {
@@ -266,6 +269,7 @@ const en = {
 			duplicates: 'Duplicates',
 			sawtooth: 'Sawtooth',
 			pyramid: 'Pyramid',
+			discontinuous: 'Discontinuous',
 		},
 		code: {
 			title: 'Algorithm Code',
@@ -362,6 +366,19 @@ const en = {
 					finishedQuickSortSegment: 'Finished quick_sort on arr[{low}..{high}]',
 				},
 			},
+		},
+		search: {
+			targetLabel: 'Target',
+			sortedArray: 'Array is sorted before searching',
+			start: 'Start linear search: {target}',
+			loop: 'Check element at index {i}',
+			compare: 'Compare {comparison} == {target}',
+			found: 'Found {target} at index {index}',
+			notFound: 'Target {target} not found',
+			binaryStart: 'Start binary search: {target}',
+			calculateMid: 'Calculate mid index {mid}',
+			adjustLeft: 'Target {target} > {comparison}, discard left half of array and search right',
+			adjustRight: 'Target {target} < {comparison}, discard right half of array and search left',
 		},
 		noSteps: 'No steps available for this array.',
 		comparison: {

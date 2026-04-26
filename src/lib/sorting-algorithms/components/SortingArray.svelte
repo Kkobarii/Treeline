@@ -4,9 +4,11 @@
 	import { ItemHighlightType } from '../steps/traceBuilder';
 	import type { SortingArrayProps } from './SortingArray.types';
 
-	let { gridColumns, gridCells, targetAreaHighlight, isQuickSort, activeFlipDurationMs, currentArray }: SortingArrayProps = $props();
+	let { gridColumns, gridCells, targetAreaHighlight, isQuickSort, activeFlipDurationMs, currentArray, onItemClick }: SortingArrayProps =
+		$props();
 
 	let arcHeightFactor = $state(0.1);
+	const maxValue = $derived(currentArray.reduce((max, item) => Math.max(max, item.value), 0));
 
 	function curvedFlip(
 		_: Element,
@@ -41,7 +43,7 @@
 	{/if}
 	{#each gridCells as cell (cell.key)}
 		<div
-			class={cell.item ? 'array-item' : 'array-slot'}
+			class={cell.item ? `array-item ${onItemClick ? 'cursor-pointer' : ''} ${onItemClick ? 'default' : 'searching'}` : 'array-slot'}
 			class:item-compared={cell.item?.highlightType === ItemHighlightType.Compare}
 			class:item-moved={cell.item?.highlightType === ItemHighlightType.Move}
 			class:item-sorted={cell.item?.highlightType === ItemHighlightType.Sorted}
@@ -50,12 +52,20 @@
 			animate:curvedFlip={{
 				duration: activeFlipDurationMs,
 				easing: cubicInOut,
-			}}>
+			}}
+			{...onItemClick && cell.item
+				? {
+						onclick: () => onItemClick(cell.item!.value),
+						role: 'button',
+						tabindex: 0,
+						onkeydown: (e: KeyboardEvent) => e.key === 'Enter' && onItemClick(cell.item!.value),
+					}
+				: {}}>
 			{#if cell.item}
 				<div class="value-marker-track">
 					<div
 						class="value-marker-fill"
-						style={`height: ${(cell.item.value / currentArray.length) * 100}%;`}>
+						style={`height: ${(cell.item.value / maxValue) * 100}%;`}>
 					</div>
 				</div>
 				<div class="flex min-w-0 flex-1 flex-col p-[0.45rem] pl-[0.55rem]">
@@ -108,7 +118,15 @@
 		transition: background-color 140ms ease;
 		will-change: transform;
 		transform: translateZ(0);
-		backface-visibility: hidden;
+	}
+
+	.array-item.cursor-pointer {
+		cursor: pointer;
+	}
+
+	.array-item.cursor-pointer:active {
+		transform: translateY(1px);
+		background: var(--color-primary-ultra-light);
 	}
 
 	.value-marker-track {
@@ -134,6 +152,13 @@
 	}
 	.item-dark {
 		@apply bg-purple-300;
+	}
+
+	.array-item.searching.item-light {
+		@apply bg-gray-100;
+	}
+	.array-item.searching.item-dark {
+		@apply bg-gray-300;
 	}
 
 	@media (max-width: 640px) {

@@ -56,6 +56,12 @@
 			{/each}
 			<div class="dropdown-separator nav-separator"></div>
 			<a
+				href="/{locale}/sorting-algorithms/searching"
+				class="dropdown-link nav-submenu-link">
+				{t('sortingAlgorithms.searching')}
+			</a>
+			<div class="dropdown-separator nav-separator"></div>
+			<a
 				href="/{locale}/sorting-algorithms/comparison"
 				class="dropdown-link nav-submenu-link">
 				{t('sorting.comparison.title')}

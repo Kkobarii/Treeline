@@ -3,38 +3,38 @@
 	import { onMount, tick } from 'svelte';
 
 	import { getLocale, translate } from '$lib/i18n';
+	import SortingArray from '$lib/sorting-algorithms/components/SortingArray.svelte';
+	import SortingPlaybackControls from '$lib/sorting-algorithms/components/SortingPlaybackControls.svelte';
+	import SortingPseudocode from '$lib/sorting-algorithms/components/SortingPseudocode.svelte';
+	import { getCodeTemplate } from '$lib/sorting-algorithms/misc/codeTemplates';
+	import type { SearchingAlgorithmId } from '$lib/sorting-algorithms/misc/types';
+	import type { ArrayType } from '$lib/sorting-algorithms/misc/utils';
+	import { createArrayByType } from '$lib/sorting-algorithms/misc/utils';
+	import { DEFAULT_PLAYBACK_ANIMATION } from '$lib/sorting-algorithms/misc/visualUtils';
+	import type { CodeLanguage } from '$lib/sorting-algorithms/registry';
+	import { getSearchingAlgorithm, languageOptions } from '$lib/sorting-algorithms/registry';
+	import { StepManager } from '$lib/sorting-algorithms/steps/stepManager.svelte';
+	import type { DetailedSortStep } from '$lib/sorting-algorithms/steps/stepTypes';
 	import { getStoredStringOption, saveStringToStorage } from '$lib/utils/storageUtils';
-
-	import SortingArray from '../components/SortingArray.svelte';
-	import SortingPlaybackControls from '../components/SortingPlaybackControls.svelte';
-	import SortingPseudocode from '../components/SortingPseudocode.svelte';
-	import { getCodeTemplate } from '../misc/codeTemplates';
-	import type { SortingAlgorithmId } from '../misc/types';
-	import type { ArrayType } from '../misc/utils';
-	import { createArrayByType } from '../misc/utils';
-	import { computeTargetAreaHighlight, DEFAULT_PLAYBACK_ANIMATION } from '../misc/visualUtils';
-	import type { CodeLanguage } from '../registry';
-	import { dataSets, DEFAULT_ARRAY_TYPE, DEFAULT_CODE_LANGUAGE, getSortingAlgorithm, languageOptions } from '../registry';
-	import { StepManager } from '../steps/stepManager.svelte';
-	import type { DetailedSortStep } from '../steps/stepTypes';
 
 	const locale = getLocale();
 	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
+	const DEFAULT_ARRAY_TYPE = 'discontinuous';
 
 	let {
 		algorithmId,
 		initialArray,
 	}: {
-		algorithmId: SortingAlgorithmId;
+		algorithmId: SearchingAlgorithmId;
 		initialArray?: number[];
 	} = $props();
 
-	const algorithm = getSortingAlgorithm(algorithmId);
-	const codeTemplate = getCodeTemplate(algorithmId);
+	const algorithm = $derived(getSearchingAlgorithm(algorithmId));
+	const codeTemplate = $derived(getCodeTemplate(algorithmId));
 
 	const playback = DEFAULT_PLAYBACK_ANIMATION;
 	const languageConfig = {
-		storageKey: 'sortingDetailedViewCodeLanguage',
+		storageKey: 'searchingDetailedViewCodeLanguage',
 		options: languageOptions.map(opt => ({
 			value: opt.id,
 			label: t(opt.labelKey),
@@ -42,11 +42,11 @@
 		validValues: languageOptions.map(o => o.id),
 	};
 	const arrayConfig = {
-		storageKey: 'sortingArrayType',
-		validTypes: dataSets.map(ds => ds.type) as readonly ArrayType[],
+		storageKey: 'searchingArrayType',
+		validTypes: ['discontinuous'] as const,
 	};
 
-	let language = $state<CodeLanguage>(DEFAULT_CODE_LANGUAGE);
+	let language = $state<CodeLanguage>('python');
 	let codeLines = $derived(codeTemplate.codes[language] || []);
 	let highlightedCodeLines = $derived(
 		codeLines.map(line => ({
@@ -64,21 +64,27 @@
 	let fastAnimation = $state(false);
 	let cellHeight = $state(92);
 
+	let targetValue = $state(0);
+	let maxArrayValue = $derived(baseArray.length);
+
 	function updateSizes() {
 		detailArraySize = window.matchMedia('(max-width: 425px)').matches ? 8 : 16;
 		cellHeight = window.matchMedia('(max-width: 640px)').matches ? 52 : 92;
 		regenerateArray();
 	}
 
-	const stepManager = new StepManager<DetailedSortStep>(algorithm.generateDetailedSteps(startingArray).steps, {
-		minDelay: playback.minDelayMs,
-		maxDelay: playback.maxDelayMs,
-		defaultDelay: playback.defaultDelayMs,
-		delayStorageKey: playback.storageKey,
-		timerType: 'animation',
-	});
+	const stepManager = $derived.by(
+		() =>
+			new StepManager<DetailedSortStep>(algorithm.generateDetailedSteps(startingArray).steps, {
+				minDelay: playback.minDelayMs,
+				maxDelay: playback.maxDelayMs,
+				defaultDelay: playback.defaultDelayMs,
+				delayStorageKey: playback.storageKey,
+				timerType: 'animation',
+			}),
+	);
 
-	let delayMs = $state(stepManager.delayMs);
+	let delayMs = $state(playback.defaultDelayMs);
 	let currentStep = $derived(stepManager.steps[stepManager.currentStepIndex]);
 	let currentArray = $derived(currentStep?.array ?? []);
 	let currentRows = $derived(currentStep?.rows?.length ? currentStep.rows : currentArray.length ? [currentArray] : []);
@@ -96,12 +102,10 @@
 	let stepLabel = $derived(currentStep ? t(currentStep.stepLabel.label, currentStep.stepLabel.params) : '');
 	let variables = $derived(currentStep?.variables ?? {});
 
-	let isMergeSort = $derived(algorithmId === 'merge');
-	let isQuickSort = $derived(algorithmId === 'quick');
-	let useExpandedAnimationArea = $derived(isMergeSort || isQuickSort);
-	let targetAreaHighlight = $derived(
-		useExpandedAnimationArea ? computeTargetAreaHighlight(variables, gridColumns, algorithmId, cellHeight) : null,
-	);
+	let isMergeSort = $derived(false);
+	let isQuickSort = $derived(false);
+	let useExpandedAnimationArea = $derived(false);
+	let targetAreaHighlight = $derived(null);
 
 	let normalFlipDurationMs = $derived(stepManager.isPlaying ? Math.max(100, Math.floor(delayMs * 0.85)) : 300);
 	let activeFlipDurationMs = $derived(fastAnimation ? Math.max(35, Math.floor(normalFlipDurationMs * 0.22)) : normalFlipDurationMs);
@@ -172,13 +176,14 @@
 		};
 		mediaQuery.addEventListener('change', handleChange);
 
-		language = getStoredStringOption(languageConfig.storageKey, languageConfig.validValues, DEFAULT_CODE_LANGUAGE);
+		language = getStoredStringOption(languageConfig.storageKey, languageConfig.validValues, 'python');
 		arrayType = getStoredStringOption(arrayConfig.storageKey, arrayConfig.validTypes, DEFAULT_ARRAY_TYPE);
 		delayMs = stepManager.delayMs;
 
 		void tick().then(() => {
 			baseArray = createArrayByType(arrayType, detailArraySize);
-			stepManager.setSteps(algorithm.generateDetailedSteps(baseArray).steps);
+			targetValue = baseArray[Math.floor(baseArray.length / 2)];
+			stepManager.setSteps(algorithm.generateDetailedSteps(baseArray, targetValue).steps);
 			hasHydrated = true;
 		});
 
@@ -188,12 +193,23 @@
 	function regenerateArray() {
 		stepManager.stop();
 		baseArray = createArrayByType(arrayType, detailArraySize);
-		stepManager.setSteps(algorithm.generateDetailedSteps(baseArray).steps);
+		// targetValue = baseArray[Math.floor(baseArray.length / 2)];
+		stepManager.setSteps(algorithm.generateDetailedSteps(baseArray, targetValue).steps);
 	}
 
 	function changeArrayType(type: ArrayType) {
 		arrayType = type;
 		regenerateArray();
+	}
+
+	function onTargetChange(value: number) {
+		targetValue = value;
+		stepManager.stop();
+		stepManager.setSteps(algorithm.generateDetailedSteps(baseArray, targetValue).steps);
+	}
+
+	function handleItemClick(value: number) {
+		onTargetChange(value);
 	}
 
 	function onDelayChange(newDelay: number) {
@@ -227,6 +243,7 @@
 			}}
 			delayConfig={{ ...playback, delayMs, onDelayChange }}
 			arrayConfig={{ arrayType, onArrayTypeChange: changeArrayType, onShuffle: regenerateArray }}
+			targetConfig={{ targetValue, minTargetValue: -99, maxTargetValue: 99, onTargetChange }}
 			navigation={{ onTogglePlay: () => stepManager.toggle(), onStepBackward: stepBackManual, onStepForward: stepForwardManual }} />
 
 		<SortingArray
@@ -235,15 +252,18 @@
 			{targetAreaHighlight}
 			{isQuickSort}
 			{activeFlipDurationMs}
-			{currentArray} />
+			{currentArray}
+			onItemClick={handleItemClick} />
 	</div>
 
-	<SortingPseudocode
-		{language}
-		languageOptions={languageConfig.options}
-		{highlightedCodeLines}
-		{currentCodePartId}
-		onLanguageChange={lang => (language = lang)} />
+	{#key algorithmId}
+		<SortingPseudocode
+			{language}
+			languageOptions={languageConfig.options}
+			{highlightedCodeLines}
+			{currentCodePartId}
+			onLanguageChange={lang => (language = lang)} />
+	{/key}
 </div>
 
 <style lang="postcss">

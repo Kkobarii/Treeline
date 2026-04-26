@@ -12,6 +12,7 @@ const descriptions: Record<string, string> = {
 	quick: 'sorting-algorithms/quick_sort',
 	selection: 'sorting-algorithms/selection_sort',
 	comparison: 'sorting-algorithms/comparison',
+	searching: 'sorting-algorithms/searching',
 };
 
 const titles: Record<string, string> = {
@@ -22,6 +23,7 @@ const titles: Record<string, string> = {
 	quick: 'sortingAlgorithms.quickSort',
 	selection: 'sortingAlgorithms.selectionSort',
 	comparison: 'sorting.comparison.title',
+	searching: 'sortingAlgorithms.searching',
 };
 
 export const load: LayoutServerLoad = async ({ params, url }) => {

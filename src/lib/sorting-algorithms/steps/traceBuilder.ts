@@ -241,13 +241,15 @@ export class DetailedTraceBuilder {
 		});
 	}
 
-	build(): DetailedSortStepResult {
-		this.paint({ sorted: this.array.map((_, index) => index) });
-		this.record({
-			codePartId: 'final',
-			stepLabel: new StepLabel('sorting.steps.common.finalArray'),
-			variables: {},
-		});
+	build(dontDoLastStep: boolean = false): DetailedSortStepResult {
+		if (!dontDoLastStep) {
+			this.paint({ sorted: this.array.map((_, index) => index) });
+			this.record({
+				codePartId: 'final',
+				stepLabel: new StepLabel('sorting.steps.common.finalArray'),
+				variables: {},
+			});
+		}
 
 		return {
 			steps: this.steps,

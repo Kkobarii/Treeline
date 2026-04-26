@@ -64,6 +64,13 @@
 			{/each}
 			<div class="mobile-submenu-separator nav-separator"></div>
 			<a
+				href="/{locale}/sorting-algorithms/searching"
+				data-sveltekit-reload
+				class="mobile-submenu-link nav-submenu-link">
+				{t('sortingAlgorithms.searching')}
+			</a>
+			<div class="mobile-submenu-separator nav-separator"></div>
+			<a
 				href="/{locale}/sorting-algorithms/comparison"
 				data-sveltekit-reload
 				class="mobile-submenu-link nav-submenu-link">

@@ -1,4 +1,4 @@
-import type { Item, ItemHighlightType } from '$lib/sorting-algorithms/steps/traceBuilder';
+import type { Item } from '$lib/sorting-algorithms/steps/traceBuilder';
 
 export interface GridCell {
 	item: Item | null;
@@ -20,4 +20,5 @@ export interface SortingArrayProps {
 	isQuickSort: boolean;
 	activeFlipDurationMs: number;
 	currentArray: Item[];
+	onItemClick?: (value: number) => void;
 }

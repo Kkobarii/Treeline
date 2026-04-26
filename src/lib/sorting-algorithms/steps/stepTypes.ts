@@ -1,6 +1,6 @@
 import type { StepLabel } from '$lib/utils/stepLabel';
 
-import type { SortingAlgorithmId } from '../misc/types';
+import type { SearchingAlgorithmId, SortingAlgorithmId } from '../misc/types';
 import type { CodeLanguage } from '../registry';
 import type { Item } from './traceBuilder';
 
@@ -53,7 +53,7 @@ export interface CodeLine {
 }
 
 export interface DetailedCodeTemplate {
-	algorithmId: SortingAlgorithmId;
+	algorithmId: SortingAlgorithmId | SearchingAlgorithmId;
 	codes: Record<CodeLanguage, CodeLine[]>;
 }
 

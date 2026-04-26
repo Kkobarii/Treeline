@@ -66,6 +66,7 @@
 		border: 1px solid var(--color-gray-300);
 		border-radius: 0.5rem;
 		overflow: hidden;
+		background-color: var(--color-gray-100);
 	}
 
 	:global(.treeline-card .prose th) {
@@ -82,7 +83,7 @@
 	}
 
 	:global(.treeline-card .prose tbody tr:hover) {
-		background-color: var(--color-gray-100);
+		background-color: var(--color-gray-200);
 	}
 
 	@media (max-width: 768px) {

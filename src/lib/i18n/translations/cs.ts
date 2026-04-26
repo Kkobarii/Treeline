@@ -54,6 +54,9 @@ const cs: Translation = {
 		mergeSort: 'Merge sort',
 		quickSort: 'Quick sort',
 		heapSort: 'Heap sort',
+		linearSearch: 'Lineární vyhledávání',
+		binarySearch: 'Binární vyhledávání',
+		searching: 'Vyhledávací algoritmy',
 	},
 
 	controls: {
@@ -268,6 +271,7 @@ const cs: Translation = {
 			duplicates: 'Duplikáty',
 			sawtooth: 'Pila',
 			pyramid: 'Pyramida',
+			discontinuous: 'Nespojité',
 		},
 		code: {
 			title: 'Kód algoritmu',
@@ -364,6 +368,19 @@ const cs: Translation = {
 					finishedQuickSortSegment: 'Dokončen quick_sort na arr[{low}..{high}]',
 				},
 			},
+		},
+		search: {
+			targetLabel: 'Cíl',
+			sortedArray: 'Pole je seřazeno před vyhledáváním',
+			start: 'Začít lineární vyhledávání: {target}',
+			loop: 'Kontrolovat prvek na indexu {i}',
+			compare: 'Porovnat {comparison} == {target}',
+			found: 'Nalezeno {target} na indexu {index}',
+			notFound: 'Cíl {target} nenalezen',
+			binaryStart: 'Začít binární vyhledávání: {target}',
+			calculateMid: 'Vypočítat střední index {mid}',
+			adjustLeft: 'Cíl {target} > {comparison}, zahodit levou polovinu pole a hledat vpravo',
+			adjustRight: 'Cíl {target} < {comparison}, zahodit pravou polovinu pole a hledat vlevo',
 		},
 		noSteps: 'Pro toto pole nejsou k dispozici žádné kroky.',
 		comparison: {

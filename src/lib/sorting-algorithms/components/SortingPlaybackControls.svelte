@@ -6,6 +6,10 @@
 	import { dataSets } from '../registry';
 	import type { GroupedProps } from './SortingPlaybackControls.types';
 
+	function clamp(value: number, min: number, max: number): number {
+		return Math.min(Math.max(value, min), max);
+	}
+
 	let props: GroupedProps = $props();
 
 	const { stepDescription, currentStep, totalSteps, isPlaying, canStepBackward, canStepForward } = $derived(props.playbackState);
@@ -14,7 +18,13 @@
 
 	const { arrayType, onArrayTypeChange, onShuffle } = $derived(props.arrayConfig);
 
+	const { targetValue, minTargetValue, maxTargetValue, onTargetChange } = $derived(
+		props.targetConfig ?? { targetValue: 0, minTargetValue: 0, maxTargetValue: 0, onTargetChange: () => {} },
+	);
+
 	const { onTogglePlay, onStepBackward, onStepForward } = $derived(props.navigation);
+
+	const hasTargetConfig = $derived(!!props.targetConfig);
 
 	const locale = getLocale();
 	const t = (key: string, params?: Record<string, string | number>) => translate(locale, key, params);
@@ -32,25 +42,66 @@
 <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
 	<div class="flex min-w-0 flex-col gap-3">
 		<div class="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
-			<div class="array-controls-group w-full sm:w-auto">
-				<Dropdown
-					options={arrayTypeOptions}
-					value={arrayType}
-					onchange={onArrayTypeChange}
-					ariaLabel={t('sorting.arrayTypes.label')} />
-				<button
-					type="button"
-					class="shuffle-button"
-					onclick={onShuffle}
-					aria-label={t('sorting.controls.shuffle')}
-					title={t('sorting.controls.shuffle')}>
-					<img
-						class="shuffle-icon dark:invert"
-						src="/controls/shuffle.svg"
-						alt=""
-						aria-hidden="true" />
-				</button>
-			</div>
+			{#if !hasTargetConfig}
+				<div class="array-controls-group w-full sm:w-auto">
+					<Dropdown
+						options={arrayTypeOptions}
+						value={arrayType}
+						onchange={onArrayTypeChange}
+						ariaLabel={t('sorting.arrayTypes.label')} />
+					<button
+						type="button"
+						class="shuffle-button"
+						onclick={onShuffle}
+						aria-label={t('sorting.controls.shuffle')}
+						title={t('sorting.controls.shuffle')}>
+						<img
+							class="shuffle-icon dark:invert"
+							src="/controls/shuffle.svg"
+							alt=""
+							aria-hidden="true" />
+					</button>
+				</div>
+				<!-- else normal button -->
+			{:else}
+				<div class="flex items-center gap-4">
+					<button
+						type="button"
+						class="inline-flex h-[2.35rem] w-[2.65rem] items-center justify-center !p-0"
+						onclick={onShuffle}
+						aria-label={t('sorting.controls.shuffle')}
+						title={t('sorting.controls.shuffle')}>
+						<img
+							class="h-4 w-4 dark:invert"
+							src="/controls/shuffle.svg"
+							alt=""
+							aria-hidden="true" />
+					</button>
+					<div>
+						<label
+							for="target-input"
+							class="text-sm font-medium text-gray-700 select-none dark:text-gray-300">
+							{t('sorting.search.targetLabel')}
+						</label>
+						<input
+							id="target-input"
+							name="target-input"
+							type="number"
+							class="target-input"
+							value={targetValue}
+							min={minTargetValue}
+							max={maxTargetValue}
+							disabled={isPlaying}
+							onchange={e => {
+								const clamped = clamp(Number(e.currentTarget.value), minTargetValue, maxTargetValue);
+								e.currentTarget.value = clamped.toString();
+								onTargetChange?.(clamped);
+							}}
+							aria-label={t('sorting.search.targetLabel')}
+							title={t('sorting.search.targetLabel')} />
+					</div>
+				</div>
+			{/if}
 
 			<div class="flex items-center gap-2 sm:ml-4">
 				<button
@@ -245,5 +296,22 @@
 
 	[role='progressbar'] > div {
 		background: var(--color-secondary);
+	}
+
+	.target-input {
+		@apply h-[2.35rem] w-[4.5rem] rounded-lg text-center text-[0.9rem] font-medium;
+		padding: 0.4rem 0.5rem;
+		background: var(--color-primary-ultra-light);
+		border: 1px solid var(--color-primary-light);
+		color: var(--color-text);
+	}
+
+	.target-input:focus {
+		@apply outline-none;
+		box-shadow: 0 0 0 2px oklch(from var(--color-secondary) l c h / 0.35);
+	}
+
+	.target-input:disabled {
+		opacity: 0.6;
 	}
 </style>
