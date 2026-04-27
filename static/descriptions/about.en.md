@@ -36,6 +36,8 @@ And also sorting algorithms:
 
 What's more, there is also a page comparing these algorithms, where you can see how they perform on different types of datasets and what their theoretical complexities are versus their practical performance.
 
+As a last minute addition, I also implemented a page for searching algorithms, where you can see how linear search and binary search work on different datasets.
+
 ## Technologies
 
 Treeline is built using modern web technologies including Svelte, TypeScript, Tailwind CSS, and vis.js for visualizations. The whole project is open-source and available on GitHub.

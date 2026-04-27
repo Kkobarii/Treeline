@@ -36,6 +36,37 @@ const cs: Translation = {
 		copyright: 'Vizuální nástroj pro výuku datových struktur a třídicích algoritmů.',
 	},
 
+	home: {
+		kicker: 'Interaktivní studijní platforma',
+		title: 'Naučte se algoritmy krok za krokem',
+		subtitle:
+			'Treeline pomáhá vysokoškolským studentům pochopit datové struktury a třídicí a vyhledávací algoritmy pomocí interaktivních vizualizací, řízených operací a přímého porovnání výkonu.',
+		ctaRandomStructure: 'Vyzkoušejte štěstí: Náhodná datová struktura',
+		ctaRandomSorting: 'Náhodný třídicí algoritmus',
+		ctaAbout: 'Přečtěte si o projektu',
+		structureDescription:
+			'Sestavujte a upravujte struktury v reálném čase, pochopte vyvažování, vkládání, mazání i průchody bez odhadování mezikroků.',
+		sortingDescription:
+			'Analyzujte chování třídicích strategií nad různými typy dat a porovnejte praktické výsledky s teoretickou složitostí.',
+		sortingResourcesTitle: 'Třídicí a vyhledávací algoritmy',
+		stats: {
+			structures: 'Datových struktur',
+			sorting: 'Třídicích algoritmů',
+			searching: 'Vyhledávací algoritmy',
+			datasets: 'Datových sad',
+		},
+		tracks: {
+			interactiveTitle: 'Učte se datové struktury interaktivně',
+			interactiveBody:
+				'Pracujte s více strukturami, používejte jejich specifické operace a sledujte celý proces jako celek i krok za krokem.',
+			multipleViewsTitle: 'Prozkoumejte třídění ze všech pohledů',
+			multipleViewsBody:
+				'Algoritmy můžete sledovat v přehledu nebo do detailu s interaktivním polem, zvýrazněním pseudokódu a krokováním.',
+			comparisonTitle: 'Porovnávejte datové sady i výsledky',
+			comparisonBody: 'Zkoušejte algoritmy na různých datech a ve srovnávací matici sledujte porovnání, výměny i rychlost najednou.',
+		},
+	},
+
 	devModeHackOverlay: {
 		title: 'PŘÍSTUP PRO VÝVOJÁŘE POVOLEN',
 		line1: 'Obcházím ochranné zábrany...',

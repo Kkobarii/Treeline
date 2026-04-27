@@ -34,6 +34,38 @@ const en = {
 		copyright: 'Visual tool for learning data structures and sorting algorithms.',
 	},
 
+	home: {
+		kicker: 'Interactive study platform',
+		title: 'Learn algorithms by seeing every step',
+		subtitle:
+			'Treeline helps university students understand data structures and sorting and searching algorithms through interactive visuals, guided operations, and side-by-side performance comparison.',
+		ctaRandomStructure: 'Try your luck: Random data structure',
+		ctaRandomSorting: 'Random sorting algorithm',
+		ctaAbout: 'Read about this project',
+		structureDescription:
+			'Build and modify structures in real time to understand balancing, insertion, deletion, and traversal logic without guessing what happens between steps.',
+		sortingDescription:
+			'Analyze how sorting strategies behave on different data distributions, then compare practical behavior with theoretical complexity.',
+		sortingResourcesTitle: 'Sorting and Searching Algorithms',
+		stats: {
+			structures: 'Data structures',
+			sorting: 'Sorting algorithms',
+			searching: 'Searching algorithms',
+			datasets: 'Dataset profiles',
+		},
+		tracks: {
+			interactiveTitle: 'Learn data structures interactively',
+			interactiveBody:
+				'Work with multiple structures, run their specific operations, and follow the process as a whole or step by step.',
+			multipleViewsTitle: 'Study sorting from every angle',
+			multipleViewsBody:
+				'View algorithms in a big-picture mode or in detail with an interactive array, pseudocode highlighting, and stepping logic.',
+			comparisonTitle: 'Compare datasets and results',
+			comparisonBody:
+				'Test algorithms against multiple data sets and use the comparison matrix to weigh comparisons, swaps, and speed together.',
+		},
+	},
+
 	devModeHackOverlay: {
 		title: 'DEVELOPER ACCESS GRANTED',
 		line1: 'Bypassing guard rails...',

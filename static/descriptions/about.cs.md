@@ -36,6 +36,8 @@ A také třídicí algoritmy:
 
 A k tomu je zde i stránka s porovnáním těchto algoritmů, kde si můžete prohlédnout, jak se chovají na různých typech datových sad a jaké jsou jejich teoretické složitosti versus praktický výkon.
 
+Na poslední chvíli jsem také přidala stránku pro vyhledávací algoritmy, kde můžete vidět, jak fungují lineární a binární vyhledávání na různých datových sadách.
+
 ## Technologie
 
 Treeline je postaven pomocí moderních webových technologií Svelte, TypeScript, Tailwind CSS a vis.js pro vizualizace. Celý projekt je open-source a dostupný na GitHubu.
