@@ -425,7 +425,7 @@ const cs: Translation = {
 		comparison: {
 			title: 'Porovnání algoritmů',
 			stop: 'Zastavit',
-			runAll: 'Spustit vše',
+			runAll: 'Spustit',
 			runRow: 'Spustit řádek',
 			runColumn: 'Spustit sloupec',
 			swaps: 'Prohození',

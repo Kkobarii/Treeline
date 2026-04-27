@@ -9,8 +9,8 @@
 	import SortingBars from '../components/SortingBars.svelte';
 	import type { ArrayType } from '../misc/utils';
 	import { createWaitForPaint } from '../misc/visualUtils';
-	import type { Item } from '../steps/traceBuilder';
 	import type { SortStep } from '../steps/stepTypes';
+	import type { Item } from '../steps/traceBuilder';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
@@ -34,7 +34,11 @@
 		label: t(o.labelKey),
 	}));
 
-	let cellStates = $state<CellState[][]>(sortingAlgorithms.map(() => arrayTypeOptions.map(() => ({ steps: [], counters: { comparisons: 0, swaps: 0 }, currentStepIndex: 0 }))));
+	let cellStates = $state<CellState[][]>(
+		sortingAlgorithms.map(() =>
+			arrayTypeOptions.map(() => ({ steps: [], counters: { comparisons: 0, swaps: 0 }, currentStepIndex: 0 })),
+		),
+	);
 	let playingCells: boolean[][] = $state(sortingAlgorithms.map(() => arrayTypeOptions.map(() => false)));
 	let finishedCells: boolean[][] = $state(sortingAlgorithms.map(() => arrayTypeOptions.map(() => false)));
 	let finishOrder: (number | null)[][] = $state(sortingAlgorithms.map(() => arrayTypeOptions.map(() => null)));
@@ -181,7 +185,6 @@
 					class="comparison-control-btn"
 					onclick={clearAll}>
 					<img
-						class="h-4 w-4 dark:invert"
 						src="/controls/stop.svg"
 						alt=""
 						aria-hidden="true" />
@@ -192,7 +195,6 @@
 					class="comparison-control-btn"
 					onclick={runAll}>
 					<img
-						class="h-4 w-4 dark:invert"
 						src="/controls/play.svg"
 						alt=""
 						aria-hidden="true" />
@@ -209,7 +211,6 @@
 					onclick={() => runColumn(typeIndex)}
 					title={t('sorting.comparison.runColumn')}>
 					<img
-						class="h-4 w-4 dark:invert"
 						src="/controls/play.svg"
 						alt=""
 						aria-hidden="true" />
@@ -229,7 +230,6 @@
 					onclick={() => runRow(algoIndex)}
 					title={t('sorting.comparison.runRow')}>
 					<img
-						class="h-4 w-4 dark:invert"
 						src="/controls/play.svg"
 						alt=""
 						aria-hidden="true" />
@@ -274,7 +274,6 @@
 					class="mobile-run-btn"
 					onclick={clearAll}>
 					<img
-						class="h-4 w-4 dark:invert"
 						src="/controls/stop.svg"
 						alt=""
 						aria-hidden="true" />
@@ -285,7 +284,6 @@
 					class="mobile-run-btn"
 					onclick={runAll}>
 					<img
-						class="h-4 w-4 dark:invert"
 						src="/controls/play.svg"
 						alt=""
 						aria-hidden="true" />
@@ -356,8 +354,16 @@
 		@apply opacity-90;
 	}
 
+	.comparison-control-btn:focus {
+		box-shadow: none;
+	}
+
+	.comparison-control-btn img {
+		@apply h-6 w-6 dark:invert;
+	}
+
 	.comparison-row-header {
-		@apply flex flex-col justify-center gap-1.5 rounded-md bg-gray-100 px-3 py-2;
+		@apply flex flex-col justify-center rounded-md bg-gray-100 px-3 py-2;
 		min-width: 7rem;
 	}
 
@@ -372,7 +378,7 @@
 	}
 
 	.comparison-run-btn {
-		@apply inline-flex h-7 w-7 shrink-0 items-center justify-center rounded bg-transparent p-0 opacity-50;
+		@apply inline-flex shrink-0 items-center justify-start rounded bg-transparent p-0 opacity-50;
 		border: none;
 		cursor: pointer;
 		transition: opacity 0.15s ease;
@@ -380,6 +386,14 @@
 
 	.comparison-run-btn:hover {
 		@apply opacity-100;
+	}
+
+	.comparison-run-btn:focus {
+		box-shadow: none;
+	}
+
+	.comparison-run-btn img {
+		@apply h-6 w-6 dark:invert;
 	}
 
 	.comparison-cell {
@@ -439,5 +453,9 @@
 	.mobile-run-btn {
 		width: 7rem;
 		gap: 0.2rem;
+	}
+
+	.mobile-run-btn img {
+		@apply h-6 w-6 dark:invert;
 	}
 </style>
