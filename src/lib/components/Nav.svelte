@@ -1,8 +1,6 @@
 <script lang="ts">
 	import DesktopMenu from '$lib/components/DesktopMenu.svelte';
-	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
 	import MobileMenu from '$lib/components/MobileMenu.svelte';
-	import ThemeSwitcher from '$lib/components/ThemeSwitcher.svelte';
 	import { getLocale } from '$lib/i18n';
 
 	const locale = getLocale();
@@ -83,18 +81,18 @@
 			href="/{locale}"
 			class="flex items-center gap-3 no-underline"
 			aria-label="Treeline home">
-			<img
+			<!-- <img
 				src="/branch.svg"
 				alt="Treeline logo"
-				class="h-8 w-8" />
-			<span class="header-title hidden md:inline">Treeline</span>
+				class="h-8 w-8" /> -->
+			<span class="header-title hidden md:inline">Výuková aplikace</span>
 		</a>
 
 		<DesktopMenu />
 
 		<div class="ml-auto flex items-center gap-3">
-			<LanguageSwitcher />
-			<ThemeSwitcher />
+			<!-- <LanguageSwitcher />
+			<ThemeSwitcher /> -->
 
 			<button
 				type="button"

@@ -109,16 +109,16 @@
 	--color-primary-ultra-light: var(--color-gray-100);
 	--color-primary-ultra-dark: var(--color-gray-900);
 
-	--color-secondary: var(--color-green-500);
-	--color-secondary-light: var(--color-green-300);
-	--color-secondary-dark: var(--color-green-700);
-	--color-secondary-ultra-light: var(--color-green-950);
-	--color-secondary-ultra-dark: var(--color-green-900);
+	--color-secondary: var(--color-blue-500);
+	--color-secondary-light: var(--color-blue-300);
+	--color-secondary-dark: var(--color-blue-700);
+	--color-secondary-ultra-light: var(--color-blue-950);
+	--color-secondary-ultra-dark: var(--color-blue-900);
 
 	--color-white: #ffffff;
 	--color-black: #000000;
 
-	--color-panel: var(--color-green-500);
+	--color-panel: var(--color-blue-600);
 	--color-background: #ffffff;
 }
 
