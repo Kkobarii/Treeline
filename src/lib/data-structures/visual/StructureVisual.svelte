@@ -7,6 +7,7 @@
 	import { AnimationOrchestrator } from '$lib/data-structures/visual/orchestrators/animationOrchestrator';
 	import { getLocale } from '$lib/i18n';
 	import { Colors } from '$lib/utils/colors';
+	import { getDevSessionDebugEnabled, subscribeToDevSessionDebugEnabled } from '$lib/utils/devSessionDebugGate';
 
 	import { getStoredDebugMode, setStoredDebugMode, subscribeToDebugMode } from '../utils/debugMode';
 
@@ -32,16 +33,26 @@
 
 	let overlayCanvas: HTMLCanvasElement | null = null;
 	let debugMode: boolean = false;
+	let devSessionDebugEnabled: boolean = false;
 	let unsubscribeDebugMode: (() => void) | null = null;
+	let unsubscribeDevSessionDebug: (() => void) | null = null;
 
 	function setDebugMode(value: boolean) {
-		debugMode = value;
+		debugMode = devSessionDebugEnabled ? value : false;
 		if (annotator) {
 			annotator.setDebugMode(debugMode);
 		}
 	}
 
+	function setDevSessionDebugMode(value: boolean) {
+		devSessionDebugEnabled = value;
+		if (!devSessionDebugEnabled) {
+			setDebugMode(false);
+		}
+	}
+
 	function toggleDebugMode() {
+		if (!devSessionDebugEnabled) return;
 		setStoredDebugMode(!debugMode);
 	}
 
@@ -68,10 +79,18 @@
 
 		animator = new Animator({ network, nodes, edges, nodeOptions });
 		annotator = new Annotator({ canvas: overlayCanvas!, network, nodes, edges, locale: getLocale() });
+		setDevSessionDebugMode(getDevSessionDebugEnabled());
 		setDebugMode(getStoredDebugMode());
 
 		unsubscribeDebugMode = subscribeToDebugMode(value => {
 			setDebugMode(value);
+		});
+
+		unsubscribeDevSessionDebug = subscribeToDevSessionDebugEnabled(value => {
+			setDevSessionDebugMode(value);
+			if (value) {
+				setDebugMode(getStoredDebugMode());
+			}
 		});
 
 		orchestrator = new AnimationOrchestrator(animator, annotator, operationManager, new StepHandler());
@@ -100,6 +119,11 @@
 				unsubscribeDebugMode();
 				unsubscribeDebugMode = null;
 			}
+
+			if (unsubscribeDevSessionDebug) {
+				unsubscribeDevSessionDebug();
+				unsubscribeDevSessionDebug = null;
+			}
 		};
 	});
 </script>
@@ -113,24 +137,26 @@
 		bind:this={overlayCanvas}
 		class="pointer-events-none absolute inset-0 z-50 rounded"></canvas>
 
-	<div class="absolute bottom-4 left-4 z-60 flex gap-2">
-		<button
-			style="padding: 2px!important;"
-			aria-label="Toggle debug mode"
-			on:click={toggleDebugMode}>
-			<span class="inline-flex h-6 w-6 items-center justify-center rounded-full">
-				<span
-					role="img"
-					aria-label={debugMode ? 'Disable debug mode' : 'Enable debug mode'}
-					class="block h-4 w-4"
-					style="
-						background: {debugMode ? 'var(--color-gray-900)' : 'var(--color-gray-50)'};
-						<!-- -webkit-mask: url('/bug.svg') no-repeat center / contain;
-						mask: url('/bug.svg') no-repeat center / contain; -->
-					"></span>
-			</span>
-		</button>
-	</div>
+	{#if devSessionDebugEnabled}
+		<div class="absolute bottom-4 left-4 z-60 flex gap-2">
+			<button
+				style="padding: 2px!important;"
+				aria-label="Toggle debug mode"
+				on:click={toggleDebugMode}>
+				<span class="inline-flex h-6 w-6 items-center justify-center rounded-full">
+					<span
+						role="img"
+						aria-label={debugMode ? 'Disable debug mode' : 'Enable debug mode'}
+						class="block h-4 w-4"
+						style="
+							background: {debugMode ? 'var(--color-gray-900)' : 'var(--color-gray-50)'};
+							<!-- -webkit-mask: url('/bug.svg') no-repeat center / contain;
+							mask: url('/bug.svg') no-repeat center / contain; -->
+						"></span>
+				</span>
+			</button>
+		</div>
+	{/if}
 </div>
 
 <style>

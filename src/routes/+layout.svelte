@@ -1,4 +1,6 @@
 <script lang="ts">
+	import DevModeOverlay from '$lib/components/DevModeOverlay.svelte';
+
 	import '../app.css';
 
 	import { ModeWatcher } from 'mode-watcher';
@@ -7,5 +9,6 @@
 </script>
 
 <ModeWatcher />
+<DevModeOverlay />
 
 {@render children?.()}

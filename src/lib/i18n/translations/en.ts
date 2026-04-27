@@ -34,6 +34,14 @@ const en = {
 		copyright: 'Visual tool for learning data structures and sorting algorithms.',
 	},
 
+	devModeHackOverlay: {
+		title: 'DEVELOPER ACCESS GRANTED',
+		line1: 'Bypassing guard rails...',
+		line2: 'Hacking into the mainframe...',
+		line3: 'Unlocking visualization debug controls...',
+		line4: 'Releasing debug logs...',
+	},
+
 	dataStructures: {
 		binarySearchTree: 'Binary Search Tree',
 		avlTree: 'AVL Tree',

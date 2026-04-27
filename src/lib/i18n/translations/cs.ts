@@ -36,6 +36,14 @@ const cs: Translation = {
 		copyright: 'Vizuální nástroj pro výuku datových struktur a třídicích algoritmů.',
 	},
 
+	devModeHackOverlay: {
+		title: 'PŘÍSTUP PRO VÝVOJÁŘE POVOLEN',
+		line1: 'Obcházím ochranné zábrany...',
+		line2: 'Hackuji se do mainframu...',
+		line3: 'Odemykám ladicí ovládání vizualizace...',
+		line4: 'Uvolňuji ladicí záznamy...',
+	},
+
 	dataStructures: {
 		binarySearchTree: 'Binární vyhledávací strom',
 		avlTree: 'AVL strom',
