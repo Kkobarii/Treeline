@@ -42,6 +42,7 @@ export const binarySearchCodeTemplate: DetailedCodeTemplate = {
 			{ indent: 3, text: 'left = mid + 1;', codePartId: BinarySearchPartId.AdjustLeft },
 			{ indent: 2, text: '} else {', codePartId: BinarySearchPartId.AdjustRight },
 			{ indent: 3, text: 'right = mid - 1;', codePartId: BinarySearchPartId.AdjustRight },
+			{ indent: 2, text: '}', codePartId: BinarySearchPartId.AdjustRight },
 			{ indent: 1, text: '}', codePartId: BinarySearchPartId.CalculateMid },
 			{ indent: 1, text: 'return -1;', codePartId: BinarySearchPartId.NotFound },
 			{ indent: 0, text: '}', codePartId: BinarySearchPartId.StartBinarySearch },
@@ -57,25 +58,13 @@ export const binarySearchCodeTemplate: DetailedCodeTemplate = {
 			{ indent: 3, text: 'left = mid + 1;', codePartId: BinarySearchPartId.AdjustLeft },
 			{ indent: 2, text: '} else {', codePartId: BinarySearchPartId.AdjustRight },
 			{ indent: 3, text: 'right = mid - 1;', codePartId: BinarySearchPartId.AdjustRight },
+			{ indent: 2, text: '}', codePartId: BinarySearchPartId.AdjustRight },
 			{ indent: 1, text: '}', codePartId: BinarySearchPartId.CalculateMid },
 			{ indent: 1, text: 'return -1;', codePartId: BinarySearchPartId.NotFound },
 			{ indent: 0, text: '}', codePartId: BinarySearchPartId.StartBinarySearch },
 		],
 	},
 };
-
-function insertionSort(input: number[]): number[] {
-	for (let i = 1; i < input.length; i++) {
-		const key = input[i];
-		let j = i - 1;
-		while (j >= 0 && input[j] > key) {
-			input[j + 1] = input[j];
-			j--;
-		}
-		input[j + 1] = key;
-	}
-	return input;
-}
 
 export function binarySearchDetailedSteps(input: number[], targetValue?: number): DetailedSortStepResult {
 	const trace = new DetailedTraceBuilder(input);
