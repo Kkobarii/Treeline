@@ -363,7 +363,9 @@ label {
 .page-layout {
 	display: flex;
 	flex-direction: row;
+	align-items: stretch;
 	gap: 1rem;
+	min-height: 500px;
 	height: 65vh;
 }
 
@@ -395,6 +397,7 @@ label {
 	.page-layout {
 		flex-direction: column;
 		height: auto;
+		min-height: 0;
 	}
 
 	.treeline-card {

@@ -27,7 +27,7 @@
 
 	$effect(() => {
 		if (typeof window !== 'undefined') {
-			isMobile = window.innerWidth < 768;
+			isMobile = window.innerWidth < 1024;
 		}
 	});
 
@@ -151,13 +151,13 @@
 		border-radius: 1px;
 	}
 
-	@media (min-width: 768px) {
+	@media (min-width: 1024px) {
 		.header-burger {
 			display: none;
 		}
 	}
 
-	@media (max-width: 768px) {
+	@media (max-width: 1024px) {
 		.header-nav {
 			margin: 1rem;
 			will-change: transform;

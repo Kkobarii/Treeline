@@ -65,7 +65,7 @@
 	let cellHeight = $state(92);
 
 	function updateSizes() {
-		detailArraySize = window.matchMedia('(max-width: 425px)').matches ? 8 : 16;
+		detailArraySize = window.matchMedia('(max-width: 640px)').matches ? 8 : 16;
 		cellHeight = window.matchMedia('(max-width: 640px)').matches ? 52 : 92;
 		regenerateArray();
 	}

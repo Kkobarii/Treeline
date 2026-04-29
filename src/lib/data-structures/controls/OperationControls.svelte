@@ -13,7 +13,7 @@
 	import { OperationType, type OperationTypeValue } from '$lib/data-structures/structures/dataStructure';
 	import { getLocale, translate } from '$lib/i18n';
 
-	import { getStoredDebugMode, subscribeToDebugMode } from '../utils/debugMode';
+	import { subscribeToDebugMode } from '../utils/debugMode';
 
 	const locale = getLocale();
 	const t = (key: string) => translate(locale, key);
@@ -64,7 +64,7 @@
 	let unsubscribeDebugMode: (() => void) | null = null;
 
 	onMount(() => {
-		debugMode = getStoredDebugMode();
+		debugMode = false;
 		unsubscribeDebugMode = subscribeToDebugMode(value => {
 			debugMode = value;
 		});

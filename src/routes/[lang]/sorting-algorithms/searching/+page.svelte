@@ -32,7 +32,7 @@
 	}
 </script>
 
-<div class="page-header justify-start! gap-8!">
+<div class="page-header page-header-search">
 	<h1 class="page-title">{t('sortingAlgorithms.searching')}</h1>
 	<div class="searching-dropdown-wrapper">
 		<Dropdown
@@ -71,5 +71,24 @@
 	:global(.searching-dropdown-wrapper .dropdown-option) {
 		font-size: 0.95rem;
 		font-weight: 500;
+	}
+
+	.page-header-search {
+		flex-direction: row;
+		justify-content: flex-start;
+		gap: 1.5rem;
+	}
+
+	@media (max-width: 640px) {
+		.page-header-search {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.75rem;
+		}
+
+		:global(.searching-dropdown-wrapper .dropdown-trigger) {
+			width: 100%;
+			padding: 0.75rem;
+		}
 	}
 </style>

@@ -59,7 +59,7 @@
 		@apply bg-green-500;
 	}
 
-	@media (max-width: 768px) {
+	@media (max-width: 1024px) {
 		.bars-wrapper {
 			@apply h-36 gap-px;
 		}

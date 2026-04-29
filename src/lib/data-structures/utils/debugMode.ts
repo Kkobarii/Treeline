@@ -5,24 +5,8 @@ function isBrowser(): boolean {
 	return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 }
 
-export function getStoredDebugMode(): boolean {
-	if (!isBrowser()) return false;
-
-	try {
-		return localStorage.getItem(STORAGE_KEY) === 'true';
-	} catch {
-		return false;
-	}
-}
-
 export function setStoredDebugMode(value: boolean): void {
 	if (!isBrowser()) return;
-
-	try {
-		localStorage.setItem(STORAGE_KEY, String(value));
-	} catch {
-		// Ignore storage write failures (private mode, quota, etc.).
-	}
 
 	window.dispatchEvent(
 		new CustomEvent(EVENT_NAME, {

@@ -12,7 +12,7 @@
 	);
 </script>
 
-<div class="ml-4 hidden items-center gap-6 md:flex">
+<div class="desktop-container ml-4 items-center gap-6">
 	<div
 		class="nav-dropdown relative"
 		role="menuitem"
@@ -169,5 +169,15 @@
 	.dropdown-separator::after {
 		left: 1rem;
 		right: 1rem;
+	}
+
+	.desktop-container {
+		display: flex;
+	}
+
+	@media (max-width: 1024px) {
+		.desktop-container {
+			display: none;
+		}
 	}
 </style>

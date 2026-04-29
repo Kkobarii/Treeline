@@ -9,7 +9,7 @@
 	import { Colors } from '$lib/utils/colors';
 	import { getDevSessionDebugEnabled, subscribeToDevSessionDebugEnabled } from '$lib/utils/devSessionDebugGate';
 
-	import { getStoredDebugMode, setStoredDebugMode, subscribeToDebugMode } from '../utils/debugMode';
+	import { setStoredDebugMode, subscribeToDebugMode } from '../utils/debugMode';
 
 	export let Animator: any;
 	export let Annotator: any;
@@ -80,7 +80,7 @@
 		animator = new Animator({ network, nodes, edges, nodeOptions });
 		annotator = new Annotator({ canvas: overlayCanvas!, network, nodes, edges, locale: getLocale() });
 		setDevSessionDebugMode(getDevSessionDebugEnabled());
-		setDebugMode(getStoredDebugMode());
+		setDebugMode(false);
 
 		unsubscribeDebugMode = subscribeToDebugMode(value => {
 			setDebugMode(value);
@@ -89,7 +89,7 @@
 		unsubscribeDevSessionDebug = subscribeToDevSessionDebugEnabled(value => {
 			setDevSessionDebugMode(value);
 			if (value) {
-				setDebugMode(getStoredDebugMode());
+				setDebugMode(false);
 			}
 		});
 
@@ -128,7 +128,7 @@
 	});
 </script>
 
-<div class="structure-visual-container treeline-card relative h-full min-h-[400px] w-full overflow-hidden">
+<div class="structure-visual-container treeline-card relative h-auto min-h-[400px] w-full overflow-hidden">
 	<div
 		bind:this={container}
 		class="absolute inset-0 rounded">
