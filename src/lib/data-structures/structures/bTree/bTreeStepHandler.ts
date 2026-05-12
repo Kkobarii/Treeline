@@ -204,7 +204,7 @@ export class BTreeStepHandler extends StepHandlerBase {
 	async handleSplitForward(animator: BTreeAnimator, annotator: BTreeAnnotator, data: SplitData) {
 		const promise = animator.ensureAndAnimateSplit(data.endSnapshot, data.translationMap);
 		const info = t(annotator.locale, data.label, data.params);
-		annotator.annotateNode(info, data.nodeId);
+		annotator.annotateNode(info, data.leftNodeId);
 		annotator.createTransplantedValueAnnotation(data.middleValue.toString(), [data.leftNodeId, data.rightNodeId]);
 
 		await promise;
